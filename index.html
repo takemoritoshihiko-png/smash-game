@@ -120,6 +120,19 @@ const characters = [
     moveSpeed: 8.4,
     jumpPower: -13.5,
     weight: 0.85
+  },
+  {
+    name: 'うる男',
+    type: 'ディフェンス型',
+    color: '#7A6A5A',
+    accent: '#C8A878',
+    dark: '#4A3A2A',
+    stats: { power: 3, speed: 3, tech: 2, defense: 5 },
+    desc: '鉄壁の守りを誇る狼系獣人',
+    bodyColors: { main: '#7A6A5A', sub: '#C8A878', skin: '#D4B896' },
+    moveSpeed: 6.72,
+    jumpPower: -12.5,
+    weight: 1.5
   }
 ];
 
@@ -145,6 +158,8 @@ const meteoImg = new Image();
 meteoImg.src = 'images/meteo.png';
 const longImg = new Image();
 longImg.src = 'images/long.png';
+const uruoImg = new Image();
+uruoImg.src = 'images/uruo.png';
 
 // --- Particles ---
 function spawnTitleParticle() {
@@ -271,6 +286,108 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.fillRect(-4 * s, -10 * s, 8 * s, 8 * s);
       ctx.fillStyle = '#33DDAA';
       ctx.fillRect(-2 * s, -8 * s, 4 * s, 4 * s);
+    }
+  } else if (charIndex === 5) {
+    // うる男 - 狼系獣人
+    if (uruoImg.complete && uruoImg.naturalWidth > 0) {
+      const imgW = 75 * s;
+      const imgH = 90 * s;
+      ctx.drawImage(uruoImg, -imgW / 2, -35 * s, imgW, imgH);
+    } else {
+      // Canvas描画：狼系獣人
+      // 脚
+      ctx.fillStyle = '#5A4A3A';
+      ctx.fillRect(-10 * s, 25 * s, 8 * s, 22 * s);
+      ctx.fillRect(2 * s, 25 * s, 8 * s, 22 * s);
+      // 体（がっしり）
+      ctx.fillStyle = '#7A6A5A';
+      ctx.fillRect(-14 * s, -18 * s, 28 * s, 44 * s);
+      // 胸の毛皮
+      ctx.fillStyle = '#C8A878';
+      ctx.beginPath();
+      ctx.moveTo(-10 * s, -10 * s);
+      ctx.lineTo(0, 5 * s);
+      ctx.lineTo(10 * s, -10 * s);
+      ctx.closePath();
+      ctx.fill();
+      // 腕（太い）
+      ctx.fillStyle = '#6A5A4A';
+      ctx.fillRect(-18 * s, -14 * s, 7 * s, 28 * s);
+      ctx.fillRect(11 * s, -14 * s, 7 * s, 28 * s);
+      // 爪（右手）
+      ctx.fillStyle = '#EEE';
+      for (let i = 0; i < 3; i++) {
+        ctx.fillRect((12 + i * 2) * s, 14 * s, 1.5 * s, 5 * s);
+      }
+      // 頭（狼）
+      ctx.fillStyle = '#8A7A6A';
+      ctx.beginPath();
+      ctx.arc(0, -28 * s, 13 * s, 0, Math.PI * 2);
+      ctx.fill();
+      // 耳（三角）
+      ctx.fillStyle = '#6A5A4A';
+      ctx.beginPath();
+      ctx.moveTo(-10 * s, -38 * s);
+      ctx.lineTo(-6 * s, -50 * s);
+      ctx.lineTo(-2 * s, -36 * s);
+      ctx.closePath();
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(2 * s, -36 * s);
+      ctx.lineTo(6 * s, -50 * s);
+      ctx.lineTo(10 * s, -38 * s);
+      ctx.closePath();
+      ctx.fill();
+      // 耳の内側
+      ctx.fillStyle = '#C8A878';
+      ctx.beginPath();
+      ctx.moveTo(-8 * s, -39 * s);
+      ctx.lineTo(-6 * s, -47 * s);
+      ctx.lineTo(-3 * s, -37 * s);
+      ctx.closePath();
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(3 * s, -37 * s);
+      ctx.lineTo(6 * s, -47 * s);
+      ctx.lineTo(8 * s, -39 * s);
+      ctx.closePath();
+      ctx.fill();
+      // マズル（口元）
+      ctx.fillStyle = '#B8A888';
+      ctx.beginPath();
+      ctx.ellipse(0, -22 * s, 7 * s, 5 * s, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // 鼻
+      ctx.fillStyle = '#333';
+      ctx.beginPath();
+      ctx.arc(0, -24 * s, 2.5 * s, 0, Math.PI * 2);
+      ctx.fill();
+      // 目（鋭い）
+      ctx.fillStyle = '#FFD700';
+      ctx.beginPath();
+      ctx.ellipse(-5 * s, -30 * s, 3 * s, 2 * s, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(5 * s, -30 * s, 3 * s, 2 * s, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // 瞳
+      ctx.fillStyle = '#222';
+      ctx.beginPath();
+      ctx.arc(-5 * s, -30 * s, 1.5 * s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(5 * s, -30 * s, 1.5 * s, 0, Math.PI * 2);
+      ctx.fill();
+      // 尻尾
+      ctx.strokeStyle = '#7A6A5A';
+      ctx.lineWidth = 4 * s;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(-8 * s, 20 * s);
+      ctx.quadraticCurveTo(-22 * s, 10 * s, -18 * s, -5 * s);
+      ctx.stroke();
+      ctx.lineWidth = 1;
+      ctx.lineCap = 'butt';
     }
   }
 
@@ -458,8 +575,8 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
   ctx.scale(scaleX, scaleY);
 
   // Draw character image
-  const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg];
-  const imgSizes = [[70, 90], [80, 95], [75, 90], [75, 90], [75, 90]];
+  const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg];
+  const imgSizes = [[70, 90], [80, 95], [75, 90], [75, 90], [75, 90], [75, 90]];
   const img = imgs[charIndex];
   if (img && img.complete && img.naturalWidth > 0) {
     const imgW = imgSizes[charIndex][0] * s;
@@ -523,6 +640,47 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
     ctx.fillRect(-4 * s, -10 * s, 8 * s, 8 * s);
     ctx.fillStyle = '#33DDAA';
     ctx.fillRect(-2 * s, -8 * s, 4 * s, 4 * s);
+  } else if (charIndex === 5) {
+    // うる男: Canvas fallback for battle
+    // 脚
+    ctx.fillStyle = '#5A4A3A';
+    ctx.fillRect(-10 * s, 25 * s, 8 * s, 22 * s);
+    ctx.fillRect(2 * s, 25 * s, 8 * s, 22 * s);
+    // 体
+    ctx.fillStyle = '#7A6A5A';
+    ctx.fillRect(-14 * s, -18 * s, 28 * s, 44 * s);
+    // 胸毛皮
+    ctx.fillStyle = '#C8A878';
+    ctx.beginPath();
+    ctx.moveTo(-10 * s, -10 * s); ctx.lineTo(0, 5 * s); ctx.lineTo(10 * s, -10 * s);
+    ctx.closePath(); ctx.fill();
+    // 腕
+    ctx.fillStyle = '#6A5A4A';
+    ctx.fillRect(-18 * s, -14 * s, 7 * s, 28 * s);
+    ctx.fillRect(11 * s, -14 * s, 7 * s, 28 * s);
+    // 爪
+    ctx.fillStyle = '#EEE';
+    for (let i = 0; i < 3; i++) ctx.fillRect((12 + i * 2) * s, 14 * s, 1.5 * s, 5 * s);
+    // 頭
+    ctx.fillStyle = '#8A7A6A';
+    ctx.beginPath(); ctx.arc(0, -28 * s, 13 * s, 0, Math.PI * 2); ctx.fill();
+    // 耳
+    ctx.fillStyle = '#6A5A4A';
+    ctx.beginPath(); ctx.moveTo(-10 * s, -38 * s); ctx.lineTo(-6 * s, -50 * s); ctx.lineTo(-2 * s, -36 * s); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(2 * s, -36 * s); ctx.lineTo(6 * s, -50 * s); ctx.lineTo(10 * s, -38 * s); ctx.closePath(); ctx.fill();
+    // マズル
+    ctx.fillStyle = '#B8A888';
+    ctx.beginPath(); ctx.ellipse(0, -22 * s, 7 * s, 5 * s, 0, 0, Math.PI * 2); ctx.fill();
+    // 鼻
+    ctx.fillStyle = '#333';
+    ctx.beginPath(); ctx.arc(0, -24 * s, 2.5 * s, 0, Math.PI * 2); ctx.fill();
+    // 目
+    ctx.fillStyle = '#FFD700';
+    ctx.beginPath(); ctx.ellipse(-5 * s, -30 * s, 3 * s, 2 * s, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(5 * s, -30 * s, 3 * s, 2 * s, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#222';
+    ctx.beginPath(); ctx.arc(-5 * s, -30 * s, 1.5 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(5 * s, -30 * s, 1.5 * s, 0, Math.PI * 2); ctx.fill();
   }
 
   // 攻撃時の武器・体パーツアニメーション
@@ -1563,6 +1721,203 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
       }
     }
 
+    // ─── うる男（狼系獣人）───
+    else if (charIndex === 5) {
+      const armX = 10 * s, armY = -15 * s;
+      const clawLen = 14 * s;
+
+      if (atkType === 'normal') {
+        // 通常: 爪で引っ掻く
+        let reach;
+        if (phase === 'startup') reach = -6 * s * easeIn;
+        else if (phase === 'active') reach = 22 * s * easeOut;
+        else reach = 22 * s * (1 - easeOut);
+        ctx.translate(armX + reach, armY);
+        // 腕
+        ctx.fillStyle = '#6A5A4A';
+        ctx.fillRect(-18 * s, -3 * s, 18 * s, 6 * s);
+        // 手
+        ctx.fillStyle = '#8A7A6A';
+        ctx.beginPath();
+        ctx.arc(0, 0, 5 * s, 0, Math.PI * 2);
+        ctx.fill();
+        // 爪3本
+        ctx.fillStyle = '#EEE';
+        for (let i = 0; i < 3; i++) {
+          ctx.save();
+          ctx.rotate(-0.3 + i * 0.3);
+          ctx.fillRect(-1 * s, 3 * s, 2 * s, clawLen);
+          ctx.restore();
+        }
+        if (phase === 'active' && phaseT < 0.5) {
+          ctx.globalAlpha = 0.4 * (1 - phaseT * 2);
+          ctx.strokeStyle = '#C8A878';
+          ctx.lineWidth = 2;
+          for (let i = 0; i < 3; i++) {
+            ctx.beginPath();
+            ctx.moveTo((2 + i * 3) * s, -6 * s);
+            ctx.lineTo((6 + i * 4) * s, 8 * s);
+            ctx.stroke();
+          }
+          ctx.globalAlpha = 1;
+        }
+      } else if (atkType === 'strong') {
+        // 強: ウルフパンチ
+        let reach, fistY;
+        if (phase === 'startup') { reach = -10 * s * easeIn; fistY = 0; }
+        else if (phase === 'active') { reach = 26 * s * easeOut; fistY = -2 * s * (1 - phaseT); }
+        else { reach = 26 * s * (1 - easeOut); fistY = 0; }
+        ctx.translate(armX + reach, armY + fistY);
+        ctx.fillStyle = '#6A5A4A';
+        ctx.fillRect(-22 * s, -4 * s, 22 * s, 8 * s);
+        ctx.fillStyle = '#8A7A6A';
+        ctx.beginPath();
+        ctx.arc(0, 0, 7 * s, 0, Math.PI * 2);
+        ctx.fill();
+        if (phase === 'active' && phaseT < 0.4) {
+          ctx.globalAlpha = 0.5 * (1 - phaseT * 2.5);
+          ctx.fillStyle = '#FFD700';
+          ctx.beginPath();
+          ctx.arc(4 * s, 0, 10 * s, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.globalAlpha = 1;
+        }
+      } else if (atkType === 'special') {
+        // 必殺: ウルフジャンプ
+        const ss = animData.specialState;
+        let angle;
+        if (ss === 'jumping') {
+          angle = -Math.PI * 0.5 - Math.sin(frame * 0.3) * 0.2;
+        } else if (ss === 'slamming') {
+          angle = Math.PI * 0.4;
+        } else if (ss === 'slamHit') {
+          angle = Math.PI * 0.5;
+        } else {
+          angle = -Math.PI * 0.3 * easeIn;
+        }
+        ctx.translate(armX, armY);
+        ctx.rotate(angle);
+        ctx.fillStyle = '#6A5A4A';
+        ctx.fillRect(-2 * s, 0, 5 * s, 20 * s);
+        ctx.fillStyle = '#8A7A6A';
+        ctx.beginPath();
+        ctx.arc(0, 20 * s, 6 * s, 0, Math.PI * 2);
+        ctx.fill();
+        if (ss === 'slamming') {
+          ctx.globalAlpha = 0.4;
+          ctx.strokeStyle = '#FFD700';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(0, 26 * s);
+          ctx.lineTo(0, 40 * s);
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+        }
+      } else if (atkType === 'aerial') {
+        // 空中: 回転爪撃
+        let angle;
+        if (phase === 'startup') angle = easeIn * Math.PI * 0.3;
+        else if (phase === 'active') angle = Math.PI * 0.3 + easeOut * Math.PI * 1.7;
+        else angle = 0;
+        ctx.translate(armX - 2 * s, armY);
+        ctx.rotate(angle);
+        ctx.fillStyle = '#6A5A4A';
+        ctx.fillRect(-2 * s, 0, 5 * s, 18 * s);
+        ctx.fillStyle = '#EEE';
+        for (let i = 0; i < 3; i++) {
+          ctx.fillRect((-2 + i * 2) * s, 18 * s, 1.5 * s, clawLen);
+        }
+        if (phase === 'active') {
+          ctx.globalAlpha = 0.3 * (1 - phaseT);
+          ctx.strokeStyle = '#C8A878';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(0, 0, 20 * s, angle - 0.5, angle);
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+        }
+      } else if (atkType === 'up') {
+        // 上攻撃: 爪で真上に斬り上げ
+        let angle;
+        if (phase === 'startup') angle = Math.PI * 0.3 + easeIn * 0.2;
+        else if (phase === 'active') angle = Math.PI * 0.5 - easeOut * Math.PI * 1.0;
+        else angle = -Math.PI * 0.5 * (1 - easeOut);
+        ctx.translate(armX, armY);
+        ctx.rotate(angle);
+        ctx.fillStyle = '#6A5A4A';
+        ctx.fillRect(-2 * s, 0, 5 * s, 20 * s);
+        ctx.fillStyle = '#EEE';
+        for (let i = 0; i < 3; i++) {
+          ctx.fillRect((-2 + i * 2) * s, 20 * s, 1.5 * s, clawLen);
+        }
+        if (phase === 'active') {
+          ctx.globalAlpha = 0.4 * (1 - phaseT);
+          ctx.strokeStyle = '#FFD700';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(0, 10 * s, 22 * s, Math.PI * 0.5, Math.PI * 0.5 - phaseT * Math.PI * 0.8);
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+        }
+      } else if (atkType === 'side') {
+        // 横攻撃: ウルフスラッシュ
+        let reach;
+        if (phase === 'startup') reach = -8 * s * easeIn;
+        else if (phase === 'active') reach = 24 * s * easeOut;
+        else reach = 24 * s * (1 - easeOut);
+        ctx.translate(armX + reach, armY + 3 * s);
+        ctx.fillStyle = '#6A5A4A';
+        ctx.fillRect(-20 * s, -3 * s, 20 * s, 6 * s);
+        ctx.fillStyle = '#8A7A6A';
+        ctx.beginPath();
+        ctx.arc(0, 0, 5 * s, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#EEE';
+        for (let i = 0; i < 3; i++) {
+          ctx.save();
+          ctx.rotate(-0.2 + i * 0.2);
+          ctx.fillRect(-1 * s, 3 * s, 2 * s, clawLen * 1.2);
+          ctx.restore();
+        }
+        if (phase === 'active') {
+          ctx.globalAlpha = 0.35 * (1 - phaseT);
+          ctx.strokeStyle = '#C8A878';
+          ctx.lineWidth = 2;
+          for (let i = 0; i < 3; i++) {
+            ctx.beginPath();
+            ctx.moveTo((3 + i * 4) * s, -8 * s);
+            ctx.lineTo((7 + i * 5) * s, 10 * s);
+            ctx.stroke();
+          }
+          ctx.globalAlpha = 1;
+        }
+      } else if (atkType === 'downair') {
+        // 空中下攻撃: 急降下爪撃
+        let angle;
+        if (phase === 'startup') angle = easeIn * Math.PI * 0.2;
+        else if (phase === 'active') angle = Math.PI * 0.2 + easeOut * Math.PI * 0.3;
+        else angle = Math.PI * 0.5 * (1 - easeOut);
+        ctx.translate(armX - 4 * s, armY + 5 * s);
+        ctx.rotate(angle);
+        ctx.fillStyle = '#6A5A4A';
+        ctx.fillRect(-2 * s, 0, 5 * s, 20 * s);
+        ctx.fillStyle = '#EEE';
+        for (let i = 0; i < 3; i++) {
+          ctx.fillRect((-2 + i * 2) * s, 20 * s, 1.5 * s, clawLen);
+        }
+        if (phase === 'active') {
+          ctx.globalAlpha = 0.4 * (1 - phaseT);
+          ctx.fillStyle = '#FFD700';
+          for (let i = 0; i < 3; i++) {
+            ctx.beginPath();
+            ctx.arc((-2 + i * 3) * s, 28 * s + i * 4 * s, 3 * s, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.globalAlpha = 1;
+        }
+      }
+    }
+
     ctx.restore();
   }
 
@@ -2442,6 +2797,13 @@ const commandDefs = {
     { name:'機械展開', seq:['F','U','F','U'], cooldownKey:'cmd2',
       attack:{ startup:10, active:10, recovery:22, damage:22, kbBase:8, kbScale:0.13, kbAngle:-20, hx:25, hy:-38, hw:140, hh:40, color:'#A0B4FF', effect:'cmdLong2' } },
   ],
+  5: [ // うる男
+    { name:'ウルフネイル', seq:['D','D','F','F'], cooldownKey:'cmd1',
+      attack:{ startup:8, active:10, recovery:18, damage:18, kbBase:6, kbScale:0.11, kbAngle:-10, hx:20, hy:-35, hw:90, hh:40, color:'#FFD700', effect:'cmdUruo1' } },
+    { name:'ウルフギガンパンチ', seq:['F','F','U','U'], cooldownKey:'cmd2',
+      attack:{ startup:6, active:24, recovery:18, damage:2, kbBase:0.5, kbScale:0.01, kbAngle:-10, hx:12, hy:-38, hw:50, hh:45, color:'#FF8844', effect:'cmdUruo2',
+        multiHit:true, hitInterval:4, finalDamage:20, finalKbBase:9, finalKbScale:0.14, finalKbAngle:-30, spinKB:true } },
+  ],
 };
 
 function addCmdInput(playerId, dir) {
@@ -2608,6 +2970,21 @@ const attackDefs = {
     side:   { name:'槍横薙ぎ', startup:5, active:7, recovery:12, damage:11, kbBase:5, kbScale:0.08, kbAngle:-15, hx:22, hy:-35, hw:95, hh:35, color:'#8899EE', effect:'sideslash' },
     downair:{ name:'槍突き刺し', startup:5, active:10, recovery:14, damage:13, kbBase:6, kbScale:0.10, kbAngle:80, hx:0, hy:10, hw:35, hh:55, color:'#44FFCC', effect:'meteor' },
     throwDmg: 9,
+  },
+  // うる男 - Wolf Beast
+  5: {
+    normal: { name:'爪引っ掻き', startup:4, active:6, recovery:10, damage:7, kbBase:3, kbScale:0.05, kbAngle:-15, hx:14, hy:-35, hw:50, hh:40, color:'#C8A878', effect:'slash' },
+    strong: { name:'ウルフパンチ', startup:10, active:7, recovery:18, damage:16, kbBase:6, kbScale:0.10, kbAngle:-20, hx:14, hy:-35, hw:55, hh:45, color:'#FFD700', effect:'punch' },
+    special:{ name:'ウルフジャンプ', startup:10, active:0, recovery:20, damage:20, kbBase:7, kbScale:0.12, kbAngle:-80, hx:0, hy:-10, hw:70, hh:50, color:'#C8A878', effect:'slam',
+              specialType:'jumpSlam', jumpPower:-15, slamActive:8, slamHx:0, slamHy:-10, slamHw:80, slamHh:50 },
+    aerial: { name:'回転爪撃', startup:4, active:10, recovery:10, damage:9, kbBase:3, kbScale:0.07, kbAngle:-85, hx:5, hy:-25, hw:55, hh:55, color:'#C8A878', effect:'airkick' },
+    down:   { name:'四足突進', startup:4, active:14, recovery:12, damage:8, kbBase:3, kbScale:0.06, kbAngle:20, hx:18, hy:-10, hw:65, hh:25, color:'#C8A878', effect:'sliding',
+              specialType:'slide', slideSpeed:11 },
+    up:     { name:'爪斬り上げ', startup:5, active:8, recovery:14, damage:11, kbBase:5, kbScale:0.09, kbAngle:-88, hx:5, hy:-55, hw:45, hh:50, color:'#FFD700', effect:'upslash' },
+    side:   { name:'ウルフスラッシュ', startup:6, active:7, recovery:12, damage:12, kbBase:5, kbScale:0.09, kbAngle:-15, hx:18, hy:-35, hw:70, hh:40, color:'#C8A878', effect:'sideslash' },
+    downair:{ name:'急降下爪撃', startup:5, active:10, recovery:14, damage:14, kbBase:6, kbScale:0.10, kbAngle:80, hx:0, hy:10, hw:40, hh:50, color:'#FFD700', effect:'meteor',
+              specialType:'divekick', diveSpeed:13 },
+    throwDmg: 12,
   }
 };
 
