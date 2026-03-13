@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node server.js)",
+      "Bash(wc -l /Users/yutotakemori/new-game/smash-game/index.html && node -c /Users/yutotakemori/new-game/smash-game/index.html 2>&1 || true)",
+      "Bash(node -e \"\n// Test the landing squash values are reasonable\nfunction easeOutElastic\\(t\\) {\n  if \\(t === 0 || t === 1\\) return t;\n  return Math.pow\\(2, -10 * t\\) * Math.sin\\(\\(t * 10 - 0.75\\) * \\(2 * Math.PI / 3\\)\\) + 1;\n}\n// Simulate landSquash from 12 down to 0\nfor \\(let f = 12; f >= 0; f--\\) {\n  const raw = f / 12;\n  const t = easeOutElastic\\(1 - raw\\);\n  const sx = 1 + \\(1 - t\\) * 0.25;\n  const sy = 1 - \\(1 - t\\) * 0.25;\n  console.log\\('frame', 12-f, ': scaleX=' + sx.toFixed\\(3\\) + ' scaleY=' + sy.toFixed\\(3\\)\\);\n}\n\")",
+      "Bash(open /Users/yutotakemori/new-game/smash-game/index.html)",
+      "Bash(sips -g pixelHeight -g pixelWidth /Users/yutotakemori/new-game/smash-game/images/stage1.png)",
+      "Bash(export PATH=\"/opt/homebrew/bin:/usr/local/bin:$PATH\" && which brew 2>&1 && which gh 2>&1)",
+      "Read(//opt/**)",
+      "Read(//Users/yutotakemori/bin/**)",
+      "Read(//Users/yutotakemori/.local/bin/**)",
+      "Bash(export PATH=\"$HOME/bin:$PATH\" && gh auth status 2>&1)",
+      "Bash(git init:*)"
+    ]
+  }
+}
