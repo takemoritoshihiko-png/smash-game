@@ -133,6 +133,19 @@ const characters = [
     moveSpeed: 6.72,
     jumpPower: -12.5,
     weight: 1.5
+  },
+  {
+    name: '熊太郎',
+    type: 'テクニック型',
+    color: '#3A3A3A',
+    accent: '#FF6B6B',
+    dark: '#1A1A1A',
+    stats: { power: 3, speed: 3, tech: 5, defense: 3 },
+    desc: '見た目はかわいいが超テクニシャンな黒クマ',
+    bodyColors: { main: '#3A3A3A', sub: '#FF6B6B', skin: '#4A4A4A' },
+    moveSpeed: 7.0,
+    jumpPower: -13.0,
+    weight: 1.05
   }
 ];
 
@@ -160,6 +173,8 @@ const longImg = new Image();
 longImg.src = 'images/long.png';
 const uruoImg = new Image();
 uruoImg.src = 'images/uruo.png';
+const kumataroImg = new Image();
+kumataroImg.src = 'images/kumataro.png';
 
 // --- Particles ---
 function spawnTitleParticle() {
@@ -389,6 +404,71 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.lineWidth = 1;
       ctx.lineCap = 'butt';
     }
+  } else if (charIndex === 6) {
+    // 熊太郎 - 黒いクマ
+    if (kumataroImg.complete && kumataroImg.naturalWidth > 0) {
+      const imgW = 78 * s;
+      const imgH = 90 * s;
+      ctx.drawImage(kumataroImg, -imgW / 2, -35 * s, imgW, imgH);
+    } else {
+      // Canvas描画：丸い黒クマ
+      // 脚（短め・太い）
+      ctx.fillStyle = '#2A2A2A';
+      ctx.beginPath(); ctx.ellipse(-8 * s, 38 * s, 7 * s, 10 * s, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(8 * s, 38 * s, 7 * s, 10 * s, 0, 0, Math.PI * 2); ctx.fill();
+      // 足の裏（肉球）
+      ctx.fillStyle = '#D4877A';
+      ctx.beginPath(); ctx.ellipse(-8 * s, 44 * s, 4 * s, 3 * s, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(8 * s, 44 * s, 4 * s, 3 * s, 0, 0, Math.PI * 2); ctx.fill();
+      // 体（丸くて大きい）
+      ctx.fillStyle = '#3A3A3A';
+      ctx.beginPath(); ctx.ellipse(0, 5 * s, 18 * s, 22 * s, 0, 0, Math.PI * 2); ctx.fill();
+      // お腹（薄いグレー）
+      ctx.fillStyle = '#555';
+      ctx.beginPath(); ctx.ellipse(0, 10 * s, 12 * s, 14 * s, 0, 0, Math.PI * 2); ctx.fill();
+      // 腕（丸い）
+      ctx.fillStyle = '#3A3A3A';
+      ctx.beginPath(); ctx.ellipse(-18 * s, 2 * s, 7 * s, 10 * s, 0.3, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(18 * s, 2 * s, 7 * s, 10 * s, -0.3, 0, Math.PI * 2); ctx.fill();
+      // 頭（丸い）
+      ctx.fillStyle = '#3A3A3A';
+      ctx.beginPath(); ctx.arc(0, -22 * s, 16 * s, 0, Math.PI * 2); ctx.fill();
+      // 耳（丸い）
+      ctx.fillStyle = '#2A2A2A';
+      ctx.beginPath(); ctx.arc(-12 * s, -35 * s, 6 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(12 * s, -35 * s, 6 * s, 0, Math.PI * 2); ctx.fill();
+      // 耳の内側
+      ctx.fillStyle = '#D4877A';
+      ctx.beginPath(); ctx.arc(-12 * s, -35 * s, 3 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(12 * s, -35 * s, 3 * s, 0, Math.PI * 2); ctx.fill();
+      // ほっぺ（赤い）
+      ctx.fillStyle = '#FF6B6B';
+      ctx.globalAlpha = 0.6;
+      ctx.beginPath(); ctx.ellipse(-9 * s, -17 * s, 5 * s, 3.5 * s, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(9 * s, -17 * s, 5 * s, 3.5 * s, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = 1;
+      // 目（つぶらな瞳）
+      ctx.fillStyle = '#FFF';
+      ctx.beginPath(); ctx.arc(-6 * s, -24 * s, 4 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(6 * s, -24 * s, 4 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#111';
+      ctx.beginPath(); ctx.arc(-5 * s, -24 * s, 2.5 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(7 * s, -24 * s, 2.5 * s, 0, Math.PI * 2); ctx.fill();
+      // ハイライト
+      ctx.fillStyle = '#FFF';
+      ctx.beginPath(); ctx.arc(-4 * s, -25 * s, 1 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(8 * s, -25 * s, 1 * s, 0, Math.PI * 2); ctx.fill();
+      // 鼻
+      ctx.fillStyle = '#222';
+      ctx.beginPath(); ctx.ellipse(0, -19 * s, 3 * s, 2 * s, 0, 0, Math.PI * 2); ctx.fill();
+      // 口（にっこり）
+      ctx.strokeStyle = '#222';
+      ctx.lineWidth = 1.5 * s;
+      ctx.beginPath();
+      ctx.arc(0, -16 * s, 4 * s, 0.2, Math.PI - 0.2);
+      ctx.stroke();
+      ctx.lineWidth = 1;
+    }
   }
 
   ctx.restore();
@@ -575,8 +655,8 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
   ctx.scale(scaleX, scaleY);
 
   // Draw character image
-  const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg];
-  const imgSizes = [[70, 90], [80, 95], [75, 90], [75, 90], [75, 90], [75, 90]];
+  const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg];
+  const imgSizes = [[70, 90], [80, 95], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90]];
   const img = imgs[charIndex];
   if (img && img.complete && img.naturalWidth > 0) {
     const imgW = imgSizes[charIndex][0] * s;
@@ -681,6 +761,53 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
     ctx.fillStyle = '#222';
     ctx.beginPath(); ctx.arc(-5 * s, -30 * s, 1.5 * s, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.arc(5 * s, -30 * s, 1.5 * s, 0, Math.PI * 2); ctx.fill();
+  } else if (charIndex === 6) {
+    // 熊太郎: Canvas fallback for battle
+    // 脚
+    ctx.fillStyle = '#2A2A2A';
+    ctx.beginPath(); ctx.ellipse(-8 * s, 38 * s, 7 * s, 10 * s, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(8 * s, 38 * s, 7 * s, 10 * s, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#D4877A';
+    ctx.beginPath(); ctx.ellipse(-8 * s, 44 * s, 4 * s, 3 * s, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(8 * s, 44 * s, 4 * s, 3 * s, 0, 0, Math.PI * 2); ctx.fill();
+    // 体
+    ctx.fillStyle = '#3A3A3A';
+    ctx.beginPath(); ctx.ellipse(0, 5 * s, 18 * s, 22 * s, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#555';
+    ctx.beginPath(); ctx.ellipse(0, 10 * s, 12 * s, 14 * s, 0, 0, Math.PI * 2); ctx.fill();
+    // 腕
+    ctx.fillStyle = '#3A3A3A';
+    ctx.beginPath(); ctx.ellipse(-18 * s, 2 * s, 7 * s, 10 * s, 0.3, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(18 * s, 2 * s, 7 * s, 10 * s, -0.3, 0, Math.PI * 2); ctx.fill();
+    // 頭
+    ctx.fillStyle = '#3A3A3A';
+    ctx.beginPath(); ctx.arc(0, -22 * s, 16 * s, 0, Math.PI * 2); ctx.fill();
+    // 耳
+    ctx.fillStyle = '#2A2A2A';
+    ctx.beginPath(); ctx.arc(-12 * s, -35 * s, 6 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(12 * s, -35 * s, 6 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#D4877A';
+    ctx.beginPath(); ctx.arc(-12 * s, -35 * s, 3 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(12 * s, -35 * s, 3 * s, 0, Math.PI * 2); ctx.fill();
+    // ほっぺ
+    ctx.fillStyle = '#FF6B6B';
+    ctx.globalAlpha = 0.6;
+    ctx.beginPath(); ctx.ellipse(-9 * s, -17 * s, 5 * s, 3.5 * s, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(9 * s, -17 * s, 5 * s, 3.5 * s, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = 1;
+    // 目
+    ctx.fillStyle = '#FFF';
+    ctx.beginPath(); ctx.arc(-6 * s, -24 * s, 4 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(6 * s, -24 * s, 4 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#111';
+    ctx.beginPath(); ctx.arc(-5 * s, -24 * s, 2.5 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(7 * s, -24 * s, 2.5 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#FFF';
+    ctx.beginPath(); ctx.arc(-4 * s, -25 * s, 1 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(8 * s, -25 * s, 1 * s, 0, Math.PI * 2); ctx.fill();
+    // 鼻
+    ctx.fillStyle = '#222';
+    ctx.beginPath(); ctx.ellipse(0, -19 * s, 3 * s, 2 * s, 0, 0, Math.PI * 2); ctx.fill();
   }
 
   // 攻撃時の武器・体パーツアニメーション
@@ -1918,6 +2045,155 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
       }
     }
 
+    // ─── 熊太郎（黒クマ）───
+    else if (charIndex === 6) {
+      const armX = 10 * s, armY = -12 * s;
+      const pawR = 7 * s;
+
+      if (atkType === 'normal') {
+        // 通常: ぷにぷにパンチ
+        let reach;
+        if (phase === 'startup') reach = -5 * s * easeIn;
+        else if (phase === 'active') reach = 20 * s * easeOut;
+        else reach = 20 * s * (1 - easeOut);
+        ctx.translate(armX + reach, armY);
+        // 丸い腕
+        ctx.fillStyle = '#3A3A3A';
+        ctx.beginPath(); ctx.ellipse(-10 * s, 0, 6 * s, 8 * s, 0, 0, Math.PI * 2); ctx.fill();
+        // 丸い手
+        ctx.fillStyle = '#4A4A4A';
+        ctx.beginPath(); ctx.arc(0, 0, pawR, 0, Math.PI * 2); ctx.fill();
+        // 肉球
+        ctx.fillStyle = '#D4877A';
+        ctx.beginPath(); ctx.arc(1 * s, 0, 3 * s, 0, Math.PI * 2); ctx.fill();
+        if (phase === 'active' && phaseT < 0.5) {
+          ctx.globalAlpha = 0.4 * (1 - phaseT * 2);
+          ctx.fillStyle = '#FF6B6B';
+          ctx.beginPath(); ctx.arc(3 * s, 0, 9 * s, 0, Math.PI * 2); ctx.fill();
+          ctx.globalAlpha = 1;
+        }
+      } else if (atkType === 'strong') {
+        // 強: クマたたき
+        let reach, fistY;
+        if (phase === 'startup') { reach = -8 * s * easeIn; fistY = -5 * s * easeIn; }
+        else if (phase === 'active') { reach = 24 * s * easeOut; fistY = 5 * s * easeOut; }
+        else { reach = 24 * s * (1 - easeOut); fistY = 0; }
+        ctx.translate(armX + reach, armY + fistY);
+        ctx.fillStyle = '#3A3A3A';
+        ctx.beginPath(); ctx.ellipse(-12 * s, 0, 7 * s, 9 * s, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#4A4A4A';
+        ctx.beginPath(); ctx.arc(0, 0, pawR * 1.2, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#D4877A';
+        ctx.beginPath(); ctx.arc(1 * s, 0, 4 * s, 0, Math.PI * 2); ctx.fill();
+        if (phase === 'active' && phaseT < 0.4) {
+          ctx.globalAlpha = 0.5 * (1 - phaseT * 2.5);
+          ctx.fillStyle = '#FF4444';
+          ctx.beginPath(); ctx.arc(5 * s, 0, 12 * s, 0, Math.PI * 2); ctx.fill();
+          ctx.globalAlpha = 1;
+        }
+      } else if (atkType === 'special') {
+        // 必殺: ころころローリング
+        if (phase === 'active') {
+          ctx.globalAlpha = 0.3;
+          const rollAngle = phaseT * Math.PI * 6;
+          for (let i = 0; i < 3; i++) {
+            const a = rollAngle + (i / 3) * Math.PI * 2;
+            const dist = 10 * s;
+            ctx.fillStyle = '#3A3A3A';
+            ctx.beginPath();
+            ctx.arc(Math.cos(a) * dist, Math.sin(a) * dist - 5 * s, 8 * s, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.globalAlpha = 1;
+        }
+      } else if (atkType === 'aerial') {
+        // 空中: ぽよんジャンプ（お腹アタック）
+        let squash;
+        if (phase === 'startup') squash = easeIn * 0.15;
+        else if (phase === 'active') squash = 0.15 - easeOut * 0.25;
+        else squash = -0.1 * (1 - easeOut);
+        ctx.scale(1 + squash, 1 - squash);
+        ctx.fillStyle = '#555';
+        ctx.globalAlpha = 0.4;
+        ctx.beginPath(); ctx.ellipse(0, 5 * s, 16 * s, 18 * s, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.globalAlpha = 1;
+        if (phase === 'active' && phaseT < 0.3) {
+          ctx.globalAlpha = 0.4;
+          ctx.fillStyle = '#FF6B6B';
+          ctx.beginPath(); ctx.ellipse(0, 12 * s, 18 * s, 10 * s, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.globalAlpha = 1;
+        }
+      } else if (atkType === 'up') {
+        // 上攻撃: 両手振り上げ
+        let angle;
+        if (phase === 'startup') angle = Math.PI * 0.2 + easeIn * 0.2;
+        else if (phase === 'active') angle = Math.PI * 0.4 - easeOut * Math.PI * 0.9;
+        else angle = -Math.PI * 0.5 * (1 - easeOut);
+        // 左手
+        ctx.save();
+        ctx.translate(-8 * s, armY);
+        ctx.rotate(angle);
+        ctx.fillStyle = '#3A3A3A';
+        ctx.beginPath(); ctx.ellipse(0, 10 * s, 5 * s, 10 * s, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#4A4A4A';
+        ctx.beginPath(); ctx.arc(0, 20 * s, pawR, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+        // 右手
+        ctx.save();
+        ctx.translate(8 * s, armY);
+        ctx.rotate(angle);
+        ctx.fillStyle = '#3A3A3A';
+        ctx.beginPath(); ctx.ellipse(0, 10 * s, 5 * s, 10 * s, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#4A4A4A';
+        ctx.beginPath(); ctx.arc(0, 20 * s, pawR, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+        if (phase === 'active') {
+          ctx.globalAlpha = 0.3 * (1 - phaseT);
+          ctx.strokeStyle = '#FF6B6B';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(0, armY, 22 * s, Math.PI * 0.6, Math.PI * 0.6 - phaseT * Math.PI * 0.7);
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+        }
+      } else if (atkType === 'side') {
+        // 横攻撃: クマスワイプ
+        let reach;
+        if (phase === 'startup') reach = -6 * s * easeIn;
+        else if (phase === 'active') reach = 22 * s * easeOut;
+        else reach = 22 * s * (1 - easeOut);
+        ctx.translate(armX + reach, armY + 2 * s);
+        ctx.fillStyle = '#3A3A3A';
+        ctx.beginPath(); ctx.ellipse(-10 * s, 0, 6 * s, 8 * s, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#4A4A4A';
+        ctx.beginPath(); ctx.arc(0, 0, pawR * 1.1, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#D4877A';
+        ctx.beginPath(); ctx.arc(1 * s, 0, 3.5 * s, 0, Math.PI * 2); ctx.fill();
+        if (phase === 'active') {
+          ctx.globalAlpha = 0.35 * (1 - phaseT);
+          ctx.strokeStyle = '#FF4444';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.arc(0, 0, pawR * 2, -0.5, -0.5 + phaseT * Math.PI * 0.5);
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+        }
+      } else if (atkType === 'down' || atkType === 'downair') {
+        // 下/空中下: お尻落とし・お尻プレス
+        let squash;
+        if (phase === 'startup') squash = easeIn * 0.1;
+        else if (phase === 'active') squash = 0.1 + easeOut * 0.15;
+        else squash = 0.25 * (1 - easeOut);
+        ctx.scale(1 + squash, 1 - squash);
+        if (phase === 'active') {
+          ctx.globalAlpha = 0.4 * (1 - phaseT);
+          ctx.fillStyle = '#FF6B6B';
+          ctx.beginPath(); ctx.ellipse(0, 20 * s, 14 * s, 8 * s, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.globalAlpha = 1;
+        }
+      }
+    }
+
     ctx.restore();
   }
 
@@ -2804,6 +3080,13 @@ const commandDefs = {
       attack:{ startup:6, active:24, recovery:18, damage:2, kbBase:0.5, kbScale:0.01, kbAngle:-10, hx:12, hy:-38, hw:50, hh:45, color:'#FF8844', effect:'cmdUruo2',
         multiHit:true, hitInterval:4, finalDamage:20, finalKbBase:9, finalKbScale:0.14, finalKbAngle:-30, spinKB:true } },
   ],
+  6: [ // 熊太郎
+    { name:'はちみつ爆弾', seq:['D','D','F','F'], cooldownKey:'cmd1',
+      attack:{ startup:10, active:5, recovery:18, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FFCC00', effect:'cmdKuma1',
+        projectile:{ speed:8, damage:16, kbBase:6, kbScale:0.10, kbAngle:-30, w:25, h:25, life:50, color:'#FFCC00', pcolor:'#FFE066' } } },
+    { name:'スーパーベアーパンチ', seq:['F','F','U','U'], cooldownKey:'cmd2',
+      attack:{ startup:14, active:8, recovery:22, damage:28, kbBase:9, kbScale:0.14, kbAngle:-20, hx:16, hy:-35, hw:65, hh:50, color:'#FF2222', effect:'cmdKuma2' } },
+  ],
 };
 
 function addCmdInput(playerId, dir) {
@@ -2985,6 +3268,21 @@ const attackDefs = {
     downair:{ name:'急降下爪撃', startup:5, active:10, recovery:14, damage:14, kbBase:6, kbScale:0.10, kbAngle:80, hx:0, hy:10, hw:40, hh:50, color:'#FFD700', effect:'meteor',
               specialType:'divekick', diveSpeed:13 },
     throwDmg: 12,
+  },
+  // 熊太郎 - Black Bear
+  6: {
+    normal: { name:'ぷにぷにパンチ', startup:4, active:5, recovery:9, damage:5, kbBase:2, kbScale:0.04, kbAngle:-12, hx:12, hy:-32, hw:42, hh:38, color:'#FF6B6B', effect:'punch' },
+    strong: { name:'クマたたき', startup:8, active:8, recovery:16, damage:14, kbBase:5, kbScale:0.09, kbAngle:-25, hx:14, hy:-35, hw:60, hh:45, color:'#FF4444', effect:'punch' },
+    special:{ name:'ころころローリング', startup:8, active:18, recovery:14, damage:10, kbBase:4, kbScale:0.07, kbAngle:-15, hx:12, hy:-25, hw:55, hh:50, color:'#3A3A3A', effect:'dash',
+              specialType:'shadowDash', dashSpeed:12 },
+    aerial: { name:'ぽよんジャンプ', startup:4, active:10, recovery:10, damage:9, kbBase:3, kbScale:0.07, kbAngle:-85, hx:0, hy:-15, hw:55, hh:50, color:'#FF6B6B', effect:'airslam', centerHit:true },
+    down:   { name:'お尻落とし', startup:5, active:10, recovery:14, damage:12, kbBase:5, kbScale:0.09, kbAngle:80, hx:0, hy:10, hw:45, hh:45, color:'#FF6B6B', effect:'meteor',
+              specialType:'divekick', diveSpeed:11 },
+    up:     { name:'両手振り上げ', startup:5, active:7, recovery:13, damage:10, kbBase:5, kbScale:0.08, kbAngle:-88, hx:3, hy:-55, hw:50, hh:50, color:'#FF6B6B', effect:'upslash' },
+    side:   { name:'クマスワイプ', startup:5, active:7, recovery:11, damage:11, kbBase:4, kbScale:0.08, kbAngle:-15, hx:16, hy:-32, hw:60, hh:38, color:'#FF4444', effect:'sideslash' },
+    downair:{ name:'お尻プレス', startup:5, active:10, recovery:14, damage:14, kbBase:6, kbScale:0.10, kbAngle:80, hx:0, hy:10, hw:45, hh:50, color:'#FF6B6B', effect:'meteor',
+              specialType:'divekick', diveSpeed:12 },
+    throwDmg: 10,
   }
 };
 
