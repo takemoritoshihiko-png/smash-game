@@ -2361,18 +2361,27 @@ function drawSelect(dt) {
   ctx.lineWidth = 2;
   ctx.beginPath(); ctx.moveTo(100, 66); ctx.lineTo(860, 66); ctx.stroke();
 
-  // Character cards
+  // Character cards - 2-row grid layout
   const charCount = characters.length;
-  const cardW = charCount <= 4 ? 170 : 150;
-  const cardH = charCount <= 4 ? 230 : 220;
-  const gap = charCount <= 4 ? 16 : 12;
-  const totalW = charCount * cardW + (charCount - 1) * gap;
-  const startX = (960 - totalW) / 2;
+  const cols = Math.min(charCount, 4);
+  const rows = Math.ceil(charCount / cols);
+  const cardW = 120;
+  const cardH = rows <= 1 ? 220 : 130;
+  const gapX = 14;
+  const gapY = 10;
+  const totalW = cols * cardW + (cols - 1) * gapX;
+  const gridStartX = (960 - totalW) / 2;
+  const gridStartY = 74;
 
   for (let i = 0; i < charCount; i++) {
     const ch = characters[i];
-    const cx = startX + i * (cardW + gap);
-    const cy = 82;
+    const row = Math.floor(i / cols);
+    const col = i % cols;
+    const rowCount = (row < rows - 1) ? cols : (charCount - cols * (rows - 1));
+    const rowTotalW = rowCount * cardW + (rowCount - 1) * gapX;
+    const rowStartX = (960 - rowTotalW) / 2;
+    const cx = rowStartX + col * (cardW + gapX);
+    const cy = gridStartY + row * (cardH + gapY);
     const isP1 = p1Select === i;
     const isP2 = p2Select === i;
 
@@ -2445,28 +2454,31 @@ function drawSelect(dt) {
     }
 
     // Type label
-    ctx.font = 'bold 12px sans-serif';
+    ctx.font = 'bold 10px sans-serif';
     ctx.textAlign = 'center';
     ctx.fillStyle = ch.accent;
-    ctx.fillText(ch.type, cx + cardW / 2, cy + 42);
+    ctx.fillText(ch.type, cx + cardW / 2, cy + 38);
 
     // Character
-    drawCharacterBody(cx + cardW / 2, cy + 115, 1.0, i, selectTime, false);
+    const charScale = rows <= 1 ? 1.0 : 0.65;
+    const charY = rows <= 1 ? cy + 115 : cy + 72;
+    drawCharacterBody(cx + cardW / 2, charY, charScale, i, selectTime, false);
 
     // Name
-    ctx.font = 'bold 22px sans-serif';
+    ctx.font = rows <= 1 ? 'bold 22px sans-serif' : 'bold 16px sans-serif';
     ctx.textAlign = 'center';
     ctx.fillStyle = (isP1 || isP2) ? '#FFF' : '#888';
-    ctx.fillText(ch.name, cx + cardW / 2, cy + cardH - 12);
+    ctx.fillText(ch.name, cx + cardW / 2, cy + cardH - 8);
 
     ctx.restore();
   }
 
   // Detail panels - P1 left, P2 right
+  const detailY = gridStartY + rows * (cardH + gapY) + 10;
   const p1Label = '1P';
-  drawSelectDetail(60, 340, p1Select, p1Label, '#44AAFF', p1Confirmed);
+  drawSelectDetail(60, detailY, p1Select, p1Label, '#44AAFF', p1Confirmed);
   const p2Label = gameMode === 'cpu' ? 'CPU' : '2P';
-  drawSelectDetail(500, 340, p2Select, p2Label, '#FF4444', p2Confirmed);
+  drawSelectDetail(500, detailY, p2Select, p2Label, '#FF4444', p2Confirmed);
 
   // Mode selection overlay (before char select starts)
   if (!modeSelected) {
@@ -2535,7 +2547,7 @@ function drawSelect(dt) {
 function drawSelectDetail(px, py, charIdx, label, color, isConfirmed) {
   const ch = characters[charIdx];
   const pw = 400;
-  const ph = 240;
+  const ph = 220;
 
   ctx.fillStyle = 'rgba(15, 15, 30, 0.85)';
   roundRect(ctx, px, py, pw, ph, 10);
@@ -2552,7 +2564,7 @@ function drawSelectDetail(px, py, charIdx, label, color, isConfirmed) {
   ctx.fillText(label, px + 12, py + 22);
 
   // Character preview
-  drawCharacterBody(px + 80, py + 125, 1.5, charIdx, selectTime, false);
+  drawCharacterBody(px + 80, py + 110, 1.3, charIdx, selectTime, false);
 
   // Info
   ctx.textAlign = 'left';
@@ -2574,7 +2586,7 @@ function drawSelectDetail(px, py, charIdx, label, color, isConfirmed) {
   const statColors = ['#FF4444', '#44FF88', '#FFDD44', '#4488FF'];
 
   for (let i = 0; i < 4; i++) {
-    const sy = py + 108 + i * 22;
+    const sy = py + 100 + i * 22;
     ctx.font = 'bold 11px sans-serif';
     ctx.textAlign = 'left';
     ctx.fillStyle = '#777';
