@@ -28,7 +28,7 @@ resize();
 window.addEventListener('resize', resize);
 
 // --- State ---
-let scene = 'title'; // 'title' | 'select' | 'difficulty' | 'battle'
+let scene = 'title'; // 'title' | 'select' | 'difficulty' | 'vsintro' | 'battle'
 let titleAlpha = 0;
 let titleFadeIn = true;
 let pressAlpha = 0;
@@ -52,6 +52,11 @@ let modeSelected = false; // whether mode has been chosen on select screen
 let cpuDifficulty = 1; // 0=easy, 1=normal, 2=hard
 let difficultyTime = 0;
 let difficultySelected = 0; // cursor on difficulty screen
+
+// VS Intro screen
+let vsIntroTime = 0;
+const VS_INTRO_DURATION = 180; // 3 seconds at 60fps
+let vsIntroFanfareNodes = null;
 
 
 // --- Characters ---
@@ -146,6 +151,45 @@ const characters = [
     moveSpeed: 7.0,
     jumpPower: -13.0,
     weight: 1.05
+  },
+  {
+    name: 'バレット',
+    type: '完全遠距離型',
+    color: '#CC3366',
+    accent: '#FF66AA',
+    dark: '#881144',
+    stats: { power: 5, speed: 2, tech: 4, defense: 1 },
+    desc: '遠距離最強・近距離は極端に弱い機械系女性兵',
+    bodyColors: { main: '#CC3366', sub: '#FF66AA', skin: '#FFD5C2' },
+    moveSpeed: 5.8,
+    jumpPower: -12.0,
+    weight: 0.75
+  },
+  {
+    name: 'シャうでん',
+    type: 'スピード型',
+    color: '#E05090',
+    accent: '#FF80B0',
+    dark: '#8A2050',
+    stats: { power: 2, speed: 5, tech: 3, defense: 2 },
+    desc: '素早い触手攻撃とインクで翻弄するタコ系生物',
+    bodyColors: { main: '#E05090', sub: '#FF80B0', skin: '#F0A0C0' },
+    moveSpeed: 10.5,
+    jumpPower: -15.0,
+    weight: 0.65
+  },
+  {
+    name: 'ジャッジマン',
+    type: 'バランス型',
+    color: '#2A2A3A',
+    accent: '#C0A0FF',
+    dark: '#1A1A2A',
+    stats: { power: 3, speed: 3, tech: 3, defense: 3 },
+    desc: '法と秩序を司る謎めいた審判者',
+    bodyColors: { main: '#2A2A3A', sub: '#C0A0FF', skin: '#E8E0F0' },
+    moveSpeed: 7.56,
+    jumpPower: -12.94,
+    weight: 1.0
   }
 ];
 
@@ -175,6 +219,12 @@ const uruoImg = new Image();
 uruoImg.src = 'images/uruo.png';
 const kumataroImg = new Image();
 kumataroImg.src = 'images/kumataro.png';
+const bulletImg = new Image();
+bulletImg.src = 'images/bullet.png';
+const shaudenImg = new Image();
+shaudenImg.src = 'images/shauden.png';
+const judgemanImg = new Image();
+judgemanImg.src = 'images/judgeman.png';
 
 // --- Particles ---
 function spawnTitleParticle() {
@@ -469,6 +519,230 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.stroke();
       ctx.lineWidth = 1;
     }
+  } else if (charIndex === 7) {
+    // バレット - 機械系女性・遠距離型
+    if (bulletImg.complete && bulletImg.naturalWidth > 0) {
+      const imgW = 70 * s;
+      const imgH = 90 * s;
+      ctx.drawImage(bulletImg, -imgW / 2, -35 * s, imgW, imgH);
+    } else {
+      // Canvas描画：機械系女性兵
+      // 脚（ブーツ）
+      ctx.fillStyle = '#881144';
+      ctx.fillRect(-9 * s, 25 * s, 7 * s, 22 * s);
+      ctx.fillRect(2 * s, 25 * s, 7 * s, 22 * s);
+      // ブーツのハイライト
+      ctx.fillStyle = '#CC3366';
+      ctx.fillRect(-9 * s, 38 * s, 7 * s, 6 * s);
+      ctx.fillRect(2 * s, 38 * s, 7 * s, 6 * s);
+      // 体（装甲スーツ）
+      ctx.fillStyle = '#CC3366';
+      ctx.fillRect(-11 * s, -16 * s, 22 * s, 42 * s);
+      // 胸部アーマー
+      ctx.fillStyle = '#FF66AA';
+      ctx.fillRect(-9 * s, -12 * s, 18 * s, 14 * s);
+      // コアライト
+      ctx.fillStyle = '#00FFCC';
+      ctx.beginPath(); ctx.arc(0, -5 * s, 3 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#00DDAA';
+      ctx.beginPath(); ctx.arc(0, -5 * s, 1.5 * s, 0, Math.PI * 2); ctx.fill();
+      // 腕（細め）
+      ctx.fillStyle = '#AA2255';
+      ctx.fillRect(-15 * s, -12 * s, 5 * s, 24 * s);
+      ctx.fillRect(10 * s, -12 * s, 5 * s, 24 * s);
+      // 右手に銃
+      ctx.fillStyle = '#555';
+      ctx.fillRect(12 * s, 8 * s, 10 * s, 4 * s);
+      ctx.fillStyle = '#888';
+      ctx.fillRect(20 * s, 7 * s, 4 * s, 6 * s);
+      // 銃口の光
+      ctx.fillStyle = '#FF4444';
+      ctx.beginPath(); ctx.arc(24 * s, 10 * s, 1.5 * s, 0, Math.PI * 2); ctx.fill();
+      // 頭（ヘルメット付き）
+      ctx.fillStyle = '#FFD5C2';
+      ctx.beginPath(); ctx.arc(0, -25 * s, 11 * s, 0, Math.PI * 2); ctx.fill();
+      // ヘルメット（上半分）
+      ctx.fillStyle = '#CC3366';
+      ctx.beginPath(); ctx.arc(0, -25 * s, 11.5 * s, Math.PI, 0); ctx.fill();
+      // バイザー
+      ctx.fillStyle = '#00FFCC';
+      ctx.globalAlpha = 0.7;
+      ctx.fillRect(-8 * s, -28 * s, 16 * s, 5 * s);
+      ctx.globalAlpha = 1;
+      // 目
+      ctx.fillStyle = '#00FFCC';
+      ctx.beginPath(); ctx.ellipse(-4 * s, -23 * s, 2.5 * s, 2 * s, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(4 * s, -23 * s, 2.5 * s, 2 * s, 0, 0, Math.PI * 2); ctx.fill();
+      // 髪（ヘルメットから出るポニーテール）
+      ctx.strokeStyle = '#FF66AA';
+      ctx.lineWidth = 3 * s;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(-2 * s, -35 * s);
+      ctx.quadraticCurveTo(-14 * s, -30 * s, -16 * s, -15 * s);
+      ctx.stroke();
+      ctx.lineWidth = 1;
+      ctx.lineCap = 'butt';
+    }
+  } else if (charIndex === 8) {
+    // シャうでん - タコ系海の生き物
+    if (shaudenImg.complete && shaudenImg.naturalWidth > 0) {
+      const imgW = 75 * s;
+      const imgH = 90 * s;
+      ctx.drawImage(shaudenImg, -imgW / 2, -35 * s, imgW, imgH);
+    } else {
+      // Canvas描画：タコ系キャラ
+      // 触手（脚8本のうち見える4本）
+      ctx.strokeStyle = '#C04080';
+      ctx.lineWidth = 4 * s;
+      ctx.lineCap = 'round';
+      const tentT = Math.sin(time * 0.04 + charIndex) * 0.3;
+      // 左触手2本
+      ctx.beginPath(); ctx.moveTo(-8 * s, 18 * s); ctx.quadraticCurveTo(-18 * s, 30 * s + tentT * 10, -14 * s, 45 * s); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-4 * s, 20 * s); ctx.quadraticCurveTo(-12 * s, 35 * s - tentT * 8, -16 * s, 48 * s); ctx.stroke();
+      // 右触手2本
+      ctx.beginPath(); ctx.moveTo(8 * s, 18 * s); ctx.quadraticCurveTo(18 * s, 30 * s - tentT * 10, 14 * s, 45 * s); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(4 * s, 20 * s); ctx.quadraticCurveTo(12 * s, 35 * s + tentT * 8, 16 * s, 48 * s); ctx.stroke();
+      // 吸盤
+      ctx.fillStyle = '#F0A0C0';
+      ctx.beginPath(); ctx.arc(-14 * s, 42 * s, 2 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(-16 * s, 45 * s, 2 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(14 * s, 42 * s, 2 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(16 * s, 45 * s, 2 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.lineWidth = 1;
+      ctx.lineCap = 'butt';
+      // 体（丸いタコ頭）
+      ctx.fillStyle = '#E05090';
+      ctx.beginPath(); ctx.ellipse(0, -5 * s, 16 * s, 20 * s, 0, 0, Math.PI * 2); ctx.fill();
+      // 頭のテッペン（丸くぷっくり）
+      ctx.fillStyle = '#D04080';
+      ctx.beginPath(); ctx.ellipse(0, -22 * s, 13 * s, 14 * s, 0, 0, Math.PI * 2); ctx.fill();
+      // ほっぺ模様
+      ctx.fillStyle = '#FF80B0';
+      ctx.globalAlpha = 0.5;
+      ctx.beginPath(); ctx.ellipse(-10 * s, 0, 5 * s, 3 * s, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(10 * s, 0, 5 * s, 3 * s, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = 1;
+      // 目（大きくてキュート）
+      ctx.fillStyle = '#FFF';
+      ctx.beginPath(); ctx.arc(-6 * s, -8 * s, 5 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(6 * s, -8 * s, 5 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#111';
+      ctx.beginPath(); ctx.arc(-5 * s, -7 * s, 3 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(7 * s, -7 * s, 3 * s, 0, Math.PI * 2); ctx.fill();
+      // ハイライト
+      ctx.fillStyle = '#FFF';
+      ctx.beginPath(); ctx.arc(-4 * s, -9 * s, 1.2 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(8 * s, -9 * s, 1.2 * s, 0, Math.PI * 2); ctx.fill();
+      // 口（ちょこん）
+      ctx.fillStyle = '#AA2060';
+      ctx.beginPath(); ctx.ellipse(0, 2 * s, 3 * s, 2 * s, 0, 0, Math.PI * 2); ctx.fill();
+    }
+  } else if (charIndex === 9) {
+    // ジャッジマン - 審判・裁判官系
+    if (judgemanImg.complete && judgemanImg.naturalWidth > 0) {
+      const imgW = 75 * s;
+      const imgH = 90 * s;
+      ctx.drawImage(judgemanImg, -imgW / 2, -35 * s, imgW, imgH);
+    } else {
+      // Canvas描画：黒いマント・白い顔・謎めいた雰囲気
+      // マント（広がる台形）
+      ctx.fillStyle = '#1A1A2A';
+      ctx.beginPath();
+      ctx.moveTo(-12 * s, -15 * s);
+      ctx.lineTo(12 * s, -15 * s);
+      ctx.lineTo(20 * s, 45 * s);
+      ctx.lineTo(-20 * s, 45 * s);
+      ctx.closePath();
+      ctx.fill();
+      // マントの裏地（紫）
+      ctx.fillStyle = '#3A2050';
+      ctx.beginPath();
+      ctx.moveTo(-8 * s, 10 * s);
+      ctx.lineTo(8 * s, 10 * s);
+      ctx.lineTo(14 * s, 45 * s);
+      ctx.lineTo(-14 * s, 45 * s);
+      ctx.closePath();
+      ctx.fill();
+      // マントの襟（高い立ち襟）
+      ctx.fillStyle = '#2A2A3A';
+      ctx.beginPath();
+      ctx.moveTo(-14 * s, -18 * s);
+      ctx.lineTo(-10 * s, -30 * s);
+      ctx.lineTo(-8 * s, -15 * s);
+      ctx.closePath();
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(14 * s, -18 * s);
+      ctx.lineTo(10 * s, -30 * s);
+      ctx.lineTo(8 * s, -15 * s);
+      ctx.closePath();
+      ctx.fill();
+      // 体（黒い服）
+      ctx.fillStyle = '#222233';
+      ctx.fillRect(-10 * s, -15 * s, 20 * s, 35 * s);
+      // 胸のエンブレム（天秤）
+      ctx.strokeStyle = '#C0A0FF';
+      ctx.lineWidth = 1.5 * s;
+      ctx.beginPath();
+      ctx.moveTo(0, -8 * s);
+      ctx.lineTo(0, 2 * s);
+      ctx.moveTo(-6 * s, -8 * s);
+      ctx.lineTo(6 * s, -8 * s);
+      ctx.moveTo(-6 * s, -8 * s);
+      ctx.lineTo(-8 * s, -4 * s);
+      ctx.moveTo(6 * s, -8 * s);
+      ctx.lineTo(8 * s, -4 * s);
+      ctx.stroke();
+      ctx.lineWidth = 1;
+      // 脚（黒ブーツ）
+      ctx.fillStyle = '#1A1A2A';
+      ctx.fillRect(-8 * s, 20 * s, 6 * s, 22 * s);
+      ctx.fillRect(2 * s, 20 * s, 6 * s, 22 * s);
+      // 頭（白い顔）
+      ctx.fillStyle = '#E8E0F0';
+      ctx.beginPath(); ctx.arc(0, -28 * s, 12 * s, 0, Math.PI * 2); ctx.fill();
+      // フード（頭上の黒い影）
+      ctx.fillStyle = '#1A1A2A';
+      ctx.beginPath();
+      ctx.arc(0, -28 * s, 13 * s, Math.PI + 0.3, -0.3);
+      ctx.closePath();
+      ctx.fill();
+      // 目（鋭い紫の目）
+      ctx.fillStyle = '#9966DD';
+      ctx.beginPath(); ctx.ellipse(-5 * s, -28 * s, 2.5 * s, 1.5 * s, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(5 * s, -28 * s, 2.5 * s, 1.5 * s, 0, 0, Math.PI * 2); ctx.fill();
+      // 瞳
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath(); ctx.arc(-4.5 * s, -28 * s, 1 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(5.5 * s, -28 * s, 1 * s, 0, Math.PI * 2); ctx.fill();
+      // 口（一文字）
+      ctx.strokeStyle = '#8866AA';
+      ctx.lineWidth = 1 * s;
+      ctx.beginPath();
+      ctx.moveTo(-3 * s, -21 * s);
+      ctx.lineTo(3 * s, -21 * s);
+      ctx.stroke();
+      ctx.lineWidth = 1;
+      // 右手に木槌
+      ctx.fillStyle = '#8B6914';
+      ctx.fillRect(12 * s, -5 * s, 3 * s, 18 * s); // 柄
+      ctx.fillStyle = '#A07818';
+      ctx.fillRect(9 * s, -8 * s, 9 * s, 6 * s); // ヘッド
+      // マントの揺れ（アニメーション）
+      const mantleWave = Math.sin(time * 0.03) * 2 * s;
+      ctx.strokeStyle = '#2A2040';
+      ctx.lineWidth = 1 * s;
+      ctx.beginPath();
+      ctx.moveTo(-18 * s + mantleWave, 40 * s);
+      ctx.quadraticCurveTo(-15 * s, 42 * s, -12 * s + mantleWave * 0.5, 45 * s);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(18 * s - mantleWave, 40 * s);
+      ctx.quadraticCurveTo(15 * s, 42 * s, 12 * s - mantleWave * 0.5, 45 * s);
+      ctx.stroke();
+      ctx.lineWidth = 1;
+    }
   }
 
   ctx.restore();
@@ -655,8 +929,8 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
   ctx.scale(scaleX, scaleY);
 
   // Draw character image
-  const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg];
-  const imgSizes = [[70, 90], [80, 95], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90]];
+  const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg, bulletImg, shaudenImg, judgemanImg];
+  const imgSizes = [[70, 90], [80, 95], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90]];
   const img = imgs[charIndex];
   if (img && img.complete && img.naturalWidth > 0) {
     const imgW = imgSizes[charIndex][0] * s;
@@ -808,6 +1082,95 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
     // 鼻
     ctx.fillStyle = '#222';
     ctx.beginPath(); ctx.ellipse(0, -19 * s, 3 * s, 2 * s, 0, 0, Math.PI * 2); ctx.fill();
+  } else if (charIndex === 7) {
+    // バレット: Canvas fallback for battle
+    // 脚（ブーツ）
+    ctx.fillStyle = '#881144';
+    ctx.fillRect(-9 * s, 25 * s, 7 * s, 22 * s);
+    ctx.fillRect(2 * s, 25 * s, 7 * s, 22 * s);
+    ctx.fillStyle = '#CC3366';
+    ctx.fillRect(-9 * s, 38 * s, 7 * s, 6 * s);
+    ctx.fillRect(2 * s, 38 * s, 7 * s, 6 * s);
+    // 体
+    ctx.fillStyle = '#CC3366';
+    ctx.fillRect(-11 * s, -16 * s, 22 * s, 42 * s);
+    ctx.fillStyle = '#FF66AA';
+    ctx.fillRect(-9 * s, -12 * s, 18 * s, 14 * s);
+    // コア
+    ctx.fillStyle = '#00FFCC';
+    ctx.beginPath(); ctx.arc(0, -5 * s, 3 * s, 0, Math.PI * 2); ctx.fill();
+    // 腕
+    ctx.fillStyle = '#AA2255';
+    ctx.fillRect(-15 * s, -12 * s, 5 * s, 24 * s);
+    ctx.fillRect(10 * s, -12 * s, 5 * s, 24 * s);
+    // 銃
+    ctx.fillStyle = '#555';
+    ctx.fillRect(12 * s, 8 * s, 10 * s, 4 * s);
+    ctx.fillStyle = '#888';
+    ctx.fillRect(20 * s, 7 * s, 4 * s, 6 * s);
+    ctx.fillStyle = '#FF4444';
+    ctx.beginPath(); ctx.arc(24 * s, 10 * s, 1.5 * s, 0, Math.PI * 2); ctx.fill();
+    // 頭
+    ctx.fillStyle = '#FFD5C2';
+    ctx.beginPath(); ctx.arc(0, -25 * s, 11 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#CC3366';
+    ctx.beginPath(); ctx.arc(0, -25 * s, 11.5 * s, Math.PI, 0); ctx.fill();
+    // バイザー
+    ctx.fillStyle = '#00FFCC';
+    ctx.globalAlpha = 0.7;
+    ctx.fillRect(-8 * s, -28 * s, 16 * s, 5 * s);
+    ctx.globalAlpha = 1;
+    // 目
+    ctx.fillStyle = '#00FFCC';
+    ctx.beginPath(); ctx.ellipse(-4 * s, -23 * s, 2.5 * s, 2 * s, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(4 * s, -23 * s, 2.5 * s, 2 * s, 0, 0, Math.PI * 2); ctx.fill();
+    // ポニーテール
+    ctx.strokeStyle = '#FF66AA';
+    ctx.lineWidth = 3 * s;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(-2 * s, -35 * s);
+    ctx.quadraticCurveTo(-14 * s, -30 * s, -16 * s, -15 * s);
+    ctx.stroke();
+    ctx.lineWidth = 1;
+    ctx.lineCap = 'butt';
+  } else if (charIndex === 8) {
+    // シャうでん: Canvas fallback for battle
+    // 触手
+    ctx.strokeStyle = '#C04080';
+    ctx.lineWidth = 4 * s;
+    ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(-8 * s, 18 * s); ctx.quadraticCurveTo(-18 * s, 30 * s, -14 * s, 45 * s); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-4 * s, 20 * s); ctx.quadraticCurveTo(-12 * s, 35 * s, -16 * s, 48 * s); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(8 * s, 18 * s); ctx.quadraticCurveTo(18 * s, 30 * s, 14 * s, 45 * s); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(4 * s, 20 * s); ctx.quadraticCurveTo(12 * s, 35 * s, 16 * s, 48 * s); ctx.stroke();
+    ctx.fillStyle = '#F0A0C0';
+    ctx.beginPath(); ctx.arc(-14 * s, 42 * s, 2 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(14 * s, 42 * s, 2 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.lineWidth = 1; ctx.lineCap = 'butt';
+    // 体
+    ctx.fillStyle = '#E05090';
+    ctx.beginPath(); ctx.ellipse(0, -5 * s, 16 * s, 20 * s, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#D04080';
+    ctx.beginPath(); ctx.ellipse(0, -22 * s, 13 * s, 14 * s, 0, 0, Math.PI * 2); ctx.fill();
+    // ほっぺ
+    ctx.fillStyle = '#FF80B0'; ctx.globalAlpha = 0.5;
+    ctx.beginPath(); ctx.ellipse(-10 * s, 0, 5 * s, 3 * s, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(10 * s, 0, 5 * s, 3 * s, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = 1;
+    // 目
+    ctx.fillStyle = '#FFF';
+    ctx.beginPath(); ctx.arc(-6 * s, -8 * s, 5 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(6 * s, -8 * s, 5 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#111';
+    ctx.beginPath(); ctx.arc(-5 * s, -7 * s, 3 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(7 * s, -7 * s, 3 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#FFF';
+    ctx.beginPath(); ctx.arc(-4 * s, -9 * s, 1.2 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(8 * s, -9 * s, 1.2 * s, 0, Math.PI * 2); ctx.fill();
+    // 口
+    ctx.fillStyle = '#AA2060';
+    ctx.beginPath(); ctx.ellipse(0, 2 * s, 3 * s, 2 * s, 0, 0, Math.PI * 2); ctx.fill();
   }
 
   // 攻撃時の武器・体パーツアニメーション
@@ -2217,6 +2580,298 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
         }
       }
     }
+    // ─── バレット（銃使い・遠距離型）───
+    else if (charIndex === 7) {
+      const gunX = 12 * s, gunY = -8 * s;
+
+      if (atkType === 'normal') {
+        // 通常: ピストルショット - 銃を前に構えて発射
+        let reach;
+        if (phase === 'startup') reach = 5 * s * easeIn;
+        else if (phase === 'active') reach = 8 * s + 3 * s * (1 - easeOut);
+        else reach = 8 * s * (1 - easeOut);
+        ctx.translate(gunX + reach, gunY);
+        // 銃本体
+        ctx.fillStyle = '#555';
+        ctx.fillRect(-2 * s, -2 * s, 14 * s, 4 * s);
+        ctx.fillStyle = '#888';
+        ctx.fillRect(10 * s, -3 * s, 4 * s, 6 * s);
+        // マズルフラッシュ
+        if (phase === 'active' && phaseT < 0.4) {
+          ctx.globalAlpha = 0.7 * (1 - phaseT * 2.5);
+          ctx.fillStyle = '#FFAA00';
+          ctx.beginPath(); ctx.arc(16 * s, 0, (6 + phaseT * 4) * s, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#FFF';
+          ctx.beginPath(); ctx.arc(16 * s, 0, 3 * s, 0, Math.PI * 2); ctx.fill();
+          ctx.globalAlpha = 1;
+        }
+      } else if (atkType === 'strong') {
+        // 強: チャージショット
+        let charge;
+        if (phase === 'startup') charge = easeIn;
+        else if (phase === 'active') charge = 1;
+        else charge = 1 - easeOut;
+        ctx.translate(gunX, gunY);
+        // 銃（大型）
+        ctx.fillStyle = '#444';
+        ctx.fillRect(-4 * s, -3 * s, 18 * s, 6 * s);
+        ctx.fillStyle = '#666';
+        ctx.fillRect(12 * s, -4 * s, 5 * s, 8 * s);
+        // チャージエフェクト
+        if (phase === 'startup') {
+          ctx.globalAlpha = 0.4 * charge;
+          ctx.strokeStyle = '#FF66AA';
+          ctx.lineWidth = 2 * s;
+          ctx.beginPath(); ctx.arc(18 * s, 0, (3 + charge * 6) * s, 0, Math.PI * 2); ctx.stroke();
+          ctx.globalAlpha = 1;
+        }
+        // 発射エフェクト
+        if (phase === 'active' && phaseT < 0.5) {
+          ctx.globalAlpha = 0.8 * (1 - phaseT * 2);
+          ctx.fillStyle = '#FF3366';
+          ctx.beginPath(); ctx.arc(20 * s, 0, (8 + phaseT * 6) * s, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#FFF';
+          ctx.beginPath(); ctx.arc(20 * s, 0, 4 * s, 0, Math.PI * 2); ctx.fill();
+          ctx.globalAlpha = 1;
+        }
+      } else if (atkType === 'special') {
+        // 必殺: スナイパー
+        let angle;
+        if (phase === 'startup') angle = -0.05 * easeIn;
+        else angle = -0.05;
+        ctx.translate(gunX - 4 * s, gunY - 4 * s);
+        ctx.rotate(angle);
+        // スナイパーライフル
+        ctx.fillStyle = '#333';
+        ctx.fillRect(-6 * s, -2 * s, 28 * s, 4 * s);
+        ctx.fillStyle = '#555';
+        ctx.fillRect(18 * s, -3 * s, 6 * s, 6 * s);
+        // スコープ
+        ctx.fillStyle = '#00FFCC';
+        ctx.beginPath(); ctx.arc(8 * s, -4 * s, 2 * s, 0, Math.PI * 2); ctx.fill();
+        // レーザーサイト
+        if (phase === 'startup') {
+          ctx.globalAlpha = 0.3 + easeIn * 0.4;
+          ctx.strokeStyle = '#FF0000';
+          ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.moveTo(24 * s, 0); ctx.lineTo(200 * s, 0); ctx.stroke();
+          ctx.globalAlpha = 1;
+        }
+        // 発射
+        if (phase === 'active' && phaseT < 0.3) {
+          ctx.globalAlpha = 0.9 * (1 - phaseT * 3.3);
+          ctx.fillStyle = '#FF0044';
+          ctx.fillRect(24 * s, -3 * s, 200 * s, 6 * s);
+          ctx.fillStyle = '#FFF';
+          ctx.fillRect(24 * s, -1 * s, 200 * s, 2 * s);
+          ctx.globalAlpha = 1;
+        }
+      } else if (atkType === 'aerial') {
+        // 空中: 真下に撃つ
+        ctx.translate(0, 8 * s);
+        ctx.rotate(Math.PI / 2);
+        ctx.fillStyle = '#555';
+        ctx.fillRect(-2 * s, -2 * s, 12 * s, 4 * s);
+        if (phase === 'active' && phaseT < 0.4) {
+          ctx.globalAlpha = 0.6 * (1 - phaseT * 2.5);
+          ctx.fillStyle = '#FFAA00';
+          ctx.beginPath(); ctx.arc(14 * s, 0, 5 * s, 0, Math.PI * 2); ctx.fill();
+          ctx.globalAlpha = 1;
+        }
+      } else if (atkType === 'up') {
+        // 上: 真上に連射
+        ctx.translate(4 * s, gunY - 8 * s);
+        ctx.rotate(-Math.PI / 2);
+        ctx.fillStyle = '#555';
+        ctx.fillRect(-2 * s, -2 * s, 12 * s, 4 * s);
+        if (phase === 'active') {
+          const flash = Math.floor(phaseT * 3) % 2 === 0;
+          if (flash) {
+            ctx.globalAlpha = 0.6;
+            ctx.fillStyle = '#FFAA00';
+            ctx.beginPath(); ctx.arc(14 * s, 0, 4 * s, 0, Math.PI * 2); ctx.fill();
+            ctx.globalAlpha = 1;
+          }
+        }
+      } else if (atkType === 'side') {
+        // 横: ピストル横撃ち（通常と似ているが少し大きい）
+        let reach;
+        if (phase === 'startup') reach = 3 * s * easeIn;
+        else if (phase === 'active') reach = 10 * s;
+        else reach = 10 * s * (1 - easeOut);
+        ctx.translate(gunX + reach, gunY);
+        ctx.fillStyle = '#555';
+        ctx.fillRect(-2 * s, -2 * s, 14 * s, 4 * s);
+        if (phase === 'active' && phaseT < 0.3) {
+          ctx.globalAlpha = 0.7;
+          ctx.fillStyle = '#FFAA00';
+          ctx.beginPath(); ctx.arc(16 * s, 0, 5 * s, 0, Math.PI * 2); ctx.fill();
+          ctx.globalAlpha = 1;
+        }
+      } else if (atkType === 'down') {
+        // 下: 爆発弾設置
+        ctx.translate(gunX, gunY + 10 * s);
+        ctx.rotate(0.4);
+        ctx.fillStyle = '#555';
+        ctx.fillRect(-2 * s, -2 * s, 10 * s, 4 * s);
+        if (phase === 'active') {
+          ctx.globalAlpha = 0.5 * (1 - phaseT);
+          ctx.fillStyle = '#FF6600';
+          ctx.beginPath(); ctx.arc(12 * s, 6 * s, (4 + phaseT * 8) * s, 0, Math.PI * 2); ctx.fill();
+          ctx.globalAlpha = 1;
+        }
+      } else if (atkType === 'downair') {
+        // 空中下: 真下に1発
+        ctx.translate(0, 8 * s);
+        ctx.rotate(Math.PI / 2);
+        ctx.fillStyle = '#555';
+        ctx.fillRect(-2 * s, -2 * s, 12 * s, 4 * s);
+        if (phase === 'active' && phaseT < 0.4) {
+          ctx.globalAlpha = 0.7;
+          ctx.fillStyle = '#FFAA00';
+          ctx.beginPath(); ctx.arc(14 * s, 0, 6 * s, 0, Math.PI * 2); ctx.fill();
+          ctx.globalAlpha = 1;
+        }
+      }
+    }
+    // ─── シャうでん（タコ系・スピード型）───
+    else if (charIndex === 8) {
+      if (atkType === 'normal') {
+        // 通常: 触手でピシャ
+        let reach;
+        if (phase === 'startup') reach = -5 * s * easeIn;
+        else if (phase === 'active') reach = 22 * s * easeOut;
+        else reach = 22 * s * (1 - easeOut);
+        ctx.translate(10 * s + reach, -8 * s);
+        // 触手
+        ctx.strokeStyle = '#E05090';
+        ctx.lineWidth = 4 * s;
+        ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(-8 * s, 0); ctx.quadraticCurveTo(6 * s, -4 * s, 14 * s, 2 * s); ctx.stroke();
+        ctx.lineWidth = 1; ctx.lineCap = 'butt';
+        // 吸盤エフェクト
+        ctx.fillStyle = '#F0A0C0';
+        ctx.beginPath(); ctx.arc(14 * s, 2 * s, 3 * s, 0, Math.PI * 2); ctx.fill();
+        if (phase === 'active' && phaseT < 0.4) {
+          ctx.globalAlpha = 0.5 * (1 - phaseT * 2.5);
+          ctx.fillStyle = '#FF80B0';
+          ctx.beginPath(); ctx.arc(16 * s, 0, 8 * s, 0, Math.PI * 2); ctx.fill();
+          ctx.globalAlpha = 1;
+        }
+      } else if (atkType === 'strong') {
+        // 強: インク噴射
+        let spray;
+        if (phase === 'startup') spray = easeIn * 0.3;
+        else if (phase === 'active') spray = 0.3 + easeOut * 0.7;
+        else spray = 1 - easeOut * 0.5;
+        ctx.translate(12 * s, -10 * s);
+        if (phase === 'active') {
+          ctx.globalAlpha = 0.6 * (1 - phaseT * 0.5);
+          ctx.fillStyle = '#2A0040';
+          // インクの飛沫
+          for (let j = 0; j < 5; j++) {
+            const dx = (8 + j * 12) * s * spray;
+            const dy = (Math.sin(j * 1.5 + phaseT * 4) * 8) * s;
+            const r = (4 - j * 0.5) * s;
+            ctx.beginPath(); ctx.arc(dx, dy, r, 0, Math.PI * 2); ctx.fill();
+          }
+          ctx.globalAlpha = 1;
+        }
+      } else if (atkType === 'special') {
+        // 必殺: ジェット噴射（突進）
+        if (phase === 'active') {
+          // ジェットエフェクト（後方に水噴射）
+          ctx.globalAlpha = 0.5 * (1 - phaseT);
+          ctx.fillStyle = '#66CCFF';
+          for (let j = 0; j < 3; j++) {
+            const bx = (-15 - j * 12) * s;
+            const by = (Math.random() - 0.5) * 10 * s;
+            ctx.beginPath(); ctx.ellipse(bx, by, (6 - j * 1.5) * s, 4 * s, 0, 0, Math.PI * 2); ctx.fill();
+          }
+          ctx.globalAlpha = 1;
+        }
+      } else if (atkType === 'aerial') {
+        // 空中: 触手回転
+        let angle;
+        if (phase === 'startup') angle = easeIn * Math.PI * 0.3;
+        else if (phase === 'active') angle = Math.PI * 0.3 + easeOut * Math.PI * 1.7;
+        else angle = Math.PI * 2 * (1 - easeOut * 0.1);
+        ctx.rotate(angle);
+        ctx.strokeStyle = '#E05090';
+        ctx.lineWidth = 3 * s;
+        ctx.lineCap = 'round';
+        for (let j = 0; j < 4; j++) {
+          const a = (j / 4) * Math.PI * 2;
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.lineTo(Math.cos(a) * 20 * s, Math.sin(a) * 20 * s);
+          ctx.stroke();
+        }
+        ctx.lineWidth = 1; ctx.lineCap = 'butt';
+        if (phase === 'active') {
+          ctx.globalAlpha = 0.3 * (1 - phaseT);
+          ctx.strokeStyle = '#FF80B0';
+          ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.arc(0, 0, 22 * s, 0, Math.PI * 2); ctx.stroke();
+          ctx.globalAlpha = 1;
+        }
+      } else if (atkType === 'up') {
+        // 上: 触手を真上に伸ばす
+        let reach;
+        if (phase === 'startup') reach = easeIn * 0.5;
+        else if (phase === 'active') reach = 0.5 + easeOut * 0.5;
+        else reach = 1 - easeOut * 0.5;
+        ctx.strokeStyle = '#E05090';
+        ctx.lineWidth = 4 * s;
+        ctx.lineCap = 'round';
+        const len = reach * 35 * s;
+        ctx.beginPath(); ctx.moveTo(-3 * s, -15 * s); ctx.lineTo(-4 * s, -15 * s - len); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(3 * s, -15 * s); ctx.lineTo(4 * s, -15 * s - len); ctx.stroke();
+        ctx.lineWidth = 1; ctx.lineCap = 'butt';
+        if (phase === 'active') {
+          ctx.fillStyle = '#F0A0C0';
+          ctx.beginPath(); ctx.arc(-4 * s, -15 * s - len, 3 * s, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.arc(4 * s, -15 * s - len, 3 * s, 0, Math.PI * 2); ctx.fill();
+        }
+      } else if (atkType === 'side') {
+        // 横: 触手でピシャ（通常より長い）
+        let reach;
+        if (phase === 'startup') reach = -3 * s * easeIn;
+        else if (phase === 'active') reach = 26 * s * easeOut;
+        else reach = 26 * s * (1 - easeOut);
+        ctx.translate(8 * s + reach, -6 * s);
+        ctx.strokeStyle = '#E05090';
+        ctx.lineWidth = 4 * s;
+        ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(-12 * s, 0); ctx.quadraticCurveTo(0, -6 * s, 12 * s, 0); ctx.stroke();
+        ctx.lineWidth = 1; ctx.lineCap = 'butt';
+        if (phase === 'active' && phaseT < 0.3) {
+          ctx.globalAlpha = 0.4;
+          ctx.fillStyle = '#FF80B0';
+          ctx.beginPath(); ctx.arc(12 * s, 0, 7 * s, 0, Math.PI * 2); ctx.fill();
+          ctx.globalAlpha = 1;
+        }
+      } else if (atkType === 'down' || atkType === 'downair') {
+        // 下/空中下: 触手叩きつけ
+        let smash;
+        if (phase === 'startup') smash = easeIn * 0.3;
+        else if (phase === 'active') smash = 0.3 + easeOut * 0.7;
+        else smash = (1 - easeOut) * 0.3;
+        ctx.strokeStyle = '#E05090';
+        ctx.lineWidth = 5 * s;
+        ctx.lineCap = 'round';
+        const dy = smash * 25 * s;
+        ctx.beginPath(); ctx.moveTo(-6 * s, 10 * s); ctx.lineTo(-8 * s, 10 * s + dy); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(6 * s, 10 * s); ctx.lineTo(8 * s, 10 * s + dy); ctx.stroke();
+        ctx.lineWidth = 1; ctx.lineCap = 'butt';
+        if (phase === 'active' && phaseT < 0.4) {
+          ctx.globalAlpha = 0.5 * (1 - phaseT * 2.5);
+          ctx.fillStyle = '#E05090';
+          ctx.beginPath(); ctx.ellipse(0, 10 * s + dy + 5 * s, 12 * s, 5 * s, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.globalAlpha = 1;
+        }
+      }
+    }
 
     ctx.restore();
   }
@@ -3026,13 +3681,50 @@ function playHitSound(type) {
 // Hit flash overlay (white flash on strong hits)
 let hitFlash = { alpha: 0, color: '#FFFFFF' };
 
+// ============ All-Star Brawl 2 style effects ============
+// Hitstop system
+let hitStopFrames = 0;
+
+// Comic text effects ("POW!", "BAM!", etc.)
+let comicTexts = [];
+const COMIC_WORDS = ['POW!','BAM!','WHAM!','CRACK!','SMASH!','BOOM!','ZAP!','THWACK!'];
+const COMIC_COLORS = ['#FF4444','#FFDD00','#44AAFF','#FF66AA','#44FF88','#FF8844','#AA44FF','#00FFCC'];
+
+// KO display
+let koDisplay = { active: false, life: 0, maxLife: 90, playerIdx: -1 };
+
+// Confetti / paper particles for KO
+let confetti = [];
+
+// Speed lines for knockback
+let speedLines = [];
+
+// Fire trail for high damage knockback
+let fireTrails = [];
+
+// Rainbow aura for special attacks
+let specialAura = [];
+
+// Command technique background flash
+let cmdFlash = { alpha: 0, color: '#FFFFFF' };
+let cmdScaleEffect = { playerId: -1, life: 0 };
+
+// ① KO slash effects (光の斬撃)
+let koSlashEffects = [];
+
+// ③ KO slow motion
+let koSlowMotion = { active: false, frames: 0, maxFrames: 90 }; // 1.5sec = 90 frames
+
+// ⑤ Stock loss animation
+let stockLossAnim = { active: false, playerId: -1, life: 0, maxLife: 30, x: 0, y: 0 };
+
 // HIT/MISS display system
 let hitMissDisplays = [];
 function showHitDisplay(x, y, isHit) {
   hitMissDisplays.push({
     text: isHit ? 'HIT!' : 'MISS',
     x: x, y: y - 70,
-    life: isHit ? 30 : 18, // 0.5s / 0.3s at 60fps
+    life: isHit ? 30 : 18,
     maxLife: isHit ? 30 : 18,
     isHit: isHit,
   });
@@ -3123,6 +3815,30 @@ const commandDefs = {
     { name:'スーパーベアーパンチ', seq:['F','F','U','U'], cooldownKey:'cmd2',
       attack:{ startup:14, active:8, recovery:22, damage:28, kbBase:9, kbScale:0.14, kbAngle:-20, hx:16, hy:-35, hw:65, hh:50, color:'#FF2222', effect:'cmdKuma2' } },
   ],
+  7: [ // バレット
+    { name:'ミサイル', seq:['D','D','F','F'], cooldownKey:'cmd1',
+      attack:{ startup:12, active:5, recovery:20, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF3366', effect:'cmdBullet1',
+        projectile:{ speed:7, damage:18, kbBase:7, kbScale:0.12, kbAngle:-25, w:20, h:12, life:80, color:'#FF3366', pcolor:'#FF88AA', homing:true } } },
+    { name:'バレットストーム', seq:['F','F','U','U'], cooldownKey:'cmd2',
+      attack:{ startup:10, active:30, recovery:18, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF66AA', effect:'cmdBullet2',
+        specialType:'bulletStorm' } },
+  ],
+  8: [ // シャうでん
+    { name:'インク爆弾', seq:['D','D','F','F'], cooldownKey:'cmd1',
+      attack:{ startup:8, active:5, recovery:16, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#2A0040', effect:'cmdShauden1',
+        projectile:{ speed:8, damage:5, kbBase:2, kbScale:0.03, kbAngle:-10, w:22, h:22, life:50, color:'#2A0040', pcolor:'#5A2070', ink:true } } },
+    { name:'タコ足乱舞', seq:['F','F','U','U'], cooldownKey:'cmd2',
+      attack:{ startup:5, active:24, recovery:16, damage:3, kbBase:1.5, kbScale:0.03, kbAngle:-15, hx:0, hy:-35, hw:90, hh:60, color:'#E05090', effect:'cmdShauden2',
+        centerHit:true, multiHit:true, hitInterval:3, finalDamage:12, finalKbBase:6, finalKbScale:0.10, finalKbAngle:-40, spinKB:true } },
+  ],
+  9: [ // ジャッジマン
+    { name:'拘束令状', seq:['D','D','F','F'], cooldownKey:'cmd1',
+      attack:{ startup:8, active:6, recovery:18, damage:5, kbBase:1, kbScale:0.02, kbAngle:-10, hx:15, hy:-35, hw:70, hh:50, color:'#C0A0FF', effect:'cmdJudge1',
+        stun:true, stunFrames:60 } },
+    { name:'死刑宣告', seq:['F','F','U','U'], cooldownKey:'cmd2',
+      attack:{ startup:10, active:10, recovery:20, damage:14, kbBase:6, kbScale:0.10, kbAngle:-50, hx:0, hy:-35, hw:100, hh:80, color:'#2A2A3A', effect:'cmdJudge2',
+        centerHit:true } },
+  ],
 };
 
 function addCmdInput(playerId, dir) {
@@ -3206,7 +3922,7 @@ function executeCommand(player, cmd) {
     o2.start(now + 0.03); o2.stop(now + 0.15);
   } catch(e) {}
 
-  // Show command name
+  // Show command name (コミック風フォント演出)
   const ch = characters[player.charIdx];
   cmdNameDisplay.push({
     text: cmd.name, x: player.x, y: player.y - 120,
@@ -3215,6 +3931,21 @@ function executeCommand(player, cmd) {
 
   // Flash effect
   hitEffects.push({ x: player.x, y: player.y - 40, life: 15, maxLife: 15, color: '#FFFFFF', size: 50 });
+
+  // ② 虹色オーラ
+  specialAura.push({ playerId: player.id, life: 45, maxLife: 45 });
+
+  // ⑤ 背景カラフルフラッシュ
+  cmdFlash.alpha = 0.3;
+  cmdFlash.color = ch.accent;
+
+  // ⑤ キャラクター一瞬大きくなる演出
+  cmdScaleEffect.playerId = player.id;
+  cmdScaleEffect.life = 12;
+
+  // ② 画面シェイク
+  triggerScreenShake(4, 8);
+
   return true;
 }
 
@@ -3318,6 +4049,56 @@ const attackDefs = {
     downair:{ name:'お尻プレス', startup:5, active:10, recovery:14, damage:14, kbBase:6, kbScale:0.10, kbAngle:80, hx:0, hy:10, hw:45, hh:50, color:'#FF6B6B', effect:'meteor',
               specialType:'divekick', diveSpeed:12 },
     throwDmg: 10,
+  },
+  // バレット - Gunner (ranged specialist)
+  7: {
+    normal: { name:'ピストルショット', startup:5, active:3, recovery:14, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF66AA', effect:'none',
+              projectile:{ speed:12, damage:7, kbBase:3, kbScale:0.05, kbAngle:-15, w:12, h:8, life:50, color:'#FF66AA', pcolor:'#FFAACC' } },
+    strong: { name:'チャージショット', startup:18, active:4, recovery:20, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF3366', effect:'none',
+              projectile:{ speed:14, damage:16, kbBase:6, kbScale:0.11, kbAngle:-20, w:25, h:18, life:70, color:'#FF3366', pcolor:'#FF88AA' } },
+    special:{ name:'スナイパー', startup:20, active:3, recovery:24, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF0044', effect:'none',
+              projectile:{ speed:20, damage:22, kbBase:8, kbScale:0.14, kbAngle:-10, w:18, h:8, life:80, color:'#FF0044', pcolor:'#FF4488', pierce:true } },
+    aerial: { name:'空中射撃', startup:4, active:3, recovery:12, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF66AA', effect:'none',
+              projectile:{ speed:10, damage:6, kbBase:2, kbScale:0.04, kbAngle:80, w:10, h:10, life:40, color:'#FFAA66', pcolor:'#FFCC88', dirAngle:90 } },
+    down:   { name:'爆発弾設置', startup:6, active:5, recovery:16, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF6600', effect:'none',
+              projectile:{ speed:4, damage:14, kbBase:5, kbScale:0.09, kbAngle:-60, w:18, h:18, life:45, color:'#FF6600', pcolor:'#FFAA44', dirAngle:45 } },
+    up:     { name:'上方連射', startup:4, active:12, recovery:14, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF66AA', effect:'none',
+              projectile:{ speed:11, damage:4, kbBase:2, kbScale:0.03, kbAngle:-88, w:8, h:10, life:35, color:'#FF66AA', pcolor:'#FFAACC', dirAngle:-90 },
+              multiShot:3, shotInterval:4 },
+    side:   { name:'横撃ち', startup:5, active:3, recovery:13, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF66AA', effect:'none',
+              projectile:{ speed:11, damage:9, kbBase:4, kbScale:0.07, kbAngle:-15, w:14, h:10, life:55, color:'#FF66AA', pcolor:'#FFAACC' } },
+    downair:{ name:'空中下射撃', startup:4, active:3, recovery:12, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FFAA66', effect:'none',
+              projectile:{ speed:12, damage:8, kbBase:3, kbScale:0.06, kbAngle:80, w:10, h:12, life:40, color:'#FFAA66', pcolor:'#FFCC88', dirAngle:90 } },
+    throwDmg: 5,
+  },
+  // シャうでん - Octopus Speed
+  8: {
+    normal: { name:'触手でピシャ', startup:3, active:5, recovery:8, damage:5, kbBase:2, kbScale:0.04, kbAngle:-12, hx:14, hy:-35, hw:50, hh:35, color:'#FF80B0', effect:'slash' },
+    strong: { name:'インク噴射', startup:8, active:5, recovery:16, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#2A0040', effect:'none',
+              projectile:{ speed:9, damage:10, kbBase:3, kbScale:0.06, kbAngle:-20, w:20, h:16, life:45, color:'#2A0040', pcolor:'#5A2070' } },
+    special:{ name:'ジェット噴射', startup:6, active:14, recovery:14, damage:10, kbBase:4, kbScale:0.08, kbAngle:-15, hx:12, hy:-38, hw:55, hh:45, color:'#66CCFF', effect:'dash',
+              specialType:'shadowDash', dashSpeed:16 },
+    aerial: { name:'触手回転', startup:3, active:10, recovery:8, damage:7, kbBase:3, kbScale:0.06, kbAngle:-85, hx:0, hy:-30, hw:60, hh:60, color:'#FF80B0', effect:'airkick', centerHit:true },
+    down:   { name:'触手叩きつけ', startup:4, active:8, recovery:12, damage:10, kbBase:5, kbScale:0.09, kbAngle:80, hx:0, hy:10, hw:45, hh:40, color:'#E05090', effect:'meteor', centerHit:true },
+    up:     { name:'触手伸ばし', startup:3, active:8, recovery:10, damage:8, kbBase:4, kbScale:0.08, kbAngle:-88, hx:3, hy:-60, hw:35, hh:55, color:'#E05090', effect:'upslash' },
+    side:   { name:'触手横ビンタ', startup:3, active:6, recovery:9, damage:9, kbBase:4, kbScale:0.07, kbAngle:-15, hx:16, hy:-35, hw:65, hh:35, color:'#FF80B0', effect:'sideslash' },
+    downair:{ name:'触手急降下', startup:4, active:10, recovery:12, damage:11, kbBase:5, kbScale:0.09, kbAngle:80, hx:0, hy:10, hw:40, hh:50, color:'#E05090', effect:'meteor',
+              specialType:'divekick', diveSpeed:14 },
+    throwDmg: 7,
+  },
+  9: {
+    normal: { name:'判決槌', startup:5, active:7, recovery:12, damage:8, kbBase:3, kbScale:0.06, kbAngle:-20, hx:14, hy:-35, hw:55, hh:40, color:'#C0A0FF', effect:'punch' },
+    strong: { name:'有罪宣告', startup:10, active:6, recovery:18, damage:12, kbBase:5, kbScale:0.09, kbAngle:-30, hx:0, hy:0, hw:0, hh:0, color:'#2A2A3A', effect:'none',
+              projectile:{ speed:10, damage:12, kbBase:5, kbScale:0.08, kbAngle:-25, w:24, h:24, life:40, color:'#2A2A3A', pcolor:'#9966DD' } },
+    special:{ name:'最終審判', startup:14, active:8, recovery:22, damage:16, kbBase:7, kbScale:0.12, kbAngle:-60, hx:0, hy:-30, hw:80, hh:70, color:'#C0A0FF', effect:'bigpunch', centerHit:true,
+              specialType:'jumpSlam', jumpPower:-14, slamActive:6 },
+    aerial: { name:'マント薙ぎ払い', startup:4, active:8, recovery:10, damage:8, kbBase:3, kbScale:0.06, kbAngle:-70, hx:0, hy:-30, hw:65, hh:55, color:'#3A2050', effect:'airkick', centerHit:true },
+    down:   { name:'判決書叩きつけ', startup:6, active:6, recovery:14, damage:11, kbBase:5, kbScale:0.09, kbAngle:80, hx:6, hy:5, hw:50, hh:35, color:'#C0A0FF', effect:'meteor' },
+    up:     { name:'法廷の鐘', startup:5, active:8, recovery:12, damage:9, kbBase:4, kbScale:0.08, kbAngle:-88, hx:0, hy:-60, hw:50, hh:50, color:'#9966DD', effect:'upslash', centerHit:true },
+    side:   { name:'木槌横振り', startup:5, active:6, recovery:10, damage:9, kbBase:4, kbScale:0.07, kbAngle:-20, hx:15, hy:-35, hw:65, hh:40, color:'#A07818', effect:'sideslash' },
+    downair:{ name:'マント急降下', startup:5, active:10, recovery:14, damage:12, kbBase:5, kbScale:0.09, kbAngle:80, hx:0, hy:10, hw:45, hh:50, color:'#1A1A2A', effect:'meteor',
+              specialType:'divekick', diveSpeed:14 },
+    throwDmg: 10,
   }
 };
 
@@ -3395,6 +4176,8 @@ function createPlayer(id, charIdx, startX) {
     // Command cooldowns
     cd_cmd1: 0,
     cd_cmd2: 0,
+    sniperCooldown: 0,
+    inkBlindTimer: 0,
     strongLocked: false, // locked until landing after aerial strong
     // Animation state
     animState: 'idle', // 'idle' | 'walk' | 'jump' | 'fall' | 'hitstun'
@@ -3424,6 +4207,18 @@ function initBattle() {
   blastExplosions = [];
   cmdNameDisplay = [];
   hitMissDisplays = [];
+  comicTexts = [];
+  confetti = [];
+  speedLines = [];
+  fireTrails = [];
+  specialAura = [];
+  koDisplay = { active: false, life: 0, maxLife: 90, playerIdx: -1 };
+  cmdFlash = { alpha: 0, color: '#FFFFFF' };
+  cmdScaleEffect = { playerId: -1, life: 0 };
+  hitStopFrames = 0;
+  koSlashEffects = [];
+  koSlowMotion = { active: false, frames: 0, maxFrames: 90 };
+  stockLossAnim = { active: false, playerId: -1, life: 0, maxLife: 30, x: 0, y: 0 };
   cmdInputBuffers[0] = []; cmdInputBuffers[1] = [];
   cmdInputTimestamps[0] = []; cmdInputTimestamps[1] = [];
   cpuActionTimer = 0;
@@ -3505,8 +4300,22 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
     return;
   }
 
-  target.damage = Math.min(999, target.damage + damage);
-  const kb = calcKnockback(target.damage, kbBase, kbScale);
+  // バレット近距離弱体化: 近距離（80px以内）で与ダメ20%、被ダメ1.5倍
+  let finalDamage = damage;
+  let finalKbScale = kbScale;
+  const dist = Math.abs(attacker.x - target.x);
+  const CLOSE_RANGE = 80;
+  if (attacker.charIdx === 7 && hitType !== 'projectile' && dist < CLOSE_RANGE) {
+    finalDamage *= 0.2;
+    finalKbScale *= 0.2;
+  }
+  if (target.charIdx === 7 && dist < CLOSE_RANGE) {
+    finalDamage *= 1.5;
+    finalKbScale *= 1.3;
+  }
+
+  target.damage = Math.min(999, target.damage + finalDamage);
+  const kb = calcKnockback(target.damage, kbBase, finalKbScale);
   const rad = kbAngle * Math.PI / 180;
   const dir = attacker.x < target.x ? 1 : -1;
   target.vx = Math.cos(rad) * kb * dir;
@@ -3518,6 +4327,13 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   const atkData = attacker.attackData;
   if (atkData && atkData.spinKB && kb > 3) {
     target.spinAngle = dir * 0.15;
+  }
+
+  // 拘束令状: 相手を一定時間動けなくする
+  if (atkData && atkData.stun && atkData.stunFrames) {
+    target.hitstun = Math.max(target.hitstun, atkData.stunFrames);
+    target.vx = 0;
+    target.vy = 0;
   }
 
   target.attacking = false;
@@ -3573,6 +4389,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
       2: ['#44FFAA', '#88FFcc', '#22DD88'],  // Saisoku: green
       3: ['#FFD700', '#FFAA33', '#FFEE88'],  // Meteor: gold
       4: ['#44FFCC', '#88AAFF', '#66DDFF'],  // Long: cyan
+      9: ['#C0A0FF', '#9966DD', '#3A2050'],  // Judgeman: purple
     };
     const colors = charColors[attacker.charIdx] || ['#FFFFFF'];
     const specialCount = 30 + Math.floor(kb * 1.5);
@@ -3675,8 +4492,100 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
       color: isSpecial ? charColor : characters[attacker.charIdx].accent,
       targetId: target.id,
       maxPoints: maxPoints,
-      width: 3 + dmgFactor * 5, // 太さもダメージで変化
+      width: 2 + dmgFactor * 3, // 太さもダメージで変化(60%)
     });
+  }
+
+  // ===== All-Star Brawl 2 エフェクト =====
+
+  // ① ヒットストップ（0.1秒 = 6フレーム、強攻撃は長め）
+  if (isStrong || isSpecial) {
+    hitStopFrames = Math.max(hitStopFrames, isSpecial ? 8 : 6);
+  } else if (kb > 3) {
+    hitStopFrames = Math.max(hitStopFrames, 4);
+  }
+
+  // ① コミック風テキスト
+  if (kb > 2) {
+    const word = isSpecial ? 'SMASH!' : isStrong ? COMIC_WORDS[Math.floor(Math.random() * COMIC_WORDS.length)] : (kb > 6 ? 'POW!' : 'BAM!');
+    const ci = Math.floor(Math.random() * COMIC_COLORS.length);
+    comicTexts.push({
+      text: word, x: hx + (Math.random() - 0.5) * 40, y: hy - 20 + (Math.random() - 0.5) * 30,
+      life: 35, maxLife: 35,
+      color: COMIC_COLORS[ci], bgColor: COMIC_COLORS[(ci + 4) % COMIC_COLORS.length],
+      size: isSpecial ? 24 : isStrong ? 20 : 14,
+      rotation: (Math.random() - 0.5) * 0.4,
+    });
+  }
+
+  // ① カラフルな星・ハート・稲妻パーティクル
+  if (kb > 3) {
+    const decorCount = isSpecial ? 8 : isStrong ? 5 : 3;
+    for (let i = 0; i < decorCount; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const spd = 3 + Math.random() * 5;
+      sparks.push({
+        x: hx, y: hy, vx: Math.cos(a) * spd, vy: Math.sin(a) * spd - 2,
+        life: 25 + Math.floor(Math.random() * 15), maxLife: 40,
+        color: ['#FF4444','#FFDD00','#44AAFF','#FF66AA','#44FF88'][i % 5],
+        size: 5 + Math.random() * 4,
+        type: ['star','heart','bolt'][i % 3],
+        gravity: 0.1, drag: 0.97,
+        spin: (Math.random() - 0.5) * 0.3, angle: Math.random() * Math.PI * 2,
+      });
+    }
+  }
+
+  // ③ スピードライン（吹っ飛び時 - 画面を走る）
+  if (kb > 5) {
+    const lineCount = Math.min(18, 6 + Math.floor(kb * 0.8));
+    for (let i = 0; i < lineCount; i++) {
+      speedLines.push({
+        x: target.x, y: target.y - 35,
+        angle: Math.atan2(target.vy, target.vx) + (Math.random() - 0.5) * 0.8,
+        length: 80 + Math.random() * 200 + kb * 5,
+        life: 15 + Math.floor(Math.random() * 10),
+        maxLife: 25,
+        color: i % 3 === 0 ? '#FFFFFF' : i % 3 === 1 ? charColor : COMIC_COLORS[i % COMIC_COLORS.length],
+        width: 1.5 + Math.random() * 3,
+      });
+    }
+    // Full-screen radial speed lines for strong knockback
+    if (kb > 10) {
+      for (let i = 0; i < 12; i++) {
+        const a = (i / 12) * Math.PI * 2 + Math.random() * 0.3;
+        speedLines.push({
+          x: 480, y: 320,
+          angle: a,
+          length: 300 + Math.random() * 200,
+          life: 10 + Math.floor(Math.random() * 8),
+          maxLife: 18,
+          color: i % 2 === 0 ? 'rgba(255,255,255,0.5)' : charColor,
+          width: 1 + Math.random() * 1.5,
+        });
+      }
+    }
+  }
+
+  // ② 必殺技ヒット時の画面フラッシュ
+  if (isSpecial) {
+    hitFlash.alpha = Math.max(hitFlash.alpha, 0.2);
+    hitFlash.color = charColor;
+  }
+
+  // ③ 炎の軌跡（200%超え）
+  if (target.damage > 200 && kb > 4) {
+    for (let i = 0; i < 6; i++) {
+      fireTrails.push({
+        x: target.x + (Math.random() - 0.5) * 15,
+        y: target.y - 35 + (Math.random() - 0.5) * 15,
+        vx: target.vx * 0.3 + (Math.random() - 0.5) * 2,
+        vy: target.vy * 0.3 - Math.random() * 2,
+        life: 20 + Math.floor(Math.random() * 15),
+        maxLife: 35,
+        size: 4 + Math.random() * 6,
+      });
+    }
   }
 }
 
@@ -3700,9 +4609,18 @@ function getAttackHitbox(p, atk) {
 // --- Projectile spawning ---
 function spawnProjectile(p, projDef) {
   const dir = p.facingLeft ? -1 : 1;
+  let vx, vy;
+  if (projDef.dirAngle !== undefined) {
+    const rad = projDef.dirAngle * Math.PI / 180;
+    vx = Math.cos(rad) * projDef.speed * dir;
+    vy = Math.sin(rad) * projDef.speed;
+  } else {
+    vx = projDef.speed * dir;
+    vy = 0;
+  }
   projectiles.push({
     x: p.x + 30 * dir, y: p.y - 40,
-    vx: projDef.speed * dir, vy: 0,
+    vx, vy,
     w: projDef.w, h: projDef.h,
     damage: projDef.damage, kbBase: projDef.kbBase, kbScale: projDef.kbScale, kbAngle: projDef.kbAngle,
     life: projDef.life, ownerId: p.id,
@@ -3710,6 +4628,10 @@ function spawnProjectile(p, projDef) {
     shape: projDef.shape || 'rect',
     ownerCharIdx: p.charIdx,
     time: 0,
+    homing: projDef.homing || false,
+    pierce: projDef.pierce || false,
+    ink: projDef.ink || false,
+    hitTargets: [],
   });
 }
 
@@ -3719,6 +4641,9 @@ function startAttack(p, type) {
 
   // Meteor only: strong attack locked until landing after use
   if (type === 'strong' && p.charIdx === 3 && p.strongLocked) return;
+
+  // バレット: スナイパー（必殺技）クールダウン5秒
+  if (type === 'special' && p.charIdx === 7 && p.sniperCooldown > 0) return;
 
   // Context-sensitive attack type
   const defs = attackDefs[p.charIdx];
@@ -3732,6 +4657,11 @@ function startAttack(p, type) {
   // Meteor only: lock strong attack until landing after use
   if (actualType === 'strong' && p.charIdx === 3) {
     p.strongLocked = true;
+  }
+
+  // バレット: スナイパー使用時にクールダウン設定（5秒 = 300フレーム）
+  if (actualType === 'special' && p.charIdx === 7) {
+    p.sniperCooldown = 300;
   }
 
   p.attacking = true;
@@ -4101,26 +5031,127 @@ function updateBattle(dt) {
     if (hitMissDisplays[i].life <= 0) hitMissDisplays.splice(i, 1);
   }
 
+  // Update comic texts
+  for (let i = comicTexts.length - 1; i >= 0; i--) {
+    comicTexts[i].life--;
+    comicTexts[i].y -= 0.6;
+    if (comicTexts[i].life <= 0) comicTexts.splice(i, 1);
+  }
+
+  // Update KO display
+  if (koDisplay.active) {
+    koDisplay.life--;
+    if (koDisplay.life <= 0) koDisplay.active = false;
+  }
+
+  // Update confetti
+  for (let i = confetti.length - 1; i >= 0; i--) {
+    const c = confetti[i];
+    c.x += c.vx; c.y += c.vy;
+    c.vy += 0.03;
+    c.vx *= 0.99;
+    c.rotation += c.rotSpeed;
+    c.life--;
+    if (c.life <= 0) confetti.splice(i, 1);
+  }
+
+  // Update speed lines
+  for (let i = speedLines.length - 1; i >= 0; i--) {
+    speedLines[i].life--;
+    if (speedLines[i].life <= 0) speedLines.splice(i, 1);
+  }
+
+  // Update fire trails
+  for (let i = fireTrails.length - 1; i >= 0; i--) {
+    const f = fireTrails[i];
+    f.x += f.vx; f.y += f.vy;
+    f.vy -= 0.05;
+    f.size *= 0.97;
+    f.life--;
+    if (f.life <= 0) fireTrails.splice(i, 1);
+  }
+
+  // Update special aura
+  for (let i = specialAura.length - 1; i >= 0; i--) {
+    specialAura[i].life--;
+    if (specialAura[i].life <= 0) specialAura.splice(i, 1);
+  }
+
+  // Update command flash
+  if (cmdFlash.alpha > 0) {
+    cmdFlash.alpha *= 0.88;
+    if (cmdFlash.alpha < 0.01) cmdFlash.alpha = 0;
+  }
+
+  // Update command scale effect
+  if (cmdScaleEffect.life > 0) {
+    cmdScaleEffect.life--;
+  }
+
+  // Update KO slash effects
+  for (let i = koSlashEffects.length - 1; i >= 0; i--) {
+    if (koSlashEffects[i].delay > 0) {
+      koSlashEffects[i].delay--;
+    } else {
+      koSlashEffects[i].life--;
+      if (koSlashEffects[i].life <= 0) koSlashEffects.splice(i, 1);
+    }
+  }
+
+  // Update stock loss animation
+  if (stockLossAnim.active) {
+    stockLossAnim.life--;
+    if (stockLossAnim.life <= 0) stockLossAnim.active = false;
+  }
+
   // Update projectiles
   for (let i = projectiles.length - 1; i >= 0; i--) {
     const pr = projectiles[i];
+    // Homing: steer toward nearest enemy
+    if (pr.homing) {
+      let nearestEnemy = null, nearestDist = Infinity;
+      for (const p of players) {
+        if (p.id === pr.ownerId || !p.alive) continue;
+        const dx = p.x - pr.x, dy = (p.y - 40) - pr.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < nearestDist) { nearestDist = dist; nearestEnemy = p; }
+      }
+      if (nearestEnemy) {
+        const dx = nearestEnemy.x - pr.x, dy = (nearestEnemy.y - 40) - pr.y;
+        const targetAngle = Math.atan2(dy, dx);
+        const curAngle = Math.atan2(pr.vy, pr.vx);
+        let diff = targetAngle - curAngle;
+        while (diff > Math.PI) diff -= Math.PI * 2;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        const turnRate = 0.06;
+        const newAngle = curAngle + Math.sign(diff) * Math.min(Math.abs(diff), turnRate);
+        const spd = Math.sqrt(pr.vx * pr.vx + pr.vy * pr.vy);
+        pr.vx = Math.cos(newAngle) * spd;
+        pr.vy = Math.sin(newAngle) * spd;
+      }
+    }
     pr.x += pr.vx;
     pr.y += pr.vy;
     pr.life--;
     pr.time++;
     if (pr.life <= 0) { projectiles.splice(i, 1); continue; }
     // Check hit against players
+    let hitSomething = false;
     for (const p of players) {
       if (p.id === pr.ownerId || !p.alive || p.invincibleTimer > 0) continue;
+      if (pr.pierce && pr.hitTargets && pr.hitTargets.includes(p.id)) continue;
       const ph = getPlayerHitbox(p);
       if (hitboxCollides(pr.x - pr.w/2, pr.y - pr.h/2, pr.w, pr.h, ph.x, ph.y, ph.w, ph.h)) {
         const fakeAttacker = { x: pr.x - pr.vx * 5, charIdx: pr.ownerCharIdx };
-        applyHit(fakeAttacker, p, pr.damage, pr.kbBase, pr.kbScale, pr.kbAngle, 'special');
+        applyHit(fakeAttacker, p, pr.damage, pr.kbBase, pr.kbScale, pr.kbAngle, 'projectile');
         showHitDisplay(p.x, p.y, true);
-        projectiles.splice(i, 1);
+        if (pr.ink) p.inkBlindTimer = 120; // 2 seconds of ink blind
+        if (pr.pierce) { if (pr.hitTargets) pr.hitTargets.push(p.id); }
+        else { projectiles.splice(i, 1); hitSomething = true; }
         break;
       }
     }
+    if (hitSomething) continue;
   }
 
   // Update players
@@ -4145,6 +5176,8 @@ function updateBattle(dt) {
     if (p.throwCooldown > 0) p.throwCooldown--;
     if (p.cd_cmd1 > 0) p.cd_cmd1--;
     if (p.cd_cmd2 > 0) p.cd_cmd2--;
+    if (p.sniperCooldown > 0) p.sniperCooldown--;
+    if (p.inkBlindTimer > 0) p.inkBlindTimer--;
 
     // Grabbed state: stuck to grabber
     if (p.grabbed) {
@@ -4211,6 +5244,30 @@ function updateBattle(dt) {
       // 空気抵抗（速いほど減衰が弱い = 遠くまで飛ぶ）
       const airRes = kbSpeed > 12 ? 0.98 : 0.95;
       p.vx *= airRes;
+      // ③ 吹っ飛び中のカラフル星軌跡
+      if (kbSpeed > 6 && p.hitstun % 3 === 0) {
+        sparks.push({
+          x: p.x + (Math.random() - 0.5) * 10, y: p.y - 35 + (Math.random() - 0.5) * 10,
+          vx: (Math.random() - 0.5) * 2, vy: (Math.random() - 0.5) * 2 - 1,
+          life: 15 + Math.floor(Math.random() * 10), maxLife: 25,
+          color: ['#FF4444','#FFDD00','#44AAFF','#FF66AA','#44FF88'][Math.floor(Math.random() * 5)],
+          size: 3 + Math.random() * 3, type: 'star',
+          gravity: 0.08, drag: 0.97,
+          spin: (Math.random() - 0.5) * 0.3, angle: Math.random() * Math.PI * 2,
+        });
+      }
+      // ③ 炎の軌跡（200%超え）
+      if (p.damage > 200 && kbSpeed > 4 && p.hitstun % 2 === 0) {
+        fireTrails.push({
+          x: p.x + (Math.random() - 0.5) * 10,
+          y: p.y - 35 + (Math.random() - 0.5) * 10,
+          vx: -p.vx * 0.1 + (Math.random() - 0.5) * 1,
+          vy: -Math.random() * 1.5 - 0.5,
+          life: 15 + Math.floor(Math.random() * 10),
+          maxLife: 25,
+          size: 3 + Math.random() * 5,
+        });
+      }
       landingCheck(p);
       wallBounceCheck(p);
       blastCheck(p);
@@ -4354,9 +5411,31 @@ function updateBattle(dt) {
 
       // Active frames - check hitbox
       if (p.attackFrame > atk.startup && p.attackFrame <= atk.startup + atk.active) {
-        // Spawn projectile on first active frame
-        if (atk.projectile && p.attackFrame === atk.startup + 1) {
-          spawnProjectile(p, atk.projectile);
+        // Spawn projectile on first active frame (or multi-shot)
+        if (atk.projectile) {
+          if (atk.multiShot && atk.shotInterval) {
+            const activeFrame = p.attackFrame - atk.startup;
+            if (activeFrame >= 1 && activeFrame <= atk.multiShot * atk.shotInterval && (activeFrame - 1) % atk.shotInterval === 0) {
+              spawnProjectile(p, atk.projectile);
+            }
+          } else if (p.attackFrame === atk.startup + 1) {
+            spawnProjectile(p, atk.projectile);
+          }
+        }
+        // BulletStorm: scatter random projectiles during active frames
+        if (atk.specialType === 'bulletStorm' && p.attackFrame % 2 === 0) {
+          const dir = p.facingLeft ? -1 : 1;
+          const angle = (Math.random() - 0.3) * Math.PI * 0.8;
+          projectiles.push({
+            x: p.x + 20 * dir, y: p.y - 40,
+            vx: Math.cos(angle) * 10 * dir, vy: Math.sin(angle) * 10,
+            w: 10, h: 8,
+            damage: 3, kbBase: 2, kbScale: 0.03, kbAngle: -15,
+            life: 40, ownerId: p.id,
+            color: '#FF66AA', pcolor: '#FFAACC',
+            shape: 'rect', ownerCharIdx: p.charIdx, time: 0,
+            homing: false, pierce: false,
+          });
         }
 
         // Determine hit type for effects
@@ -4508,18 +5587,18 @@ function updateBattle(dt) {
       p.walkCycle = 0;
     }
 
-    // Grab hold detection (X/I held)
+    // Grab detection (simultaneous press: P1=Z+X, P2=U+I)
     if (p.id === 0) {
-      if (keys['x'] || keys['X']) {
-        p.grabHoldFrames++;
-        if (p.grabHoldFrames === GRAB_HOLD_FRAMES && p.grounded && !p.attacking) tryGrab(p);
+      if ((keys['z'] || keys['Z']) && (keys['x'] || keys['X'])) {
+        if (p.grabHoldFrames === 0 && p.grounded && !p.attacking) tryGrab(p);
+        p.grabHoldFrames = 1;
       } else {
         p.grabHoldFrames = 0;
       }
     } else if (gameMode === 'vs') {
-      if (keys['i'] || keys['I']) {
-        p.grabHoldFrames++;
-        if (p.grabHoldFrames === GRAB_HOLD_FRAMES && p.grounded && !p.attacking) tryGrab(p);
+      if ((keys['u'] || keys['U']) && (keys['i'] || keys['I'])) {
+        if (p.grabHoldFrames === 0 && p.grounded && !p.attacking) tryGrab(p);
+        p.grabHoldFrames = 1;
       } else {
         p.grabHoldFrames = 0;
       }
@@ -4815,8 +5894,75 @@ function blastCheck(p) {
     p.damage = 0;
     playHitSound('ko');
     triggerScreenShake(10, 20);
-    hitFlash.alpha = 0.35;
+
+    // ④ 白いフラッシュ（強め）
+    hitFlash.alpha = 0.55;
     hitFlash.color = '#FFFFFF';
+
+    // ① 光の斬撃エフェクト（青白い光線が画面を斜めに走る）
+    for (let i = 0; i < 5; i++) {
+      const baseAngle = -0.6 + Math.random() * 1.2;
+      koSlashEffects.push({
+        x: ex, y: ey,
+        angle: baseAngle,
+        length: 400 + Math.random() * 500,
+        width: 2 + Math.random() * 4,
+        life: 90, maxLife: 90,
+        delay: i * 3,
+        color: i % 2 === 0 ? '#AADDFF' : '#FFFFFF',
+      });
+    }
+
+    // ② 黄色い星（大小様々、多めに飛び散る）
+    for (let i = 0; i < 16; i++) {
+      const angle = (i / 16) * Math.PI * 2 + Math.random() * 0.4;
+      const speed = 2 + Math.random() * 7;
+      sparks.push({
+        x: ex, y: ey,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 2,
+        life: 70 + Math.floor(Math.random() * 20),
+        maxLife: 90,
+        color: i % 3 === 0 ? '#FFFFFF' : '#FFDD44',
+        size: 3 + Math.random() * 6,
+        type: 'star',
+        gravity: 0.04,
+        drag: 0.985,
+        spin: (Math.random() - 0.5) * 0.4,
+        angle: Math.random() * Math.PI * 2,
+      });
+    }
+
+    // ③ スローモーション（1.5秒）
+    koSlowMotion = { active: true, frames: 0, maxFrames: 90 };
+
+    // ⑤ ストックロスアニメーション
+    const stockIdx = p.stocks; // stocks already decremented, so this is the lost stock index
+    const hudX = p.id === 0 ? 20 : 710;
+    stockLossAnim = {
+      active: true, playerId: p.id, life: 30, maxLife: 30,
+      x: hudX + 10 + stockIdx * 22 + 7,
+      y: 640 - 100 + 80 - 18 + 5,
+    };
+
+    // KO!! テキスト表示
+    koDisplay = { active: true, life: 90, maxLife: 90, playerIdx: p.id };
+
+    // 紙吹雪
+    const killerIdx = p.id === 0 ? 1 : 0;
+    const killerColor = characters[players[killerIdx] ? players[killerIdx].charIdx : 0].accent;
+    for (let i = 0; i < 50; i++) {
+      confetti.push({
+        x: 100 + Math.random() * 760, y: -20 - Math.random() * 100,
+        vx: (Math.random() - 0.5) * 4, vy: 1 + Math.random() * 3,
+        life: 60 + Math.floor(Math.random() * 60), maxLife: 120,
+        color: ['#FF4444','#FFDD00','#44AAFF','#FF66AA','#44FF88','#FF8844','#AA44FF', killerColor][i % 8],
+        size: 3 + Math.random() * 5,
+        rotation: Math.random() * Math.PI * 2,
+        rotSpeed: (Math.random() - 0.5) * 0.2,
+        type: i % 3 === 0 ? 'rect' : i % 3 === 1 ? 'star' : 'circle',
+      });
+    }
     p.attacking = false;
     p.specialState = null;
     if (p.stocks <= 0) {
@@ -5063,6 +6209,48 @@ function drawBattle(dt) {
       ctx.fillStyle = '#FFFFFF';
       ctx.globalAlpha = t * 0.5;
       drawStar(0, 0, s.size * 0.5, 5, ctx);
+    } else if (s.type === 'heart') {
+      // ハートパーティクル
+      const heartAngle = (s.angle || 0) + (s.spin || 0) * (s.maxLife - s.life);
+      ctx.translate(s.x, s.y);
+      ctx.rotate(heartAngle);
+      ctx.fillStyle = s.color;
+      ctx.globalAlpha = t * 0.9;
+      ctx.beginPath();
+      const hs = s.size;
+      ctx.moveTo(0, hs * 0.3);
+      ctx.bezierCurveTo(-hs, -hs * 0.3, -hs * 0.3, -hs, 0, -hs * 0.4);
+      ctx.bezierCurveTo(hs * 0.3, -hs, hs, -hs * 0.3, 0, hs * 0.3);
+      ctx.fill();
+      ctx.fillStyle = '#FFFFFF';
+      ctx.globalAlpha = t * 0.4;
+      ctx.beginPath();
+      const hs2 = hs * 0.5;
+      ctx.moveTo(0, hs2 * 0.3);
+      ctx.bezierCurveTo(-hs2, -hs2 * 0.3, -hs2 * 0.3, -hs2, 0, -hs2 * 0.4);
+      ctx.bezierCurveTo(hs2 * 0.3, -hs2, hs2, -hs2 * 0.3, 0, hs2 * 0.3);
+      ctx.fill();
+    } else if (s.type === 'bolt') {
+      // 稲妻パーティクル
+      ctx.translate(s.x, s.y);
+      const boltAngle = (s.angle || 0) + (s.spin || 0) * (s.maxLife - s.life);
+      ctx.rotate(boltAngle);
+      ctx.fillStyle = s.color;
+      ctx.globalAlpha = t * 0.9;
+      const bs = s.size;
+      ctx.beginPath();
+      ctx.moveTo(-bs * 0.3, -bs);
+      ctx.lineTo(bs * 0.15, -bs * 0.15);
+      ctx.lineTo(bs * 0.5, -bs * 0.2);
+      ctx.lineTo(-bs * 0.1, bs * 0.5);
+      ctx.lineTo(bs * 0.05, bs * 0.05);
+      ctx.lineTo(-bs * 0.4, bs * 0.1);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.lineWidth = 1;
+      ctx.globalAlpha = t * 0.5;
+      ctx.stroke();
     } else if (s.type === 'fireball') {
       // 火の玉 - グラデーション付きの大きな光球
       const r = s.size * (0.8 + (1 - t) * 0.4);
@@ -5165,33 +6353,54 @@ function drawBattle(dt) {
     ctx.restore();
   }
 
-  // Blast explosions (stock loss)
+  // Blast explosions (stock loss) - ④ 大きな爆発
   for (const be of blastExplosions) {
     const t = 1 - be.life / be.maxLife;
     ctx.save();
-    // Multiple expanding rings
-    for (let r = 0; r < 3; r++) {
-      const delay = r * 0.12;
+    // Multiple expanding rings (bigger)
+    for (let r = 0; r < 5; r++) {
+      const delay = r * 0.08;
       const rt = Math.max(0, Math.min(1, (t - delay) / (1 - delay)));
       if (rt <= 0) continue;
-      ctx.globalAlpha = (1 - rt) * 0.7;
-      ctx.strokeStyle = r === 0 ? '#FFF' : r === 1 ? be.color : be.charColor;
-      ctx.lineWidth = (4 - r) * (1 - rt);
+      ctx.globalAlpha = (1 - rt) * 0.5;
+      const colors = ['#FFF', be.color, be.charColor, '#FFDD44', '#FF66AA'];
+      ctx.strokeStyle = colors[r];
+      ctx.lineWidth = (6 - r) * (1 - rt);
       ctx.beginPath();
-      ctx.arc(be.x, be.y, (40 + r * 25) * rt, 0, Math.PI * 2);
+      ctx.arc(be.x, be.y, (60 + r * 30) * rt, 0, Math.PI * 2);
       ctx.stroke();
     }
-    // Central flash
-    if (t < 0.3) {
-      ctx.globalAlpha = 1 - t / 0.3;
-      ctx.fillStyle = '#FFF';
+    // Central flash (bigger)
+    if (t < 0.4) {
+      const ft = t / 0.4;
+      ctx.globalAlpha = (1 - ft) * 0.9;
+      const grad = ctx.createRadialGradient(be.x, be.y, 0, be.x, be.y, 50 * (1 - ft));
+      grad.addColorStop(0, '#FFFFFF');
+      grad.addColorStop(0.5, be.color);
+      grad.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = grad;
       ctx.beginPath();
-      ctx.arc(be.x, be.y, 25 * (1 - t / 0.3), 0, Math.PI * 2);
+      ctx.arc(be.x, be.y, 50 * (1 - ft), 0, Math.PI * 2);
       ctx.fill();
     }
+    // Cross rays
+    if (t < 0.5) {
+      const ct2 = t / 0.5;
+      ctx.globalAlpha = (1 - ct2) * 0.6;
+      ctx.strokeStyle = '#FFDD44';
+      ctx.lineWidth = 3 * (1 - ct2);
+      for (let i = 0; i < 8; i++) {
+        const a = (i / 8) * Math.PI * 2;
+        const len = 80 * ct2;
+        ctx.beginPath();
+        ctx.moveTo(be.x + Math.cos(a) * 10, be.y + Math.sin(a) * 10);
+        ctx.lineTo(be.x + Math.cos(a) * len, be.y + Math.sin(a) * len);
+        ctx.stroke();
+      }
+    }
     // Screen flash overlay at start
-    if (t < 0.08) {
-      ctx.globalAlpha = 0.3 * (1 - t / 0.08);
+    if (t < 0.12) {
+      ctx.globalAlpha = 0.25 * (1 - t / 0.12);
       ctx.fillStyle = be.color;
       ctx.fillRect(0, 0, 960, 640);
     }
@@ -5223,7 +6432,19 @@ function drawBattle(dt) {
       }
     }
 
-    drawBattleCharacter(p.x, p.y - 55, 1.0, p.charIdx, battleTime, p.facingLeft, p);
+    // ⑤ コマンド技スケールエフェクト
+    if (cmdScaleEffect.playerId === p.id && cmdScaleEffect.life > 0) {
+      const scaleT = cmdScaleEffect.life / 12;
+      const s = 1 + scaleT * 0.3;
+      ctx.save();
+      ctx.translate(p.x, p.y - 55);
+      ctx.scale(s, s);
+      ctx.translate(-p.x, -(p.y - 55));
+      drawBattleCharacter(p.x, p.y - 55, 1.0, p.charIdx, battleTime, p.facingLeft, p);
+      ctx.restore();
+    } else {
+      drawBattleCharacter(p.x, p.y - 55, 1.0, p.charIdx, battleTime, p.facingLeft, p);
+    }
 
     // Draw attack effects
     if (p.attacking && p.attackData) {
@@ -5248,6 +6469,24 @@ function drawBattle(dt) {
         const sy = p.y - 80 + Math.sin(angle) * 6;
         ctx.fillStyle = '#FFDD00';
         drawStar(sx, sy, 5, 5, ctx);
+      }
+      ctx.restore();
+    }
+
+    // Ink blind effect
+    if (p.inkBlindTimer > 0) {
+      ctx.save();
+      const fade = Math.min(1, p.inkBlindTimer / 30);
+      ctx.globalAlpha = 0.6 * fade;
+      ctx.fillStyle = '#1A0030';
+      ctx.beginPath(); ctx.ellipse(p.x, p.y - 45, 28, 35, 0, 0, Math.PI * 2); ctx.fill();
+      // ink drip
+      ctx.fillStyle = '#2A0040';
+      ctx.globalAlpha = 0.5 * fade;
+      for (let j = 0; j < 3; j++) {
+        const dx = (j - 1) * 12;
+        const drip = Math.min(20, (120 - p.inkBlindTimer) * 0.5);
+        ctx.beginPath(); ctx.ellipse(p.x + dx, p.y - 30 + drip + j * 4, 4, 6 + drip * 0.3, 0, 0, Math.PI * 2); ctx.fill();
       }
       ctx.restore();
     }
@@ -5290,21 +6529,35 @@ function drawBattle(dt) {
   // HUD
   drawBattleHUD();
 
-  // Command name display
+  // Command name display (⑤ コミック風フォント)
   for (const cn of cmdNameDisplay) {
     const t = cn.life / cn.maxLife;
+    const age = 1 - t;
     ctx.save();
-    ctx.globalAlpha = t > 0.7 ? 1 : t / 0.7;
-    ctx.font = 'bold 28px sans-serif';
+    ctx.translate(cn.x, cn.y);
+    // Pop-in scale
+    let cnScale = 1;
+    if (age < 0.1) cnScale = 0.2 + (age / 0.1) * 1.5;
+    else if (age < 0.2) cnScale = 1.7 - ((age - 0.1) / 0.1) * 0.7;
+    ctx.scale(cnScale, cnScale);
+    ctx.globalAlpha = (t > 0.3 ? 1 : t / 0.3) * 0.8;
+    ctx.font = 'bold 18px sans-serif';
     ctx.textAlign = 'center';
-    ctx.shadowColor = cn.color;
-    ctx.shadowBlur = 15;
-    ctx.fillStyle = '#FFF';
-    ctx.fillText(cn.text, cn.x, cn.y);
-    ctx.shadowBlur = 0;
+    ctx.textBaseline = 'middle';
+    // Outline
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 3;
+    ctx.strokeText(cn.text, 0, 0);
+    // Colored border
     ctx.strokeStyle = cn.color;
     ctx.lineWidth = 1.5;
-    ctx.strokeText(cn.text, cn.x, cn.y);
+    ctx.strokeText(cn.text, 0, 0);
+    // White fill
+    ctx.shadowColor = cn.color;
+    ctx.shadowBlur = 10;
+    ctx.fillStyle = '#FFF';
+    ctx.fillText(cn.text, 0, 0);
+    ctx.shadowBlur = 0;
     ctx.restore();
   }
 
@@ -5435,8 +6688,260 @@ function drawBattle(dt) {
     ctx.fillText('DEBUG: Hitboxes ON (F3 to toggle)', 10, 20);
   }
 
+  // ===== All-Star Brawl 2 Style Effects =====
+
+  // Speed lines (吹っ飛び時)
+  for (const sl of speedLines) {
+    const t = sl.life / sl.maxLife;
+    ctx.save();
+    ctx.globalAlpha = t * 0.4;
+    ctx.strokeStyle = sl.color;
+    ctx.lineWidth = sl.width * t * 0.6;
+    ctx.beginPath();
+    ctx.moveTo(sl.x, sl.y);
+    ctx.lineTo(sl.x + Math.cos(sl.angle) * sl.length * 0.6, sl.y + Math.sin(sl.angle) * sl.length * 0.6);
+    ctx.stroke();
+    // Glow
+    ctx.globalAlpha = t * 0.1;
+    ctx.lineWidth = sl.width * t * 2;
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // Fire trails (200%超えの炎の軌跡)
+  for (const f of fireTrails) {
+    const t = f.life / f.maxLife;
+    ctx.save();
+    const r = f.size * (0.6 + t * 0.4);
+    const grad = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, r);
+    grad.addColorStop(0, '#FFFFFF');
+    grad.addColorStop(0.2, '#FFDD44');
+    grad.addColorStop(0.5, '#FF6600');
+    grad.addColorStop(1, 'rgba(255,0,0,0)');
+    ctx.fillStyle = grad;
+    ctx.globalAlpha = t * 0.5;
+    ctx.beginPath();
+    ctx.arc(f.x, f.y, r * 0.6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // Comic text effects (POW!, BAM!, etc.)
+  for (const ct of comicTexts) {
+    const t = ct.life / ct.maxLife;
+    const age = 1 - t;
+    ctx.save();
+    ctx.translate(ct.x, ct.y);
+    ctx.rotate(ct.rotation);
+    // Pop-in scale
+    let scale = 1;
+    if (age < 0.15) scale = 0.3 + (age / 0.15) * 1.2;
+    else if (age < 0.25) scale = 1.5 - (age - 0.15) / 0.1 * 0.5;
+    ctx.scale(scale, scale);
+    ctx.globalAlpha = (t > 0.3 ? 1 : t / 0.3) * 0.7;
+    // Background burst shape
+    ctx.fillStyle = ct.bgColor;
+    ctx.globalAlpha *= 0.2;
+    const burstR = ct.size * 1.0;
+    ctx.beginPath();
+    for (let i = 0; i < 12; i++) {
+      const a = (i / 12) * Math.PI * 2;
+      const r = i % 2 === 0 ? burstR : burstR * 0.65;
+      if (i === 0) ctx.moveTo(Math.cos(a) * r, Math.sin(a) * r);
+      else ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+    }
+    ctx.closePath();
+    ctx.fill();
+    ctx.globalAlpha = (t > 0.3 ? 1 : t / 0.3) * 0.7;
+    // Text outline
+    ctx.font = `bold ${ct.size}px sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 3;
+    ctx.strokeText(ct.text, 0, 0);
+    // White border
+    ctx.strokeStyle = '#FFF';
+    ctx.lineWidth = 1.5;
+    ctx.strokeText(ct.text, 0, 0);
+    // Colored fill
+    ctx.fillStyle = ct.color;
+    ctx.fillText(ct.text, 0, 0);
+    ctx.restore();
+  }
+
+  // Confetti (紙吹雪)
+  for (const c of confetti) {
+    const t = c.life / c.maxLife;
+    ctx.save();
+    ctx.globalAlpha = t > 0.3 ? 0.6 : (t / 0.3) * 0.6;
+    ctx.translate(c.x, c.y);
+    ctx.rotate(c.rotation);
+    ctx.fillStyle = c.color;
+    if (c.type === 'rect') {
+      ctx.fillRect(-c.size, -c.size * 0.5, c.size * 2, c.size);
+    } else if (c.type === 'star') {
+      drawStar(0, 0, c.size, 5, ctx);
+    } else {
+      ctx.beginPath();
+      ctx.arc(0, 0, c.size * 0.6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  // Special aura (虹色オーラ - 必殺技時)
+  for (const sa of specialAura) {
+    const t = sa.life / sa.maxLife;
+    const p = players.find(pp => pp.id === sa.playerId);
+    if (!p || !p.alive) continue;
+    ctx.save();
+    const auraTime = (sa.maxLife - sa.life) * 0.15;
+    for (let ring = 0; ring < 3; ring++) {
+      const hue = ((auraTime * 60 + ring * 120) % 360);
+      ctx.strokeStyle = `hsl(${hue}, 100%, 60%)`;
+      ctx.lineWidth = (2 - ring * 0.5) * t;
+      ctx.globalAlpha = t * (0.3 - ring * 0.08);
+      const r = 18 + ring * 6 + Math.sin(auraTime + ring) * 3;
+      ctx.beginPath();
+      ctx.ellipse(p.x, p.y - 40, r * 0.7, r, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    // Inner glow
+    const hue2 = ((auraTime * 90) % 360);
+    const aGrad = ctx.createRadialGradient(p.x, p.y - 40, 3, p.x, p.y - 40, 22);
+    aGrad.addColorStop(0, `hsla(${hue2}, 100%, 80%, ${0.15 * t})`);
+    aGrad.addColorStop(1, `hsla(${hue2}, 100%, 50%, 0)`);
+    ctx.fillStyle = aGrad;
+    ctx.globalAlpha = 1;
+    ctx.beginPath();
+    ctx.ellipse(p.x, p.y - 40, 22, 28, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // ① KO光の斬撃エフェクト
+  for (const sl of koSlashEffects) {
+    if (sl.delay > 0) continue;
+    const t = sl.life / sl.maxLife;
+    ctx.save();
+    ctx.translate(sl.x, sl.y);
+    ctx.rotate(sl.angle);
+    // Extend phase then fade
+    const extend = t > 0.6 ? (1 - t) / 0.4 : 1;
+    const fade = t < 0.3 ? t / 0.3 : 1;
+    const len = sl.length * extend;
+    // Main slash line
+    ctx.globalAlpha = fade * t * 0.7;
+    ctx.strokeStyle = sl.color;
+    ctx.lineWidth = sl.width * (0.5 + t * 0.5);
+    ctx.beginPath();
+    ctx.moveTo(-len / 2, 0);
+    ctx.lineTo(len / 2, 0);
+    ctx.stroke();
+    // Glow
+    ctx.globalAlpha = fade * t * 0.25;
+    ctx.lineWidth = sl.width * 4 * t;
+    ctx.strokeStyle = '#88BBFF';
+    ctx.stroke();
+    // Bright core
+    ctx.globalAlpha = fade * t * 0.5;
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // ⑤ ストックロスアニメーション
+  if (stockLossAnim.active) {
+    const t = stockLossAnim.life / stockLossAnim.maxLife;
+    ctx.save();
+    const animX = stockLossAnim.x;
+    const animY = stockLossAnim.y - (1 - t) * 30;
+    ctx.globalAlpha = t;
+    ctx.translate(animX, animY);
+    const s = 1 + (1 - t) * 1.5;
+    ctx.scale(s, s);
+    // Fading stock circle
+    const pIdx = stockLossAnim.playerId;
+    const ch = characters[players[pIdx] ? players[pIdx].charIdx : 0];
+    ctx.fillStyle = ch.color;
+    ctx.beginPath();
+    ctx.arc(0, 0, 7, 0, Math.PI * 2);
+    ctx.fill();
+    // Cross mark
+    ctx.strokeStyle = '#FF2222';
+    ctx.lineWidth = 2;
+    ctx.globalAlpha = t * 0.8;
+    ctx.beginPath();
+    ctx.moveTo(-5, -5); ctx.lineTo(5, 5);
+    ctx.moveTo(5, -5); ctx.lineTo(-5, 5);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // KO!! display (撃墜テキスト)
+  if (koDisplay.active) {
+    const kt = koDisplay.life / koDisplay.maxLife;
+    const age = 1 - kt;
+    ctx.save();
+    ctx.translate(480, 280);
+    // Dramatic scale-in
+    let koScale = 1;
+    if (age < 0.08) koScale = 0.1 + (age / 0.08) * 2.5;
+    else if (age < 0.18) koScale = 2.6 - ((age - 0.08) / 0.1) * 1.6;
+    ctx.scale(koScale, koScale);
+    ctx.globalAlpha = (kt > 0.2 ? 1 : kt / 0.2) * 0.8;
+    // Burst background
+    ctx.fillStyle = '#FF2222';
+    ctx.globalAlpha *= 0.1;
+    ctx.beginPath();
+    for (let i = 0; i < 16; i++) {
+      const a = (i / 16) * Math.PI * 2 + age * 0.5;
+      const r = i % 2 === 0 ? 84 : 48;
+      if (i === 0) ctx.moveTo(Math.cos(a) * r, Math.sin(a) * r);
+      else ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+    }
+    ctx.closePath();
+    ctx.fill();
+    ctx.globalAlpha = (kt > 0.2 ? 1 : kt / 0.2) * 0.8;
+    // KO text
+    ctx.font = 'bold 60px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    // Shadow
+    ctx.fillStyle = '#000';
+    ctx.fillText('KO!!', 2, 2);
+    // Red outline
+    ctx.strokeStyle = '#880000';
+    ctx.lineWidth = 4;
+    ctx.strokeText('KO!!', 0, 0);
+    // White border
+    ctx.strokeStyle = '#FFF';
+    ctx.lineWidth = 2;
+    ctx.strokeText('KO!!', 0, 0);
+    // Red fill
+    ctx.fillStyle = '#FF2222';
+    ctx.fillText('KO!!', 0, 0);
+    // Glow
+    ctx.shadowColor = '#FF0000';
+    ctx.shadowBlur = 15;
+    ctx.fillText('KO!!', 0, 0);
+    ctx.shadowBlur = 0;
+    ctx.restore();
+  }
+
   // End screen shake context
   ctx.restore();
+
+  // Command technique background flash (画面全体フラッシュ)
+  if (cmdFlash.alpha > 0) {
+    ctx.save();
+    ctx.globalAlpha = cmdFlash.alpha * 0.6;
+    ctx.fillStyle = cmdFlash.color;
+    ctx.fillRect(0, 0, 960, 640);
+    ctx.restore();
+  }
 
   // Hit flash overlay (rendered outside shake)
   if (hitFlash.alpha > 0) {
@@ -6078,6 +7583,59 @@ function drawAttackEffect(p) {
     }
   }
 
+  if (atk.effect === 'cmdJudge1') {
+    // 拘束令状: 紫の鎖がターゲットに向かう
+    const t = (frame - atk.startup) / atk.active;
+    const range = 70 * Math.min(1, t * 2);
+    // 紫の波紋
+    ctx.strokeStyle = '#C0A0FF'; ctx.lineWidth = 3 * (1 - t * 0.5); ctx.globalAlpha = 0.7 * (1 - t);
+    ctx.beginPath(); ctx.arc(cx + range * dir * 0.5, cy - 35, 20 + t * 30, 0, Math.PI * 2); ctx.stroke();
+    // 内側の拘束サークル
+    ctx.strokeStyle = '#9966DD'; ctx.lineWidth = 2; ctx.globalAlpha = 0.5 * (1 - t);
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath(); ctx.arc(cx + range * dir * 0.5, cy - 35, 10 + t * 15, 0, Math.PI * 2); ctx.stroke();
+    ctx.setLineDash([]);
+    // 「拘束」の文字エフェクト
+    if (t < 0.5) {
+      ctx.fillStyle = '#C0A0FF'; ctx.globalAlpha = 0.6 * (1 - t * 2);
+      ctx.font = 'bold 14px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('BIND', cx + range * dir * 0.5, cy - 55);
+    }
+  }
+
+  if (atk.effect === 'cmdJudge2') {
+    // 死刑宣告: 全方向に黒い波動
+    const t = (frame - atk.startup) / atk.active;
+    const waveR = 20 + t * 80;
+    // 黒い波動リング（複数）
+    for (let r = 0; r < 3; r++) {
+      const rt = Math.max(0, t - r * 0.15);
+      if (rt <= 0) continue;
+      const rr = 20 + rt * 80;
+      ctx.strokeStyle = r === 0 ? '#2A2A3A' : r === 1 ? '#9966DD' : '#C0A0FF';
+      ctx.lineWidth = (4 - r) * (1 - t * 0.5);
+      ctx.globalAlpha = 0.6 * (1 - rt);
+      ctx.beginPath(); ctx.arc(cx, cy - 35, rr, 0, Math.PI * 2); ctx.stroke();
+    }
+    // 中央の暗黒オーラ
+    if (t < 0.5) {
+      const grad = ctx.createRadialGradient(cx, cy - 35, 0, cx, cy - 35, 30);
+      grad.addColorStop(0, 'rgba(42,42,58,0.6)');
+      grad.addColorStop(1, 'rgba(42,42,58,0)');
+      ctx.fillStyle = grad; ctx.globalAlpha = 1 - t * 2;
+      ctx.beginPath(); ctx.arc(cx, cy - 35, 30, 0, Math.PI * 2); ctx.fill();
+    }
+    // 放射状の暗い線
+    ctx.strokeStyle = '#2A2A3A'; ctx.lineWidth = 2; ctx.globalAlpha = 0.5 * (1 - t);
+    for (let i = 0; i < 8; i++) {
+      const a = (i / 8) * Math.PI * 2 + t * 2;
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(a) * 15, cy - 35 + Math.sin(a) * 15);
+      ctx.lineTo(cx + Math.cos(a) * waveR, cy - 35 + Math.sin(a) * waveR);
+      ctx.stroke();
+    }
+  }
+
   ctx.restore();
 }
 
@@ -6229,6 +7787,297 @@ function drawPlayerHUD(x, y, player, label, color) {
 }
 
 // ============================================================
+// VS INTRO SCREEN
+// ============================================================
+function playVsIntroFanfare() {
+  try {
+    const ac = getAudioCtx();
+    const now = ac.currentTime;
+    const masterGain = ac.createGain();
+    masterGain.gain.setValueAtTime(0.15, now);
+    masterGain.connect(ac.destination);
+
+    const notes = [
+      // Fanfare melody: dramatic ascending brass-like
+      { freq: 261.6, start: 0,    dur: 0.2,  type: 'square' },   // C4
+      { freq: 329.6, start: 0.2,  dur: 0.2,  type: 'square' },   // E4
+      { freq: 392.0, start: 0.4,  dur: 0.2,  type: 'square' },   // G4
+      { freq: 523.3, start: 0.6,  dur: 0.4,  type: 'square' },   // C5
+      { freq: 392.0, start: 1.0,  dur: 0.15, type: 'square' },   // G4
+      { freq: 523.3, start: 1.15, dur: 0.6,  type: 'square' },   // C5 (hold)
+      // Harmony layer
+      { freq: 196.0, start: 0,    dur: 0.4,  type: 'triangle' }, // G3
+      { freq: 261.6, start: 0.4,  dur: 0.4,  type: 'triangle' }, // C4
+      { freq: 329.6, start: 0.8,  dur: 0.4,  type: 'triangle' }, // E4
+      { freq: 392.0, start: 1.15, dur: 0.6,  type: 'triangle' }, // G4
+      // Second phrase
+      { freq: 587.3, start: 1.9,  dur: 0.15, type: 'square' },   // D5
+      { freq: 659.3, start: 2.05, dur: 0.15, type: 'square' },   // E5
+      { freq: 784.0, start: 2.2,  dur: 0.6,  type: 'square' },   // G5
+      { freq: 392.0, start: 1.9,  dur: 0.9,  type: 'triangle' }, // G4
+      { freq: 523.3, start: 1.9,  dur: 0.9,  type: 'triangle' }, // C5
+    ];
+
+    const oscNodes = [];
+    for (const n of notes) {
+      const osc = ac.createOscillator();
+      const g = ac.createGain();
+      osc.type = n.type;
+      osc.frequency.setValueAtTime(n.freq, now + n.start);
+      g.gain.setValueAtTime(0, now + n.start);
+      g.gain.linearRampToValueAtTime(n.type === 'square' ? 0.4 : 0.25, now + n.start + 0.02);
+      g.gain.setValueAtTime(n.type === 'square' ? 0.35 : 0.2, now + n.start + n.dur * 0.7);
+      g.gain.linearRampToValueAtTime(0, now + n.start + n.dur);
+      osc.connect(g);
+      g.connect(masterGain);
+      osc.start(now + n.start);
+      osc.stop(now + n.start + n.dur + 0.05);
+      oscNodes.push(osc);
+    }
+
+    vsIntroFanfareNodes = { masterGain, oscNodes };
+  } catch (e) { /* ignore audio errors */ }
+}
+
+function stopVsIntroFanfare() {
+  if (vsIntroFanfareNodes) {
+    try {
+      vsIntroFanfareNodes.masterGain.gain.linearRampToValueAtTime(0, getAudioCtx().currentTime + 0.3);
+    } catch (e) {}
+    vsIntroFanfareNodes = null;
+  }
+}
+
+function drawVsIntro(dt) {
+  const t = vsIntroTime / VS_INTRO_DURATION; // 0→1
+  const ch1 = characters[p1Select];
+  const ch2 = characters[p2Select];
+
+  // Background - split screen with animated stripes
+  // Left side (P1 - red)
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(0, 0, 480, 640);
+  ctx.clip();
+  const leftGrad = ctx.createLinearGradient(0, 0, 480, 640);
+  leftGrad.addColorStop(0, '#4a0a0a');
+  leftGrad.addColorStop(0.5, '#7a1a1a');
+  leftGrad.addColorStop(1, '#3a0808');
+  ctx.fillStyle = leftGrad;
+  ctx.fillRect(0, 0, 480, 640);
+  // Animated diagonal stripes
+  ctx.globalAlpha = 0.12;
+  ctx.fillStyle = '#FF4444';
+  const stripeOffset = (vsIntroTime * 2) % 80;
+  for (let i = -20; i < 30; i++) {
+    const sx = i * 80 + stripeOffset;
+    ctx.beginPath();
+    ctx.moveTo(sx, 0);
+    ctx.lineTo(sx + 40, 0);
+    ctx.lineTo(sx + 40 - 200, 640);
+    ctx.lineTo(sx - 200, 640);
+    ctx.closePath();
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+  ctx.restore();
+
+  // Right side (P2 - blue)
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(480, 0, 480, 640);
+  ctx.clip();
+  const rightGrad = ctx.createLinearGradient(480, 0, 960, 640);
+  rightGrad.addColorStop(0, '#0a0a4a');
+  rightGrad.addColorStop(0.5, '#1a1a7a');
+  rightGrad.addColorStop(1, '#08083a');
+  ctx.fillStyle = rightGrad;
+  ctx.fillRect(480, 0, 480, 640);
+  // Animated diagonal stripes (opposite direction)
+  ctx.globalAlpha = 0.12;
+  ctx.fillStyle = '#4444FF';
+  const stripeOffset2 = (vsIntroTime * 2) % 80;
+  for (let i = -20; i < 30; i++) {
+    const sx = 480 + i * 80 - stripeOffset2;
+    ctx.beginPath();
+    ctx.moveTo(sx, 0);
+    ctx.lineTo(sx + 40, 0);
+    ctx.lineTo(sx + 40 + 200, 640);
+    ctx.lineTo(sx + 200, 640);
+    ctx.closePath();
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+  ctx.restore();
+
+  // Center divider - glowing diagonal line
+  ctx.save();
+  ctx.strokeStyle = '#FFFFFF';
+  ctx.lineWidth = 3;
+  ctx.globalAlpha = 0.6;
+  ctx.beginPath();
+  ctx.moveTo(510, 0);
+  ctx.lineTo(450, 640);
+  ctx.stroke();
+  ctx.strokeStyle = '#FFDD44';
+  ctx.lineWidth = 1;
+  ctx.globalAlpha = 0.4;
+  ctx.beginPath();
+  ctx.moveTo(512, 0);
+  ctx.lineTo(452, 640);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(508, 0);
+  ctx.lineTo(448, 640);
+  ctx.stroke();
+  ctx.restore();
+
+  // Character slide-in animation
+  const slideEase = Math.min(1, vsIntroTime / 30); // 0.5 sec slide-in
+  const eased = 1 - Math.pow(1 - slideEase, 3); // ease-out cubic
+
+  // P1 character (slide from left)
+  const p1X = -100 + eased * 340; // final position: 240
+  ctx.save();
+  ctx.globalAlpha = eased;
+  drawBattleCharacter(p1X, 350, 2.0, p1Select, vsIntroTime, false, null);
+  ctx.restore();
+
+  // P2 character (slide from right)
+  const p2X = 1060 - eased * 340; // final position: 720
+  ctx.save();
+  ctx.globalAlpha = eased;
+  drawBattleCharacter(p2X, 350, 2.0, p2Select, vsIntroTime, true, null);
+  ctx.restore();
+
+  // Character glow effect behind each character
+  if (eased > 0.5) {
+    const glowAlpha = (eased - 0.5) * 0.3;
+    // P1 glow
+    ctx.save();
+    ctx.globalAlpha = glowAlpha;
+    const g1 = ctx.createRadialGradient(p1X, 330, 10, p1X, 330, 100);
+    g1.addColorStop(0, ch1.accent);
+    g1.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g1;
+    ctx.beginPath();
+    ctx.arc(p1X, 330, 100, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    // P2 glow
+    ctx.save();
+    ctx.globalAlpha = glowAlpha;
+    const g2 = ctx.createRadialGradient(p2X, 330, 10, p2X, 330, 100);
+    g2.addColorStop(0, ch2.accent);
+    g2.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g2;
+    ctx.beginPath();
+    ctx.arc(p2X, 330, 100, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // VS text - appears after characters slide in
+  const vsDelay = 25;
+  if (vsIntroTime > vsDelay) {
+    const vsT = Math.min(1, (vsIntroTime - vsDelay) / 15);
+    const vsEase = 1 - Math.pow(1 - vsT, 3);
+    const vsScale = vsT < 0.5 ? 0.3 + vsT * 4 : 2.3 - (vsT - 0.5) * 2.6;
+    const finalScale = Math.max(1, vsScale);
+
+    ctx.save();
+    ctx.translate(480, 280);
+    ctx.scale(finalScale, finalScale);
+    ctx.globalAlpha = vsEase;
+
+    // VS glow
+    ctx.shadowColor = '#FFDD44';
+    ctx.shadowBlur = 30;
+    ctx.font = 'bold 80px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    // Outline
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 8;
+    ctx.strokeText('VS', 0, 0);
+    // Yellow border
+    ctx.strokeStyle = '#FFAA00';
+    ctx.lineWidth = 4;
+    ctx.strokeText('VS', 0, 0);
+    // White fill
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillText('VS', 0, 0);
+    ctx.shadowBlur = 0;
+    ctx.restore();
+  }
+
+  // Character names and types at bottom
+  const nameDelay = 35;
+  if (vsIntroTime > nameDelay) {
+    const nameT = Math.min(1, (vsIntroTime - nameDelay) / 20);
+    const nameEase = 1 - Math.pow(1 - nameT, 2);
+
+    // P1 info (left)
+    ctx.save();
+    ctx.globalAlpha = nameEase;
+    // Name background
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.fillRect(20, 490, 300, 70);
+    ctx.fillStyle = ch1.color;
+    ctx.fillRect(20, 490, 4, 70);
+    // Name
+    ctx.font = 'bold 30px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillText(ch1.name, 40, 525);
+    // Type
+    ctx.font = '16px sans-serif';
+    ctx.fillStyle = ch1.accent;
+    ctx.fillText(ch1.type, 40, 548);
+    // Player label
+    ctx.font = 'bold 14px sans-serif';
+    ctx.fillStyle = '#FF6666';
+    ctx.fillText('1P', 290, 510);
+    ctx.restore();
+
+    // P2 info (right)
+    ctx.save();
+    ctx.globalAlpha = nameEase;
+    // Name background
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.fillRect(640, 490, 300, 70);
+    ctx.fillStyle = ch2.color;
+    ctx.fillRect(936, 490, 4, 70);
+    // Name
+    ctx.font = 'bold 30px sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillText(ch2.name, 920, 525);
+    // Type
+    ctx.font = '16px sans-serif';
+    ctx.fillStyle = ch2.accent;
+    ctx.fillText(ch2.type, 920, 548);
+    // Player label
+    ctx.font = 'bold 14px sans-serif';
+    ctx.fillStyle = '#6666FF';
+    ctx.textAlign = 'left';
+    ctx.fillText(gameMode === 'cpu' ? 'CPU' : '2P', 650, 510);
+    ctx.restore();
+  }
+
+  // "Press ENTER to skip" hint
+  if (vsIntroTime > 60) {
+    ctx.save();
+    ctx.globalAlpha = 0.4 + Math.sin(vsIntroTime * 0.08) * 0.2;
+    ctx.font = '14px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#AAA';
+    ctx.fillText('ENTER でスキップ', 480, 620);
+    ctx.restore();
+  }
+}
+
+// ============================================================
 // TRANSITIONS & INPUT
 // ============================================================
 function startTransition(target) {
@@ -6246,6 +8095,7 @@ function drawTransition() {
       transitioning = false;
       if (scene === 'select') { p1Confirmed = false; p2Confirmed = false; modeSelected = false; }
       else if (scene === 'difficulty') { difficultyTime = 0; difficultySelected = 1; }
+      else if (scene === 'vsintro') { vsIntroTime = 0; playVsIntroFanfare(); }
       else if (scene === 'battle') { initBattle(); }
     }
   } else {
@@ -6351,7 +8201,7 @@ function handleKeyDown(e) {
         if (e.key === 'ArrowRight') p1Select = (p1Select + 1) % n;
         if (e.key === 'Enter') p1Confirmed = true;
       } else if (e.key === 'Enter' && p1Confirmed && p2Confirmed) {
-        startTransition('battle'); return;
+        startTransition('vsintro'); return;
       }
       if (!p2Confirmed) {
         if (e.key === 'a' || e.key === 'A') p2Select = (p2Select + n - 1) % n;
@@ -6369,9 +8219,14 @@ function handleKeyDown(e) {
     if (e.key === 'ArrowRight') difficultySelected = Math.min(2, difficultySelected + 1);
     if (e.key === 'Enter') {
       cpuDifficulty = difficultySelected;
-      startTransition('battle');
+      startTransition('vsintro');
     }
     if (e.key === 'Escape') startTransition('select');
+  } else if (scene === 'vsintro') {
+    if (e.key === 'Enter' || e.key === ' ') {
+      stopVsIntroFanfare();
+      startTransition('battle');
+    }
   } else if (scene === 'battle') {
     if (gameOver && e.key === 'Enter') {
       startTransition('select'); return;
@@ -6497,8 +8352,27 @@ function gameLoop(timestamp) {
   // Fixed timestep updates for consistent physics
   let updated = false;
   while (accumulator >= FIXED_DT) {
-    if (scene === 'battle') {
-      updateBattle(FIXED_DT);
+    if (scene === 'vsintro') {
+      vsIntroTime++;
+      if (vsIntroTime >= VS_INTRO_DURATION && !transitioning) {
+        stopVsIntroFanfare();
+        startTransition('battle');
+      }
+    } else if (scene === 'battle') {
+      if (hitStopFrames > 0) {
+        hitStopFrames--;
+      } else if (koSlowMotion.active) {
+        // ③ スローモーション: 3フレームに1回だけ更新
+        koSlowMotion.frames++;
+        if (koSlowMotion.frames >= koSlowMotion.maxFrames) {
+          koSlowMotion.active = false;
+        }
+        if (koSlowMotion.frames % 3 === 0) {
+          updateBattle(FIXED_DT);
+        }
+      } else {
+        updateBattle(FIXED_DT);
+      }
     }
     accumulator -= FIXED_DT;
     updated = true;
@@ -6513,6 +8387,8 @@ function gameLoop(timestamp) {
     drawSelect(FIXED_DT);
   } else if (scene === 'difficulty') {
     drawDifficulty(FIXED_DT);
+  } else if (scene === 'vsintro') {
+    drawVsIntro(FIXED_DT);
   } else if (scene === 'battle') {
     drawBattle(FIXED_DT);
   }
