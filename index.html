@@ -2092,19 +2092,43 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
           ctx.globalAlpha = 1;
         }
       } else if (atkType === 'special') {
-        // 必殺: ころころローリング
-        if (phase === 'active') {
-          ctx.globalAlpha = 0.3;
-          const rollAngle = phaseT * Math.PI * 6;
-          for (let i = 0; i < 3; i++) {
-            const a = rollAngle + (i / 3) * Math.PI * 2;
-            const dist = 10 * s;
-            ctx.fillStyle = '#3A3A3A';
-            ctx.beginPath();
-            ctx.arc(Math.cos(a) * dist, Math.sin(a) * dist - 5 * s, 8 * s, 0, Math.PI * 2);
-            ctx.fill();
-          }
+        // 必殺: 熊のおたけび
+        if (phase === 'startup') {
+          // 両手を広げる準備
+          const spread = easeIn * 12 * s;
+          ctx.fillStyle = '#3A3A3A';
+          ctx.beginPath(); ctx.ellipse(-14 * s - spread, armY, 6 * s, 9 * s, -0.3, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.ellipse(14 * s + spread, armY, 6 * s, 9 * s, 0.3, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#4A4A4A';
+          ctx.beginPath(); ctx.arc(-14 * s - spread, armY + 9 * s, pawR, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.arc(14 * s + spread, armY + 9 * s, pawR, 0, Math.PI * 2); ctx.fill();
+        } else if (phase === 'active') {
+          // 両手を広げた状態 + 衝撃波
+          const spread = 12 * s;
+          ctx.fillStyle = '#3A3A3A';
+          ctx.beginPath(); ctx.ellipse(-14 * s - spread, armY, 6 * s, 9 * s, -0.3, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.ellipse(14 * s + spread, armY, 6 * s, 9 * s, 0.3, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#4A4A4A';
+          ctx.beginPath(); ctx.arc(-14 * s - spread, armY + 9 * s, pawR, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.arc(14 * s + spread, armY + 9 * s, pawR, 0, Math.PI * 2); ctx.fill();
+          // 黄色い衝撃波（円形に広がる）
+          const waveR = (20 + easeOut * 60) * s;
+          ctx.globalAlpha = 0.5 * (1 - phaseT);
+          ctx.strokeStyle = '#FFDD44';
+          ctx.lineWidth = (4 - phaseT * 3) * s;
+          ctx.beginPath(); ctx.arc(0, -10 * s, waveR, 0, Math.PI * 2); ctx.stroke();
+          // 内側の波
+          ctx.globalAlpha = 0.3 * (1 - phaseT);
+          ctx.strokeStyle = '#FFE877';
+          ctx.lineWidth = (2 - phaseT) * s;
+          ctx.beginPath(); ctx.arc(0, -10 * s, waveR * 0.6, 0, Math.PI * 2); ctx.stroke();
           ctx.globalAlpha = 1;
+        } else {
+          // 戻り
+          const spread = 12 * s * (1 - easeOut);
+          ctx.fillStyle = '#3A3A3A';
+          ctx.beginPath(); ctx.ellipse(-14 * s - spread, armY, 6 * s, 9 * s, -0.3, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.ellipse(14 * s + spread, armY, 6 * s, 9 * s, 0.3, 0, Math.PI * 2); ctx.fill();
         }
       } else if (atkType === 'aerial') {
         // 空中: ぽよんジャンプ（お腹アタック）
@@ -3273,8 +3297,7 @@ const attackDefs = {
   6: {
     normal: { name:'ぷにぷにパンチ', startup:4, active:5, recovery:9, damage:5, kbBase:2, kbScale:0.04, kbAngle:-12, hx:12, hy:-32, hw:42, hh:38, color:'#FF6B6B', effect:'punch' },
     strong: { name:'クマたたき', startup:8, active:8, recovery:16, damage:14, kbBase:5, kbScale:0.09, kbAngle:-25, hx:14, hy:-35, hw:60, hh:45, color:'#FF4444', effect:'punch' },
-    special:{ name:'ころころローリング', startup:8, active:18, recovery:14, damage:10, kbBase:4, kbScale:0.07, kbAngle:-15, hx:12, hy:-25, hw:55, hh:50, color:'#3A3A3A', effect:'dash',
-              specialType:'shadowDash', dashSpeed:12 },
+    special:{ name:'熊のおたけび', startup:12, active:10, recovery:18, damage:1, kbBase:3, kbScale:0.04, kbAngle:80, hx:0, hy:-30, hw:160, hh:140, color:'#FFDD44', effect:'shockwave', centerHit:true },
     aerial: { name:'ぽよんジャンプ', startup:4, active:10, recovery:10, damage:9, kbBase:3, kbScale:0.07, kbAngle:-85, hx:0, hy:-15, hw:55, hh:50, color:'#FF6B6B', effect:'airslam', centerHit:true },
     down:   { name:'お尻落とし', startup:5, active:10, recovery:14, damage:12, kbBase:5, kbScale:0.09, kbAngle:80, hx:0, hy:10, hw:45, hh:45, color:'#FF6B6B', effect:'meteor',
               specialType:'divekick', diveSpeed:11 },
