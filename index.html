@@ -9,6 +9,7 @@
   body { background: #000; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
   canvas { display: block; image-rendering: pixelated; }
 </style>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 </head>
 <body>
 <canvas id="gameCanvas"></canvas>
@@ -28,7 +29,7 @@ resize();
 window.addEventListener('resize', resize);
 
 // --- State ---
-let scene = 'title'; // 'title' | 'select' | 'difficulty' | 'vsintro' | 'battle'
+let scene = 'title'; // 'title' | 'select' | 'difficulty' | 'vsintro' | 'battle' | 'online'
 let titleAlpha = 0;
 let titleFadeIn = true;
 let pressAlpha = 0;
@@ -52,6 +53,19 @@ let modeSelected = false; // whether mode has been chosen on select screen
 let cpuDifficulty = 1; // 0=easy, 1=normal, 2=hard
 let difficultyTime = 0;
 let difficultySelected = 0; // cursor on difficulty screen
+
+// Online multiplayer
+let onlineMode = false;
+let isHost = false;
+let peer = null;
+let peerConn = null;
+let onlineState = 'menu'; // 'menu' | 'hosting' | 'joining' | 'connected'
+let onlineRoomId = '';
+let onlineInputId = '';
+let onlineError = '';
+let remoteKeys = {};      // keys state received from remote player
+let prevRemoteKeys = {};  // previous frame remote keys for edge detection
+let onlineInputFocused = false;
 
 // VS Intro screen
 let vsIntroTime = 0;
@@ -3210,8 +3224,14 @@ function drawTitle(dt) {
   ctx.fillStyle = '#FFFFFF';
   ctx.shadowColor = '#FFFFFF';
   ctx.shadowBlur = 10;
-  ctx.fillText('PRESS ENTER / CLICK TO START', 480, 555);
+  ctx.fillText('PRESS ENTER / CLICK TO START', 480, 535);
   ctx.shadowBlur = 0;
+
+  // Online button
+  ctx.globalAlpha = titleAlpha * (0.6 + pressAlpha * 0.4);
+  ctx.font = 'bold 18px sans-serif';
+  ctx.fillStyle = '#44DDFF';
+  ctx.fillText('O キー : オンライン対戦', 480, 575);
 
   ctx.restore();
 }
@@ -6019,13 +6039,26 @@ function updateBattle(dt) {
       if (ai.grab) tryGrab(p);
       if (ai.throwDir && p.grabbing) executeThrow(p, ai.throwDir.x, ai.throwDir.y);
     } else if (p.id === 0) {
-      if (keys['ArrowLeft']) moveX = -1;
-      if (keys['ArrowRight']) moveX = 1;
-      jumpPress = !!keys['ArrowUp'];
+      // P1 input: local if host or local, remote if guest-online
+      const k1 = (onlineMode && !isHost) ? remoteKeys : keys;
+      const left1 = onlineMode ? k1.left : (k1['ArrowLeft']);
+      const right1 = onlineMode ? k1.right : (k1['ArrowRight']);
+      const up1 = onlineMode ? k1.up : (k1['ArrowUp']);
+      if (left1) moveX = -1;
+      if (right1) moveX = 1;
+      jumpPress = !!up1;
     } else {
-      if (keys['a'] || keys['A']) moveX = -1;
-      if (keys['d'] || keys['D']) moveX = 1;
-      jumpPress = !!(keys['w'] || keys['W']);
+      // P2 input: local if host-online remote, or local WASD
+      const k2 = (onlineMode && isHost) ? remoteKeys : keys;
+      if (onlineMode) {
+        if (k2.left) moveX = -1;
+        if (k2.right) moveX = 1;
+        jumpPress = !!k2.up;
+      } else {
+        if (k2['a'] || k2['A']) moveX = -1;
+        if (k2['d'] || k2['D']) moveX = 1;
+        jumpPress = !!(k2['w'] || k2['W']);
+      }
     }
 
     applyMovement(p, moveX, ch);
@@ -6039,21 +6072,21 @@ function updateBattle(dt) {
       p.walkCycle = 0;
     }
 
-    // Grab detection (simultaneous press: P1=Z+X, P2=U+I)
+    // Grab detection (simultaneous press: P1=Z+X, P2=U+I or online Z+X)
     if (p.id === 0) {
-      if ((keys['z'] || keys['Z']) && (keys['x'] || keys['X'])) {
+      const k0 = (onlineMode && !isHost) ? remoteKeys : null;
+      const grab0 = k0 ? (k0.z && k0.x) : ((keys['z'] || keys['Z']) && (keys['x'] || keys['X']));
+      if (grab0) {
         if (p.grabHoldFrames === 0 && p.grounded && !p.attacking) tryGrab(p);
         p.grabHoldFrames = 1;
-      } else {
-        p.grabHoldFrames = 0;
-      }
+      } else { p.grabHoldFrames = 0; }
     } else if (gameMode === 'vs') {
-      if ((keys['u'] || keys['U']) && (keys['i'] || keys['I'])) {
+      const k1 = (onlineMode && isHost) ? remoteKeys : null;
+      const grab1 = k1 ? (k1.z && k1.x) : ((keys['u'] || keys['U']) && (keys['i'] || keys['I']));
+      if (grab1) {
         if (p.grabHoldFrames === 0 && p.grounded && !p.attacking) tryGrab(p);
         p.grabHoldFrames = 1;
-      } else {
-        p.grabHoldFrames = 0;
-      }
+      } else { p.grabHoldFrames = 0; }
     }
 
     // Charge command update
@@ -6064,7 +6097,13 @@ function updateBattle(dt) {
         p.charging = false; p.chargeCmd = null;
       }
       // Check if attack key released → fire charge
-      const attackKeyHeld = p.id === 0 ? (keys['z'] || keys['Z']) : (keys['u'] || keys['U']);
+      let attackKeyHeld;
+      if (onlineMode) {
+        const isRemote = (isHost && p.id === 1) || (!isHost && p.id === 0);
+        attackKeyHeld = isRemote ? remoteKeys.z : (keys['z'] || keys['Z']);
+      } else {
+        attackKeyHeld = p.id === 0 ? (keys['z'] || keys['Z']) : (keys['u'] || keys['U']);
+      }
       if (!attackKeyHeld || p.chargeTime >= p.chargeMaxTime) {
         // Release charge!
         const chargeRatio = Math.min(p.chargeTime / p.chargeMaxTime, 1); // 0→1
@@ -8444,6 +8483,213 @@ function drawPlayerHUD(x, y, player, label, color) {
 }
 
 // ============================================================
+// ONLINE LOBBY
+// ============================================================
+function generateRoomId() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+function setupPeerConnection(conn) {
+  peerConn = conn;
+  conn.on('open', () => {
+    onlineState = 'connected';
+    onlineError = '';
+    // Send our character selection
+    conn.send({ type: 'charSelect', charIdx: p1Select });
+  });
+  conn.on('data', (data) => {
+    if (data.type === 'charSelect') {
+      p2Select = data.charIdx;
+    } else if (data.type === 'charConfirm') {
+      p2Select = data.charIdx;
+      p2Confirmed = true;
+    } else if (data.type === 'startBattle') {
+      p2Select = data.charIdx;
+      p1Confirmed = true; p2Confirmed = true;
+      if (scene === 'select') startTransition('vsintro');
+    } else if (data.type === 'keys') {
+      remoteKeys = data.keys;
+    }
+  });
+  conn.on('close', () => {
+    onlineError = '接続が切断されました';
+    onlineState = 'menu';
+    onlineMode = false;
+    peerConn = null;
+  });
+  conn.on('error', (err) => {
+    onlineError = 'エラー: ' + err;
+  });
+}
+
+function startHosting() {
+  onlineRoomId = generateRoomId();
+  onlineState = 'hosting';
+  onlineError = '';
+  isHost = true;
+  peer = new Peer('smash-' + onlineRoomId);
+  peer.on('open', () => {
+    onlineState = 'hosting';
+  });
+  peer.on('connection', (conn) => {
+    setupPeerConnection(conn);
+  });
+  peer.on('error', (err) => {
+    onlineError = '接続エラー: ' + err.type;
+    onlineState = 'menu';
+  });
+}
+
+function joinRoom(roomId) {
+  onlineState = 'joining';
+  onlineError = '';
+  isHost = false;
+  peer = new Peer();
+  peer.on('open', () => {
+    const conn = peer.connect('smash-' + roomId);
+    setupPeerConnection(conn);
+  });
+  peer.on('error', (err) => {
+    onlineError = 'エラー: ' + err.type;
+    onlineState = 'menu';
+  });
+}
+
+function sendOnlineKeys() {
+  if (!peerConn || !peerConn.open) return;
+  // Send local P1 keys as the remote player's input
+  const myKeys = {};
+  if (isHost) {
+    // Host is P1: send P1 arrow keys
+    myKeys.left = !!(keys['ArrowLeft']);
+    myKeys.right = !!(keys['ArrowRight']);
+    myKeys.up = !!(keys['ArrowUp']);
+    myKeys.down = !!(keys['ArrowDown']);
+    myKeys.z = !!(keys['z'] || keys['Z']);
+    myKeys.x = !!(keys['x'] || keys['X']);
+    myKeys.c = !!(keys['c'] || keys['C']);
+    myKeys.v = !!(keys['v'] || keys['V']);
+  } else {
+    // Guest is P2: send arrow keys, but they control P2 via WASD mapping
+    myKeys.left = !!(keys['ArrowLeft']);
+    myKeys.right = !!(keys['ArrowRight']);
+    myKeys.up = !!(keys['ArrowUp']);
+    myKeys.down = !!(keys['ArrowDown']);
+    myKeys.z = !!(keys['z'] || keys['Z']);
+    myKeys.x = !!(keys['x'] || keys['X']);
+    myKeys.c = !!(keys['c'] || keys['C']);
+    myKeys.v = !!(keys['v'] || keys['V']);
+  }
+  peerConn.send({ type: 'keys', keys: myKeys });
+}
+
+function drawOnlineLobby(dt) {
+  // Background
+  const bg = ctx.createLinearGradient(0, 0, 0, 640);
+  bg.addColorStop(0, '#0a0a2e');
+  bg.addColorStop(1, '#1a0a20');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, 960, 640);
+
+  ctx.textAlign = 'center';
+
+  // Title
+  ctx.font = 'bold 36px sans-serif';
+  ctx.fillStyle = '#44DDFF';
+  ctx.fillText('オンライン対戦', 480, 80);
+
+  if (onlineState === 'menu') {
+    // Host button
+    ctx.fillStyle = 'rgba(30,60,90,0.8)';
+    roundRect(ctx, 280, 160, 400, 80, 12); ctx.fill();
+    ctx.strokeStyle = '#44AAFF';
+    ctx.lineWidth = 2;
+    roundRect(ctx, 280, 160, 400, 80, 12); ctx.stroke();
+    ctx.font = 'bold 24px sans-serif';
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillText('H : 部屋を作る（ホスト）', 480, 208);
+
+    // Join button
+    ctx.fillStyle = 'rgba(60,30,60,0.8)';
+    roundRect(ctx, 280, 270, 400, 80, 12); ctx.fill();
+    ctx.strokeStyle = '#FF66AA';
+    ctx.lineWidth = 2;
+    roundRect(ctx, 280, 270, 400, 80, 12); ctx.stroke();
+    ctx.font = 'bold 24px sans-serif';
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillText('J : 部屋に参加（ゲスト）', 480, 318);
+
+    // Input field for room ID
+    ctx.font = '18px sans-serif';
+    ctx.fillStyle = '#AAA';
+    ctx.fillText('参加する場合、IDを入力してください：', 480, 400);
+
+    // Input box
+    ctx.fillStyle = onlineInputFocused ? 'rgba(50,50,80,0.9)' : 'rgba(30,30,50,0.9)';
+    roundRect(ctx, 350, 415, 260, 45, 8); ctx.fill();
+    ctx.strokeStyle = onlineInputFocused ? '#44DDFF' : '#666';
+    ctx.lineWidth = 2;
+    roundRect(ctx, 350, 415, 260, 45, 8); ctx.stroke();
+    ctx.font = 'bold 28px monospace';
+    ctx.fillStyle = '#FFF';
+    ctx.fillText(onlineInputId || '______', 480, 445);
+
+    ctx.font = '14px sans-serif';
+    ctx.fillStyle = '#888';
+    ctx.fillText('ESC で戻る', 480, 500);
+
+  } else if (onlineState === 'hosting') {
+    ctx.font = '20px sans-serif';
+    ctx.fillStyle = '#AAA';
+    ctx.fillText('ルームID を相手に伝えてください：', 480, 200);
+
+    // Big room ID display
+    ctx.font = 'bold 64px monospace';
+    ctx.fillStyle = '#44DDFF';
+    ctx.shadowColor = '#44DDFF';
+    ctx.shadowBlur = 20;
+    ctx.fillText(onlineRoomId, 480, 290);
+    ctx.shadowBlur = 0;
+
+    ctx.font = '18px sans-serif';
+    ctx.fillStyle = '#888';
+    ctx.fillText('相手の接続を待っています...', 480, 350);
+
+    // Pulsing dots
+    const dots = '.'.repeat(1 + Math.floor(Date.now() / 500) % 3);
+    ctx.fillStyle = '#44AAFF';
+    ctx.fillText(dots, 480, 380);
+
+    ctx.font = '14px sans-serif';
+    ctx.fillStyle = '#888';
+    ctx.fillText('ESC でキャンセル', 480, 450);
+
+  } else if (onlineState === 'joining') {
+    ctx.font = '20px sans-serif';
+    ctx.fillStyle = '#AAA';
+    ctx.fillText('接続中...', 480, 300);
+    const dots = '.'.repeat(1 + Math.floor(Date.now() / 500) % 3);
+    ctx.fillStyle = '#FF66AA';
+    ctx.fillText(dots, 480, 340);
+
+  } else if (onlineState === 'connected') {
+    ctx.font = 'bold 28px sans-serif';
+    ctx.fillStyle = '#44FF88';
+    ctx.fillText('接続完了！', 480, 250);
+    ctx.font = '20px sans-serif';
+    ctx.fillStyle = '#FFF';
+    ctx.fillText('キャラ選択に進みます...', 480, 300);
+  }
+
+  // Error display
+  if (onlineError) {
+    ctx.font = 'bold 16px sans-serif';
+    ctx.fillStyle = '#FF4444';
+    ctx.fillText(onlineError, 480, 560);
+  }
+}
+
+// ============================================================
 // VS INTRO SCREEN
 // ============================================================
 function playVsIntroFanfare() {
@@ -8822,6 +9068,43 @@ function handleKeyDown(e) {
 
   if (scene === 'title') {
     if (e.key === 'Enter' || e.key === ' ') startTransition('select');
+    if (e.key === 'o' || e.key === 'O') startTransition('online');
+  } else if (scene === 'online') {
+    if (e.key === 'Escape') {
+      if (peer) { peer.destroy(); peer = null; }
+      peerConn = null;
+      onlineMode = false;
+      onlineState = 'menu';
+      onlineInputId = '';
+      onlineError = '';
+      startTransition('title');
+    }
+    if (onlineState === 'menu') {
+      if (e.key === 'h' || e.key === 'H') {
+        startHosting();
+      } else if (e.key === 'j' || e.key === 'J') {
+        onlineInputFocused = true;
+      } else if (onlineInputFocused) {
+        if (e.key === 'Backspace') {
+          onlineInputId = onlineInputId.slice(0, -1);
+        } else if (e.key === 'Enter' && onlineInputId.length >= 4) {
+          joinRoom(onlineInputId);
+        } else if (e.key.length === 1 && /[0-9]/.test(e.key) && onlineInputId.length < 6) {
+          onlineInputId += e.key;
+        }
+      }
+    }
+    if (onlineState === 'connected') {
+      // Auto-transition to select screen
+      onlineMode = true;
+      gameMode = 'vs';
+      modeSelected = true;
+      p1Confirmed = false;
+      p2Confirmed = false;
+      startTransition('select');
+    }
+    e.preventDefault();
+    return;
   } else if (scene === 'select') {
     // Mode selection phase
     if (!modeSelected) {
@@ -8854,8 +9137,29 @@ function handleKeyDown(e) {
       } else if (e.key === 'Enter' && p1Confirmed) {
         startTransition('difficulty'); return;
       }
+    } else if (onlineMode) {
+      // Online VS mode: arrows select local char, Enter confirms & sends
+      const n = characters.length;
+      if (isHost) {
+        if (!p1Confirmed) {
+          if (e.key === 'ArrowLeft') { p1Select = (p1Select + n - 1) % n; if (peerConn) peerConn.send({ type: 'charSelect', charIdx: p1Select }); }
+          if (e.key === 'ArrowRight') { p1Select = (p1Select + 1) % n; if (peerConn) peerConn.send({ type: 'charSelect', charIdx: p1Select }); }
+          if (e.key === 'Enter') { p1Confirmed = true; if (peerConn) peerConn.send({ type: 'charConfirm', charIdx: p1Select }); }
+        }
+        if (p1Confirmed && p2Confirmed && e.key === 'Enter') {
+          if (peerConn) peerConn.send({ type: 'startBattle', charIdx: p1Select });
+          startTransition('vsintro'); return;
+        }
+      } else {
+        // Guest controls P2 selection but displayed as P2
+        if (!p2Confirmed) {
+          if (e.key === 'ArrowLeft') { p2Select = (p2Select + n - 1) % n; if (peerConn) peerConn.send({ type: 'charSelect', charIdx: p2Select }); }
+          if (e.key === 'ArrowRight') { p2Select = (p2Select + 1) % n; if (peerConn) peerConn.send({ type: 'charSelect', charIdx: p2Select }); }
+          if (e.key === 'Enter') { p2Confirmed = true; if (peerConn) peerConn.send({ type: 'charConfirm', charIdx: p2Select }); }
+        }
+      }
     } else {
-      // VS mode: original 2P controls
+      // Local VS mode: original 2P controls
       const n = characters.length;
       if (!p1Confirmed) {
         if (e.key === 'ArrowLeft') p1Select = (p1Select + n - 1) % n;
@@ -9056,6 +9360,61 @@ function gameLoop(timestamp) {
       } else {
         updateBattle(FIXED_DT);
       }
+      // Online: send keys and process remote attacks
+      if (onlineMode) {
+        sendOnlineKeys();
+        // Process remote player's attack key presses (edge detection)
+        const remotePlayerId = isHost ? 1 : 0;
+        const rp = players[remotePlayerId];
+        if (rp && rp.alive && battleStarted && !gameOver) {
+          const rk = remoteKeys;
+          const prk = prevRemoteKeys;
+          // Z pressed (normal/command attack)
+          if (rk.z && !prk.z) {
+            const cmd = checkCommandInput(rp);
+            if (cmd && cmd.chargeCmd) {
+              if (!rp.charging && !rp.attacking) { rp.charging = true; rp.chargeTime = 0; rp.chargeCmd = cmd; }
+            } else if (cmd && executeCommand(rp, cmd)) {
+            } else if (!rp.grounded && rk.down) { startAttack(rp, 'downair');
+            } else if (!rp.grounded) { startAttack(rp, 'aerial');
+            } else if (rp.grounded && Math.abs(rp.vx) > 3 && (rk.left || rk.right)) { startAttack(rp, 'dash');
+            } else if (rk.up) { startAttack(rp, 'up');
+            } else if (rk.left || rk.right) { startAttack(rp, 'side');
+            } else if (rk.down) { startAttack(rp, 'down');
+            } else { startAttack(rp, 'normal'); }
+          }
+          // X pressed (strong/throw)
+          if (rk.x && !prk.x) {
+            if (rp.grabbing) {
+              let dx = 0, dy = 0;
+              if (rk.left) dx = -1; if (rk.right) dx = 1;
+              if (rk.up) dy = -1; if (rk.down) dy = 1;
+              executeThrow(rp, dx, dy);
+            } else { startAttack(rp, 'strong'); }
+          }
+          // C pressed (special)
+          if (rk.c && !prk.c) {
+            if (!(rp.charIdx === 10 && !rp.dragonMode && rp.damage >= 80 && rp.dragonCooldown <= 0 && rp.grounded)) {
+              startAttack(rp, 'special');
+            }
+          }
+          // V pressed (guard)
+          if (rk.v && !prk.v) {
+            if (rp.grounded && !rp.attacking && !rp.guarding && rp.guardDurability > 0 && rp.guardBreakStun <= 0) {
+              rp.guarding = true;
+              rp.justGuardTimer = typeof JUST_GUARD_WINDOW !== 'undefined' ? JUST_GUARD_WINDOW : 6;
+            }
+          }
+          // V released (guard release)
+          if (!rk.v && prk.v) { rp.guarding = false; }
+          // Direction commands
+          if (rk.down && !prk.down) addCmdInput(remotePlayerId, 'D');
+          if (rk.up && !prk.up) addCmdInput(remotePlayerId, 'U');
+          if (rk.left && !prk.left) addCmdInput(remotePlayerId, 'L');
+          if (rk.right && !prk.right) addCmdInput(remotePlayerId, 'R');
+        }
+        prevRemoteKeys = { ...remoteKeys };
+      }
     }
     accumulator -= FIXED_DT;
     updated = true;
@@ -9066,6 +9425,8 @@ function gameLoop(timestamp) {
 
   if (scene === 'title') {
     drawTitle(FIXED_DT);
+  } else if (scene === 'online') {
+    drawOnlineLobby(FIXED_DT);
   } else if (scene === 'select') {
     drawSelect(FIXED_DT);
   } else if (scene === 'difficulty') {
