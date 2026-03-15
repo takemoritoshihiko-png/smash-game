@@ -4435,7 +4435,7 @@ function checkCommandInput(player) {
 }
 
 function executeCommand(player, cmd) {
-  if (player.attacking || player.hitstun > 0 || !player.alive || player.grabbing || player.grabbed || player.guarding || player.guardBreakStun > 0 || player.isHanging) return false;
+  if (player.attacking || player.hitstun > 0 || !player.alive || player.grabbing || player.grabbed || player.guarding || player.guardBreakStun > 0) return false;
 
   const atk = cmd.attack;
   player.attacking = true;
@@ -4855,11 +4855,6 @@ function createPlayer(id, charIdx, startX) {
     wasGrounded: true, // for landing detection
     // 波おじ空中強攻撃カウント
     airStrongCount: 0,
-    // Ledge grab state
-    isHanging: false,      // currently hanging on ledge
-    hangingLedge: null,    // 'left' or 'right'
-    ledgeCooldownL: 0,     // cooldown for left ledge
-    ledgeCooldownR: 0,     // cooldown for right ledge
   };
 }
 
@@ -4989,9 +4984,6 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
     finalDamage *= 1.5;
     finalKbScale *= 1.3;
   }
-
-  // Release ledge on hit
-  if (target.isHanging) releaseLedge(target);
 
   target.damage = Math.min(999, target.damage + finalDamage);
   playHitSE();
@@ -5322,7 +5314,7 @@ function spawnProjectile(p, projDef) {
 
 // --- Start attack ---
 function startAttack(p, type) {
-  if (p.attacking || p.hitstun > 0 || !p.alive || p.grabbing || p.grabbed || p.guarding || p.guardBreakStun > 0 || p.isHanging) return;
+  if (p.attacking || p.hitstun > 0 || !p.alive || p.grabbing || p.grabbed || p.guarding || p.guardBreakStun > 0) return;
 
   // Meteor only: strong attack locked until landing after use
   if (type === 'strong' && p.charIdx === 3 && p.strongLocked) return;
@@ -5512,20 +5504,6 @@ function getCpuGuard(cpu, target) {
 function getCpuInput(cpu, target) {
   const result = { moveX: 0, jump: false, attack: null, grab: false, throwDir: null };
   if (!target.alive || !cpu.alive) return result;
-
-  // CPU ledge hang: climb up (extreme = fast, others = slow)
-  if (cpu.isHanging) {
-    if (!cpu._hangTimer) cpu._hangTimer = 0;
-    cpu._hangTimer++;
-    const hangThreshold = cpuDifficulty >= 3 ? (10 + Math.floor(Math.random() * 10)) : (60 + Math.floor(Math.random() * 30));
-    if (cpu._hangTimer >= hangThreshold) {
-      result.jump = true; // triggers ledgeClimbUp via up input
-      cpu._hangTimer = 0;
-    }
-    return result;
-  } else {
-    cpu._hangTimer = 0;
-  }
 
   const dx = target.x - cpu.x;
   const dy = target.y - cpu.y;
@@ -6014,7 +5992,6 @@ function updateBattle(dt) {
         p.attacking = false; p.hitstun = 0; p.specialState = null;
         p.guarding = false; p.guardDurability = GUARD_MAX_DURABILITY; p.guardBreakStun = 0; p.justGuardTimer = 0;
         p.animState = 'fall'; p.spinAngle = 0; p.damageTint = 0; p.landSquash = 0; p.jumpSquash = 0;
-        p.isHanging = false; p.hangingLedge = null; p.ledgeCooldownL = 0; p.ledgeCooldownR = 0;
       }
       continue;
     }
@@ -6581,61 +6558,23 @@ function updateBattle(dt) {
       }
     }
 
-    // Ledge cooldown tick
-    if (p.ledgeCooldownL > 0) p.ledgeCooldownL--;
-    if (p.ledgeCooldownR > 0) p.ledgeCooldownR--;
-
-    // Ledge hang: freeze physics, handle ↑/↓ input
-    if (p.isHanging) {
-      p.vx = 0; p.vy = 0;
-      // Determine up/down keys for this player
-      let hangUp = false, hangDown = false;
-      if (p.id === 0) {
-        if (onlineMode && !isHost) {
-          hangUp = !!remoteKeys.up; hangDown = !!remoteKeys.down;
-        } else {
-          hangUp = !!keys['ArrowUp']; hangDown = !!keys['ArrowDown'];
-        }
-      } else {
-        if (p.id === 1 && gameMode === 'cpu') {
-          // CPU hang is handled by getCpuInput returning jump=true
-          hangUp = jumpPress;
-        } else if (onlineMode && isHost) {
-          hangUp = !!remoteKeys.up; hangDown = !!remoteKeys.down;
-        } else if (onlineMode && !isHost) {
-          hangUp = !!keys['ArrowUp']; hangDown = !!keys['ArrowDown'];
-        } else {
-          hangUp = !!(keys['w'] || keys['W']); hangDown = !!(keys['s'] || keys['S']);
-        }
-      }
-      if (hangUp) { ledgeClimbUp(p); }
-      else if (hangDown) { ledgeDrop(p); }
-      // Cancel hang on hitstun
-      if (p.hitstun > 0) releaseLedge(p);
+    if (jumpPress && !p.jumpUsed && p.jumps > 0) {
+      p.vy = ch.jumpPower;
+      p.jumps--; p.jumpUsed = true; p.grounded = false;
+      p.jumpSquash = 6; // jump anticipation squash
+      playHitSound('jump');
     }
+    if (!jumpPress) p.jumpUsed = false;
 
-    if (!p.isHanging) {
-      if (jumpPress && !p.jumpUsed && p.jumps > 0) {
-        p.vy = ch.jumpPower;
-        p.jumps--; p.jumpUsed = true; p.grounded = false;
-        p.jumpSquash = 6; // jump anticipation squash
-        playHitSound('jump');
-      }
-      if (!jumpPress) p.jumpUsed = false;
-
-      // スマブラ風重力: 上昇=弱、頂点=極弱、落下=強
-      p.vy += getGravity(p);
-      if (p.vy > MAX_FALL_SPEED) p.vy = MAX_FALL_SPEED;
-      p.x += p.vx;
-      p.y += p.vy;
-    }
+    // スマブラ風重力: 上昇=弱、頂点=極弱、落下=強
+    p.vy += getGravity(p);
+    if (p.vy > MAX_FALL_SPEED) p.vy = MAX_FALL_SPEED;
+    p.x += p.vx;
+    p.y += p.vy;
     const wasGroundedBefore = p.grounded;
-    if (!p.isHanging) {
-      landingCheck(p);
-      ledgeGrabCheck(p);
-      wallBounceCheck(p);
-      blastCheck(p);
-    }
+    landingCheck(p);
+    wallBounceCheck(p);
+    blastCheck(p);
 
     // Landing detection - stronger squash for faster falls + dust particles
     if (!wasGroundedBefore && p.grounded) {
@@ -6711,9 +6650,7 @@ function updateBattle(dt) {
     }
 
     // Determine animation state
-    if (p.isHanging) {
-      p.animState = 'hang';
-    } else if (p.grounded) {
+    if (p.grounded) {
       if (moveX !== 0) {
         p.animState = 'walk';
       } else {
@@ -6826,72 +6763,6 @@ function landingCheck(p) {
       }
     }
   }
-}
-
-const LEDGE_GRAB_RANGE = 28; // pixels from ledge point to trigger grab
-const LEDGE_COOLDOWN = 60;   // frames before same ledge can be grabbed again
-const LEDGE_BOTTOM_Y = STAGE_GROUND_Y + 38; // ステージ下端（プラットフォーム厚み分）
-
-function ledgeGrabCheck(p) {
-  if (p.grounded || p.isHanging || p.vy >= 0 || p.hitstun > 0 || p.grabbed) return;
-  // Left ledge point (ステージ下端の左角)
-  if (p.ledgeCooldownL <= 0) {
-    const dx = p.x - STAGE_LEFT;
-    const dy = p.y - LEDGE_BOTTOM_Y;
-    if (Math.abs(dx) < LEDGE_GRAB_RANGE && dy > -LEDGE_GRAB_RANGE && dy < LEDGE_GRAB_RANGE) {
-      p.isHanging = true;
-      p.hangingLedge = 'left';
-      p.x = STAGE_LEFT;
-      p.y = LEDGE_BOTTOM_Y;
-      p.vx = 0; p.vy = 0;
-      p.facingLeft = false;
-      p.attacking = false; p.specialState = null;
-      p.jumps = 2;
-      return;
-    }
-  }
-  // Right ledge point (ステージ下端の右角)
-  if (p.ledgeCooldownR <= 0) {
-    const dx = p.x - STAGE_RIGHT;
-    const dy = p.y - LEDGE_BOTTOM_Y;
-    if (Math.abs(dx) < LEDGE_GRAB_RANGE && dy > -LEDGE_GRAB_RANGE && dy < LEDGE_GRAB_RANGE) {
-      p.isHanging = true;
-      p.hangingLedge = 'right';
-      p.x = STAGE_RIGHT;
-      p.y = LEDGE_BOTTOM_Y;
-      p.vx = 0; p.vy = 0;
-      p.facingLeft = true;
-      p.attacking = false; p.specialState = null;
-      p.jumps = 2;
-      return;
-    }
-  }
-}
-
-function releaseLedge(p) {
-  if (!p.isHanging) return;
-  const wasLedge = p.hangingLedge;
-  p.isHanging = false;
-  p.hangingLedge = null;
-  if (wasLedge === 'left') p.ledgeCooldownL = LEDGE_COOLDOWN;
-  else p.ledgeCooldownR = LEDGE_COOLDOWN;
-}
-
-function ledgeClimbUp(p) {
-  // ↑: 崖から離れて落下（ステージ下端なので上には乗れない）
-  if (!p.isHanging) return;
-  const dir = p.hangingLedge === 'left' ? -1 : 1;
-  p.x += dir * 15;
-  p.vy = -2;
-  releaseLedge(p);
-}
-
-function ledgeDrop(p) {
-  // ↓: そのまま落下
-  if (!p.isHanging) return;
-  const dir = p.hangingLedge === 'left' ? -1 : 1;
-  p.x += dir * 10;
-  releaseLedge(p);
 }
 
 function blastCheck(p) {
@@ -9321,8 +9192,6 @@ function serializePlayer(p) {
     dragonTransformTimer: p.dragonTransformTimer,
     throwCooldown: p.throwCooldown, inkBlindTimer: p.inkBlindTimer,
     animTimer: p.animTimer, charIdx: p.charIdx,
-    isHanging: p.isHanging, hangingLedge: p.hangingLedge,
-    ledgeCooldownL: p.ledgeCooldownL, ledgeCooldownR: p.ledgeCooldownR,
   };
 }
 
@@ -9387,8 +9256,6 @@ function applyHostState(data) {
     target.dragonTransformTimer = src.dragonTransformTimer;
     target.throwCooldown = src.throwCooldown; target.inkBlindTimer = src.inkBlindTimer;
     target.animTimer = src.animTimer; target.charIdx = src.charIdx;
-    target.isHanging = src.isHanging; target.hangingLedge = src.hangingLedge;
-    target.ledgeCooldownL = src.ledgeCooldownL; target.ledgeCooldownR = src.ledgeCooldownR;
     // Restore attackData from attackType
     if (src.attacking && src.attackType) {
       const defs = (target.charIdx === 10 && target.dragonMode) ? dragonAttackDefs : attackDefs[target.charIdx];
@@ -9542,7 +9409,7 @@ function updateGuestEffects(dt) {
 
   // Client prediction: move players by their velocity between host updates
   for (const p of players) {
-    if (!p.alive || p.isHanging || p.grounded) continue;
+    if (!p.alive || p.grounded) continue;
     p.x += p.vx * 0.5; // half-step prediction (host will correct)
     p.y += p.vy * 0.5;
     p.vy += 0.3; // light gravity prediction
@@ -10253,9 +10120,6 @@ function handleKeyDown(e) {
       return;
     }
 
-    // P1 hanging: skip attacks
-    if (p1.isHanging) return;
-
     // P1 direction input for commands (host or offline)
     if (e.key === 'ArrowDown') addCmdInput(0, 'D');
     if (e.key === 'ArrowUp') addCmdInput(0, 'U');
@@ -10424,7 +10288,7 @@ function gameLoop(timestamp) {
       // Online host: process remote player's (P2) attack key presses (edge detection)
       if (onlineMode && isHost) {
         const rp = players[1];
-        if (rp && rp.alive && battleStarted && !gameOver && !rp.isHanging) {
+        if (rp && rp.alive && battleStarted && !gameOver) {
           const rk = remoteKeys;
           const prk = prevRemoteKeys;
           // Z pressed
