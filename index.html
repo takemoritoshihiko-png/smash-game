@@ -4853,6 +4853,8 @@ function createPlayer(id, charIdx, startX) {
     damageTint: 0,    // frames of red flash
     spinAngle: 0,     // rotation from strong knockback
     wasGrounded: true, // for landing detection
+    // 波おじ空中強攻撃カウント
+    airStrongCount: 0,
     // Ledge grab state
     isHanging: false,      // currently hanging on ledge
     hangingLedge: null,    // 'left' or 'right'
@@ -5324,6 +5326,12 @@ function startAttack(p, type) {
 
   // Meteor only: strong attack locked until landing after use
   if (type === 'strong' && p.charIdx === 3 && p.strongLocked) return;
+
+  // 波おじ: 空中強攻撃は最大2回まで
+  if (type === 'strong' && p.charIdx === 13 && !p.grounded) {
+    if (p.airStrongCount >= 2) return;
+    p.airStrongCount++;
+  }
 
   // バレット: スナイパー（必殺技）クールダウン5秒
   if (type === 'special' && p.charIdx === 7 && p.sniperCooldown > 0) return;
@@ -6631,6 +6639,7 @@ function updateBattle(dt) {
 
     // Landing detection - stronger squash for faster falls + dust particles
     if (!wasGroundedBefore && p.grounded) {
+      if (p.charIdx === 13) p.airStrongCount = 0;
       const prevVy = p.vy || 0;
       const impactStrength = Math.min(Math.abs(prevVy) / MAX_FALL_SPEED, 1);
       p.landSquash = Math.floor(8 + impactStrength * 4);
@@ -9317,8 +9326,11 @@ function serializePlayer(p) {
   };
 }
 
+let hostSendCounter = 0;
 function sendHostState() {
   if (!peerConn || !peerConn.open) return;
+  hostSendCounter++;
+  if (hostSendCounter % 2 !== 0) return; // send every 2 frames
   const stateData = {
     type: 'state',
     p1: serializePlayer(players[0]),
@@ -9328,12 +9340,9 @@ function sendHostState() {
     koSlowMotion: { active: koSlowMotion.active, frames: koSlowMotion.frames, maxFrames: koSlowMotion.maxFrames },
     projectiles: projectiles.map(pr => ({
       x: pr.x, y: pr.y, vx: pr.vx, vy: pr.vy,
-      w: pr.w, h: pr.h, damage: pr.damage, ownerId: pr.ownerId,
-      color: pr.color, pcolor: pr.pcolor, life: pr.life, homing: pr.homing,
-      kbBase: pr.kbBase, kbScale: pr.kbScale, kbAngle: pr.kbAngle,
-      hitTargets: pr.hitTargets,
+      w: pr.w, h: pr.h, life: pr.life, ownerId: pr.ownerId,
+      color: pr.color, pcolor: pr.pcolor,
       shape: pr.shape, time: pr.time, ownerCharIdx: pr.ownerCharIdx,
-      pierce: pr.pierce, ink: pr.ink,
     })),
   };
   peerConn.send(stateData);
@@ -9347,9 +9356,19 @@ function applyHostState(data) {
   const oldStocks0 = players[0].stocks, oldStocks1 = players[1].stocks;
   const oldAlive0 = players[0].alive, oldAlive1 = players[1].alive;
 
-  // Apply player states
+  // Apply player states (with position interpolation for smooth visuals)
+  const LERP = 0.4;
   const applyFields = (target, src) => {
-    target.x = src.x; target.y = src.y; target.vx = src.vx; target.vy = src.vy;
+    // Lerp position for smoothness; snap if too far or state changed drastically
+    const dx = src.x - target.x, dy = src.y - target.y;
+    const snapDist = 80;
+    if (Math.abs(dx) > snapDist || Math.abs(dy) > snapDist || src.alive !== target.alive || src.respawnTimer !== target.respawnTimer) {
+      target.x = src.x; target.y = src.y;
+    } else {
+      target.x += dx * LERP;
+      target.y += dy * LERP;
+    }
+    target.vx = src.vx; target.vy = src.vy;
     target.damage = src.damage; target.stocks = src.stocks; target.alive = src.alive;
     target.attacking = src.attacking; target.attackType = src.attackType; target.attackFrame = src.attackFrame;
     target.facingLeft = src.facingLeft; target.hitstun = src.hitstun; target.grounded = src.grounded;
@@ -9520,6 +9539,15 @@ function applyHostState(data) {
 function updateGuestEffects(dt) {
   // Increment battleTime for animation purposes
   battleTime += dt;
+
+  // Client prediction: move players by their velocity between host updates
+  for (const p of players) {
+    if (!p.alive || p.isHanging || p.grounded) continue;
+    p.x += p.vx * 0.5; // half-step prediction (host will correct)
+    p.y += p.vy * 0.5;
+    p.vy += 0.3; // light gravity prediction
+  }
+
   // Only update visual effects, no game logic
   for (let i = hitEffects.length - 1; i >= 0; i--) {
     hitEffects[i].life--;
