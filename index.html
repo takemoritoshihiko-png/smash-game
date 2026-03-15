@@ -5151,6 +5151,13 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
       color: isSpecial ? charColor : '#FF8800',
       size: Math.min(60, 25 + kb * 2.5)
     });
+    // Shockwave ring
+    hitEffects.push({
+      x: target.x, y: target.y - 35,
+      life: 12, maxLife: 12,
+      color: '#FFFFFF', size: 80,
+      type: 'ring',
+    });
     triggerScreenShake(isSpecial ? 5 + kb * 0.3 : 3 + kb * 0.2, isSpecial ? 12 : 8);
     if (hitType === 'cmd') {
       hitFlash.alpha = 0.25;
@@ -7388,7 +7395,16 @@ function drawBattle(dt) {
     const t = 1 - e.life / e.maxLife;
     ctx.save();
 
-    if (e.type === 'shockwave') {
+    if (e.type === 'ring') {
+      // 衝撃波リング - 円形に広がる
+      const radius = e.size * t;
+      ctx.globalAlpha = 1 - t;
+      ctx.strokeStyle = e.color;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(e.x, e.y, radius, 0, Math.PI * 2);
+      ctx.stroke();
+    } else if (e.type === 'shockwave') {
       // 着地衝撃波 - 横に広がる半円
       ctx.globalAlpha = (1 - t) * 0.6;
       ctx.strokeStyle = e.color;
