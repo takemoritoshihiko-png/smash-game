@@ -296,6 +296,19 @@ const characters = [
     jumpPower: -13.0,
     weight: 0.75
   },
+  {
+    name: 'おんぱ',
+    type: '音波型',
+    color: '#44DDEE',
+    accent: '#88FFFF',
+    dark: '#226688',
+    stats: { power: 1, speed: 4, tech: 5, defense: 1 },
+    desc: '音速の支配者・最低ダメージ最強ノックバック',
+    bodyColors: { main: '#44DDEE', sub: '#88FFFF', skin: '#E0F0F8' },
+    moveSpeed: 9.0,
+    jumpPower: -14.0,
+    weight: 0.7
+  },
 ];
 
 // --- Audio unlock on first interaction ---
@@ -359,6 +372,8 @@ const samImg = new Image();
 samImg.src = 'images/sam.png';
 const kingImg = new Image();
 kingImg.src = 'images/king.png';
+const onpaImg = new Image();
+onpaImg.src = 'images/onpa.png';
 
 // --- Particles ---
 function spawnTitleParticle() {
@@ -1233,6 +1248,74 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.beginPath(); ctx.arc(2 * s, -16 * s, 4 * s, 0.1, Math.PI - 0.3); ctx.stroke();
       ctx.lineWidth = 1;
     }
+  } else if (charIndex === 17) {
+    // おんぱ - 音波キャラ
+    if (onpaImg.complete && onpaImg.naturalWidth > 0) {
+      const imgW = 75 * s;
+      const imgH = 90 * s;
+      ctx.drawImage(onpaImg, -imgW / 2, -35 * s, imgW, imgH);
+    } else {
+      // Canvas fallback: sound wave character
+      // Legs
+      ctx.fillStyle = '#226688';
+      ctx.fillRect(-8 * s, 25 * s, 6 * s, 20 * s);
+      ctx.fillRect(2 * s, 25 * s, 6 * s, 20 * s);
+      // Body (sleek, aerodynamic)
+      ctx.fillStyle = '#44DDEE';
+      ctx.beginPath(); ctx.ellipse(0, 5 * s, 14 * s, 22 * s, 0, 0, Math.PI * 2); ctx.fill();
+      // Sound wave lines on body
+      ctx.strokeStyle = '#88FFFF';
+      ctx.lineWidth = 1.5 * s;
+      ctx.globalAlpha = 0.6;
+      for (let i = 0; i < 3; i++) {
+        ctx.beginPath();
+        ctx.arc(0, (i * 8 - 8) * s, (8 + i * 3) * s, -0.5, 0.5);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+      ctx.lineWidth = 1;
+      // Arms (thin, speaker-like)
+      ctx.fillStyle = '#33BBCC';
+      ctx.fillRect(-18 * s, -5 * s, 6 * s, 18 * s);
+      ctx.fillRect(12 * s, -5 * s, 6 * s, 18 * s);
+      // Speaker cones on hands
+      ctx.fillStyle = '#88FFFF';
+      ctx.beginPath(); ctx.arc(-15 * s, 14 * s, 5 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(15 * s, 14 * s, 5 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#226688';
+      ctx.beginPath(); ctx.arc(-15 * s, 14 * s, 2.5 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(15 * s, 14 * s, 2.5 * s, 0, Math.PI * 2); ctx.fill();
+      // Head (round, headphone-like)
+      ctx.fillStyle = '#55EEFF';
+      ctx.beginPath(); ctx.arc(0, -22 * s, 13 * s, 0, Math.PI * 2); ctx.fill();
+      // Headphones
+      ctx.fillStyle = '#226688';
+      ctx.beginPath(); ctx.ellipse(-13 * s, -22 * s, 4 * s, 7 * s, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(13 * s, -22 * s, 4 * s, 7 * s, 0, 0, Math.PI * 2); ctx.fill();
+      // Headband
+      ctx.strokeStyle = '#226688';
+      ctx.lineWidth = 3 * s;
+      ctx.beginPath(); ctx.arc(0, -25 * s, 14 * s, Math.PI + 0.3, -0.3); ctx.stroke();
+      ctx.lineWidth = 1;
+      // Eyes (visor-style)
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(-8 * s, -26 * s, 16 * s, 5 * s);
+      ctx.fillStyle = '#00FFFF';
+      ctx.fillRect(-6 * s, -25 * s, 5 * s, 3 * s);
+      ctx.fillRect(1 * s, -25 * s, 5 * s, 3 * s);
+      // Mouth (speaker grill)
+      ctx.fillStyle = '#226688';
+      ctx.fillRect(-4 * s, -16 * s, 8 * s, 4 * s);
+      ctx.strokeStyle = '#88FFFF';
+      ctx.lineWidth = 0.8 * s;
+      for (let i = 0; i < 3; i++) {
+        ctx.beginPath();
+        ctx.moveTo((-3 + i * 3) * s, -16 * s);
+        ctx.lineTo((-3 + i * 3) * s, -12 * s);
+        ctx.stroke();
+      }
+      ctx.lineWidth = 1;
+    }
   } else if (charIndex === 10) {
     // 天才 - 変形型ドラゴン
     const isDragon = typeof players !== 'undefined' && players.some(p => p.charIdx === 10 && p.dragonMode);
@@ -1424,6 +1507,11 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
         scaleX = 1 + Math.sin(t * 0.03) * 0.008;
         scaleY = 1 + Math.sin(t * 0.03 + 0.5) * 0.006;
         armAngle = Math.sin(t * 0.025) * 0.02;
+      } else if (charIndex === 17) {
+        // Onpa: vibrating pulse
+        bobY = Math.sin(t * 0.06) * 2 + Math.sin(t * 0.18) * 1;
+        scaleX = 1 + Math.sin(t * 0.12) * 0.01;
+        scaleY = 1 + Math.sin(t * 0.06 + 0.5) * 0.008;
       }
     }
 
@@ -1516,6 +1604,13 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
         scaleY = 0.97 + Math.abs(Math.sin(phase)) * 0.03;
         legAngle = Math.sin(phase) * 0.12;
         armSwing = -Math.sin(phase) * 0.1;
+      } else if (charIndex === 17) {
+        // Onpa: gliding movement
+        bobY = Math.abs(Math.sin(phase)) * 2;
+        walkLean = Math.sin(phase) * 0.06;
+        scaleX = 1 + Math.sin(phase * 2) * 0.015;
+        legAngle = Math.sin(phase) * 0.1;
+        armSwing = -Math.sin(phase) * 0.08;
       }
     }
 
@@ -1596,8 +1691,8 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
   // 天才 uses different images per mode
   const tensaiIsDragon = animData && animData.dragonMode;
   const tensaiActiveImg = tensaiIsDragon ? tensaiDragonImg : tensaiHumanImg;
-  const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg, bulletImg, shaudenImg, judgemanImg, tensaiActiveImg, catbusImg, tankImg, namiojiImg, tokkoImg, samImg, kingImg];
-  const imgSizes = [[70, 90], [80, 95], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [168, 112], [75, 90], [75, 90], [75, 90], [75, 90]];
+  const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg, bulletImg, shaudenImg, judgemanImg, tensaiActiveImg, catbusImg, tankImg, namiojiImg, tokkoImg, samImg, kingImg, onpaImg];
+  const imgSizes = [[70, 90], [80, 95], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [168, 112], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90]];
   const img = imgs[charIndex];
   if (img && img.complete && img.naturalWidth > 0) {
     const imgW = imgSizes[charIndex][0] * s;
@@ -4702,6 +4797,15 @@ const commandDefs = {
       attack:{ startup:8, active:5, recovery:18, damage:3, kbBase:0.5, kbScale:0.01, kbAngle:-5, hx:20, hy:-35, hw:80, hh:40, color:'#DAA520', effect:'none',
         stun:true, stunFrames:30 } },
   ],
+  17: [ // おんぱ
+    { name:'音波爆発', seq:['D','U','D'], cooldownKey:'cmd1',
+      attack:{ startup:6, active:10, recovery:18, damage:1, kbBase:8, kbScale:0.13, kbAngle:-30, hx:0, hy:-30, hw:130, hh:90, color:'#88FFFF', effect:'shockwave', centerHit:true } },
+    { name:'共鳴波', seq:['F','D','F'], cooldownKey:'cmd2',
+      attack:{ startup:8, active:5, recovery:16, damage:1, kbBase:1, kbScale:0.01, kbAngle:-5, hx:20, hy:-35, hw:90, hh:40, color:'#44DDEE', effect:'none',
+        stun:true, stunFrames:30 } },
+    { name:'高周波スクリーム', seq:['U','F','U'], cooldownKey:'cmd3', chargeCmd:true,
+      attack:{ startup:6, active:12, recovery:16, damage:2, kbBase:7, kbScale:0.12, kbAngle:-80, hx:0, hy:-60, hw:100, hh:80, color:'#FFFFFF', effect:'upslash', centerHit:true } },
+  ],
 };
 
 // Dragon mode commands (separate)
@@ -5119,6 +5223,26 @@ const attackDefs = {
               specialType:'slide', slideSpeed:10 },
     throwDmg: 10,
   },
+  // おんぱ - Sound Type (Low Damage, Max Knockback, Max Range)
+  17: {
+    normal: { name:'音波パルス', startup:3, active:3, recovery:8, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#88FFFF', effect:'none',
+              projectile:{ speed:10, damage:1, kbBase:4, kbScale:0.08, kbAngle:-15, w:18, h:18, life:35, color:'#88FFFF', pcolor:'#AAFFFF' } },
+    strong: { name:'ソニックブラスト', startup:10, active:5, recovery:16, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#44DDEE', effect:'none',
+              projectile:{ speed:12, damage:2, kbBase:7, kbScale:0.12, kbAngle:-20, w:30, h:25, life:60, color:'#44DDEE', pcolor:'#88FFFF' } },
+    special:{ name:'超音波砲', startup:12, active:30, recovery:20, damage:1, kbBase:8, kbScale:0.14, kbAngle:-10, hx:20, hy:-35, hw:200, hh:40, color:'#FFFFFF', effect:'none',
+              multiHit:true, hitInterval:6, finalDamage:2, finalKbBase:10, finalKbScale:0.16, finalKbAngle:-15 },
+    aerial: { name:'空中音波', startup:3, active:3, recovery:8, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#88FFFF', effect:'none',
+              projectile:{ speed:9, damage:1, kbBase:4, kbScale:0.08, kbAngle:-80, w:16, h:16, life:30, color:'#88FFFF', pcolor:'#AAFFFF' } },
+    down:   { name:'足元音波', startup:4, active:8, recovery:12, damage:2, kbBase:5, kbScale:0.09, kbAngle:60, hx:0, hy:5, hw:60, hh:30, color:'#44DDEE', effect:'shockwave', centerHit:true },
+    up:     { name:'頭上音波リング', startup:4, active:8, recovery:12, damage:1, kbBase:6, kbScale:0.10, kbAngle:-88, hx:0, hy:-55, hw:55, hh:55, color:'#88FFFF', effect:'upslash', centerHit:true },
+    side:   { name:'横音波', startup:4, active:5, recovery:10, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#44DDEE', effect:'none',
+              projectile:{ speed:11, damage:2, kbBase:5, kbScale:0.09, kbAngle:-12, w:22, h:18, life:45, color:'#44DDEE', pcolor:'#88FFFF' } },
+    downair:{ name:'急降下音波', startup:4, active:10, recovery:14, damage:2, kbBase:6, kbScale:0.10, kbAngle:80, hx:0, hy:10, hw:45, hh:45, color:'#44DDEE', effect:'meteor', centerHit:true },
+    dash:   { name:'ダッシュパルス', startup:3, active:3, recovery:10, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#88FFFF', effect:'none',
+              projectile:{ speed:13, damage:1, kbBase:4, kbScale:0.07, kbAngle:-10, w:16, h:14, life:40, color:'#88FFFF', pcolor:'#AAFFFF' },
+              specialType:'slide', slideSpeed:8 },
+    throwDmg: 3,
+  },
 };
 
 // Dragon mode attack defs (separate object)
@@ -5509,6 +5633,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
       14: ['#CC44FF', '#8B00CC', '#FF44AA'], // Tokko: purple/pink
       15: ['#FFD700', '#FF4444', '#4488FF'], // Sam: gold/red/blue
       16: ['#FFD700', '#DAA520', '#FFFFFF'], // King: gold/white
+      17: ['#88FFFF', '#44DDEE', '#FFFFFF'], // Onpa: cyan/white
     };
     const colors = charColors[attacker.charIdx] || ['#FFFFFF'];
     const specialCount = 30 + Math.floor(kb * 1.5);
