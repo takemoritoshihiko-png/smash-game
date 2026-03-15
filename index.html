@@ -190,6 +190,32 @@ const characters = [
     moveSpeed: 7.56,
     jumpPower: -12.94,
     weight: 1.0
+  },
+  {
+    name: '天才',
+    type: '変形型ドラゴン',
+    color: '#CC4400',
+    accent: '#FF8833',
+    dark: '#882200',
+    stats: { power: 3, speed: 4, tech: 4, defense: 2 },
+    desc: '80%以上でドラゴンに変形する上級者向けキャラ ★★★★★',
+    bodyColors: { main: '#CC4400', sub: '#FF8833', skin: '#FFDBB8' },
+    moveSpeed: 9.0,
+    jumpPower: -14.0,
+    weight: 0.8
+  },
+  {
+    name: 'Catbus',
+    type: 'スピード型',
+    color: '#DD8822',
+    accent: '#FFBB44',
+    dark: '#885511',
+    stats: { power: 3, speed: 5, tech: 2, defense: 2 },
+    desc: '猛スピードで突進する猫バス系キャラ',
+    bodyColors: { main: '#DD8822', sub: '#FFBB44', skin: '#FFE8AA' },
+    moveSpeed: 11.5,
+    jumpPower: -15.5,
+    weight: 0.7
   }
 ];
 
@@ -225,6 +251,12 @@ const shaudenImg = new Image();
 shaudenImg.src = 'images/shauden.png';
 const judgemanImg = new Image();
 judgemanImg.src = 'images/judgeman.png';
+const catbusImg = new Image();
+catbusImg.src = 'images/catbus.png';
+const tensaiHumanImg = new Image();
+tensaiHumanImg.src = 'images/tensai_human.png';
+const tensaiDragonImg = new Image();
+tensaiDragonImg.src = 'images/tensai_dragon.png';
 
 // --- Particles ---
 function spawnTitleParticle() {
@@ -743,6 +775,201 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.stroke();
       ctx.lineWidth = 1;
     }
+  } else if (charIndex === 11) {
+    // Catbus - 猫バス系
+    if (catbusImg.complete && catbusImg.naturalWidth > 0) {
+      const imgW = 80 * s;
+      const imgH = 90 * s;
+      ctx.drawImage(catbusImg, -imgW / 2, -35 * s, imgW, imgH);
+    } else {
+      // Canvas描画：猫バス風デザイン
+      // 脚（4本＝短い）
+      ctx.fillStyle = '#BB7711';
+      ctx.fillRect(-14 * s, 25 * s, 6 * s, 18 * s);
+      ctx.fillRect(-4 * s, 25 * s, 6 * s, 18 * s);
+      ctx.fillRect(4 * s, 28 * s, 6 * s, 15 * s);
+      ctx.fillRect(12 * s, 28 * s, 6 * s, 15 * s);
+      // 体（横長の楕円＝バス体型）
+      ctx.fillStyle = '#DD8822';
+      ctx.beginPath(); ctx.ellipse(0, 5 * s, 22 * s, 18 * s, 0, 0, Math.PI * 2); ctx.fill();
+      // お腹（薄い色）
+      ctx.fillStyle = '#FFE8AA';
+      ctx.beginPath(); ctx.ellipse(0, 10 * s, 16 * s, 12 * s, 0, 0, Math.PI * 2); ctx.fill();
+      // 縞模様
+      ctx.fillStyle = '#CC7711';
+      for (let i = -2; i <= 2; i++) {
+        ctx.fillRect((i * 8 - 1) * s, -8 * s, 3 * s, 20 * s);
+      }
+      // 窓（バスの窓を模した模様）
+      ctx.fillStyle = '#AADDFF';
+      ctx.globalAlpha = 0.6;
+      ctx.fillRect(-12 * s, -2 * s, 6 * s, 5 * s);
+      ctx.fillRect(-4 * s, -2 * s, 6 * s, 5 * s);
+      ctx.fillRect(4 * s, -2 * s, 6 * s, 5 * s);
+      ctx.globalAlpha = 1;
+      // 頭（丸い猫顔）
+      ctx.fillStyle = '#DD8822';
+      ctx.beginPath(); ctx.arc(0, -22 * s, 14 * s, 0, Math.PI * 2); ctx.fill();
+      // 耳（三角）
+      ctx.fillStyle = '#CC7711';
+      ctx.beginPath();
+      ctx.moveTo(-10 * s, -33 * s); ctx.lineTo(-7 * s, -44 * s); ctx.lineTo(-3 * s, -32 * s);
+      ctx.closePath(); ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(3 * s, -32 * s); ctx.lineTo(7 * s, -44 * s); ctx.lineTo(10 * s, -33 * s);
+      ctx.closePath(); ctx.fill();
+      // 耳の中
+      ctx.fillStyle = '#FFAA88';
+      ctx.beginPath();
+      ctx.moveTo(-9 * s, -34 * s); ctx.lineTo(-7 * s, -41 * s); ctx.lineTo(-4 * s, -33 * s);
+      ctx.closePath(); ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(4 * s, -33 * s); ctx.lineTo(7 * s, -41 * s); ctx.lineTo(9 * s, -34 * s);
+      ctx.closePath(); ctx.fill();
+      // 目（大きくてまん丸）
+      ctx.fillStyle = '#FFF';
+      ctx.beginPath(); ctx.arc(-5 * s, -24 * s, 5 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(5 * s, -24 * s, 5 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#222';
+      ctx.beginPath(); ctx.arc(-4 * s, -23 * s, 2.5 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(6 * s, -23 * s, 2.5 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#FFF';
+      ctx.beginPath(); ctx.arc(-3.5 * s, -24.5 * s, 1 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(6.5 * s, -24.5 * s, 1 * s, 0, Math.PI * 2); ctx.fill();
+      // 鼻
+      ctx.fillStyle = '#FF8866';
+      ctx.beginPath(); ctx.ellipse(0, -18 * s, 2.5 * s, 2 * s, 0, 0, Math.PI * 2); ctx.fill();
+      // 口（にっこり）
+      ctx.strokeStyle = '#885511';
+      ctx.lineWidth = 1.5 * s;
+      ctx.beginPath(); ctx.arc(-3 * s, -16 * s, 3 * s, 0.1, Math.PI - 0.1); ctx.stroke();
+      ctx.beginPath(); ctx.arc(3 * s, -16 * s, 3 * s, 0.1, Math.PI - 0.1); ctx.stroke();
+      ctx.lineWidth = 1;
+      // ひげ
+      ctx.strokeStyle = '#885511';
+      ctx.lineWidth = 1 * s;
+      ctx.beginPath(); ctx.moveTo(-14 * s, -20 * s); ctx.lineTo(-6 * s, -18 * s); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-14 * s, -16 * s); ctx.lineTo(-6 * s, -16 * s); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(6 * s, -18 * s); ctx.lineTo(14 * s, -20 * s); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(6 * s, -16 * s); ctx.lineTo(14 * s, -16 * s); ctx.stroke();
+      ctx.lineWidth = 1;
+      // 尻尾
+      ctx.strokeStyle = '#CC7711';
+      ctx.lineWidth = 4 * s;
+      ctx.lineCap = 'round';
+      const tailWave = Math.sin(time * 0.06) * 5 * s;
+      ctx.beginPath();
+      ctx.moveTo(-16 * s, 15 * s);
+      ctx.quadraticCurveTo(-28 * s + tailWave, 5 * s, -22 * s + tailWave, -8 * s);
+      ctx.stroke();
+      ctx.lineWidth = 1; ctx.lineCap = 'butt';
+    }
+  } else if (charIndex === 10) {
+    // 天才 - 変形型ドラゴン
+    const isDragon = typeof players !== 'undefined' && players.some(p => p.charIdx === 10 && p.dragonMode);
+    const tImg = isDragon ? tensaiDragonImg : tensaiHumanImg;
+    if (tImg.complete && tImg.naturalWidth > 0) {
+      const imgW = (isDragon ? 85 : 75) * s;
+      const imgH = (isDragon ? 95 : 90) * s;
+      ctx.drawImage(tImg, -imgW / 2, -35 * s, imgW, imgH);
+    } else {
+      if (isDragon) {
+        // ドラゴンモード描画
+        const ds = s * 1.3;
+        // 翼
+        ctx.fillStyle = '#AA3300';
+        ctx.beginPath();
+        ctx.moveTo(-14 * ds, -15 * ds);
+        ctx.lineTo(-40 * ds, -35 * ds);
+        ctx.lineTo(-35 * ds, -10 * ds);
+        ctx.lineTo(-20 * ds, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(14 * ds, -15 * ds);
+        ctx.lineTo(40 * ds, -35 * ds);
+        ctx.lineTo(35 * ds, -10 * ds);
+        ctx.lineTo(20 * ds, 0);
+        ctx.closePath();
+        ctx.fill();
+        // 尻尾
+        ctx.strokeStyle = '#CC4400';
+        ctx.lineWidth = 4 * ds;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(-10 * ds, 25 * ds);
+        ctx.quadraticCurveTo(-30 * ds, 20 * ds, -25 * ds, 5 * ds);
+        ctx.stroke();
+        ctx.lineWidth = 1; ctx.lineCap = 'butt';
+        // 脚
+        ctx.fillStyle = '#993300';
+        ctx.fillRect(-10 * ds, 20 * ds, 8 * ds, 22 * ds);
+        ctx.fillRect(2 * ds, 20 * ds, 8 * ds, 22 * ds);
+        // 体
+        ctx.fillStyle = '#CC4400';
+        ctx.beginPath(); ctx.ellipse(0, 0, 16 * ds, 22 * ds, 0, 0, Math.PI * 2); ctx.fill();
+        // 腹
+        ctx.fillStyle = '#FFAA44';
+        ctx.beginPath(); ctx.ellipse(0, 5 * ds, 10 * ds, 14 * ds, 0, 0, Math.PI * 2); ctx.fill();
+        // 頭
+        ctx.fillStyle = '#CC4400';
+        ctx.beginPath(); ctx.ellipse(0, -25 * ds, 12 * ds, 10 * ds, 0, 0, Math.PI * 2); ctx.fill();
+        // ツノ
+        ctx.fillStyle = '#FFD700';
+        ctx.beginPath(); ctx.moveTo(-6 * ds, -33 * ds); ctx.lineTo(-4 * ds, -45 * ds); ctx.lineTo(-1 * ds, -32 * ds); ctx.closePath(); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(6 * ds, -33 * ds); ctx.lineTo(4 * ds, -45 * ds); ctx.lineTo(1 * ds, -32 * ds); ctx.closePath(); ctx.fill();
+        // 目（赤い）
+        ctx.fillStyle = '#FF2200';
+        ctx.beginPath(); ctx.ellipse(-5 * ds, -26 * ds, 3 * ds, 2 * ds, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(5 * ds, -26 * ds, 3 * ds, 2 * ds, 0, 0, Math.PI * 2); ctx.fill();
+        // 口（牙）
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath(); ctx.moveTo(-3 * ds, -19 * ds); ctx.lineTo(-2 * ds, -15 * ds); ctx.lineTo(-1 * ds, -19 * ds); ctx.closePath(); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(3 * ds, -19 * ds); ctx.lineTo(2 * ds, -15 * ds); ctx.lineTo(1 * ds, -19 * ds); ctx.closePath(); ctx.fill();
+        // 炎の息（アニメーション）
+        const flameT = Math.sin(time * 0.05) * 0.5 + 0.5;
+        ctx.fillStyle = `rgba(255, ${Math.floor(100 + flameT * 100)}, 0, ${0.3 + flameT * 0.3})`;
+        ctx.beginPath(); ctx.ellipse(12 * ds, -22 * ds, 5 * ds + flameT * 3 * ds, 3 * ds, 0, 0, Math.PI * 2); ctx.fill();
+      } else {
+        // 人型モード描画
+        // 脚
+        ctx.fillStyle = '#993300';
+        ctx.fillRect(-9 * s, 25 * s, 7 * s, 20 * s);
+        ctx.fillRect(2 * s, 25 * s, 7 * s, 20 * s);
+        // 体
+        ctx.fillStyle = '#CC4400';
+        ctx.fillRect(-11 * s, -16 * s, 22 * s, 42 * s);
+        // 胸の鱗模様
+        ctx.fillStyle = '#FF8833';
+        ctx.beginPath(); ctx.moveTo(-8 * s, -8 * s); ctx.lineTo(0, 5 * s); ctx.lineTo(8 * s, -8 * s); ctx.closePath(); ctx.fill();
+        // 腕
+        ctx.fillStyle = '#BB3300';
+        ctx.fillRect(-15 * s, -12 * s, 5 * s, 24 * s);
+        ctx.fillRect(10 * s, -12 * s, 5 * s, 24 * s);
+        // 頭
+        ctx.fillStyle = '#FFDBB8';
+        ctx.beginPath(); ctx.arc(0, -25 * s, 11 * s, 0, Math.PI * 2); ctx.fill();
+        // 髪（炎っぽい赤い髪）
+        ctx.fillStyle = '#FF4400';
+        ctx.beginPath();
+        ctx.moveTo(-10 * s, -28 * s);
+        ctx.lineTo(-8 * s, -42 * s);
+        ctx.lineTo(-3 * s, -35 * s);
+        ctx.lineTo(0, -44 * s);
+        ctx.lineTo(3 * s, -35 * s);
+        ctx.lineTo(8 * s, -42 * s);
+        ctx.lineTo(10 * s, -28 * s);
+        ctx.closePath();
+        ctx.fill();
+        // 目（鋭い）
+        ctx.fillStyle = '#FF6600';
+        ctx.beginPath(); ctx.ellipse(-4 * s, -25 * s, 2.5 * s, 2 * s, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(4 * s, -25 * s, 2.5 * s, 2 * s, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#111';
+        ctx.beginPath(); ctx.arc(-4 * s, -25 * s, 1.2 * s, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(4 * s, -25 * s, 1.2 * s, 0, Math.PI * 2); ctx.fill();
+      }
+    }
   }
 
   ctx.restore();
@@ -929,8 +1156,11 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
   ctx.scale(scaleX, scaleY);
 
   // Draw character image
-  const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg, bulletImg, shaudenImg, judgemanImg];
-  const imgSizes = [[70, 90], [80, 95], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90]];
+  // 天才 uses different images per mode
+  const tensaiIsDragon = animData && animData.dragonMode;
+  const tensaiActiveImg = tensaiIsDragon ? tensaiDragonImg : tensaiHumanImg;
+  const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg, bulletImg, shaudenImg, judgemanImg, tensaiActiveImg, catbusImg];
+  const imgSizes = [[70, 90], [80, 95], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90]];
   const img = imgs[charIndex];
   if (img && img.complete && img.naturalWidth > 0) {
     const imgW = imgSizes[charIndex][0] * s;
@@ -3412,6 +3642,21 @@ let winner = -1;
 // デバッグモード（F3キーで切り替え）
 let debugHitboxes = false;
 
+// Dynamic camera system
+const cam = {
+  x: 480, y: 320,     // current camera center (world coords)
+  zoom: 1,             // current zoom level
+  targetX: 480, targetY: 320,
+  targetZoom: 1,
+  smoothX: 0.08,       // camera position lerp speed
+  smoothY: 0.08,
+  smoothZoom: 0.06,    // zoom lerp speed
+  minZoom: 0.55,       // max zoom out (see full stage)
+  maxZoom: 1.4,        // max zoom in
+  padX: 120,           // padding around players in world units
+  padY: 100,
+};
+
 // Screen shake system
 let screenShake = { x: 0, y: 0, intensity: 0, duration: 0 };
 function triggerScreenShake(intensity, duration) {
@@ -3770,6 +4015,8 @@ const commandDefs = {
     { name:'神速斬り', seq:['B','F','B','F'], cooldownKey:'cmd2',
       attack:{ startup:8, active:10, recovery:22, damage:20, kbBase:7, kbScale:0.12, kbAngle:-15, hx:15, hy:-40, hw:80, hh:50, color:'#FFFFFF', effect:'cmdZen2',
         specialType:'cmdTeleSlash', teleportDist:250 } },
+    { name:'溜め居合い斬り', seq:['D','B','D','B'], cooldownKey:'cmd3', chargeCmd:true,
+      attack:{ startup:6, active:8, recovery:20, damage:12, kbBase:4, kbScale:0.08, kbAngle:-20, hx:20, hy:-40, hw:90, hh:50, color:'#88CCFF', effect:'bigslash' } },
   ],
   1: [ // Don
     { name:'大地砕き', seq:['D','D','F','F'], cooldownKey:'cmd1',
@@ -3777,6 +4024,8 @@ const commandDefs = {
     { name:'鬼突進', seq:['F','F','F'], cooldownKey:'cmd2',
       attack:{ startup:10, active:18, recovery:20, damage:32, kbBase:8, kbScale:0.12, kbAngle:-5, hx:15, hy:-35, hw:60, hh:50, color:'#FF4400', effect:'cmdDon2',
         specialType:'cmdCharge', chargeSpeed:16 } },
+    { name:'溜めハンマー', seq:['D','B','D','B'], cooldownKey:'cmd3', chargeCmd:true,
+      attack:{ startup:10, active:10, recovery:24, damage:18, kbBase:6, kbScale:0.11, kbAngle:-55, hx:0, hy:-10, hw:110, hh:40, color:'#FF6644', effect:'shockwave', centerHit:true } },
   ],
   2: [ // Saisoku
     { name:'手裏剣嵐', seq:['D','F','D','F'], cooldownKey:'cmd1',
@@ -3785,6 +4034,9 @@ const commandDefs = {
     { name:'瞬身乱舞', seq:['F','U','F','U'], cooldownKey:'cmd2',
       attack:{ startup:6, active:20, recovery:18, damage:10, kbBase:3, kbScale:0.06, kbAngle:-25, hx:10, hy:-40, hw:60, hh:50, color:'#22FFAA', effect:'cmdSaisoku2',
         specialType:'cmdCloneRush', multiHit:true, hitInterval:5, finalDamage:12, finalKbBase:6, finalKbScale:0.10, finalKbAngle:-40, spinKB:true } },
+    { name:'溜め手裏剣', seq:['D','B','D','B'], cooldownKey:'cmd3', chargeCmd:true,
+      attack:{ startup:5, active:5, recovery:14, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#44FFAA', effect:'none',
+        projectile:{ speed:12, damage:8, kbBase:3, kbScale:0.06, kbAngle:-15, w:16, h:16, life:45, color:'#88FFCC', pcolor:'#AAFFDD', shape:'star' } } },
   ],
   3: [ // Meteor
     { name:'百裂拳', seq:['D','D','D'], cooldownKey:'cmd1',
@@ -3793,6 +4045,9 @@ const commandDefs = {
     { name:'昇天拳MAX', seq:['F','F','U','U'], cooldownKey:'cmd2',
       attack:{ startup:6, active:12, recovery:24, damage:15, kbBase:10, kbScale:0.15, kbAngle:-88, hx:10, hy:-55, hw:50, hh:70, color:'#FF8800', effect:'cmdMeteo2',
         specialType:'uppercut', launchVy:-16 } },
+    { name:'溜め気功拳', seq:['D','B','D','B'], cooldownKey:'cmd3', chargeCmd:true,
+      attack:{ startup:8, active:5, recovery:18, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FFD700', effect:'none',
+        projectile:{ speed:9, damage:14, kbBase:5, kbScale:0.09, kbAngle:-20, w:30, h:30, life:55, color:'#FFD700', pcolor:'#FFEE88' } } },
   ],
   4: [ // Long
     { name:'ドリル突撃', seq:['D','D','F','F'], cooldownKey:'cmd1',
@@ -3800,6 +4055,9 @@ const commandDefs = {
         specialType:'cmdCharge', chargeSpeed:15 } },
     { name:'機械展開', seq:['F','U','F','U'], cooldownKey:'cmd2',
       attack:{ startup:10, active:10, recovery:22, damage:22, kbBase:8, kbScale:0.13, kbAngle:-20, hx:25, hy:-38, hw:140, hh:40, color:'#A0B4FF', effect:'cmdLong2' } },
+    { name:'溜めドリル', seq:['D','B','D','B'], cooldownKey:'cmd3', chargeCmd:true,
+      attack:{ startup:6, active:18, recovery:18, damage:14, kbBase:5, kbScale:0.09, kbAngle:-10, hx:20, hy:-38, hw:80, hh:40, color:'#44FFCC', effect:'dash',
+        specialType:'cmdCharge', chargeSpeed:14 } },
   ],
   5: [ // うる男
     { name:'ウルフネイル', seq:['D','D','F','F'], cooldownKey:'cmd1',
@@ -3807,6 +4065,8 @@ const commandDefs = {
     { name:'ウルフギガンパンチ', seq:['F','F','U','U'], cooldownKey:'cmd2',
       attack:{ startup:6, active:24, recovery:18, damage:2, kbBase:0.5, kbScale:0.01, kbAngle:-10, hx:12, hy:-38, hw:50, hh:45, color:'#FF8844', effect:'cmdUruo2',
         multiHit:true, hitInterval:4, finalDamage:20, finalKbBase:9, finalKbScale:0.14, finalKbAngle:-30, spinKB:true } },
+    { name:'溜めウルフパンチ', seq:['D','B','D','B'], cooldownKey:'cmd3', chargeCmd:true,
+      attack:{ startup:8, active:8, recovery:20, damage:16, kbBase:6, kbScale:0.11, kbAngle:-25, hx:16, hy:-35, hw:60, hh:50, color:'#FFD700', effect:'punch' } },
   ],
   6: [ // 熊太郎
     { name:'はちみつ爆弾', seq:['D','D','F','F'], cooldownKey:'cmd1',
@@ -3814,6 +4074,9 @@ const commandDefs = {
         projectile:{ speed:8, damage:16, kbBase:6, kbScale:0.10, kbAngle:-30, w:25, h:25, life:50, color:'#FFCC00', pcolor:'#FFE066' } } },
     { name:'スーパーベアーパンチ', seq:['F','F','U','U'], cooldownKey:'cmd2',
       attack:{ startup:14, active:8, recovery:22, damage:28, kbBase:9, kbScale:0.14, kbAngle:-20, hx:16, hy:-35, hw:65, hh:50, color:'#FF2222', effect:'cmdKuma2' } },
+    { name:'溜めはちみつ爆弾', seq:['D','B','D','B'], cooldownKey:'cmd3', chargeCmd:true,
+      attack:{ startup:8, active:5, recovery:18, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FFCC00', effect:'none',
+        projectile:{ speed:7, damage:16, kbBase:6, kbScale:0.10, kbAngle:-40, w:28, h:28, life:50, color:'#FFCC00', pcolor:'#FFE066' } } },
   ],
   7: [ // バレット
     { name:'ミサイル', seq:['D','D','F','F'], cooldownKey:'cmd1',
@@ -3822,6 +4085,9 @@ const commandDefs = {
     { name:'バレットストーム', seq:['F','F','U','U'], cooldownKey:'cmd2',
       attack:{ startup:10, active:30, recovery:18, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF66AA', effect:'cmdBullet2',
         specialType:'bulletStorm' } },
+    { name:'溜めスナイパー', seq:['D','B','D','B'], cooldownKey:'cmd3', chargeCmd:true,
+      attack:{ startup:10, active:3, recovery:22, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF0044', effect:'none',
+        projectile:{ speed:22, damage:20, kbBase:8, kbScale:0.13, kbAngle:-10, w:20, h:10, life:80, color:'#FF0044', pcolor:'#FF4488', pierce:true } } },
   ],
   8: [ // シャうでん
     { name:'インク爆弾', seq:['D','D','F','F'], cooldownKey:'cmd1',
@@ -3830,6 +4096,9 @@ const commandDefs = {
     { name:'タコ足乱舞', seq:['F','F','U','U'], cooldownKey:'cmd2',
       attack:{ startup:5, active:24, recovery:16, damage:3, kbBase:1.5, kbScale:0.03, kbAngle:-15, hx:0, hy:-35, hw:90, hh:60, color:'#E05090', effect:'cmdShauden2',
         centerHit:true, multiHit:true, hitInterval:3, finalDamage:12, finalKbBase:6, finalKbScale:0.10, finalKbAngle:-40, spinKB:true } },
+    { name:'溜めインク噴射', seq:['D','B','D','B'], cooldownKey:'cmd3', chargeCmd:true,
+      attack:{ startup:6, active:5, recovery:16, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#2A0040', effect:'none',
+        projectile:{ speed:8, damage:10, kbBase:4, kbScale:0.07, kbAngle:-15, w:24, h:24, life:50, color:'#2A0040', pcolor:'#5A2070', ink:true } } },
   ],
   9: [ // ジャッジマン
     { name:'拘束令状', seq:['D','D','F','F'], cooldownKey:'cmd1',
@@ -3838,8 +4107,57 @@ const commandDefs = {
     { name:'死刑宣告', seq:['F','F','U','U'], cooldownKey:'cmd2',
       attack:{ startup:10, active:10, recovery:20, damage:14, kbBase:6, kbScale:0.10, kbAngle:-50, hx:0, hy:-35, hw:100, hh:80, color:'#2A2A3A', effect:'cmdJudge2',
         centerHit:true } },
+    { name:'溜め最終審判', seq:['D','B','D','B'], cooldownKey:'cmd3', chargeCmd:true,
+      attack:{ startup:10, active:10, recovery:22, damage:16, kbBase:7, kbScale:0.12, kbAngle:-60, hx:0, hy:-30, hw:90, hh:70, color:'#C0A0FF', effect:'bigpunch', centerHit:true } },
+  ],
+  10: [ // 天才（人型）
+    { name:'龍撃拳', seq:['D','D','F','F'], cooldownKey:'cmd1',
+      attack:{ startup:6, active:8, recovery:16, damage:14, kbBase:5, kbScale:0.09, kbAngle:-20, hx:16, hy:-35, hw:65, hh:45, color:'#FF6600', effect:'punch' } },
+    { name:'昇龍', seq:['F','F','U','U'], cooldownKey:'cmd2',
+      attack:{ startup:5, active:10, recovery:20, damage:16, kbBase:8, kbScale:0.12, kbAngle:-88, hx:8, hy:-55, hw:45, hh:60, color:'#FF4400', effect:'upslash',
+        specialType:'uppercut', launchVy:-14 } },
+    { name:'溜め龍撃', seq:['D','B','D','B'], cooldownKey:'cmd3', chargeCmd:true,
+      attack:{ startup:6, active:8, recovery:18, damage:12, kbBase:4, kbScale:0.08, kbAngle:-20, hx:18, hy:-35, hw:70, hh:50, color:'#FF8833', effect:'punch' } },
+  ],
+  11: [ // Catbus
+    { name:'ターボダッシュ', seq:['D','D','F','F'], cooldownKey:'cmd1',
+      attack:{ startup:4, active:18, recovery:16, damage:16, kbBase:6, kbScale:0.10, kbAngle:-8, hx:18, hy:-32, hw:70, hh:45, color:'#FFBB44', effect:'dash',
+        specialType:'cmdCharge', chargeSpeed:18 } },
+    { name:'キャットスピン', seq:['F','F','U','U'], cooldownKey:'cmd2',
+      attack:{ startup:5, active:20, recovery:18, damage:3, kbBase:1.5, kbScale:0.03, kbAngle:-15, hx:0, hy:-35, hw:80, hh:60, color:'#DD8822', effect:'airkick',
+        centerHit:true, multiHit:true, hitInterval:4, finalDamage:12, finalKbBase:6, finalKbScale:0.10, finalKbAngle:-40, spinKB:true,
+        specialType:'cmdCharge', chargeSpeed:12 } },
+    { name:'溜めダッシュ', seq:['D','B','D','B'], cooldownKey:'cmd3', chargeCmd:true,
+      attack:{ startup:3, active:14, recovery:14, damage:14, kbBase:5, kbScale:0.09, kbAngle:-10, hx:20, hy:-32, hw:75, hh:45, color:'#FFBB44', effect:'punch',
+        specialType:'cmdCharge', chargeSpeed:16 } },
   ],
 };
+
+// Dragon mode commands (separate)
+const dragonCommandDefs = [
+  { name:'メガフレイム', seq:['D','D','F','F'], cooldownKey:'cmd1',
+    attack:{ startup:8, active:5, recovery:18, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF4400', effect:'none',
+      projectile:{ speed:8, damage:22, kbBase:7, kbScale:0.12, kbAngle:-15, w:45, h:35, life:55, color:'#FF4400', pcolor:'#FFAA44' } } },
+  { name:'天空龍', seq:['F','F','U','U'], cooldownKey:'cmd2',
+    attack:{ startup:8, active:0, recovery:22, damage:25, kbBase:9, kbScale:0.14, kbAngle:-80, hx:0, hy:-10, hw:90, hh:60, color:'#FF2200', effect:'slam',
+      specialType:'jumpSlam', jumpPower:-18, slamActive:8 } },
+  { name:'溜め炎ブレス', seq:['D','B','D','B'], cooldownKey:'cmd3', chargeCmd:true,
+    attack:{ startup:8, active:5, recovery:18, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF4400', effect:'none',
+      projectile:{ speed:8, damage:18, kbBase:6, kbScale:0.10, kbAngle:-20, w:35, h:30, life:50, color:'#FF4400', pcolor:'#FFAA44' } } },
+];
+// Scale dragon commands
+(function() {
+  const f = 1/1.68, df = 0.6;
+  for (const cmd of dragonCommandDefs) {
+    const a = cmd.attack;
+    a.startup = Math.max(1, Math.round(a.startup * f));
+    a.active = Math.max(1, Math.round(a.active * f));
+    a.recovery = Math.max(1, Math.round(a.recovery * f));
+    a.damage = Math.round(a.damage * df * 10) / 10;
+    if (a.slamActive) a.slamActive = Math.max(1, Math.round(a.slamActive * f));
+    if (a.projectile) a.projectile.damage = Math.round(a.projectile.damage * df * 10) / 10;
+  }
+})();
 
 function addCmdInput(playerId, dir) {
   const now = performance.now();
@@ -3856,7 +4174,8 @@ function checkCommandInput(player) {
   const pid = player.id;
   const buf = cmdInputBuffers[pid];
   if (buf.length < 3) return null;
-  const cmds = commandDefs[player.charIdx];
+  // 天才: ドラゴンモード時は別のcommandDefsを使用
+  const cmds = (player.charIdx === 10 && player.dragonMode) ? dragonCommandDefs : commandDefs[player.charIdx];
   if (!cmds) return null;
 
   for (const cmd of cmds) {
@@ -3962,6 +4281,7 @@ const attackDefs = {
     up:     { name:'斬り上げ', startup:5, active:8, recovery:14, damage:11, kbBase:5, kbScale:0.09, kbAngle:-88, hx:5, hy:-55, hw:45, hh:50, color:'#AADDFF', effect:'upslash' },
     side:   { name:'横一文字斬り', startup:6, active:7, recovery:13, damage:12, kbBase:5, kbScale:0.09, kbAngle:-15, hx:20, hy:-35, hw:80, hh:35, color:'#88CCFF', effect:'sideslash' },
     downair:{ name:'刀突き刺し', startup:6, active:10, recovery:14, damage:13, kbBase:5, kbScale:0.10, kbAngle:80, hx:0, hy:10, hw:35, hh:50, color:'#AADDFF', effect:'meteor' },
+    dash:   { name:'ダッシュ斬り', startup:4, active:8, recovery:14, damage:10, kbBase:4, kbScale:0.07, kbAngle:-20, hx:20, hy:-35, hw:70, hh:40, color:'#88CCFF', effect:'sideslash', specialType:'slide', slideSpeed:8 },
     throwDmg: 10,
   },
   // Don - Power
@@ -3975,6 +4295,7 @@ const attackDefs = {
     up:     { name:'ハンマー叩き上げ', startup:8, active:7, recovery:16, damage:15, kbBase:6, kbScale:0.10, kbAngle:-88, hx:5, hy:-55, hw:50, hh:50, color:'#FF8844', effect:'upslash' },
     side:   { name:'横薙ぎハンマー', startup:9, active:8, recovery:16, damage:16, kbBase:6, kbScale:0.10, kbAngle:-12, hx:15, hy:-30, hw:90, hh:40, color:'#FF6644', effect:'sideslash' },
     downair:{ name:'ハンマー叩き落とし', startup:8, active:10, recovery:16, damage:16, kbBase:7, kbScale:0.11, kbAngle:80, hx:0, hy:10, hw:45, hh:55, color:'#FF4422', effect:'meteor', centerHit:true },
+    dash:   { name:'肩タックル', startup:5, active:10, recovery:16, damage:14, kbBase:5, kbScale:0.09, kbAngle:-15, hx:18, hy:-30, hw:55, hh:50, color:'#FF6644', effect:'punch', specialType:'cmdCharge', chargeSpeed:10 },
     throwDmg: 14,
   },
   // Saisoku - Ninja
@@ -3991,6 +4312,7 @@ const attackDefs = {
     up:     { name:'跳び上がり蹴り', startup:4, active:8, recovery:12, damage:9, kbBase:4, kbScale:0.08, kbAngle:-88, hx:3, hy:-55, hw:40, hh:50, color:'#66FFBB', effect:'upslash', specialType:'uppercut', launchVy:-10 },
     side:   { name:'横回し蹴り', startup:4, active:7, recovery:10, damage:10, kbBase:4, kbScale:0.08, kbAngle:-15, hx:18, hy:-35, hw:65, hh:40, color:'#44FFAA', effect:'sideslash' },
     downair:{ name:'急降下蹴り', startup:4, active:12, recovery:12, damage:11, kbBase:5, kbScale:0.09, kbAngle:80, hx:0, hy:10, hw:35, hh:50, color:'#22FFAA', effect:'meteor', specialType:'divekick', diveSpeed:14 },
+    dash:   { name:'スライディング蹴り', startup:3, active:10, recovery:10, damage:9, kbBase:3, kbScale:0.06, kbAngle:-10, hx:20, hy:-10, hw:65, hh:25, color:'#44FFAA', effect:'sliding', specialType:'slide', slideSpeed:12 },
     throwDmg: 8,
   },
   // Meteor - Martial Arts
@@ -4005,6 +4327,7 @@ const attackDefs = {
     up:     { name:'アッパー', startup:4, active:7, recovery:14, damage:12, kbBase:5, kbScale:0.09, kbAngle:-88, hx:8, hy:-55, hw:42, hh:50, color:'#FFDD44', effect:'upslash', specialType:'uppercut', launchVy:-11 },
     side:   { name:'強烈なストレート', startup:5, active:6, recovery:14, damage:13, kbBase:5, kbScale:0.09, kbAngle:-12, hx:18, hy:-35, hw:55, hh:35, color:'#FFAA22', effect:'sideslash' },
     downair:{ name:'飛び膝落とし', startup:5, active:10, recovery:14, damage:14, kbBase:6, kbScale:0.10, kbAngle:80, hx:5, hy:10, hw:40, hh:50, color:'#FF8800', effect:'meteor', specialType:'divekick', diveSpeed:12 },
+    dash:   { name:'ダッシュアッパー', startup:4, active:8, recovery:14, damage:11, kbBase:4, kbScale:0.08, kbAngle:-70, hx:15, hy:-40, hw:50, hh:50, color:'#FFAA22', effect:'uppercut', specialType:'uppercut', launchVy:-8 },
     throwDmg: 11,
   },
   // Long - Mechanical Spear
@@ -4019,6 +4342,7 @@ const attackDefs = {
     up:     { name:'槍突き上げ', startup:5, active:8, recovery:14, damage:11, kbBase:5, kbScale:0.09, kbAngle:-88, hx:3, hy:-60, hw:40, hh:55, color:'#A0B4FF', effect:'upslash' },
     side:   { name:'槍横薙ぎ', startup:5, active:7, recovery:12, damage:11, kbBase:5, kbScale:0.08, kbAngle:-15, hx:22, hy:-35, hw:95, hh:35, color:'#8899EE', effect:'sideslash' },
     downair:{ name:'槍突き刺し', startup:5, active:10, recovery:14, damage:13, kbBase:6, kbScale:0.10, kbAngle:80, hx:0, hy:10, hw:35, hh:55, color:'#44FFCC', effect:'meteor' },
+    dash:   { name:'槍突進', startup:4, active:10, recovery:14, damage:10, kbBase:4, kbScale:0.07, kbAngle:-10, hx:25, hy:-38, hw:85, hh:30, color:'#A0B4FF', effect:'slash', specialType:'slide', slideSpeed:10 },
     throwDmg: 9,
   },
   // うる男 - Wolf Beast
@@ -4034,6 +4358,7 @@ const attackDefs = {
     side:   { name:'ウルフスラッシュ', startup:6, active:7, recovery:12, damage:12, kbBase:5, kbScale:0.09, kbAngle:-15, hx:18, hy:-35, hw:70, hh:40, color:'#C8A878', effect:'sideslash' },
     downair:{ name:'急降下爪撃', startup:5, active:10, recovery:14, damage:14, kbBase:6, kbScale:0.10, kbAngle:80, hx:0, hy:10, hw:40, hh:50, color:'#FFD700', effect:'meteor',
               specialType:'divekick', diveSpeed:13 },
+    dash:   { name:'四足タックル', startup:4, active:12, recovery:14, damage:12, kbBase:5, kbScale:0.08, kbAngle:-15, hx:18, hy:-25, hw:60, hh:45, color:'#C8A878', effect:'punch', specialType:'cmdCharge', chargeSpeed:11 },
     throwDmg: 12,
   },
   // 熊太郎 - Black Bear
@@ -4048,6 +4373,7 @@ const attackDefs = {
     side:   { name:'クマスワイプ', startup:5, active:7, recovery:11, damage:11, kbBase:4, kbScale:0.08, kbAngle:-15, hx:16, hy:-32, hw:60, hh:38, color:'#FF4444', effect:'sideslash' },
     downair:{ name:'お尻プレス', startup:5, active:10, recovery:14, damage:14, kbBase:6, kbScale:0.10, kbAngle:80, hx:0, hy:10, hw:45, hh:50, color:'#FF6B6B', effect:'meteor',
               specialType:'divekick', diveSpeed:12 },
+    dash:   { name:'ぽよん突進', startup:4, active:10, recovery:12, damage:10, kbBase:4, kbScale:0.07, kbAngle:-25, hx:16, hy:-30, hw:55, hh:45, color:'#FF6B6B', effect:'punch', specialType:'slide', slideSpeed:9 },
     throwDmg: 10,
   },
   // バレット - Gunner (ranged specialist)
@@ -4069,6 +4395,8 @@ const attackDefs = {
               projectile:{ speed:11, damage:9, kbBase:4, kbScale:0.07, kbAngle:-15, w:14, h:10, life:55, color:'#FF66AA', pcolor:'#FFAACC' } },
     downair:{ name:'空中下射撃', startup:4, active:3, recovery:12, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FFAA66', effect:'none',
               projectile:{ speed:12, damage:8, kbBase:3, kbScale:0.06, kbAngle:80, w:10, h:12, life:40, color:'#FFAA66', pcolor:'#FFCC88', dirAngle:90 } },
+    dash:   { name:'ダッシュ連射', startup:3, active:12, recovery:12, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF66AA', effect:'none',
+              projectile:{ speed:13, damage:5, kbBase:2, kbScale:0.04, kbAngle:-10, w:10, h:8, life:40, color:'#FF66AA', pcolor:'#FFAACC' }, multiShot:3, shotInterval:4, specialType:'slide', slideSpeed:6 },
     throwDmg: 5,
   },
   // シャうでん - Octopus Speed
@@ -4084,6 +4412,7 @@ const attackDefs = {
     side:   { name:'触手横ビンタ', startup:3, active:6, recovery:9, damage:9, kbBase:4, kbScale:0.07, kbAngle:-15, hx:16, hy:-35, hw:65, hh:35, color:'#FF80B0', effect:'sideslash' },
     downair:{ name:'触手急降下', startup:4, active:10, recovery:12, damage:11, kbBase:5, kbScale:0.09, kbAngle:80, hx:0, hy:10, hw:40, hh:50, color:'#E05090', effect:'meteor',
               specialType:'divekick', diveSpeed:14 },
+    dash:   { name:'触手突進', startup:3, active:10, recovery:10, damage:9, kbBase:3, kbScale:0.06, kbAngle:-15, hx:20, hy:-30, hw:65, hh:40, color:'#FF80B0', effect:'slash', specialType:'slide', slideSpeed:11 },
     throwDmg: 7,
   },
   9: {
@@ -4098,9 +4427,73 @@ const attackDefs = {
     side:   { name:'木槌横振り', startup:5, active:6, recovery:10, damage:9, kbBase:4, kbScale:0.07, kbAngle:-20, hx:15, hy:-35, hw:65, hh:40, color:'#A07818', effect:'sideslash' },
     downair:{ name:'マント急降下', startup:5, active:10, recovery:14, damage:12, kbBase:5, kbScale:0.09, kbAngle:80, hx:0, hy:10, hw:45, hh:50, color:'#1A1A2A', effect:'meteor',
               specialType:'divekick', diveSpeed:14 },
+    dash:   { name:'マント突進', startup:4, active:10, recovery:14, damage:11, kbBase:4, kbScale:0.07, kbAngle:-20, hx:18, hy:-35, hw:65, hh:50, color:'#3A2050', effect:'sideslash', specialType:'slide', slideSpeed:9 },
     throwDmg: 10,
+  },
+  // 天才 - 人型モード
+  10: {
+    normal: { name:'連続パンチ', startup:3, active:6, recovery:8, damage:5, kbBase:2, kbScale:0.04, kbAngle:-12, hx:12, hy:-35, hw:45, hh:35, color:'#FF8833', effect:'punch' },
+    strong: { name:'回し蹴り', startup:6, active:8, recovery:14, damage:10, kbBase:4, kbScale:0.08, kbAngle:-20, hx:14, hy:-35, hw:60, hh:40, color:'#CC4400', effect:'airkick' },
+    special:{ name:'小炎ブレス', startup:6, active:5, recovery:14, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF6600', effect:'none',
+              projectile:{ speed:10, damage:8, kbBase:3, kbScale:0.06, kbAngle:-15, w:18, h:18, life:35, color:'#FF6600', pcolor:'#FFAA44' } },
+    aerial: { name:'空中回転蹴り', startup:3, active:8, recovery:8, damage:7, kbBase:3, kbScale:0.06, kbAngle:-80, hx:0, hy:-30, hw:55, hh:50, color:'#FF8833', effect:'airkick', centerHit:true },
+    down:   { name:'足払い', startup:3, active:8, recovery:10, damage:6, kbBase:3, kbScale:0.05, kbAngle:20, hx:15, hy:-8, hw:60, hh:22, color:'#CC4400', effect:'sweep', specialType:'slide', slideSpeed:5 },
+    up:     { name:'昇り蹴り', startup:4, active:8, recovery:12, damage:9, kbBase:4, kbScale:0.08, kbAngle:-88, hx:5, hy:-55, hw:40, hh:50, color:'#FF8833', effect:'upslash', specialType:'uppercut', launchVy:-10 },
+    side:   { name:'横蹴り', startup:4, active:6, recovery:10, damage:8, kbBase:3, kbScale:0.07, kbAngle:-15, hx:16, hy:-35, hw:55, hh:35, color:'#CC4400', effect:'sideslash' },
+    downair:{ name:'急降下蹴り', startup:4, active:10, recovery:12, damage:10, kbBase:5, kbScale:0.09, kbAngle:80, hx:0, hy:10, hw:35, hh:50, color:'#FF6600', effect:'meteor', specialType:'divekick', diveSpeed:13 },
+    dash:   { name:'ダッシュパンチ', startup:3, active:8, recovery:12, damage:9, kbBase:3, kbScale:0.06, kbAngle:-15, hx:18, hy:-35, hw:55, hh:40, color:'#FF8833', effect:'punch', specialType:'slide', slideSpeed:10 },
+    throwDmg: 9,
+  },
+  // Catbus - 猫バス系スピード型
+  11: {
+    normal: { name:'猫パンチ', startup:2, active:5, recovery:7, damage:4, kbBase:2, kbScale:0.04, kbAngle:-12, hx:12, hy:-32, hw:45, hh:35, color:'#FFBB44', effect:'punch' },
+    strong: { name:'バス突進', startup:6, active:12, recovery:14, damage:12, kbBase:5, kbScale:0.09, kbAngle:-10, hx:18, hy:-30, hw:65, hh:45, color:'#DD8822', effect:'punch',
+              specialType:'cmdCharge', chargeSpeed:14 },
+    special:{ name:'フルスピードダッシュ', startup:4, active:16, recovery:16, damage:14, kbBase:5, kbScale:0.10, kbAngle:-12, hx:16, hy:-35, hw:60, hh:45, color:'#FFBB44', effect:'dash',
+              specialType:'shadowDash', dashSpeed:18 },
+    aerial: { name:'空中体当たり', startup:3, active:10, recovery:10, damage:9, kbBase:4, kbScale:0.07, kbAngle:50, hx:10, hy:5, hw:50, hh:45, color:'#DD8822', effect:'airknee',
+              specialType:'divekick', diveSpeed:12 },
+    down:   { name:'急ブレーキ', startup:4, active:8, recovery:14, damage:10, kbBase:5, kbScale:0.08, kbAngle:-60, hx:0, hy:-25, hw:70, hh:50, color:'#FFBB44', effect:'shockwave', centerHit:true },
+    up:     { name:'ジャンプ体当たり', startup:4, active:10, recovery:14, damage:11, kbBase:5, kbScale:0.09, kbAngle:-88, hx:3, hy:-55, hw:45, hh:55, color:'#DD8822', effect:'upslash',
+              specialType:'uppercut', launchVy:-13 },
+    side:   { name:'横突進', startup:3, active:8, recovery:10, damage:9, kbBase:4, kbScale:0.07, kbAngle:-12, hx:18, hy:-32, hw:65, hh:38, color:'#FFBB44', effect:'sideslash', specialType:'slide', slideSpeed:8 },
+    downair:{ name:'猫プレス', startup:4, active:10, recovery:12, damage:12, kbBase:5, kbScale:0.09, kbAngle:80, hx:0, hy:10, hw:40, hh:50, color:'#DD8822', effect:'meteor',
+              specialType:'divekick', diveSpeed:15 },
+    dash:   { name:'フルスロットル', startup:2, active:12, recovery:10, damage:10, kbBase:4, kbScale:0.07, kbAngle:-8, hx:20, hy:-30, hw:70, hh:45, color:'#FFBB44', effect:'punch',
+              specialType:'cmdCharge', chargeSpeed:16 },
+    throwDmg: 8,
   }
 };
+
+// Dragon mode attack defs (separate object)
+const dragonAttackDefs = {
+  normal: { name:'ドラゴンクロー', startup:5, active:8, recovery:14, damage:14, kbBase:5, kbScale:0.09, kbAngle:-15, hx:18, hy:-40, hw:80, hh:55, color:'#FF6600', effect:'bigslash' },
+  strong: { name:'巨大炎ブレス', startup:10, active:5, recovery:20, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF4400', effect:'none',
+            projectile:{ speed:8, damage:18, kbBase:6, kbScale:0.11, kbAngle:-15, w:40, h:30, life:50, color:'#FF4400', pcolor:'#FFAA44' } },
+  special:{ name:'ドラゴンブレイク', startup:12, active:10, recovery:22, damage:20, kbBase:8, kbScale:0.13, kbAngle:-50, hx:0, hy:-30, hw:120, hh:100, color:'#FF2200', effect:'shockwave', centerHit:true },
+  aerial: { name:'翼叩きつけ', startup:5, active:10, recovery:12, damage:15, kbBase:6, kbScale:0.10, kbAngle:-70, hx:0, hy:-30, hw:80, hh:65, color:'#AA3300', effect:'airslam', centerHit:true },
+  down:   { name:'尻尾叩きつけ', startup:6, active:8, recovery:16, damage:18, kbBase:7, kbScale:0.12, kbAngle:80, hx:0, hy:5, hw:70, hh:45, color:'#CC4400', effect:'meteor', centerHit:true },
+  up:     { name:'真上炎ブレス', startup:5, active:8, recovery:14, damage:14, kbBase:6, kbScale:0.10, kbAngle:-88, hx:0, hy:-65, hw:55, hh:60, color:'#FF6600', effect:'upslash', centerHit:true },
+  side:   { name:'ドラゴンスラッシュ', startup:6, active:8, recovery:14, damage:16, kbBase:6, kbScale:0.10, kbAngle:-15, hx:20, hy:-40, hw:90, hh:50, color:'#FF4400', effect:'bigslash' },
+  downair:{ name:'ドラゴン急降下', startup:5, active:12, recovery:16, damage:20, kbBase:8, kbScale:0.13, kbAngle:80, hx:0, hy:10, hw:55, hh:60, color:'#FF2200', effect:'meteor', specialType:'divekick', diveSpeed:16 },
+  dash:   { name:'ドラゴンチャージ', startup:5, active:12, recovery:16, damage:16, kbBase:6, kbScale:0.10, kbAngle:-10, hx:20, hy:-35, hw:75, hh:55, color:'#CC4400', effect:'punch', specialType:'cmdCharge', chargeSpeed:12 },
+  throwDmg: 14,
+};
+
+// Scale dragon attacks too
+(function scaleDragonAtks() {
+  const factor = 1 / 1.68;
+  const dmgFactor = 0.6;
+  for (const type in dragonAttackDefs) {
+    if (type === 'throwDmg') { dragonAttackDefs[type] = Math.round(dragonAttackDefs[type] * dmgFactor); continue; }
+    const atk = dragonAttackDefs[type];
+    atk.startup = Math.max(1, Math.round(atk.startup * factor));
+    atk.active = Math.max(1, Math.round(atk.active * factor));
+    atk.recovery = Math.max(1, Math.round(atk.recovery * factor));
+    atk.damage = Math.round(atk.damage * dmgFactor * 10) / 10;
+    if (atk.projectile) atk.projectile.damage = Math.round(atk.projectile.damage * dmgFactor * 10) / 10;
+  }
+})();
 
 // --- Speed up attacks to 168% of original (frames × 0.595) ---
 (function scaleAttackSpeeds() {
@@ -4167,6 +4560,8 @@ function createPlayer(id, charIdx, startX) {
     grabbing: false, grabTarget: null, grabTimer: 0,
     grabbed: false, grabbedBy: null,
     grabHoldFrames: 0, // how long X/I has been held
+    // Charge command state
+    charging: false, chargeTime: 0, chargeCmd: null, chargeMaxTime: 120, // 2 sec max
     throwCooldown: 0,
     // Guard state
     guarding: false,
@@ -4176,9 +4571,13 @@ function createPlayer(id, charIdx, startX) {
     // Command cooldowns
     cd_cmd1: 0,
     cd_cmd2: 0,
+    cd_cmd3: 0,
     sniperCooldown: 0,
     inkBlindTimer: 0,
     strongLocked: false, // locked until landing after aerial strong
+    // Dragon mode (天才 only)
+    dragonMode: false, dragonTimer: 0, dragonCooldown: 0,
+    dragonTransforming: false, dragonTransformTimer: 0,
     // Animation state
     animState: 'idle', // 'idle' | 'walk' | 'jump' | 'fall' | 'hitstun'
     animTimer: 0,
@@ -4216,6 +4615,9 @@ function initBattle() {
   cmdFlash = { alpha: 0, color: '#FFFFFF' };
   cmdScaleEffect = { playerId: -1, life: 0 };
   hitStopFrames = 0;
+  cam.x = cam.targetX = 480;
+  cam.y = cam.targetY = 300;
+  cam.zoom = cam.targetZoom = 0.9;
   koSlashEffects = [];
   koSlowMotion = { active: false, frames: 0, maxFrames: 90 };
   stockLossAnim = { active: false, playerId: -1, life: 0, maxLife: 30, x: 0, y: 0 };
@@ -4390,6 +4792,8 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
       3: ['#FFD700', '#FFAA33', '#FFEE88'],  // Meteor: gold
       4: ['#44FFCC', '#88AAFF', '#66DDFF'],  // Long: cyan
       9: ['#C0A0FF', '#9966DD', '#3A2050'],  // Judgeman: purple
+      10: ['#FF6600', '#FF8833', '#CC4400'], // Tensai: fire
+      11: ['#FFBB44', '#DD8822', '#FFE8AA'], // Catbus: orange
     };
     const colors = charColors[attacker.charIdx] || ['#FFFFFF'];
     const specialCount = 30 + Math.floor(kb * 1.5);
@@ -4646,7 +5050,8 @@ function startAttack(p, type) {
   if (type === 'special' && p.charIdx === 7 && p.sniperCooldown > 0) return;
 
   // Context-sensitive attack type
-  const defs = attackDefs[p.charIdx];
+  // 天才: ドラゴンモード時は別のattackDefsを使用
+  const defs = (p.charIdx === 10 && p.dragonMode) ? dragonAttackDefs : attackDefs[p.charIdx];
   let actualType = type;
   // downair は空中専用
   if (type === 'downair' && p.grounded) return;
@@ -5176,8 +5581,55 @@ function updateBattle(dt) {
     if (p.throwCooldown > 0) p.throwCooldown--;
     if (p.cd_cmd1 > 0) p.cd_cmd1--;
     if (p.cd_cmd2 > 0) p.cd_cmd2--;
+    if (p.cd_cmd3 > 0) p.cd_cmd3--;
     if (p.sniperCooldown > 0) p.sniperCooldown--;
     if (p.inkBlindTimer > 0) p.inkBlindTimer--;
+    if (p.dragonCooldown > 0) p.dragonCooldown--;
+
+    // 天才: ドラゴンモード処理
+    if (p.charIdx === 10) {
+      // Transform: Cボタン長押しで変形（ダメージ80%以上、クールダウンなし）
+      const cKeyHeld = p.id === 0 ? (keys['c'] || keys['C']) : (gameMode === 'vs' ? (keys['o'] || keys['O']) : false);
+      if (cKeyHeld && !p.dragonMode && p.damage >= 80 && p.dragonCooldown <= 0 && p.grounded && p.hitstun <= 0) {
+        p.dragonTransformTimer++;
+        if (p.dragonTransformTimer >= 60) { // 1秒長押し
+          p.dragonMode = true;
+          p.dragonTimer = 900; // 15秒
+          p.dragonTransformTimer = 0;
+          p.dragonTransforming = true;
+          // 変形エフェクト
+          triggerScreenShake(8, 15);
+          hitFlash.alpha = 0.4;
+          hitFlash.color = '#FF4400';
+          hitEffects.push({ x: p.x, y: p.y - 40, life: 25, maxLife: 25, color: '#FF6600', size: 60 });
+          specialAura.push({ playerId: p.id, life: 60, maxLife: 60 });
+          playHitSound('cmd');
+          // 炎パーティクル
+          for (let i = 0; i < 20; i++) {
+            const a = Math.random() * Math.PI * 2;
+            sparks.push({ x: p.x, y: p.y - 35, vx: Math.cos(a) * (3 + Math.random() * 5), vy: Math.sin(a) * (3 + Math.random() * 5) - 2,
+              life: 20 + Math.floor(Math.random() * 15), maxLife: 35, color: ['#FF4400','#FF8833','#FFAA44'][i%3], size: 3 + Math.random() * 4, type: 'fireball', gravity: 0.08, drag: 0.97 });
+          }
+          cmdNameDisplay.push({ text: 'DRAGON MODE!', x: p.x, y: p.y - 120, life: 90, maxLife: 90, color: '#FF4400' });
+          // ドラゴンモードではステータス変更
+          p.weight = 1.3;
+        }
+      } else {
+        p.dragonTransformTimer = 0;
+      }
+      // ドラゴンモードタイマー
+      if (p.dragonMode) {
+        p.dragonTimer--;
+        p.dragonTransforming = false;
+        if (p.dragonTimer <= 0) {
+          p.dragonMode = false;
+          p.dragonCooldown = 1200; // 20秒クールダウン
+          p.weight = 0.8; // 人型に戻す
+          hitEffects.push({ x: p.x, y: p.y - 40, life: 15, maxLife: 15, color: '#FFFFFF', size: 40 });
+          cmdNameDisplay.push({ text: 'HUMAN MODE', x: p.x, y: p.y - 120, life: 60, maxLife: 60, color: '#FF8833' });
+        }
+      }
+    }
 
     // Grabbed state: stuck to grabber
     if (p.grabbed) {
@@ -5604,6 +6056,55 @@ function updateBattle(dt) {
       }
     }
 
+    // Charge command update
+    if (p.charging) {
+      p.chargeTime++;
+      // Cancel if hit or not grounded
+      if (p.hitstun > 0 || !p.alive) {
+        p.charging = false; p.chargeCmd = null;
+      }
+      // Check if attack key released → fire charge
+      const attackKeyHeld = p.id === 0 ? (keys['z'] || keys['Z']) : (keys['u'] || keys['U']);
+      if (!attackKeyHeld || p.chargeTime >= p.chargeMaxTime) {
+        // Release charge!
+        const chargeRatio = Math.min(p.chargeTime / p.chargeMaxTime, 1); // 0→1
+        const cmd = p.chargeCmd;
+        p.charging = false; p.chargeCmd = null;
+        if (cmd && !p.attacking && p.alive) {
+          // Scale damage/knockback/size by charge ratio (1x at min → 2.5x at max)
+          const scaleFactor = 1 + chargeRatio * 1.5;
+          const chargedAtk = JSON.parse(JSON.stringify(cmd.attack));
+          chargedAtk.damage = Math.round(chargedAtk.damage * scaleFactor);
+          chargedAtk.kbBase = chargedAtk.kbBase * scaleFactor;
+          chargedAtk.kbScale = chargedAtk.kbScale * scaleFactor;
+          if (chargedAtk.hw) chargedAtk.hw = Math.round(chargedAtk.hw * (1 + chargeRatio * 0.5));
+          if (chargedAtk.hh) chargedAtk.hh = Math.round(chargedAtk.hh * (1 + chargeRatio * 0.5));
+          if (chargedAtk.projectile) {
+            chargedAtk.projectile.damage = Math.round(chargedAtk.projectile.damage * scaleFactor);
+            chargedAtk.projectile.w = Math.round(chargedAtk.projectile.w * (1 + chargeRatio * 0.6));
+            chargedAtk.projectile.h = Math.round(chargedAtk.projectile.h * (1 + chargeRatio * 0.6));
+          }
+          // Execute as command
+          p.attacking = true;
+          p.attackType = 'command';
+          p.attackFrame = 0;
+          p.attackData = chargedAtk;
+          p.hitTargets = [];
+          p.lastHitFrame = -99;
+          p.specialState = null;
+          p['cd_' + cmd.cooldownKey] = 300; // 5 sec cooldown
+          playHitSound('cmd');
+          triggerScreenShake(3 + chargeRatio * 4, 8);
+          hitFlash.alpha = 0.1 + chargeRatio * 0.15;
+          hitFlash.color = characters[p.charIdx].accent;
+          // Show charge release effect
+          const ch2 = characters[p.charIdx];
+          cmdNameDisplay.push({ text: cmd.name, x: p.x, y: p.y - 120, life: 60, maxLife: 60, color: ch2.accent });
+          hitEffects.push({ x: p.x, y: p.y - 40, life: 15, maxLife: 15, color: '#FFFFFF', size: 30 + chargeRatio * 30 });
+        }
+      }
+    }
+
     if (jumpPress && !p.jumpUsed && p.jumps > 0) {
       p.vy = ch.jumpPower;
       p.jumps--; p.jumpUsed = true; p.grounded = false;
@@ -5769,18 +6270,9 @@ function applyMovement(p, moveX, ch) {
   }
 }
 
-// 壁・天井バウンド判定（吹っ飛び中のみ）
+// 地面バウンド判定（吹っ飛び中のみ）
 function wallBounceCheck(p) {
   if (p.hitstun <= 0) return;
-
-  // 天井バウンド
-  if (p.y <= BLAST_TOP + 10 && p.vy < -WALL_BOUNCE_THRESHOLD) {
-    p.vy *= CEILING_BOUNCE_FACTOR;
-    p.y = BLAST_TOP + 11;
-    p.spinAngle += (p.vx > 0 ? 0.1 : -0.1);
-    triggerScreenShake(3, 6);
-    sparks.push({ x: p.x, y: BLAST_TOP + 10, vx: -1 + Math.random() * 2, vy: 3, life: 12, color: '#FFAA44' });
-  }
 
   // 地面バウンド（ステージ上で高速落下時）
   if (p.grounded && Math.abs(p.vy) < 1 && p.hitstun > 5) {
@@ -5977,7 +6469,73 @@ function blastCheck(p) {
 // ============================================================
 // BATTLE DRAWING
 // ============================================================
+function updateCamera() {
+  // Find alive players to track
+  const alive = players.filter(p => p.alive);
+  if (alive.length === 0) return;
+
+  // Calculate bounding box of all alive players
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  for (const p of alive) {
+    minX = Math.min(minX, p.x);
+    maxX = Math.max(maxX, p.x);
+    minY = Math.min(minY, p.y - 70); // account for character height
+    maxY = Math.max(maxY, p.y);
+  }
+
+  // Also track players in hitstun flying offscreen (but not too far)
+  for (const p of players) {
+    if (!p.alive && p.respawnTimer > RESPAWN_TIME - 10) {
+      // Recently died - briefly track their last position
+      minX = Math.min(minX, Math.max(BLAST_LEFT + 50, p.x));
+      maxX = Math.max(maxX, Math.min(BLAST_RIGHT - 50, p.x));
+    }
+  }
+
+  // Target center = midpoint of players
+  cam.targetX = (minX + maxX) / 2;
+  cam.targetY = (minY + maxY) / 2;
+
+  // Clamp target to keep stage visible
+  const stageCX = (STAGE_LEFT + STAGE_RIGHT) / 2;
+  const stageCY = STAGE_GROUND_Y - 100;
+  // Bias toward stage center
+  cam.targetX = cam.targetX * 0.7 + stageCX * 0.3;
+  cam.targetY = cam.targetY * 0.6 + stageCY * 0.4;
+
+  // Calculate zoom based on player distance
+  const spanX = (maxX - minX) + cam.padX * 2;
+  const spanY = (maxY - minY) + cam.padY * 2;
+  const zoomX = 960 / Math.max(spanX, 200);
+  const zoomY = 640 / Math.max(spanY, 200);
+  cam.targetZoom = Math.min(zoomX, zoomY);
+  cam.targetZoom = Math.max(cam.minZoom, Math.min(cam.maxZoom, cam.targetZoom));
+
+  // Fast zoom-out when players are knocked far
+  const anyFastKB = players.some(p => p.alive && p.hitstun > 0 && Math.sqrt(p.vx*p.vx + p.vy*p.vy) > 12);
+  const zoomSpeed = anyFastKB ? 0.15 : cam.smoothZoom;
+  const posSpeed = anyFastKB ? 0.15 : cam.smoothX;
+
+  // Smooth interpolation
+  cam.x += (cam.targetX - cam.x) * posSpeed;
+  cam.y += (cam.targetY - cam.y) * posSpeed;
+  cam.zoom += (cam.targetZoom - cam.zoom) * zoomSpeed;
+
+  // Clamp camera so we don't show too far outside blast zones
+  const halfW = (960 / cam.zoom) / 2;
+  const halfH = (640 / cam.zoom) / 2;
+  const viewMinX = BLAST_LEFT + 50;
+  const viewMaxX = BLAST_RIGHT - 50;
+  const viewMinY = BLAST_TOP + 50;
+  const viewMaxY = BLAST_BOTTOM - 50;
+  cam.x = Math.max(viewMinX + halfW, Math.min(viewMaxX - halfW, cam.x));
+  cam.y = Math.max(viewMinY + halfH, Math.min(viewMaxY - halfH, cam.y));
+}
+
 function drawBattle(dt) {
+  // Update camera
+  updateCamera();
+
   // Screen shake
   updateScreenShake();
   ctx.save();
@@ -6012,6 +6570,12 @@ function drawBattle(dt) {
     ctx.fill();
   }
   ctx.globalAlpha = 1;
+
+  // === Apply dynamic camera transform ===
+  ctx.save();
+  ctx.translate(960 / 2, 640 / 2);
+  ctx.scale(cam.zoom, cam.zoom);
+  ctx.translate(-cam.x, -cam.y);
 
   // Stage platform
   const stageW = STAGE_RIGHT - STAGE_LEFT;
@@ -6432,13 +6996,21 @@ function drawBattle(dt) {
       }
     }
 
-    // ⑤ コマンド技スケールエフェクト
+    // ⑤ コマンド技スケールエフェクト & ドラゴンモード拡大
+    const dragonScale = (p.charIdx === 10 && p.dragonMode) ? 1.3 : 1.0;
     if (cmdScaleEffect.playerId === p.id && cmdScaleEffect.life > 0) {
       const scaleT = cmdScaleEffect.life / 12;
-      const s = 1 + scaleT * 0.3;
+      const s = (1 + scaleT * 0.3) * dragonScale;
       ctx.save();
       ctx.translate(p.x, p.y - 55);
       ctx.scale(s, s);
+      ctx.translate(-p.x, -(p.y - 55));
+      drawBattleCharacter(p.x, p.y - 55, 1.0, p.charIdx, battleTime, p.facingLeft, p);
+      ctx.restore();
+    } else if (dragonScale !== 1.0) {
+      ctx.save();
+      ctx.translate(p.x, p.y - 55);
+      ctx.scale(dragonScale, dragonScale);
       ctx.translate(-p.x, -(p.y - 55));
       drawBattleCharacter(p.x, p.y - 55, 1.0, p.charIdx, battleTime, p.facingLeft, p);
       ctx.restore();
@@ -6454,6 +7026,88 @@ function drawBattle(dt) {
     // Guard effect
     if (p.guarding) {
       drawGuardEffect(p);
+    }
+
+    // Charge glow effect (溜め中の光る演出)
+    if (p.charging) {
+      ctx.save();
+      const chargeRatio = Math.min(p.chargeTime / p.chargeMaxTime, 1);
+      const pulse = Math.sin(battleTime * 0.15) * 0.3;
+      const chColor = characters[p.charIdx].accent;
+      // Glowing aura
+      ctx.globalAlpha = 0.2 + chargeRatio * 0.4 + pulse * 0.1;
+      const gr = ctx.createRadialGradient(p.x, p.y - 40, 5, p.x, p.y - 40, 30 + chargeRatio * 20);
+      gr.addColorStop(0, chColor);
+      gr.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = gr;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y - 40, 30 + chargeRatio * 20, 0, Math.PI * 2);
+      ctx.fill();
+      // Charge particles
+      if (p.chargeTime % 4 === 0) {
+        const a = Math.random() * Math.PI * 2;
+        sparks.push({
+          x: p.x + Math.cos(a) * 20, y: p.y - 40 + Math.sin(a) * 20,
+          vx: -Math.cos(a) * 2, vy: -Math.sin(a) * 2 - 1,
+          life: 10, maxLife: 15, color: chColor, size: 2 + chargeRatio * 2, gravity: -0.05,
+        });
+      }
+      // Max charge flash
+      if (chargeRatio >= 1 && battleTime % 10 < 5) {
+        ctx.globalAlpha = 0.3;
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.arc(p.x, p.y - 40, 35, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    // Dragon mode aura (天才 ドラゴンモード中の炎オーラ)
+    if (p.charIdx === 10 && p.dragonMode) {
+      ctx.save();
+      const pulse = Math.sin(battleTime * 0.1) * 0.15;
+      ctx.globalAlpha = 0.25 + pulse;
+      const fg = ctx.createRadialGradient(p.x, p.y - 40, 5, p.x, p.y - 40, 40);
+      fg.addColorStop(0, '#FF6600');
+      fg.addColorStop(0.5, '#FF440066');
+      fg.addColorStop(1, 'rgba(255,68,0,0)');
+      ctx.fillStyle = fg;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y - 40, 40, 0, Math.PI * 2);
+      ctx.fill();
+      // Dragon timer indicator
+      const timerRatio = p.dragonTimer / 900;
+      if (timerRatio < 0.3) {
+        // Flashing warning when time is running out
+        if (battleTime % 10 < 5) {
+          ctx.globalAlpha = 0.5;
+          ctx.strokeStyle = '#FF0000';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y - 100, 8, -Math.PI/2, -Math.PI/2 + Math.PI * 2 * timerRatio / 0.3);
+          ctx.stroke();
+        }
+      }
+      // Fire particles
+      if (battleTime % 6 === 0) {
+        sparks.push({ x: p.x + (Math.random()-0.5)*20, y: p.y - 20, vx: (Math.random()-0.5)*2, vy: -1-Math.random()*2,
+          life: 10, maxLife: 15, color: '#FF6600', size: 2+Math.random()*2, type: 'fireball', gravity: -0.05, drag: 0.98 });
+      }
+      ctx.restore();
+    }
+
+    // Dragon transform charging indicator
+    if (p.charIdx === 10 && p.dragonTransformTimer > 0 && !p.dragonMode) {
+      ctx.save();
+      const tRatio = p.dragonTransformTimer / 60;
+      ctx.globalAlpha = 0.4 + tRatio * 0.4;
+      ctx.strokeStyle = '#FF4400';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y - 80, 12, -Math.PI/2, -Math.PI/2 + Math.PI * 2 * tRatio);
+      ctx.stroke();
+      ctx.restore();
     }
 
     // Guard break stun effect
@@ -6526,9 +7180,6 @@ function drawBattle(dt) {
     ctx.closePath(); ctx.fill();
   }
 
-  // HUD
-  drawBattleHUD();
-
   // Command name display (⑤ コミック風フォント)
   for (const cn of cmdNameDisplay) {
     const t = cn.life / cn.maxLife;
@@ -6589,7 +7240,7 @@ function drawBattle(dt) {
     ctx.restore();
   }
 
-  // Countdown
+  // Countdown (screen space - after camera)
   if (battleCountdown > 0) {
     const sec = Math.ceil(battleCountdown / 60);
     ctx.font = 'bold 80px sans-serif';
@@ -6770,7 +7421,13 @@ function drawBattle(dt) {
     ctx.restore();
   }
 
-  // Confetti (紙吹雪)
+  // === End dynamic camera (world-space effects above, screen-space below) ===
+  ctx.restore();
+
+  // HUD (screen space)
+  drawBattleHUD();
+
+  // Confetti (紙吹雪 - screen space)
   for (const c of confetti) {
     const t = c.life / c.maxLife;
     ctx.save();
@@ -8144,7 +8801,11 @@ function processPlayerKeydown(key, p, playerId, keyState) {
     }
   }
   // Special (C)
-  if (key === 'c' || key === 'C') startAttack(p, 'special');
+  if (key === 'c' || key === 'C') {
+    if (!(p.charIdx === 10 && !p.dragonMode && p.damage >= 80 && p.dragonCooldown <= 0 && p.grounded)) {
+      startAttack(p, 'special');
+    }
+  }
   // Guard (V)
   if (key === 'v' || key === 'V') {
     if (p.grounded && !p.attacking && !p.guarding && p.guardDurability > 0 && p.guardBreakStun <= 0) {
@@ -8248,12 +8909,19 @@ function handleKeyDown(e) {
       } else {
         // Check command input first
         const cmd = checkCommandInput(p1);
-        if (cmd && executeCommand(p1, cmd)) {
+        if (cmd && cmd.chargeCmd) {
+          // Charge command: start charging
+          if (!p1.charging && !p1.attacking) {
+            p1.charging = true; p1.chargeTime = 0; p1.chargeCmd = cmd;
+          }
+        } else if (cmd && executeCommand(p1, cmd)) {
           // Command executed
         } else if (!p1.grounded && keys['ArrowDown']) {
           startAttack(p1, 'downair');
         } else if (!p1.grounded) {
           startAttack(p1, 'aerial');
+        } else if (p1.grounded && Math.abs(p1.vx) > 3 && (keys['ArrowLeft'] || keys['ArrowRight'])) {
+          startAttack(p1, 'dash');
         } else if (keys['ArrowUp']) {
           startAttack(p1, 'up');
         } else if (keys['ArrowLeft'] || keys['ArrowRight']) {
@@ -8278,7 +8946,12 @@ function handleKeyDown(e) {
         startAttack(p1, 'strong');
       }
     }
-    if (e.key === 'c' || e.key === 'C') startAttack(p1, 'special');
+    if (e.key === 'c' || e.key === 'C') {
+      // 天才: 変形条件を満たしている場合はspecial攻撃を抑制（長押し変形用）
+      if (!(p1.charIdx === 10 && !p1.dragonMode && p1.damage >= 80 && p1.dragonCooldown <= 0 && p1.grounded)) {
+        startAttack(p1, 'special');
+      }
+    }
 
     // P2 attacks: U I O (only in VS mode)
     if (gameMode === 'vs') {
@@ -8294,12 +8967,18 @@ function handleKeyDown(e) {
           if (target) { target.damage = Math.min(999, target.damage + 2); hitEffects.push({x:target.x,y:target.y-40,life:6,maxLife:6,color:'#FFF',size:10}); }
         } else {
           const cmd = checkCommandInput(p2);
-          if (cmd && executeCommand(p2, cmd)) {
+          if (cmd && cmd.chargeCmd) {
+            if (!p2.charging && !p2.attacking) {
+              p2.charging = true; p2.chargeTime = 0; p2.chargeCmd = cmd;
+            }
+          } else if (cmd && executeCommand(p2, cmd)) {
             // Command executed
           } else if (!p2.grounded && (keys['s'] || keys['S'])) {
             startAttack(p2, 'downair');
           } else if (!p2.grounded) {
             startAttack(p2, 'aerial');
+          } else if (p2.grounded && Math.abs(p2.vx) > 3 && (keys['a'] || keys['A'] || keys['d'] || keys['D'])) {
+            startAttack(p2, 'dash');
           } else if (keys['w'] || keys['W']) {
             startAttack(p2, 'up');
           } else if (keys['a'] || keys['A'] || keys['d'] || keys['D']) {
@@ -8323,7 +9002,11 @@ function handleKeyDown(e) {
           startAttack(p2, 'strong');
         }
       }
-      if (e.key === 'o' || e.key === 'O') startAttack(p2, 'special');
+      if (e.key === 'o' || e.key === 'O') {
+        if (!(p2.charIdx === 10 && !p2.dragonMode && p2.damage >= 80 && p2.dragonCooldown <= 0 && p2.grounded)) {
+          startAttack(p2, 'special');
+        }
+      }
     }
   }
 }
