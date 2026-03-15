@@ -276,7 +276,7 @@ const keys = {};
 document.addEventListener('keydown', (e) => {
   unlockAudio();
   keys[e.key] = true;
-  if (e.key === 'F3') { debugHitboxes = !debugHitboxes; e.preventDefault(); }
+  if (e.key === 'F3' || ((e.key === 'h' || e.key === 'H') && scene === 'battle')) { debugHitboxes = !debugHitboxes; e.preventDefault(); }
   handleKeyDown(e);
 });
 document.addEventListener('keyup', (e) => {
@@ -947,11 +947,11 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
   } else if (charIndex === 13) {
     // 波おじ - ボクサーおじさん
     if (namiojiImg.complete && namiojiImg.naturalWidth > 0) {
-      const imgW = 90 * s;
-      const imgH = 110 * s;
+      const imgW = 75 * s;
+      const imgH = 90 * s;
       ctx.save();
       ctx.globalCompositeOperation = 'screen';
-      ctx.drawImage(namiojiImg, -imgW / 2, -50 * s, imgW, imgH);
+      ctx.drawImage(namiojiImg, -imgW / 2, -35 * s, imgW, imgH);
       ctx.restore();
     } else {
       // Canvas fallback: simple boxer
@@ -1289,13 +1289,13 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
   const tensaiIsDragon = animData && animData.dragonMode;
   const tensaiActiveImg = tensaiIsDragon ? tensaiDragonImg : tensaiHumanImg;
   const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg, bulletImg, shaudenImg, judgemanImg, tensaiActiveImg, catbusImg, tankImg, namiojiImg];
-  const imgSizes = [[70, 90], [80, 95], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [168, 112], [90, 110]];
+  const imgSizes = [[70, 90], [80, 95], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [168, 112], [75, 90]];
   const img = imgs[charIndex];
   if (img && img.complete && img.naturalWidth > 0) {
     const imgW = imgSizes[charIndex][0] * s;
     const imgH = imgSizes[charIndex][1] * s;
     const tankOfsX = charIndex === 12 ? -5 * s : 0;
-    const tankOfsY = charIndex === 12 ? -20 * s : (charIndex === 13 ? -15 * s : 0);
+    const tankOfsY = charIndex === 12 ? -20 * s : 0;
     const useScreen = charIndex === 12 || charIndex === 13;
     if (useScreen) ctx.globalCompositeOperation = 'screen';
 
@@ -8041,7 +8041,7 @@ function drawBattle(dt) {
           ctx.strokeStyle = '#FF0000';
           ctx.lineWidth = 2;
           ctx.strokeRect(ah.x, ah.y, ah.w, ah.h);
-          ctx.fillStyle = 'rgba(255, 0, 0, 0.15)';
+          ctx.fillStyle = 'rgba(255, 0, 0, 0.4)';
           ctx.fillRect(ah.x, ah.y, ah.w, ah.h);
         }
       }
