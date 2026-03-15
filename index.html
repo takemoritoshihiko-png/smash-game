@@ -230,7 +230,20 @@ const characters = [
     moveSpeed: 11.5,
     jumpPower: -15.5,
     weight: 0.7
-  }
+  },
+  {
+    name: 'タンク',
+    type: 'パワー型',
+    color: '#6B7B3A',
+    accent: '#A0B858',
+    dark: '#3A4A1A',
+    stats: { power: 5, speed: 1, tech: 2, defense: 5 },
+    desc: '鋼鉄の暴君・最重量級の破壊戦車',
+    bodyColors: { main: '#6B7B3A', sub: '#A0B858', skin: '#8A9A5A' },
+    moveSpeed: 5.0,
+    jumpPower: -11.0,
+    weight: 1.7
+  },
 ];
 
 // --- Input tracking ---
@@ -271,6 +284,8 @@ const tensaiHumanImg = new Image();
 tensaiHumanImg.src = 'images/tensai_human.png';
 const tensaiDragonImg = new Image();
 tensaiDragonImg.src = 'images/tensai_dragon.png';
+const tankImg = new Image();
+tankImg.src = 'images/tank.png';
 
 // --- Particles ---
 function spawnTitleParticle() {
@@ -878,6 +893,29 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.stroke();
       ctx.lineWidth = 1; ctx.lineCap = 'butt';
     }
+  } else if (charIndex === 12) {
+    // タンク - 戦車モチーフ重装甲キャラ
+    if (tankImg.complete && tankImg.naturalWidth > 0) {
+      const imgW = 120 * s;
+      const imgH = 80 * s;
+      ctx.save();
+      ctx.globalCompositeOperation = 'screen';
+      ctx.drawImage(tankImg, -imgW / 2 - 5 * s, -45 * s, imgW, imgH);
+      ctx.restore();
+    } else {
+      // Canvas fallback
+      ctx.fillStyle = '#6B7B3A';
+      ctx.fillRect(-18 * s, -15 * s, 36 * s, 44 * s);
+      ctx.fillStyle = '#7A8A4A';
+      ctx.beginPath(); ctx.arc(0, -24 * s, 14 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#4A5A2A';
+      ctx.fillRect(14 * s, -28 * s, 24 * s, 6 * s);
+      ctx.fillStyle = '#3A3A2A';
+      ctx.fillRect(-16 * s, 28 * s, 12 * s, 16 * s);
+      ctx.fillRect(4 * s, 28 * s, 12 * s, 16 * s);
+      ctx.fillStyle = '#CCFF44';
+      ctx.fillRect(-8 * s, -28 * s, 16 * s, 5 * s);
+    }
   } else if (charIndex === 10) {
     // 天才 - 変形型ドラゴン
     const isDragon = typeof players !== 'undefined' && players.some(p => p.charIdx === 10 && p.dragonMode);
@@ -1040,6 +1078,11 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
         bobY = Math.sin(t * 0.06) * 1.5 + Math.sin(t * 0.12) * 0.5;
         scaleX = 1 + Math.sin(t * 0.08) * 0.01;
         scaleY = 1 + Math.sin(t * 0.06 + 0.5) * 0.006;
+      } else if (charIndex === 12) {
+        // Tank: slow heavy breathing
+        bobY = Math.sin(t * 0.02) * 2 + Math.sin(t * 0.04) * 0.5;
+        scaleX = 1 + Math.sin(t * 0.02) * 0.008;
+        scaleY = 1 + Math.sin(t * 0.02 + 0.5) * 0.012;
       }
     }
 
@@ -1093,6 +1136,16 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
         walkLean = Math.sin(blend * Math.PI * 2) * 0.035;
         scaleY = 1 - Math.abs(Math.sin(blend * Math.PI * 2)) * 0.025;
         legAngle = Math.sin(blend * Math.PI * 2) * 0.1;
+      } else if (charIndex === 12) {
+        // Tank: very heavy stomping walk
+        const stompT = Math.abs(Math.sin(phase));
+        const eased = stompT < 0.5 ? stompT * 2 : 1;
+        bobY = -eased * 4;
+        scaleX = 1 + Math.sin(phase) * 0.03;
+        scaleY = 1 - eased * 0.04;
+        walkLean = Math.sin(phase) * 0.02;
+        legAngle = Math.sin(phase) * 0.08;
+        armSwing = -Math.sin(phase) * 0.06;
       }
     }
 
@@ -1173,12 +1226,16 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
   // 天才 uses different images per mode
   const tensaiIsDragon = animData && animData.dragonMode;
   const tensaiActiveImg = tensaiIsDragon ? tensaiDragonImg : tensaiHumanImg;
-  const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg, bulletImg, shaudenImg, judgemanImg, tensaiActiveImg, catbusImg];
-  const imgSizes = [[70, 90], [80, 95], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90]];
+  const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg, bulletImg, shaudenImg, judgemanImg, tensaiActiveImg, catbusImg, tankImg];
+  const imgSizes = [[70, 90], [80, 95], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [120, 80]];
   const img = imgs[charIndex];
   if (img && img.complete && img.naturalWidth > 0) {
     const imgW = imgSizes[charIndex][0] * s;
     const imgH = imgSizes[charIndex][1] * s;
+    const tankOfsX = charIndex === 12 ? -5 * s : 0;
+    const tankOfsY = charIndex === 12 ? -10 * s : 0;
+    const useScreen = charIndex === 12;
+    if (useScreen) ctx.globalCompositeOperation = 'screen';
 
     // Damage flash: smooth 2-frame blink with fading intensity
     if (animData && animData.damageTint > 0) {
@@ -1204,16 +1261,17 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
         tctx.globalAlpha = 1;
         // Slight shake on damage
         const shake = intensity * 2;
-        ctx.drawImage(tc, -imgW / 2 + (Math.random() - 0.5) * shake, -35 * s + (Math.random() - 0.5) * shake, imgW, imgH);
+        ctx.drawImage(tc, -imgW / 2 + tankOfsX + (Math.random() - 0.5) * shake, -35 * s + tankOfsY + (Math.random() - 0.5) * shake, imgW, imgH);
       } else {
         // Normal frame (white flash)
         ctx.globalAlpha = 0.7 + 0.3 * intensity;
-        ctx.drawImage(img, -imgW / 2, -35 * s, imgW, imgH);
+        ctx.drawImage(img, -imgW / 2 + tankOfsX, -35 * s + tankOfsY, imgW, imgH);
         ctx.globalAlpha = 1;
       }
     } else {
-      ctx.drawImage(img, -imgW / 2, -35 * s, imgW, imgH);
+      ctx.drawImage(img, -imgW / 2 + tankOfsX, -35 * s + tankOfsY, imgW, imgH);
     }
+    if (useScreen) ctx.globalCompositeOperation = 'source-over';
   } else if (charIndex === 4) {
     // Long: Canvas fallback for battle
     ctx.fillStyle = '#5A6AAE';
@@ -4151,6 +4209,16 @@ const commandDefs = {
       attack:{ startup:3, active:14, recovery:14, damage:14, kbBase:5, kbScale:0.09, kbAngle:-10, hx:20, hy:-32, hw:75, hh:45, color:'#FFBB44', effect:'punch',
         specialType:'cmdCharge', chargeSpeed:16 } },
   ],
+  12: [ // タンク
+    { name:'砲塔回転', seq:['D','U','D','U'], cooldownKey:'cmd1',
+      attack:{ startup:10, active:5, recovery:18, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF8833', effect:'none',
+        projectile:{ speed:10, damage:16, kbBase:6, kbScale:0.10, kbAngle:-88, w:22, h:22, life:45, color:'#FF8833', pcolor:'#FFBB66', dirAngle:-90 } } },
+    { name:'連射', seq:['F','F','F'], cooldownKey:'cmd2',
+      attack:{ startup:8, active:18, recovery:16, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#A0B858', effect:'none',
+        projectile:{ speed:12, damage:6, kbBase:2, kbScale:0.04, kbAngle:-10, w:14, h:10, life:40, color:'#A0B858', pcolor:'#C0D878' }, multiShot:3, shotInterval:5 } },
+    { name:'地雷設置', seq:['D','B','D','B'], cooldownKey:'cmd3', chargeCmd:true,
+      attack:{ startup:10, active:10, recovery:20, damage:22, kbBase:8, kbScale:0.13, kbAngle:-60, hx:0, hy:-10, hw:100, hh:40, color:'#FF6600', effect:'shockwave', centerHit:true } },
+  ],
 };
 
 // Dragon mode commands (separate)
@@ -4482,7 +4550,24 @@ const attackDefs = {
     dash:   { name:'フルスロットル', startup:2, active:12, recovery:10, damage:10, kbBase:4, kbScale:0.07, kbAngle:-8, hx:20, hy:-30, hw:70, hh:45, color:'#FFBB44', effect:'punch',
               specialType:'cmdCharge', chargeSpeed:16 },
     throwDmg: 8,
-  }
+  },
+  // タンク - Heavy Tank
+  12: {
+    normal: { name:'砲身パンチ', startup:8, active:7, recovery:16, damage:14, kbBase:5, kbScale:0.09, kbAngle:-12, hx:18, hy:-35, hw:65, hh:45, color:'#A0B858', effect:'punch' },
+    strong: { name:'装甲タックル', startup:14, active:12, recovery:24, damage:20, kbBase:8, kbScale:0.13, kbAngle:-10, hx:18, hy:-30, hw:70, hh:50, color:'#6B7B3A', effect:'punch',
+              specialType:'cmdCharge', chargeSpeed:8 },
+    special:{ name:'キャノンショット', startup:16, active:5, recovery:22, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF8833', effect:'none',
+              projectile:{ speed:9, damage:18, kbBase:6, kbScale:0.11, kbAngle:-18, w:28, h:22, life:60, color:'#FF8833', pcolor:'#FFBB66' } },
+    aerial: { name:'空中プレス', startup:7, active:10, recovery:14, damage:15, kbBase:6, kbScale:0.10, kbAngle:70, hx:0, hy:10, hw:55, hh:50, color:'#6B7B3A', effect:'airslam', centerHit:true },
+    down:   { name:'ストンプ', startup:6, active:8, recovery:18, damage:13, kbBase:5, kbScale:0.09, kbAngle:80, hx:0, hy:5, hw:60, hh:30, color:'#A0B858', effect:'shockwave', centerHit:true },
+    up:     { name:'砲身突き上げ', startup:7, active:8, recovery:16, damage:14, kbBase:6, kbScale:0.10, kbAngle:-88, hx:5, hy:-55, hw:50, hh:55, color:'#A0B858', effect:'upslash' },
+    side:   { name:'砲身叩きつけ', startup:8, active:8, recovery:16, damage:16, kbBase:6, kbScale:0.10, kbAngle:-15, hx:20, hy:-35, hw:80, hh:40, color:'#6B7B3A', effect:'sideslash' },
+    downair:{ name:'急降下プレス', startup:7, active:12, recovery:16, damage:17, kbBase:7, kbScale:0.12, kbAngle:80, hx:0, hy:10, hw:50, hh:55, color:'#6B7B3A', effect:'meteor', centerHit:true,
+              specialType:'divekick', diveSpeed:11 },
+    dash:   { name:'突撃タックル', startup:6, active:12, recovery:18, damage:15, kbBase:6, kbScale:0.10, kbAngle:-12, hx:20, hy:-30, hw:65, hh:50, color:'#A0B858', effect:'punch',
+              specialType:'cmdCharge', chargeSpeed:7 },
+    throwDmg: 15,
+  },
 };
 
 // Dragon mode attack defs (separate object)
@@ -4814,6 +4899,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
       9: ['#C0A0FF', '#9966DD', '#3A2050'],  // Judgeman: purple
       10: ['#FF6600', '#FF8833', '#CC4400'], // Tensai: fire
       11: ['#FFBB44', '#DD8822', '#FFE8AA'], // Catbus: orange
+      12: ['#A0B858', '#6B7B3A', '#FF8833'], // Tank: olive/orange
     };
     const colors = charColors[attacker.charIdx] || ['#FFFFFF'];
     const specialCount = 30 + Math.floor(kb * 1.5);
