@@ -5977,11 +5977,14 @@ function updateBattle(dt) {
     // --- Guard handling ---
     let wantsGuard = false;
     if (p.id === 0) {
-      wantsGuard = !!(keys['v'] || keys['V']);
+      wantsGuard = (onlineMode && !isHost) ? !!remoteKeys.v : !!(keys['v'] || keys['V']);
     } else if (p.id === 1 && gameMode === 'cpu') {
-      // CPU guard handled by AI
       const cpuTarget = players[0];
       wantsGuard = getCpuGuard(p, cpuTarget);
+    } else if (onlineMode && isHost) {
+      wantsGuard = !!remoteKeys.v;
+    } else if (onlineMode && !isHost) {
+      wantsGuard = !!(keys['v'] || keys['V']);
     } else {
       wantsGuard = !!(keys['p'] || keys['P']);
     }
@@ -6039,25 +6042,35 @@ function updateBattle(dt) {
       if (ai.grab) tryGrab(p);
       if (ai.throwDir && p.grabbing) executeThrow(p, ai.throwDir.x, ai.throwDir.y);
     } else if (p.id === 0) {
-      // P1 input: local if host or local, remote if guest-online
-      const k1 = (onlineMode && !isHost) ? remoteKeys : keys;
-      const left1 = onlineMode ? k1.left : (k1['ArrowLeft']);
-      const right1 = onlineMode ? k1.right : (k1['ArrowRight']);
-      const up1 = onlineMode ? k1.up : (k1['ArrowUp']);
-      if (left1) moveX = -1;
-      if (right1) moveX = 1;
-      jumpPress = !!up1;
-    } else {
-      // P2 input: local if host-online remote, or local WASD
-      const k2 = (onlineMode && isHost) ? remoteKeys : keys;
-      if (onlineMode) {
-        if (k2.left) moveX = -1;
-        if (k2.right) moveX = 1;
-        jumpPress = !!k2.up;
+      // P1: host=local keys, guest-online=remote keys
+      if (onlineMode && !isHost) {
+        // Guest's remote controls P1
+        if (remoteKeys.left) moveX = -1;
+        if (remoteKeys.right) moveX = 1;
+        jumpPress = !!remoteKeys.up;
       } else {
-        if (k2['a'] || k2['A']) moveX = -1;
-        if (k2['d'] || k2['D']) moveX = 1;
-        jumpPress = !!(k2['w'] || k2['W']);
+        // Host or offline: local arrow keys
+        if (keys['ArrowLeft']) moveX = -1;
+        if (keys['ArrowRight']) moveX = 1;
+        jumpPress = !!keys['ArrowUp'];
+      }
+    } else {
+      // P2: host-online=remote keys, guest-online=local keys, offline=WASD
+      if (onlineMode && isHost) {
+        // Host receives guest's remote for P2
+        if (remoteKeys.left) moveX = -1;
+        if (remoteKeys.right) moveX = 1;
+        jumpPress = !!remoteKeys.up;
+      } else if (onlineMode && !isHost) {
+        // Guest controls P2 locally with arrow keys
+        if (keys['ArrowLeft']) moveX = -1;
+        if (keys['ArrowRight']) moveX = 1;
+        jumpPress = !!keys['ArrowUp'];
+      } else {
+        // Offline: WASD
+        if (keys['a'] || keys['A']) moveX = -1;
+        if (keys['d'] || keys['D']) moveX = 1;
+        jumpPress = !!(keys['w'] || keys['W']);
       }
     }
 
@@ -8499,12 +8512,15 @@ function setupPeerConnection(conn) {
   });
   conn.on('data', (data) => {
     if (data.type === 'charSelect') {
-      p2Select = data.charIdx;
+      // Received remote player's character selection
+      if (isHost) { p2Select = data.charIdx; }
+      else { p1Select = data.charIdx; }
     } else if (data.type === 'charConfirm') {
-      p2Select = data.charIdx;
-      p2Confirmed = true;
+      if (isHost) { p2Select = data.charIdx; p2Confirmed = true; }
+      else { p1Select = data.charIdx; p1Confirmed = true; }
     } else if (data.type === 'startBattle') {
-      p2Select = data.charIdx;
+      if (isHost) { p2Select = data.charIdx; }
+      else { p1Select = data.charIdx; }
       p1Confirmed = true; p2Confirmed = true;
       if (scene === 'select') startTransition('vsintro');
     } else if (data.type === 'keys') {
@@ -9141,6 +9157,7 @@ function handleKeyDown(e) {
       // Online VS mode: arrows select local char, Enter confirms & sends
       const n = characters.length;
       if (isHost) {
+        // Host controls P1
         if (!p1Confirmed) {
           if (e.key === 'ArrowLeft') { p1Select = (p1Select + n - 1) % n; if (peerConn) peerConn.send({ type: 'charSelect', charIdx: p1Select }); }
           if (e.key === 'ArrowRight') { p1Select = (p1Select + 1) % n; if (peerConn) peerConn.send({ type: 'charSelect', charIdx: p1Select }); }
@@ -9151,12 +9168,13 @@ function handleKeyDown(e) {
           startTransition('vsintro'); return;
         }
       } else {
-        // Guest controls P2 selection but displayed as P2
+        // Guest controls P2
         if (!p2Confirmed) {
           if (e.key === 'ArrowLeft') { p2Select = (p2Select + n - 1) % n; if (peerConn) peerConn.send({ type: 'charSelect', charIdx: p2Select }); }
           if (e.key === 'ArrowRight') { p2Select = (p2Select + 1) % n; if (peerConn) peerConn.send({ type: 'charSelect', charIdx: p2Select }); }
           if (e.key === 'Enter') { p2Confirmed = true; if (peerConn) peerConn.send({ type: 'charConfirm', charIdx: p2Select }); }
         }
+        // Guest can also see both confirmed and wait for host to start
       }
     } else {
       // Local VS mode: original 2P controls
@@ -9199,7 +9217,54 @@ function handleKeyDown(e) {
     if (!battleStarted || gameOver) return;
     const p1 = players[0], p2 = players[1];
 
-    // P1 direction input for commands
+    // Online: guest's local input controls P2, not P1
+    // Remote attacks are handled in the game loop via remoteKeys
+    if (onlineMode && !isHost) {
+      // Guest: local arrow/z/x/c → control P2
+      const lp = p2;
+      if (e.key === 'ArrowDown') addCmdInput(1, 'D');
+      if (e.key === 'ArrowUp') addCmdInput(1, 'U');
+      if (e.key === 'ArrowLeft') addCmdInput(1, 'L');
+      if (e.key === 'ArrowRight') addCmdInput(1, 'R');
+      if (e.key === 'z' || e.key === 'Z') {
+        if (lp.grabbing) {
+          const target = players.find(pp => pp.id === lp.grabTarget);
+          if (target) { target.damage = Math.min(999, target.damage + 2); hitEffects.push({x:target.x,y:target.y-40,life:6,maxLife:6,color:'#FFF',size:10}); }
+        } else {
+          const cmd = checkCommandInput(lp);
+          if (cmd && cmd.chargeCmd) { if (!lp.charging && !lp.attacking) { lp.charging = true; lp.chargeTime = 0; lp.chargeCmd = cmd; } }
+          else if (cmd && executeCommand(lp, cmd)) {}
+          else if (!lp.grounded && keys['ArrowDown']) startAttack(lp, 'downair');
+          else if (!lp.grounded) startAttack(lp, 'aerial');
+          else if (lp.grounded && Math.abs(lp.vx) > 3 && (keys['ArrowLeft'] || keys['ArrowRight'])) startAttack(lp, 'dash');
+          else if (keys['ArrowUp']) startAttack(lp, 'up');
+          else if (keys['ArrowLeft'] || keys['ArrowRight']) startAttack(lp, 'side');
+          else if (keys['ArrowDown']) startAttack(lp, 'down');
+          else startAttack(lp, 'normal');
+        }
+      }
+      if (e.key === 'x' || e.key === 'X') {
+        if (lp.grabbing) {
+          let dx = 0, dy = 0;
+          if (keys['ArrowLeft']) dx = -1; if (keys['ArrowRight']) dx = 1;
+          if (keys['ArrowUp']) dy = -1; if (keys['ArrowDown']) dy = 1;
+          executeThrow(lp, dx, dy);
+        } else { startAttack(lp, 'strong'); }
+      }
+      if (e.key === 'c' || e.key === 'C') {
+        if (!(lp.charIdx === 10 && !lp.dragonMode && lp.damage >= 80 && lp.dragonCooldown <= 0 && lp.grounded)) {
+          startAttack(lp, 'special');
+        }
+      }
+      if (e.key === 'v' || e.key === 'V') {
+        if (lp.grounded && !lp.attacking && !lp.guarding && lp.guardDurability > 0 && lp.guardBreakStun <= 0) {
+          lp.guarding = true; lp.justGuardTimer = typeof JUST_GUARD_WINDOW !== 'undefined' ? JUST_GUARD_WINDOW : 6;
+        }
+      }
+      return; // Don't process P1 inputs for guest
+    }
+
+    // P1 direction input for commands (host or offline)
     if (e.key === 'ArrowDown') addCmdInput(0, 'D');
     if (e.key === 'ArrowUp') addCmdInput(0, 'U');
     if (e.key === 'ArrowLeft') addCmdInput(0, 'L');
@@ -9257,8 +9322,8 @@ function handleKeyDown(e) {
       }
     }
 
-    // P2 attacks: U I O (only in VS mode)
-    if (gameMode === 'vs') {
+    // P2 attacks: U I O (only in local VS mode, skip for online)
+    if (gameMode === 'vs' && !onlineMode) {
       // P2 direction input for commands
       if (e.key === 's' || e.key === 'S') addCmdInput(1, 'D');
       if (e.key === 'w' || e.key === 'W') addCmdInput(1, 'U');
