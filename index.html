@@ -270,6 +270,19 @@ const characters = [
     jumpPower: -15.5,
     weight: 0.4
   },
+  {
+    name: 'サム',
+    type: '空中戦型',
+    color: '#FFD700',
+    accent: '#FF4444',
+    dark: '#AA8800',
+    stats: { power: 3, speed: 3, tech: 4, defense: 2 },
+    desc: '空飛ぶ道化師・3段ジャンプの空中戦マスター',
+    bodyColors: { main: '#FFD700', sub: '#FF4444', skin: '#FFFFFF' },
+    moveSpeed: 6.0,
+    jumpPower: -14.5,
+    weight: 0.7
+  },
 ];
 
 // --- Audio unlock on first interaction ---
@@ -329,6 +342,8 @@ const namiojiImg = new Image();
 namiojiImg.src = 'images/namioji.png';
 const tokkoImg = new Image();
 tokkoImg.src = 'images/tokko.png?v=2';
+const samImg = new Image();
+samImg.src = 'images/sam.png';
 
 // --- Particles ---
 function spawnTitleParticle() {
@@ -1041,6 +1056,102 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.moveTo(1 * s, -19 * s); ctx.lineTo(2 * s, -15 * s); ctx.lineTo(3 * s, -19 * s);
       ctx.closePath(); ctx.fill();
     }
+  } else if (charIndex === 15) {
+    // サム - 鶏ピエロ
+    if (samImg.complete && samImg.naturalWidth > 0) {
+      const imgW = 75 * s;
+      const imgH = 90 * s;
+      ctx.drawImage(samImg, -imgW / 2, -35 * s, imgW, imgH);
+    } else {
+      // Canvas fallback: chicken-clown
+      // Chicken feet (orange)
+      ctx.fillStyle = '#FF8800';
+      ctx.fillRect(-10 * s, 30 * s, 5 * s, 15 * s);
+      ctx.fillRect(5 * s, 30 * s, 5 * s, 15 * s);
+      // Toes
+      for (let i = 0; i < 3; i++) {
+        ctx.fillRect((-12 + i * 3) * s, 43 * s, 3 * s, 4 * s);
+        ctx.fillRect((3 + i * 3) * s, 43 * s, 3 * s, 4 * s);
+      }
+      // Body (colorful clown suit)
+      ctx.fillStyle = '#FFD700';
+      ctx.fillRect(-14 * s, -10 * s, 28 * s, 40 * s);
+      // Clown suit stripes
+      ctx.fillStyle = '#FF4444';
+      ctx.fillRect(-14 * s, -2 * s, 28 * s, 8 * s);
+      ctx.fillStyle = '#4488FF';
+      ctx.fillRect(-14 * s, 14 * s, 28 * s, 8 * s);
+      // Ruffled collar
+      ctx.fillStyle = '#FFFFFF';
+      for (let i = 0; i < 5; i++) {
+        ctx.beginPath();
+        ctx.arc((-8 + i * 4) * s, -10 * s, 4 * s, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      // Wings (white-yellow feathers)
+      ctx.fillStyle = '#FFFFCC';
+      ctx.beginPath();
+      ctx.ellipse(-18 * s, 5 * s, 8 * s, 14 * s, 0.3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(18 * s, 5 * s, 8 * s, 14 * s, -0.3, 0, Math.PI * 2);
+      ctx.fill();
+      // Wing tips
+      ctx.fillStyle = '#FFD700';
+      ctx.beginPath();
+      ctx.ellipse(-22 * s, 10 * s, 4 * s, 8 * s, 0.4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(22 * s, 10 * s, 4 * s, 8 * s, -0.4, 0, Math.PI * 2);
+      ctx.fill();
+      // Head (white clown face)
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath(); ctx.arc(0, -22 * s, 14 * s, 0, Math.PI * 2); ctx.fill();
+      // Comb/Crest (red chicken comb)
+      ctx.fillStyle = '#FF2222';
+      ctx.beginPath();
+      ctx.moveTo(-5 * s, -35 * s);
+      ctx.lineTo(-2 * s, -48 * s);
+      ctx.lineTo(2 * s, -42 * s);
+      ctx.lineTo(5 * s, -50 * s);
+      ctx.lineTo(8 * s, -40 * s);
+      ctx.lineTo(10 * s, -35 * s);
+      ctx.closePath(); ctx.fill();
+      // Clown face paint - eye marks
+      ctx.fillStyle = '#4488FF';
+      ctx.beginPath();
+      ctx.moveTo(-9 * s, -28 * s); ctx.lineTo(-4 * s, -30 * s); ctx.lineTo(-4 * s, -24 * s);
+      ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#FF4444';
+      ctx.beginPath();
+      ctx.moveTo(4 * s, -30 * s); ctx.lineTo(9 * s, -28 * s); ctx.lineTo(4 * s, -24 * s);
+      ctx.closePath(); ctx.fill();
+      // Eyes
+      ctx.fillStyle = '#111';
+      ctx.beginPath(); ctx.arc(-5 * s, -25 * s, 2.5 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(5 * s, -25 * s, 2.5 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#FFF';
+      ctx.beginPath(); ctx.arc(-4.5 * s, -26 * s, 1 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(5.5 * s, -26 * s, 1 * s, 0, Math.PI * 2); ctx.fill();
+      // Red clown nose
+      ctx.fillStyle = '#FF0000';
+      ctx.beginPath(); ctx.arc(0, -18 * s, 4 * s, 0, Math.PI * 2); ctx.fill();
+      // Highlight on nose
+      ctx.fillStyle = '#FF8888';
+      ctx.beginPath(); ctx.arc(-1 * s, -19 * s, 1.5 * s, 0, Math.PI * 2); ctx.fill();
+      // Beak (yellow, small)
+      ctx.fillStyle = '#FFAA00';
+      ctx.beginPath();
+      ctx.moveTo(-3 * s, -15 * s); ctx.lineTo(0, -10 * s); ctx.lineTo(3 * s, -15 * s);
+      ctx.closePath(); ctx.fill();
+      // Smile
+      ctx.strokeStyle = '#FF4444';
+      ctx.lineWidth = 2 * s;
+      ctx.beginPath();
+      ctx.arc(0, -14 * s, 6 * s, 0.2, Math.PI - 0.2);
+      ctx.stroke();
+      ctx.lineWidth = 1;
+    }
   } else if (charIndex === 10) {
     // 天才 - 変形型ドラゴン
     const isDragon = typeof players !== 'undefined' && players.some(p => p.charIdx === 10 && p.dragonMode);
@@ -1220,6 +1331,12 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
         scaleX = 1 + Math.sin(t * 0.1) * 0.015;
         scaleY = 1 + Math.sin(t * 0.08 + 0.3) * 0.012;
         armAngle = Math.sin(t * 0.07) * 0.06;
+      } else if (charIndex === 15) {
+        // Sam: bouncy chicken hop
+        bobY = Math.sin(t * 0.07) * 4 + Math.abs(Math.sin(t * 0.14)) * 2;
+        scaleX = 1 + Math.sin(t * 0.07) * 0.015;
+        scaleY = 1 + Math.sin(t * 0.07 + 0.5) * 0.02;
+        armAngle = Math.sin(t * 0.1) * 0.08;
       }
     }
 
@@ -1297,6 +1414,14 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
         scaleX = 1 + Math.sin(phase * 2) * 0.02;
         legAngle = Math.sin(phase) * 0.22;
         armSwing = -Math.sin(phase) * 0.2;
+      } else if (charIndex === 15) {
+        // Sam: chicken waddle
+        bobY = Math.abs(Math.sin(phase)) * 5;
+        walkLean = Math.sin(phase) * 0.1;
+        scaleX = 1 + Math.sin(phase * 2) * 0.02;
+        scaleY = 0.95 + Math.abs(Math.sin(phase)) * 0.05;
+        legAngle = Math.sin(phase) * 0.18;
+        armSwing = -Math.sin(phase) * 0.15;
       }
     }
 
@@ -1377,8 +1502,8 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
   // 天才 uses different images per mode
   const tensaiIsDragon = animData && animData.dragonMode;
   const tensaiActiveImg = tensaiIsDragon ? tensaiDragonImg : tensaiHumanImg;
-  const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg, bulletImg, shaudenImg, judgemanImg, tensaiActiveImg, catbusImg, tankImg, namiojiImg, tokkoImg];
-  const imgSizes = [[70, 90], [80, 95], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [168, 112], [75, 90], [75, 90]];
+  const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg, bulletImg, shaudenImg, judgemanImg, tensaiActiveImg, catbusImg, tankImg, namiojiImg, tokkoImg, samImg];
+  const imgSizes = [[70, 90], [80, 95], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [168, 112], [75, 90], [75, 90], [75, 90]];
   const img = imgs[charIndex];
   if (img && img.complete && img.naturalWidth > 0) {
     const imgW = imgSizes[charIndex][0] * s;
@@ -4463,6 +4588,17 @@ const commandDefs = {
       attack:{ startup:4, active:10, recovery:14, damage:12, kbBase:4, kbScale:0.08, kbAngle:20, hx:18, hy:-10, hw:80, hh:25, color:'#8B00CC', effect:'sweep',
         specialType:'slide', slideSpeed:12 } },
   ],
+  15: [ // サム
+    { name:'トサカ急降下', seq:['U','D','U'], cooldownKey:'cmd1',
+      attack:{ startup:5, active:12, recovery:18, damage:16, kbBase:6, kbScale:0.10, kbAngle:80, hx:0, hy:10, hw:55, hh:50, color:'#FF2222', effect:'meteor',
+        specialType:'divekick', diveSpeed:18 } },
+    { name:'ピエロダッシュ', seq:['F','D','F'], cooldownKey:'cmd2',
+      attack:{ startup:4, active:14, recovery:16, damage:14, kbBase:5, kbScale:0.09, kbAngle:-12, hx:16, hy:-35, hw:60, hh:45, color:'#FFD700', effect:'dash',
+        specialType:'shadowDash', dashSpeed:15 } },
+    { name:'羽根吹雪', seq:['D','U','D'], cooldownKey:'cmd3', chargeCmd:true,
+      attack:{ startup:6, active:20, recovery:16, damage:2, kbBase:1, kbScale:0.02, kbAngle:-15, hx:0, hy:-30, hw:100, hh:70, color:'#FFFFCC', effect:'airkick',
+        centerHit:true, multiHit:true, hitInterval:4, finalDamage:10, finalKbBase:5, finalKbScale:0.09, finalKbAngle:-40 } },
+  ],
 };
 
 // Dragon mode commands (separate)
@@ -4848,6 +4984,23 @@ const attackDefs = {
               specialType:'slide', slideSpeed:14 },
     throwDmg: 8,
   },
+  // サム - Air Type (Chicken-Clown)
+  15: {
+    normal: { name:'くちばしつつき', startup:3, active:5, recovery:8, damage:5, kbBase:2, kbScale:0.04, kbAngle:-12, hx:14, hy:-35, hw:45, hh:35, color:'#FFAA00', effect:'punch' },
+    strong: { name:'羽ばたきアタック', startup:6, active:10, recovery:14, damage:11, kbBase:4, kbScale:0.08, kbAngle:-30, hx:0, hy:-30, hw:90, hh:55, color:'#FFD700', effect:'airkick', centerHit:true },
+    special:{ name:'ピエロ爆弾', startup:10, active:5, recovery:16, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF4444', effect:'none',
+              projectile:{ speed:6, damage:14, kbBase:5, kbScale:0.09, kbAngle:-50, w:22, h:22, life:50, color:'#FF4444', pcolor:'#FFD700', dirAngle:60 } },
+    aerial: { name:'空中くちばし', startup:3, active:8, recovery:8, damage:8, kbBase:3, kbScale:0.07, kbAngle:-80, hx:8, hy:-30, hw:55, hh:50, color:'#FFAA00', effect:'airkick', centerHit:true },
+    down:   { name:'両足キック', startup:4, active:10, recovery:14, damage:12, kbBase:5, kbScale:0.09, kbAngle:80, hx:0, hy:10, hw:40, hh:45, color:'#FF8800', effect:'meteor',
+              specialType:'divekick', diveSpeed:14 },
+    up:     { name:'トサカ叩き', startup:4, active:8, recovery:12, damage:12, kbBase:6, kbScale:0.10, kbAngle:-88, hx:3, hy:-55, hw:50, hh:55, color:'#FF2222', effect:'upslash' },
+    side:   { name:'くちばし突き', startup:4, active:7, recovery:11, damage:11, kbBase:4, kbScale:0.08, kbAngle:-15, hx:20, hy:-35, hw:70, hh:35, color:'#FFAA00', effect:'sideslash' },
+    downair:{ name:'急降下キック', startup:4, active:10, recovery:14, damage:14, kbBase:6, kbScale:0.10, kbAngle:80, hx:0, hy:10, hw:45, hh:50, color:'#FF8800', effect:'meteor',
+              specialType:'divekick', diveSpeed:13 },
+    dash:   { name:'ダッシュくちばし', startup:3, active:8, recovery:10, damage:9, kbBase:3, kbScale:0.06, kbAngle:-10, hx:18, hy:-35, hw:60, hh:40, color:'#FFD700', effect:'punch',
+              specialType:'slide', slideSpeed:8 },
+    throwDmg: 9,
+  },
 };
 
 // Dragon mode attack defs (separate object)
@@ -4932,7 +5085,7 @@ function createPlayer(id, charIdx, startX) {
     x: startX, y: STAGE_GROUND_Y - 60,
     vx: 0, vy: 0,
     facingLeft: id === 1,
-    grounded: false, jumps: 2, jumpUsed: false,
+    grounded: false, jumps: charIdx === 15 ? 3 : 2, jumpUsed: false,
     damage: 0, stocks: MAX_STOCKS,
     respawnTimer: 0, invincibleTimer: 0, alive: true,
     // Attack state
@@ -5090,8 +5243,12 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
     return;
   }
 
-  // バレット近距離弱体化: 近距離（80px以内）で与ダメ20%、被ダメ1.5倍
+  // サム空中攻撃補正: 空中時1.3倍ダメージ
   let finalDamage = damage;
+  if (attacker.charIdx === 15 && !attacker.grounded) {
+    finalDamage *= 1.3;
+  }
+  // バレット近距離弱体化: 近距離（80px以内）で与ダメ20%、被ダメ1.5倍
   let finalKbScale = kbScale;
   const dist = Math.abs(attacker.x - target.x);
   const CLOSE_RANGE = 80;
@@ -5193,6 +5350,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
       12: ['#A0B858', '#6B7B3A', '#FF8833'], // Tank: olive/orange
       13: ['#FF6644', '#CC3333', '#FFFFFF'], // Namioji: red/white
       14: ['#CC44FF', '#8B00CC', '#FF44AA'], // Tokko: purple/pink
+      15: ['#FFD700', '#FF4444', '#4488FF'], // Sam: gold/red/blue
     };
     const colors = charColors[attacker.charIdx] || ['#FFFFFF'];
     const specialCount = 30 + Math.floor(kb * 1.5);
@@ -6872,7 +7030,7 @@ function landingCheck(p) {
   if (p.vy >= 0) {
     if (p.x >= STAGE_LEFT && p.x <= STAGE_RIGHT) {
       if (p.y >= STAGE_GROUND_Y && p.y - p.vy < STAGE_GROUND_Y + 8) {
-        p.y = STAGE_GROUND_Y; p.vy = 0; p.grounded = true; p.jumps = 2; p.strongLocked = false;
+        p.y = STAGE_GROUND_Y; p.vy = 0; p.grounded = true; p.jumps = p.charIdx === 15 ? 3 : 2; p.strongLocked = false;
         // divekick着地で攻撃終了
         if (p.attacking && p.attackData && p.attackData.specialType === 'divekick') {
           p.attacking = false; p.specialState = null; p.attackFrame = 0;
@@ -6882,7 +7040,7 @@ function landingCheck(p) {
     for (const plat of platforms) {
       if (p.x >= plat.x && p.x <= plat.x + plat.w) {
         if (p.y >= plat.y && p.y - p.vy < plat.y + 8) {
-          p.y = plat.y; p.vy = 0; p.grounded = true; p.jumps = 2; p.strongLocked = false;
+          p.y = plat.y; p.vy = 0; p.grounded = true; p.jumps = p.charIdx === 15 ? 3 : 2; p.strongLocked = false;
           if (p.attacking && p.attackData && p.attackData.specialType === 'divekick') {
             p.attacking = false; p.specialState = null; p.attackFrame = 0;
           }
