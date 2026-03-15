@@ -5609,7 +5609,7 @@ function updateBattle(dt) {
     // 天才: ドラゴンモード処理
     if (p.charIdx === 10) {
       // Transform: Cボタン長押しで変形（ダメージ80%以上、クールダウンなし）
-      const cKeyHeld = p.id === 0 ? (keys['c'] || keys['C']) : (gameMode === 'vs' ? (keys['o'] || keys['O']) : false);
+      const cKeyHeld = p.id === 0 ? (keys['c'] || keys['C']) : (onlineMode && isHost) ? !!remoteKeys.c : (gameMode === 'vs' ? (keys['o'] || keys['O']) : false);
       if (cKeyHeld && !p.dragonMode && p.damage >= 80 && p.dragonCooldown <= 0 && p.grounded && p.hitstun <= 0) {
         p.dragonTransformTimer++;
         if (p.dragonTransformTimer >= 60) { // 1秒長押し
@@ -8450,7 +8450,8 @@ function drawBattleHUD() {
 }
 
 function drawPlayerHUD(x, y, player, label, color) {
-  const ch = characters[player.charIdx];
+  if (!player) return;
+  const ch = characters[player.charIdx] || characters[0];
   const w = 240, h = 90;
   ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
   roundRect(ctx, x, y, w, h, 8); ctx.fill();
@@ -8505,10 +8506,19 @@ function generateRoomId() {
 function setupPeerConnection(conn) {
   peerConn = conn;
   conn.on('open', () => {
+    console.log('[ONLINE] Connection opened, isHost:', isHost);
     onlineState = 'connected';
     onlineError = '';
     // Send our character selection
-    conn.send({ type: 'charSelect', charIdx: p1Select });
+    const myCharIdx = isHost ? p1Select : p2Select;
+    conn.send({ type: 'charSelect', charIdx: myCharIdx });
+    // Auto-transition to select screen
+    onlineMode = true;
+    gameMode = 'vs';
+    modeSelected = true;
+    p1Confirmed = false;
+    p2Confirmed = false;
+    if (scene === 'online') startTransition('select');
   });
   conn.on('data', (data) => {
     if (data.type === 'charSelect') {
@@ -8523,37 +8533,27 @@ function setupPeerConnection(conn) {
       else { p1Select = data.charIdx; }
       p1Confirmed = true; p2Confirmed = true;
       if (scene === 'select') startTransition('vsintro');
-    } else if (data.type === 'keys') {
-      remoteKeys = data.keys;
-    } else if (data.type === 'sync') {
-      remoteKeys = data.keys;
-      // Position correction for remote player
-      const remoteId = isHost ? 1 : 0;
-      const rp = players[remoteId];
-      if (rp && data.pos) {
-        // Lerp toward authoritative position to avoid jitter
-        rp.x += (data.pos.x - rp.x) * 0.3;
-        rp.y += (data.pos.y - rp.y) * 0.3;
-        rp.vx = data.pos.vx;
-        rp.vy = data.pos.vy;
-        rp.damage = data.damage;
-        rp.stocks = data.stocks;
-        rp.facingLeft = data.facingLeft;
-        if (!data.alive && rp.alive) {
-          // Remote player died
-          rp.alive = false;
-          rp.stocks = data.stocks;
-        }
+    } else if (data.type === 'input') {
+      // Host receives guest input
+      if (isHost) {
+        remoteKeys = data.keys;
+      }
+    } else if (data.type === 'state') {
+      // Guest receives authoritative state from host
+      if (!isHost) {
+        applyHostState(data);
       }
     }
   });
   conn.on('close', () => {
+    console.log('[ONLINE] Connection closed');
     onlineError = '接続が切断されました';
     onlineState = 'menu';
     onlineMode = false;
     peerConn = null;
   });
   conn.on('error', (err) => {
+    console.error('[ONLINE] Connection error:', err);
     onlineError = 'エラー: ' + err;
   });
 }
@@ -8563,14 +8563,18 @@ function startHosting() {
   onlineState = 'hosting';
   onlineError = '';
   isHost = true;
+  console.log('[ONLINE] Hosting room:', onlineRoomId);
   peer = new Peer('smash-' + onlineRoomId);
-  peer.on('open', () => {
+  peer.on('open', (id) => {
+    console.log('[ONLINE] Peer opened with ID:', id);
     onlineState = 'hosting';
   });
   peer.on('connection', (conn) => {
+    console.log('[ONLINE] Guest connected!');
     setupPeerConnection(conn);
   });
   peer.on('error', (err) => {
+    console.error('[ONLINE] Peer error:', err.type, err);
     onlineError = '接続エラー: ' + err.type;
     onlineState = 'menu';
   });
@@ -8580,24 +8584,22 @@ function joinRoom(roomId) {
   onlineState = 'joining';
   onlineError = '';
   isHost = false;
+  console.log('[ONLINE] Joining room:', roomId);
   peer = new Peer();
-  peer.on('open', () => {
-    const conn = peer.connect('smash-' + roomId);
+  peer.on('open', (id) => {
+    console.log('[ONLINE] Guest peer opened:', id, '→ connecting to smash-' + roomId);
+    const conn = peer.connect('smash-' + roomId, { reliable: true });
     setupPeerConnection(conn);
   });
   peer.on('error', (err) => {
+    console.error('[ONLINE] Peer error:', err.type, err);
     onlineError = 'エラー: ' + err.type;
     onlineState = 'menu';
   });
 }
 
-function sendOnlineSync() {
-  if (!peerConn || !peerConn.open || !battleStarted || gameOver) return;
-  // Determine which player we control locally
-  const localId = isHost ? 0 : 1;
-  const lp = players[localId];
-  if (!lp) return;
-
+function sendGuestInput() {
+  if (!peerConn || !peerConn.open) return;
   const myKeys = {
     left: !!(keys['ArrowLeft']),
     right: !!(keys['ArrowRight']),
@@ -8608,17 +8610,318 @@ function sendOnlineSync() {
     c: !!(keys['c'] || keys['C']),
     v: !!(keys['v'] || keys['V']),
   };
+  peerConn.send({ type: 'input', keys: myKeys });
+}
 
-  peerConn.send({
-    type: 'sync',
-    keys: myKeys,
-    pos: { x: lp.x, y: lp.y, vx: lp.vx, vy: lp.vy },
-    damage: lp.damage,
-    stocks: lp.stocks,
-    alive: lp.alive,
-    attacking: lp.attacking,
-    facingLeft: lp.facingLeft,
-  });
+function serializePlayer(p) {
+  return {
+    x: p.x, y: p.y, vx: p.vx, vy: p.vy,
+    damage: p.damage, stocks: p.stocks, alive: p.alive,
+    attacking: p.attacking, attackType: p.attackType, attackFrame: p.attackFrame,
+    facingLeft: p.facingLeft, hitstun: p.hitstun, grounded: p.grounded,
+    guarding: p.guarding, animState: p.animState, walkCycle: p.walkCycle,
+    spinAngle: p.spinAngle, damageTint: p.damageTint,
+    invincibleTimer: p.invincibleTimer,
+    dragonMode: p.dragonMode, dragonTimer: p.dragonTimer,
+    charging: p.charging, chargeTime: p.chargeTime, chargeMaxTime: p.chargeMaxTime,
+    grabbing: p.grabbing, grabbed: p.grabbed,
+    grabTarget: p.grabTarget, grabbedBy: p.grabbedBy,
+    respawnTimer: p.respawnTimer, landSquash: p.landSquash, jumpSquash: p.jumpSquash,
+    specialState: p.specialState, jumps: p.jumps,
+    guardDurability: p.guardDurability, guardBreakStun: p.guardBreakStun,
+    justGuardTimer: p.justGuardTimer, strongLocked: p.strongLocked,
+    dragonCooldown: p.dragonCooldown, dragonTransforming: p.dragonTransforming,
+    dragonTransformTimer: p.dragonTransformTimer,
+    throwCooldown: p.throwCooldown, inkBlindTimer: p.inkBlindTimer,
+    animTimer: p.animTimer, charIdx: p.charIdx,
+  };
+}
+
+function sendHostState() {
+  if (!peerConn || !peerConn.open) return;
+  const stateData = {
+    type: 'state',
+    p1: serializePlayer(players[0]),
+    p2: serializePlayer(players[1]),
+    battleTimer, battleStarted, battleCountdown, gameOver, winner,
+    hitStopFrames,
+    koSlowMotion: { active: koSlowMotion.active, frames: koSlowMotion.frames, maxFrames: koSlowMotion.maxFrames },
+    projectiles: projectiles.map(pr => ({
+      x: pr.x, y: pr.y, vx: pr.vx, vy: pr.vy,
+      w: pr.w, h: pr.h, damage: pr.damage, ownerId: pr.ownerId,
+      color: pr.color, pcolor: pr.pcolor, life: pr.life, homing: pr.homing,
+      kbBase: pr.kbBase, kbScale: pr.kbScale, kbAngle: pr.kbAngle,
+      hitTargets: pr.hitTargets,
+      shape: pr.shape, time: pr.time, ownerCharIdx: pr.ownerCharIdx,
+      pierce: pr.pierce, ink: pr.ink,
+    })),
+  };
+  peerConn.send(stateData);
+}
+
+function applyHostState(data) {
+  if (!players[0] || !players[1]) return;
+
+  // Detect damage changes for local effects
+  const oldDmg0 = players[0].damage, oldDmg1 = players[1].damage;
+  const oldStocks0 = players[0].stocks, oldStocks1 = players[1].stocks;
+  const oldAlive0 = players[0].alive, oldAlive1 = players[1].alive;
+
+  // Apply player states
+  const applyFields = (target, src) => {
+    target.x = src.x; target.y = src.y; target.vx = src.vx; target.vy = src.vy;
+    target.damage = src.damage; target.stocks = src.stocks; target.alive = src.alive;
+    target.attacking = src.attacking; target.attackType = src.attackType; target.attackFrame = src.attackFrame;
+    target.facingLeft = src.facingLeft; target.hitstun = src.hitstun; target.grounded = src.grounded;
+    target.guarding = src.guarding; target.animState = src.animState; target.walkCycle = src.walkCycle;
+    target.spinAngle = src.spinAngle; target.damageTint = src.damageTint;
+    target.invincibleTimer = src.invincibleTimer;
+    target.dragonMode = src.dragonMode; target.dragonTimer = src.dragonTimer;
+    target.charging = src.charging; target.chargeTime = src.chargeTime; target.chargeMaxTime = src.chargeMaxTime;
+    target.grabbing = src.grabbing; target.grabbed = src.grabbed;
+    target.grabTarget = src.grabTarget; target.grabbedBy = src.grabbedBy;
+    target.respawnTimer = src.respawnTimer; target.landSquash = src.landSquash; target.jumpSquash = src.jumpSquash;
+    target.specialState = src.specialState; target.jumps = src.jumps;
+    target.guardDurability = src.guardDurability; target.guardBreakStun = src.guardBreakStun;
+    target.justGuardTimer = src.justGuardTimer; target.strongLocked = src.strongLocked;
+    target.dragonCooldown = src.dragonCooldown; target.dragonTransforming = src.dragonTransforming;
+    target.dragonTransformTimer = src.dragonTransformTimer;
+    target.throwCooldown = src.throwCooldown; target.inkBlindTimer = src.inkBlindTimer;
+    target.animTimer = src.animTimer; target.charIdx = src.charIdx;
+    // Restore attackData from attackType
+    if (src.attacking && src.attackType) {
+      const defs = (target.charIdx === 10 && target.dragonMode) ? dragonAttackDefs : attackDefs[target.charIdx];
+      target.attackData = defs ? (defs[src.attackType] || null) : null;
+    } else {
+      target.attackData = null;
+    }
+  };
+  applyFields(players[0], data.p1);
+  applyFields(players[1], data.p2);
+
+  // Global state
+  battleTimer = data.battleTimer;
+  battleStarted = data.battleStarted;
+  battleCountdown = data.battleCountdown;
+  gameOver = data.gameOver;
+  winner = data.winner;
+  hitStopFrames = data.hitStopFrames;
+  koSlowMotion.active = data.koSlowMotion.active;
+  koSlowMotion.frames = data.koSlowMotion.frames;
+  koSlowMotion.maxFrames = data.koSlowMotion.maxFrames;
+  // hitFlash and screenShake are generated locally from state changes
+  // Don't overwrite them from host to avoid cancelling guest-local effects
+
+  // Projectiles
+  projectiles.length = 0;
+  if (data.projectiles) {
+    for (const pr of data.projectiles) {
+      projectiles.push(pr);
+    }
+  }
+
+  // Generate local effects on damage/stock changes
+  for (let i = 0; i < 2; i++) {
+    const oldDmg = i === 0 ? oldDmg0 : oldDmg1;
+    const newDmg = players[i].damage;
+    const oldStocks = i === 0 ? oldStocks0 : oldStocks1;
+    const newStocks = players[i].stocks;
+    const oldAlive = i === 0 ? oldAlive0 : oldAlive1;
+    const p = players[i];
+    if (newDmg > oldDmg) {
+      const dmgDiff = newDmg - oldDmg;
+      const isBig = dmgDiff >= 12;
+      damageNumbers.push({
+        x: p.x + (Math.random() - 0.5) * 20, y: p.y - 50,
+        vy: -1.8 - Math.random() * 0.5,
+        value: dmgDiff,
+        life: isBig ? 50 : 40, maxLife: isBig ? 50 : 40,
+        color: dmgDiff >= 15 ? '#FF4444' : dmgDiff >= 8 ? '#FFAA44' : '#FFFFFF',
+        scale: isBig ? 1.4 : 1.0,
+        bold: isBig,
+      });
+      hitEffects.push({ x: p.x, y: p.y - 35, life: 8, maxLife: 8, color: '#FFFFFF', size: 15 + dmgDiff * 0.5 });
+      // Hit flash
+      const chColor = characters[p.charIdx] ? characters[p.charIdx].accent : '#FFFFFF';
+      hitFlash.alpha = Math.max(hitFlash.alpha, 0.1 + Math.min(dmgDiff / 40, 0.2));
+      hitFlash.color = chColor;
+      // Screen shake proportional to damage
+      if (dmgDiff >= 8) triggerScreenShake(Math.min(dmgDiff / 3, 8), Math.min(dmgDiff / 2, 12));
+      for (let s = 0; s < Math.min(6, 2 + Math.floor(dmgDiff / 5)); s++) {
+        sparks.push({ x: p.x, y: p.y - 35, vx: (Math.random()-0.5)*6, vy: (Math.random()-0.5)*6 - 2, life: 10+Math.random()*10, maxLife: 20, color: '#FFAA33', size: 2+Math.random()*3, gravity: 0.15, drag: 0.97 });
+      }
+    }
+    if (newStocks < oldStocks) {
+      const ch = characters[p.charIdx] || characters[0];
+      const accent = ch.accent;
+      const mainCol = ch.color;
+      const ex = Math.max(BLAST_LEFT + 20, Math.min(BLAST_RIGHT - 20, p.x));
+      const ey = Math.max(BLAST_TOP + 20, Math.min(BLAST_BOTTOM - 20, p.y));
+
+      // KO display
+      koDisplay = { active: true, life: 90, maxLife: 90, playerIdx: i };
+
+      // Blast explosion with colors
+      blastExplosions.push({ x: ex, y: ey, life: 40, maxLife: 40, color: accent, charColor: mainCol });
+
+      // KO slash effects
+      for (let j = 0; j < 5; j++) {
+        const baseAngle = -0.6 + Math.random() * 1.2;
+        koSlashEffects.push({
+          x: ex, y: ey, angle: baseAngle,
+          length: 400 + Math.random() * 500, width: 2 + Math.random() * 4,
+          life: 90, maxLife: 90, delay: j * 3,
+          color: j % 2 === 0 ? '#AADDFF' : '#FFFFFF',
+        });
+      }
+
+      // Large spark burst (40 particles)
+      for (let j = 0; j < 40; j++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 2 + Math.random() * 8;
+        sparks.push({
+          x: ex + (Math.random()-0.5)*20, y: ey + (Math.random()-0.5)*20,
+          vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+          life: 20 + Math.floor(Math.random()*20), maxLife: 40,
+          color: j%4===0 ? '#FFFFFF' : j%4===1 ? accent : j%4===2 ? '#FFDD44' : mainCol,
+          size: 1.5 + Math.random() * 3.5, gravity: 0.05 + Math.random()*0.1, drag: 0.98,
+        });
+      }
+
+      // Star particles
+      for (let j = 0; j < 16; j++) {
+        const angle = (j/16) * Math.PI * 2 + Math.random() * 0.4;
+        const speed = 2 + Math.random() * 7;
+        sparks.push({
+          x: ex, y: ey, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 2,
+          life: 70 + Math.floor(Math.random()*20), maxLife: 90,
+          color: j%3===0 ? '#FFFFFF' : '#FFDD44', size: 3 + Math.random()*6,
+          type: 'star', gravity: 0.04, drag: 0.985,
+          spin: (Math.random()-0.5)*0.4, angle: Math.random()*Math.PI*2,
+        });
+      }
+
+      // Stock loss animation
+      const stockIdx = newStocks;
+      const hudX = i === 0 ? 120 : 600;
+      stockLossAnim = {
+        active: true, playerId: i, life: 30, maxLife: 30,
+        x: hudX + 10 + stockIdx * 22 + 7, y: 530 + 90 - 18 + 5,
+      };
+
+      // Confetti
+      const killerIdx = i === 0 ? 1 : 0;
+      const killerColor = characters[players[killerIdx] ? players[killerIdx].charIdx : 0].accent;
+      for (let j = 0; j < 50; j++) {
+        confetti.push({
+          x: 100 + Math.random() * 760, y: -20 - Math.random() * 100,
+          vx: (Math.random()-0.5)*4, vy: 1 + Math.random()*3,
+          life: 60 + Math.floor(Math.random()*60), maxLife: 120,
+          color: ['#FF4444','#FFDD00','#44AAFF','#FF66AA','#44FF88','#FF8844','#AA44FF', killerColor][j % 8],
+          size: 3 + Math.random()*5,
+          rotation: Math.random()*Math.PI*2, rotSpeed: (Math.random()-0.5)*0.2,
+          type: j%3===0 ? 'rect' : j%3===1 ? 'star' : 'circle',
+        });
+      }
+
+      // Hit flash
+      hitFlash.alpha = 0.55;
+      hitFlash.color = '#FFFFFF';
+
+      // Screen shake + sound
+      triggerScreenShake(10, 20);
+      try { playHitSound('ko'); } catch(e) {}
+    }
+  }
+}
+
+function updateGuestEffects(dt) {
+  // Increment battleTime for animation purposes
+  battleTime += dt;
+  // Only update visual effects, no game logic
+  for (let i = hitEffects.length - 1; i >= 0; i--) {
+    hitEffects[i].life--;
+    if (hitEffects[i].life <= 0) hitEffects.splice(i, 1);
+  }
+  for (let i = sparks.length - 1; i >= 0; i--) {
+    const s = sparks[i];
+    s.x += s.vx; s.y += s.vy;
+    s.vy += (s.gravity || 0.15);
+    s.vx *= (s.drag || 0.97);
+    if (s.spin) s.angle = (s.angle || 0) + s.spin;
+    s.life--;
+    if (s.life <= 0) sparks.splice(i, 1);
+  }
+  for (let i = damageNumbers.length - 1; i >= 0; i--) {
+    const d = damageNumbers[i];
+    d.y += d.vy; d.vy *= 0.96; d.life--;
+    if (d.life <= 0) damageNumbers.splice(i, 1);
+  }
+  for (let i = trails.length - 1; i >= 0; i--) {
+    const tr = trails[i];
+    tr.life--;
+    if (tr.life <= 0) { trails.splice(i, 1); continue; }
+    const target = players.find(pp => pp.id === tr.targetId);
+    if (target && target.alive && target.hitstun > 0) {
+      if (!tr.points) tr.points = [];
+      tr.points.push({ x: target.x, y: target.y - 35 });
+      const maxPts = tr.maxPoints || 20;
+      if (tr.points.length > maxPts) tr.points.shift();
+    }
+  }
+  for (let i = blastExplosions.length - 1; i >= 0; i--) {
+    blastExplosions[i].life--;
+    if (blastExplosions[i].life <= 0) blastExplosions.splice(i, 1);
+  }
+  for (let i = cmdNameDisplay.length - 1; i >= 0; i--) {
+    cmdNameDisplay[i].life--; cmdNameDisplay[i].y -= 0.5;
+    if (cmdNameDisplay[i].life <= 0) cmdNameDisplay.splice(i, 1);
+  }
+  for (let i = hitMissDisplays.length - 1; i >= 0; i--) {
+    hitMissDisplays[i].life--; hitMissDisplays[i].y -= 0.8;
+    if (hitMissDisplays[i].life <= 0) hitMissDisplays.splice(i, 1);
+  }
+  for (let i = comicTexts.length - 1; i >= 0; i--) {
+    comicTexts[i].life--; comicTexts[i].y -= 0.6;
+    if (comicTexts[i].life <= 0) comicTexts.splice(i, 1);
+  }
+  if (koDisplay.active) {
+    koDisplay.life--;
+    if (koDisplay.life <= 0) koDisplay.active = false;
+  }
+  for (let i = confetti.length - 1; i >= 0; i--) {
+    const c = confetti[i];
+    c.x += c.vx; c.y += c.vy; c.vy += 0.03; c.vx *= 0.99;
+    c.rotation += c.rotSpeed; c.life--;
+    if (c.life <= 0) confetti.splice(i, 1);
+  }
+  for (let i = speedLines.length - 1; i >= 0; i--) {
+    speedLines[i].life--;
+    if (speedLines[i].life <= 0) speedLines.splice(i, 1);
+  }
+  for (let i = fireTrails.length - 1; i >= 0; i--) {
+    const f = fireTrails[i];
+    f.x += f.vx; f.y += f.vy; f.vy -= 0.05; f.size *= 0.97; f.life--;
+    if (f.life <= 0) fireTrails.splice(i, 1);
+  }
+  for (let i = specialAura.length - 1; i >= 0; i--) {
+    specialAura[i].life--;
+    if (specialAura[i].life <= 0) specialAura.splice(i, 1);
+  }
+  if (cmdFlash.alpha > 0) {
+    cmdFlash.alpha *= 0.88;
+    if (cmdFlash.alpha < 0.01) cmdFlash.alpha = 0;
+  }
+  if (cmdScaleEffect.life > 0) cmdScaleEffect.life--;
+  for (let i = koSlashEffects.length - 1; i >= 0; i--) {
+    if (koSlashEffects[i].delay > 0) { koSlashEffects[i].delay--; }
+    else { koSlashEffects[i].life--; if (koSlashEffects[i].life <= 0) koSlashEffects.splice(i, 1); }
+  }
+  if (stockLossAnim.active) {
+    stockLossAnim.life--;
+    if (stockLossAnim.life <= 0) stockLossAnim.active = false;
+  }
+  // screenShake and hitFlash are decayed in drawBattle (updateScreenShake / hitFlash render)
 }
 
 function drawOnlineLobby(dt) {
@@ -9132,15 +9435,7 @@ function handleKeyDown(e) {
         }
       }
     }
-    if (onlineState === 'connected') {
-      // Auto-transition to select screen
-      onlineMode = true;
-      gameMode = 'vs';
-      modeSelected = true;
-      p1Confirmed = false;
-      p2Confirmed = false;
-      startTransition('select');
-    }
+    // Connected state is now handled in setupPeerConnection
     e.preventDefault();
     return;
   } else if (scene === 'select') {
@@ -9242,48 +9537,9 @@ function handleKeyDown(e) {
     // Online: guest's local input controls P2, not P1
     // Remote attacks are handled in the game loop via remoteKeys
     if (onlineMode && !isHost) {
-      // Guest: local arrow/z/x/c → control P2
-      const lp = p2;
-      if (e.key === 'ArrowDown') addCmdInput(1, 'D');
-      if (e.key === 'ArrowUp') addCmdInput(1, 'U');
-      if (e.key === 'ArrowLeft') addCmdInput(1, 'L');
-      if (e.key === 'ArrowRight') addCmdInput(1, 'R');
-      if (e.key === 'z' || e.key === 'Z') {
-        if (lp.grabbing) {
-          const target = players.find(pp => pp.id === lp.grabTarget);
-          if (target) { target.damage = Math.min(999, target.damage + 2); hitEffects.push({x:target.x,y:target.y-40,life:6,maxLife:6,color:'#FFF',size:10}); }
-        } else {
-          const cmd = checkCommandInput(lp);
-          if (cmd && cmd.chargeCmd) { if (!lp.charging && !lp.attacking) { lp.charging = true; lp.chargeTime = 0; lp.chargeCmd = cmd; } }
-          else if (cmd && executeCommand(lp, cmd)) {}
-          else if (!lp.grounded && keys['ArrowDown']) startAttack(lp, 'downair');
-          else if (!lp.grounded) startAttack(lp, 'aerial');
-          else if (lp.grounded && Math.abs(lp.vx) > 3 && (keys['ArrowLeft'] || keys['ArrowRight'])) startAttack(lp, 'dash');
-          else if (keys['ArrowUp']) startAttack(lp, 'up');
-          else if (keys['ArrowLeft'] || keys['ArrowRight']) startAttack(lp, 'side');
-          else if (keys['ArrowDown']) startAttack(lp, 'down');
-          else startAttack(lp, 'normal');
-        }
-      }
-      if (e.key === 'x' || e.key === 'X') {
-        if (lp.grabbing) {
-          let dx = 0, dy = 0;
-          if (keys['ArrowLeft']) dx = -1; if (keys['ArrowRight']) dx = 1;
-          if (keys['ArrowUp']) dy = -1; if (keys['ArrowDown']) dy = 1;
-          executeThrow(lp, dx, dy);
-        } else { startAttack(lp, 'strong'); }
-      }
-      if (e.key === 'c' || e.key === 'C') {
-        if (!(lp.charIdx === 10 && !lp.dragonMode && lp.damage >= 80 && lp.dragonCooldown <= 0 && lp.grounded)) {
-          startAttack(lp, 'special');
-        }
-      }
-      if (e.key === 'v' || e.key === 'V') {
-        if (lp.grounded && !lp.attacking && !lp.guarding && lp.guardDurability > 0 && lp.guardBreakStun <= 0) {
-          lp.guarding = true; lp.justGuardTimer = typeof JUST_GUARD_WINDOW !== 'undefined' ? JUST_GUARD_WINDOW : 6;
-        }
-      }
-      return; // Don't process P1 inputs for guest
+      // Guest: input is recorded in keys{} and sent via sendGuestInput()
+      // No local game state changes - host is authoritative
+      return;
     }
 
     // P1 direction input for commands (host or offline)
@@ -9433,7 +9689,10 @@ function gameLoop(timestamp) {
         startTransition('battle');
       }
     } else if (scene === 'battle') {
-      if (hitStopFrames > 0) {
+      if (onlineMode && !isHost) {
+        // Guest: no game simulation, only update effects
+        updateGuestEffects(FIXED_DT);
+      } else if (hitStopFrames > 0) {
         hitStopFrames--;
       } else if (koSlowMotion.active) {
         // ③ スローモーション: 3フレームに1回だけ更新
@@ -9447,10 +9706,9 @@ function gameLoop(timestamp) {
       } else {
         updateBattle(FIXED_DT);
       }
-      // Online: process remote player's attack key presses (edge detection)
-      if (onlineMode) {
-        const remotePlayerId = isHost ? 1 : 0;
-        const rp = players[remotePlayerId];
+      // Online host: process remote player's (P2) attack key presses (edge detection)
+      if (onlineMode && isHost) {
+        const rp = players[1];
         if (rp && rp.alive && battleStarted && !gameOver) {
           const rk = remoteKeys;
           const prk = prevRemoteKeys;
@@ -9484,10 +9742,10 @@ function gameLoop(timestamp) {
             }
           }
           // Direction commands
-          if (rk.down && !prk.down) addCmdInput(remotePlayerId, 'D');
-          if (rk.up && !prk.up) addCmdInput(remotePlayerId, 'U');
-          if (rk.left && !prk.left) addCmdInput(remotePlayerId, 'L');
-          if (rk.right && !prk.right) addCmdInput(remotePlayerId, 'R');
+          if (rk.down && !prk.down) addCmdInput(1, 'D');
+          if (rk.up && !prk.up) addCmdInput(1, 'U');
+          if (rk.left && !prk.left) addCmdInput(1, 'L');
+          if (rk.right && !prk.right) addCmdInput(1, 'R');
         }
         prevRemoteKeys = { ...remoteKeys };
       }
@@ -9496,9 +9754,10 @@ function gameLoop(timestamp) {
     updated = true;
   }
 
-  // Online: send sync data once per render frame (60fps)
+  // Online: host sends state, guest sends input
   if (onlineMode && scene === 'battle') {
-    sendOnlineSync();
+    if (isHost) sendHostState();
+    else sendGuestInput();
   }
 
   // Render every frame for smooth visuals
