@@ -4799,12 +4799,12 @@ const commandDefs = {
   ],
   17: [ // おんぱ
     { name:'音波爆発', seq:['D','U','D'], cooldownKey:'cmd1',
-      attack:{ startup:6, active:10, recovery:18, damage:1, kbBase:8, kbScale:0.13, kbAngle:-30, hx:0, hy:-30, hw:130, hh:90, color:'#88FFFF', effect:'shockwave', centerHit:true } },
+      attack:{ startup:6, active:10, recovery:18, damage:1, kbBase:12, kbScale:0.195, kbAngle:-30, hx:0, hy:-30, hw:195, hh:135, color:'#88FFFF', effect:'shockwave', centerHit:true, effectScale:1.5 } },
     { name:'共鳴波', seq:['F','D','F'], cooldownKey:'cmd2',
-      attack:{ startup:8, active:5, recovery:16, damage:1, kbBase:1, kbScale:0.01, kbAngle:-5, hx:20, hy:-35, hw:90, hh:40, color:'#44DDEE', effect:'none',
+      attack:{ startup:8, active:5, recovery:16, damage:1, kbBase:1.5, kbScale:0.015, kbAngle:-5, hx:20, hy:-35, hw:135, hh:60, color:'#44DDEE', effect:'none',
         stun:true, stunFrames:30 } },
     { name:'高周波スクリーム', seq:['U','F','U'], cooldownKey:'cmd3', chargeCmd:true,
-      attack:{ startup:6, active:12, recovery:16, damage:2, kbBase:7, kbScale:0.12, kbAngle:-80, hx:0, hy:-60, hw:100, hh:80, color:'#FFFFFF', effect:'upslash', centerHit:true } },
+      attack:{ startup:6, active:12, recovery:16, damage:2, kbBase:10.5, kbScale:0.18, kbAngle:-80, hx:0, hy:-60, hw:150, hh:120, color:'#FFFFFF', effect:'upslash', centerHit:true } },
   ],
 };
 
@@ -5226,20 +5226,20 @@ const attackDefs = {
   // おんぱ - Sound Type (Low Damage, Max Knockback, Max Range)
   17: {
     normal: { name:'音波パルス', startup:3, active:3, recovery:8, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#88FFFF', effect:'none',
-              projectile:{ speed:10, damage:1, kbBase:4, kbScale:0.08, kbAngle:-15, w:18, h:18, life:35, color:'#88FFFF', pcolor:'#AAFFFF' } },
+              projectile:{ speed:10, damage:1, kbBase:6, kbScale:0.12, kbAngle:-15, w:27, h:27, life:53, color:'#88FFFF', pcolor:'#AAFFFF' } },
     strong: { name:'ソニックブラスト', startup:10, active:5, recovery:16, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#44DDEE', effect:'none',
-              projectile:{ speed:12, damage:2, kbBase:7, kbScale:0.12, kbAngle:-20, w:30, h:25, life:60, color:'#44DDEE', pcolor:'#88FFFF' } },
-    special:{ name:'超音波砲', startup:12, active:30, recovery:20, damage:1, kbBase:8, kbScale:0.14, kbAngle:-10, hx:20, hy:-35, hw:200, hh:40, color:'#FFFFFF', effect:'none',
-              multiHit:true, hitInterval:6, finalDamage:2, finalKbBase:10, finalKbScale:0.16, finalKbAngle:-15 },
+              projectile:{ speed:12, damage:2, kbBase:10.5, kbScale:0.18, kbAngle:-20, w:45, h:38, life:90, color:'#44DDEE', pcolor:'#88FFFF' } },
+    special:{ name:'超音波砲', startup:12, active:30, recovery:20, damage:1, kbBase:12, kbScale:0.21, kbAngle:-10, hx:20, hy:-35, hw:300, hh:60, color:'#FFFFFF', effect:'none',
+              multiHit:true, hitInterval:6, finalDamage:2, finalKbBase:15, finalKbScale:0.24, finalKbAngle:-15 },
     aerial: { name:'空中音波', startup:3, active:3, recovery:8, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#88FFFF', effect:'none',
-              projectile:{ speed:9, damage:1, kbBase:4, kbScale:0.08, kbAngle:-80, w:16, h:16, life:30, color:'#88FFFF', pcolor:'#AAFFFF' } },
-    down:   { name:'足元音波', startup:4, active:8, recovery:12, damage:2, kbBase:5, kbScale:0.09, kbAngle:60, hx:0, hy:5, hw:60, hh:30, color:'#44DDEE', effect:'shockwave', centerHit:true },
-    up:     { name:'頭上音波リング', startup:4, active:8, recovery:12, damage:1, kbBase:6, kbScale:0.10, kbAngle:-88, hx:0, hy:-55, hw:55, hh:55, color:'#88FFFF', effect:'upslash', centerHit:true },
+              projectile:{ speed:9, damage:1, kbBase:6, kbScale:0.12, kbAngle:-80, w:24, h:24, life:45, color:'#88FFFF', pcolor:'#AAFFFF' } },
+    down:   { name:'足元音波', startup:4, active:8, recovery:12, damage:2, kbBase:7.5, kbScale:0.135, kbAngle:60, hx:0, hy:5, hw:90, hh:45, color:'#44DDEE', effect:'shockwave', centerHit:true, effectScale:1.5 },
+    up:     { name:'頭上音波リング', startup:4, active:8, recovery:12, damage:1, kbBase:9, kbScale:0.15, kbAngle:-88, hx:0, hy:-55, hw:83, hh:83, color:'#88FFFF', effect:'upslash', centerHit:true },
     side:   { name:'横音波', startup:4, active:5, recovery:10, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#44DDEE', effect:'none',
-              projectile:{ speed:11, damage:2, kbBase:5, kbScale:0.09, kbAngle:-12, w:22, h:18, life:45, color:'#44DDEE', pcolor:'#88FFFF' } },
-    downair:{ name:'急降下音波', startup:4, active:10, recovery:14, damage:2, kbBase:6, kbScale:0.10, kbAngle:80, hx:0, hy:10, hw:45, hh:45, color:'#44DDEE', effect:'meteor', centerHit:true },
+              projectile:{ speed:11, damage:2, kbBase:7.5, kbScale:0.135, kbAngle:-12, w:33, h:27, life:68, color:'#44DDEE', pcolor:'#88FFFF' } },
+    downair:{ name:'急降下音波', startup:4, active:10, recovery:14, damage:2, kbBase:9, kbScale:0.15, kbAngle:80, hx:0, hy:10, hw:68, hh:68, color:'#44DDEE', effect:'meteor', centerHit:true },
     dash:   { name:'ダッシュパルス', startup:3, active:3, recovery:10, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#88FFFF', effect:'none',
-              projectile:{ speed:13, damage:1, kbBase:4, kbScale:0.07, kbAngle:-10, w:16, h:14, life:40, color:'#88FFFF', pcolor:'#AAFFFF' },
+              projectile:{ speed:13, damage:1, kbBase:6, kbScale:0.105, kbAngle:-10, w:24, h:21, life:60, color:'#88FFFF', pcolor:'#AAFFFF' },
               specialType:'slide', slideSpeed:8 },
     throwDmg: 3,
   },
@@ -8903,14 +8903,15 @@ function drawAttackEffect(p) {
 
   if (atk.effect === 'shockwave') {
     const t = (frame - atk.startup) / atk.active;
-    const radius = 60 * t;
+    const es = atk.effectScale || 1;
+    const radius = 60 * es * t;
     // Red ground wave
     ctx.strokeStyle = '#FF4422';
     ctx.lineWidth = 5 * (1 - t);
     ctx.globalAlpha = 0.8 * (1 - t);
     ctx.beginPath();
     ctx.moveTo(cx - radius, cy - 5);
-    ctx.quadraticCurveTo(cx, cy - 25 * (1 - t), cx + radius, cy - 5);
+    ctx.quadraticCurveTo(cx, cy - 25 * es * (1 - t), cx + radius, cy - 5);
     ctx.stroke();
     // Second wave (delayed, smaller)
     if (t > 0.2) {
@@ -8918,20 +8919,20 @@ function drawAttackEffect(p) {
       ctx.strokeStyle = atk.color;
       ctx.lineWidth = 3 * (1 - t2);
       ctx.globalAlpha = 0.5 * (1 - t2);
-      const r2 = 45 * t2;
+      const r2 = 45 * es * t2;
       ctx.beginPath();
       ctx.moveTo(cx - r2, cy - 3);
-      ctx.quadraticCurveTo(cx, cy - 15 * (1 - t2), cx + r2, cy - 3);
+      ctx.quadraticCurveTo(cx, cy - 15 * es * (1 - t2), cx + r2, cy - 3);
       ctx.stroke();
     }
     // Rising dust columns
     for (let i = 0; i < 6; i++) {
-      const dx = (i - 2.5) * 22 * t;
-      const dustH = 15 + i * 4;
+      const dx = (i - 2.5) * 22 * es * t;
+      const dustH = (15 + i * 4) * es;
       ctx.globalAlpha = 0.35 * (1 - t);
       ctx.fillStyle = i % 2 === 0 ? '#FF6644' : '#887';
       ctx.beginPath();
-      ctx.arc(cx + dx, cy - 8 - dustH * t, (5 - i * 0.5) * (1 - t), 0, Math.PI * 2);
+      ctx.arc(cx + dx, cy - 8 - dustH * t, (5 - i * 0.5) * es * (1 - t), 0, Math.PI * 2);
       ctx.fill();
     }
     // Ground crack glow
