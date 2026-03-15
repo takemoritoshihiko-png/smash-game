@@ -246,9 +246,22 @@ const characters = [
   },
 ];
 
+// --- Audio unlock on first interaction ---
+let audioUnlocked = false;
+function unlockAudio() {
+  if (audioUnlocked) return;
+  audioUnlocked = true;
+  try {
+    const ac = getAudioCtx();
+    if (ac.state === 'suspended') ac.resume();
+  } catch(e) {}
+  bgmAudio.load();
+}
+
 // --- Input tracking ---
 const keys = {};
 document.addEventListener('keydown', (e) => {
+  unlockAudio();
   keys[e.key] = true;
   if (e.key === 'F3') { debugHitboxes = !debugHitboxes; e.preventDefault(); }
   handleKeyDown(e);
@@ -896,11 +909,11 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
   } else if (charIndex === 12) {
     // タンク - 戦車モチーフ重装甲キャラ
     if (tankImg.complete && tankImg.naturalWidth > 0) {
-      const imgW = 120 * s;
-      const imgH = 80 * s;
+      const imgW = 168 * s;
+      const imgH = 112 * s;
       ctx.save();
       ctx.globalCompositeOperation = 'screen';
-      ctx.drawImage(tankImg, -imgW / 2 - 5 * s, -45 * s, imgW, imgH);
+      ctx.drawImage(tankImg, -imgW / 2 - 5 * s, -55 * s, imgW, imgH);
       ctx.restore();
     } else {
       // Canvas fallback
@@ -1227,13 +1240,13 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
   const tensaiIsDragon = animData && animData.dragonMode;
   const tensaiActiveImg = tensaiIsDragon ? tensaiDragonImg : tensaiHumanImg;
   const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg, bulletImg, shaudenImg, judgemanImg, tensaiActiveImg, catbusImg, tankImg];
-  const imgSizes = [[70, 90], [80, 95], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [120, 80]];
+  const imgSizes = [[70, 90], [80, 95], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [168, 112]];
   const img = imgs[charIndex];
   if (img && img.complete && img.naturalWidth > 0) {
     const imgW = imgSizes[charIndex][0] * s;
     const imgH = imgSizes[charIndex][1] * s;
     const tankOfsX = charIndex === 12 ? -5 * s : 0;
-    const tankOfsY = charIndex === 12 ? -10 * s : 0;
+    const tankOfsY = charIndex === 12 ? -20 * s : 0;
     const useScreen = charIndex === 12;
     if (useScreen) ctx.globalCompositeOperation = 'screen';
 
@@ -4001,6 +4014,70 @@ function playHitSound(type) {
   } catch (e) { /* ignore audio errors */ }
 }
 
+// === BGM ===
+const bgmAudio = new Audio('sounds/bgm.mp3');
+bgmAudio.loop = true;
+bgmAudio.volume = 0.4;
+let bgmPlaying = false;
+
+function startBGM() {
+  if (bgmPlaying) return;
+  bgmAudio.currentTime = 0;
+  bgmAudio.play().catch(() => {});
+  bgmPlaying = true;
+}
+
+function stopBGM() {
+  if (!bgmPlaying) return;
+  bgmAudio.pause();
+  bgmAudio.currentTime = 0;
+  bgmPlaying = false;
+}
+
+// === SE (攻撃ヒット・撃墜) ===
+function playHitSE() {
+  try {
+    const ac = getAudioCtx();
+    const now = ac.currentTime;
+    const o = ac.createOscillator(); const g = ac.createGain();
+    o.type = 'square';
+    o.frequency.setValueAtTime(200, now);
+    o.frequency.exponentialRampToValueAtTime(50, now + 0.1);
+    g.gain.setValueAtTime(0.25, now);
+    g.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+    o.connect(g); g.connect(ac.destination);
+    o.start(now); o.stop(now + 0.1);
+  } catch(e) {}
+}
+
+function playKOSE() {
+  try {
+    const ac = getAudioCtx();
+    const now = ac.currentTime;
+    // Deep boom
+    const o = ac.createOscillator(); const g = ac.createGain();
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(100, now);
+    o.frequency.exponentialRampToValueAtTime(20, now + 0.6);
+    g.gain.setValueAtTime(0.3, now);
+    g.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+    o.connect(g); g.connect(ac.destination);
+    o.start(now); o.stop(now + 0.6);
+    // Sub rumble
+    const o2 = ac.createOscillator(); const g2 = ac.createGain();
+    o2.type = 'sine';
+    o2.frequency.setValueAtTime(50, now);
+    o2.frequency.exponentialRampToValueAtTime(15, now + 0.5);
+    g2.gain.setValueAtTime(0.2, now);
+    g2.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+    o2.connect(g2); g2.connect(ac.destination);
+    o2.start(now); o2.stop(now + 0.55);
+    // Noise burst
+    const n = makeNoise(ac, 0.2, 0.18);
+    n.src.start(now); n.src.stop(now + 0.2);
+  } catch(e) {}
+}
+
 // Hit flash overlay (white flash on strong hits)
 let hitFlash = { alpha: 0, color: '#FFFFFF' };
 
@@ -4739,6 +4816,7 @@ function initBattle() {
     createPlayer(0, p1Select, 350),
     createPlayer(1, p2Select, 610),
   ];
+  startBGM();
 }
 
 // --- Knockback calculation ---
@@ -4830,6 +4908,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   if (target.isHanging) releaseLedge(target);
 
   target.damage = Math.min(999, target.damage + finalDamage);
+  playHitSE();
   const kb = calcKnockback(target.damage, kbBase, finalKbScale);
   const rad = kbAngle * Math.PI / 180;
   const dir = attacker.x < target.x ? 1 : -1;
@@ -5113,6 +5192,7 @@ function hitboxCollides(ax, ay, aw, ah, bx, by, bw, bh) {
 }
 
 function getPlayerHitbox(p) {
+  if (p.charIdx === 12) return { x: p.x - 25, y: p.y - 98, w: 50, h: 98 };
   return { x: p.x - 18, y: p.y - 70, w: 36, h: 70 };
 }
 
@@ -5497,6 +5577,7 @@ function updateBattle(dt) {
 
   if (battleTimer <= 0 && !gameOver) {
     gameOver = true;
+    stopBGM();
     const p1 = players[0], p2 = players[1];
     if (p1.stocks !== p2.stocks) winner = p1.stocks > p2.stocks ? 0 : 1;
     else winner = p1.damage <= p2.damage ? 0 : 1;
@@ -6513,18 +6594,19 @@ function landingCheck(p) {
 
 const LEDGE_GRAB_RANGE = 28; // pixels from ledge point to trigger grab
 const LEDGE_COOLDOWN = 60;   // frames before same ledge can be grabbed again
+const LEDGE_BOTTOM_Y = STAGE_GROUND_Y + 38; // ステージ下端（プラットフォーム厚み分）
 
 function ledgeGrabCheck(p) {
-  if (p.grounded || p.isHanging || p.vy <= 0 || p.hitstun > 0 || p.grabbed) return;
-  // Left ledge point
+  if (p.grounded || p.isHanging || p.vy >= 0 || p.hitstun > 0 || p.grabbed) return;
+  // Left ledge point (ステージ下端の左角)
   if (p.ledgeCooldownL <= 0) {
     const dx = p.x - STAGE_LEFT;
-    const dy = p.y - STAGE_GROUND_Y;
+    const dy = p.y - LEDGE_BOTTOM_Y;
     if (Math.abs(dx) < LEDGE_GRAB_RANGE && dy > -LEDGE_GRAB_RANGE && dy < LEDGE_GRAB_RANGE) {
       p.isHanging = true;
       p.hangingLedge = 'left';
       p.x = STAGE_LEFT;
-      p.y = STAGE_GROUND_Y;
+      p.y = LEDGE_BOTTOM_Y;
       p.vx = 0; p.vy = 0;
       p.facingLeft = false;
       p.attacking = false; p.specialState = null;
@@ -6532,15 +6614,15 @@ function ledgeGrabCheck(p) {
       return;
     }
   }
-  // Right ledge point
+  // Right ledge point (ステージ下端の右角)
   if (p.ledgeCooldownR <= 0) {
     const dx = p.x - STAGE_RIGHT;
-    const dy = p.y - STAGE_GROUND_Y;
+    const dy = p.y - LEDGE_BOTTOM_Y;
     if (Math.abs(dx) < LEDGE_GRAB_RANGE && dy > -LEDGE_GRAB_RANGE && dy < LEDGE_GRAB_RANGE) {
       p.isHanging = true;
       p.hangingLedge = 'right';
       p.x = STAGE_RIGHT;
-      p.y = STAGE_GROUND_Y;
+      p.y = LEDGE_BOTTOM_Y;
       p.vx = 0; p.vy = 0;
       p.facingLeft = true;
       p.attacking = false; p.specialState = null;
@@ -6560,17 +6642,16 @@ function releaseLedge(p) {
 }
 
 function ledgeClimbUp(p) {
+  // ↑: 崖から離れて落下（ステージ下端なので上には乗れない）
   if (!p.isHanging) return;
-  const dir = p.hangingLedge === 'left' ? 1 : -1;
-  p.x += dir * 30;
-  p.y = STAGE_GROUND_Y;
-  p.grounded = true;
-  p.vy = 0;
-  p.invincibleTimer = Math.max(p.invincibleTimer, 10);
+  const dir = p.hangingLedge === 'left' ? -1 : 1;
+  p.x += dir * 15;
+  p.vy = -2;
   releaseLedge(p);
 }
 
 function ledgeDrop(p) {
+  // ↓: そのまま落下
   if (!p.isHanging) return;
   const dir = p.hangingLedge === 'left' ? -1 : 1;
   p.x += dir * 10;
@@ -6648,6 +6729,7 @@ function blastCheck(p) {
       });
     }
     p.stocks--;
+    playKOSE();
     p.alive = false;
     p.damage = 0;
     playHitSound('ko');
@@ -6725,6 +6807,7 @@ function blastCheck(p) {
     p.specialState = null;
     if (p.stocks <= 0) {
       gameOver = true;
+      stopBGM();
       winner = p.id === 0 ? 1 : 0;
     } else {
       p.respawnTimer = RESPAWN_TIME;
@@ -9901,6 +9984,7 @@ function handleKeyDown(e) {
     }
   } else if (scene === 'battle') {
     if (gameOver && e.key === 'Enter') {
+      stopBGM();
       startTransition('select'); return;
     }
     if (!battleStarted || gameOver) return;
@@ -10034,6 +10118,7 @@ function handleKeyDown(e) {
 }
 
 canvas.addEventListener('click', (e) => {
+  unlockAudio();
   if (transitioning) return;
   if (scene === 'title') startTransition('select');
 });
