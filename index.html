@@ -257,6 +257,19 @@ const characters = [
     jumpPower: -13.0,
     weight: 1.0
   },
+  {
+    name: 'とっこ',
+    type: '超攻撃型',
+    color: '#8B00CC',
+    accent: '#CC44FF',
+    dark: '#440066',
+    stats: { power: 5, speed: 5, tech: 3, defense: 0 },
+    desc: '一撃必倒の凶獣・超攻撃特化の最軽量',
+    bodyColors: { main: '#8B00CC', sub: '#CC44FF', skin: '#E8D0F0' },
+    moveSpeed: 12.0,
+    jumpPower: -15.5,
+    weight: 0.4
+  },
 ];
 
 // --- Audio unlock on first interaction ---
@@ -314,6 +327,8 @@ const tankImg = new Image();
 tankImg.src = 'images/tank.png';
 const namiojiImg = new Image();
 namiojiImg.src = 'images/namioji.png';
+const tokkoImg = new Image();
+tokkoImg.src = 'images/tokko.png';
 
 // --- Particles ---
 function spawnTitleParticle() {
@@ -965,6 +980,67 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.beginPath(); ctx.arc(-16 * s, 0, 7 * s, 0, Math.PI * 2); ctx.fill();
       ctx.beginPath(); ctx.arc(16 * s, 0, 7 * s, 0, Math.PI * 2); ctx.fill();
     }
+  } else if (charIndex === 14) {
+    // とっこ - 凶獣
+    if (tokkoImg.complete && tokkoImg.naturalWidth > 0) {
+      const imgW = 75 * s;
+      const imgH = 90 * s;
+      ctx.drawImage(tokkoImg, -imgW / 2, -35 * s, imgW, imgH);
+    } else {
+      // Canvas fallback: beast silhouette
+      // Legs
+      ctx.fillStyle = '#440066';
+      ctx.fillRect(-10 * s, 25 * s, 7 * s, 20 * s);
+      ctx.fillRect(3 * s, 25 * s, 7 * s, 20 * s);
+      // Body (slim, agile)
+      ctx.fillStyle = '#8B00CC';
+      ctx.fillRect(-12 * s, -15 * s, 24 * s, 40 * s);
+      // Chest slash mark
+      ctx.strokeStyle = '#CC44FF';
+      ctx.lineWidth = 2 * s;
+      ctx.beginPath(); ctx.moveTo(-6 * s, -8 * s); ctx.lineTo(6 * s, 5 * s); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(6 * s, -8 * s); ctx.lineTo(-6 * s, 5 * s); ctx.stroke();
+      ctx.lineWidth = 1;
+      // Arms (claws)
+      ctx.fillStyle = '#6A00AA';
+      ctx.fillRect(-18 * s, -10 * s, 7 * s, 22 * s);
+      ctx.fillRect(11 * s, -10 * s, 7 * s, 22 * s);
+      // Claws
+      ctx.fillStyle = '#FFF';
+      for (let i = 0; i < 3; i++) {
+        ctx.fillRect((12 + i * 2) * s, 12 * s, 1.5 * s, 5 * s);
+        ctx.fillRect((-18 + i * 2) * s, 12 * s, 1.5 * s, 5 * s);
+      }
+      // Head
+      ctx.fillStyle = '#9B10DD';
+      ctx.beginPath(); ctx.arc(0, -25 * s, 12 * s, 0, Math.PI * 2); ctx.fill();
+      // Eyes (fierce, glowing)
+      ctx.fillStyle = '#FF3366';
+      ctx.beginPath(); ctx.ellipse(-5 * s, -27 * s, 3 * s, 2 * s, -0.2, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(5 * s, -27 * s, 3 * s, 2 * s, 0.2, 0, Math.PI * 2); ctx.fill();
+      // Pupils
+      ctx.fillStyle = '#FFF';
+      ctx.beginPath(); ctx.arc(-4.5 * s, -27 * s, 1 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(5.5 * s, -27 * s, 1 * s, 0, Math.PI * 2); ctx.fill();
+      // Ears (pointed)
+      ctx.fillStyle = '#7A00BB';
+      ctx.beginPath();
+      ctx.moveTo(-9 * s, -34 * s); ctx.lineTo(-5 * s, -48 * s); ctx.lineTo(-1 * s, -33 * s);
+      ctx.closePath(); ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(1 * s, -33 * s); ctx.lineTo(5 * s, -48 * s); ctx.lineTo(9 * s, -34 * s);
+      ctx.closePath(); ctx.fill();
+      // Mouth (fangs)
+      ctx.fillStyle = '#222';
+      ctx.beginPath(); ctx.ellipse(0, -19 * s, 5 * s, 3 * s, 0, 0, Math.PI); ctx.fill();
+      ctx.fillStyle = '#FFF';
+      ctx.beginPath();
+      ctx.moveTo(-3 * s, -19 * s); ctx.lineTo(-2 * s, -15 * s); ctx.lineTo(-1 * s, -19 * s);
+      ctx.closePath(); ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(1 * s, -19 * s); ctx.lineTo(2 * s, -15 * s); ctx.lineTo(3 * s, -19 * s);
+      ctx.closePath(); ctx.fill();
+    }
   } else if (charIndex === 10) {
     // 天才 - 変形型ドラゴン
     const isDragon = typeof players !== 'undefined' && players.some(p => p.charIdx === 10 && p.dragonMode);
@@ -1138,6 +1214,12 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
         scaleX = 1 + Math.sin(t * 0.06) * 0.012;
         scaleY = 1 + Math.sin(t * 0.06 + 0.5) * 0.01;
         armAngle = Math.sin(t * 0.05) * 0.04;
+      } else if (charIndex === 14) {
+        // Tokko: rapid twitchy breathing
+        bobY = Math.sin(t * 0.08) * 3 + Math.sin(t * 0.16) * 1.5;
+        scaleX = 1 + Math.sin(t * 0.1) * 0.015;
+        scaleY = 1 + Math.sin(t * 0.08 + 0.3) * 0.012;
+        armAngle = Math.sin(t * 0.07) * 0.06;
       }
     }
 
@@ -1208,6 +1290,13 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
         scaleY = 0.97 + Math.abs(Math.sin(phase)) * 0.03;
         legAngle = Math.sin(phase) * 0.14;
         armSwing = -Math.sin(phase) * 0.12;
+      } else if (charIndex === 14) {
+        // Tokko: very fast sprint
+        bobY = Math.abs(Math.sin(phase)) * 4;
+        walkLean = Math.sin(phase) * 0.12;
+        scaleX = 1 + Math.sin(phase * 2) * 0.02;
+        legAngle = Math.sin(phase) * 0.22;
+        armSwing = -Math.sin(phase) * 0.2;
       }
     }
 
@@ -1288,8 +1377,8 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
   // 天才 uses different images per mode
   const tensaiIsDragon = animData && animData.dragonMode;
   const tensaiActiveImg = tensaiIsDragon ? tensaiDragonImg : tensaiHumanImg;
-  const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg, bulletImg, shaudenImg, judgemanImg, tensaiActiveImg, catbusImg, tankImg, namiojiImg];
-  const imgSizes = [[70, 90], [80, 95], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [168, 112], [75, 90]];
+  const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg, bulletImg, shaudenImg, judgemanImg, tensaiActiveImg, catbusImg, tankImg, namiojiImg, tokkoImg];
+  const imgSizes = [[70, 90], [80, 95], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [168, 112], [75, 90], [75, 90]];
   const img = imgs[charIndex];
   if (img && img.complete && img.naturalWidth > 0) {
     const imgW = imgSizes[charIndex][0] * s;
@@ -4363,6 +4452,17 @@ const commandDefs = {
     { name:'ボディブロー', seq:['D','B','D','B'], cooldownKey:'cmd3', chargeCmd:true,
       attack:{ startup:8, active:8, recovery:18, damage:14, kbBase:5, kbScale:0.09, kbAngle:60, hx:16, hy:-20, hw:55, hh:35, color:'#FF4422', effect:'punch' } },
   ],
+  14: [ // とっこ
+    { name:'空中急襲', seq:['D','U','D','U'], cooldownKey:'cmd1',
+      attack:{ startup:4, active:12, recovery:16, damage:16, kbBase:6, kbScale:0.10, kbAngle:-40, hx:12, hy:-45, hw:55, hh:55, color:'#CC44FF', effect:'dash',
+        specialType:'shadowDash', dashSpeed:16 } },
+    { name:'瞬間移動斬り', seq:['F','F','F'], cooldownKey:'cmd2',
+      attack:{ startup:6, active:8, recovery:20, damage:18, kbBase:7, kbScale:0.12, kbAngle:-15, hx:15, hy:-40, hw:65, hh:50, color:'#FF44AA', effect:'sideslash',
+        specialType:'cmdTeleSlash', teleportDist:200 } },
+    { name:'地を這う斬り', seq:['D','B','D','B'], cooldownKey:'cmd3', chargeCmd:true,
+      attack:{ startup:4, active:10, recovery:14, damage:12, kbBase:4, kbScale:0.08, kbAngle:20, hx:18, hy:-10, hw:80, hh:25, color:'#8B00CC', effect:'sweep',
+        specialType:'slide', slideSpeed:12 } },
+  ],
 };
 
 // Dragon mode commands (separate)
@@ -4729,6 +4829,25 @@ const attackDefs = {
               specialType:'slide', slideSpeed:9 },
     throwDmg: 10,
   },
+  // とっこ - Speed/Power Beast
+  14: {
+    normal: { name:'高速爪斬り', startup:2, active:3, recovery:5, damage:4, kbBase:1.5, kbScale:0.03, kbAngle:-10, hx:14, hy:-35, hw:45, hh:35, color:'#CC44FF', effect:'slash' },
+    strong: { name:'跳びかかり', startup:5, active:10, recovery:14, damage:14, kbBase:5, kbScale:0.10, kbAngle:-15, hx:18, hy:-35, hw:60, hh:45, color:'#8B00CC', effect:'dash',
+              specialType:'cmdCharge', chargeSpeed:14 },
+    special:{ name:'狂乱ラッシュ', startup:4, active:24, recovery:20, damage:3, kbBase:1.5, kbScale:0.03, kbAngle:-10, hx:14, hy:-38, hw:50, hh:45, color:'#FF44AA', effect:'punch',
+              multiHit:true, hitInterval:4, finalDamage:14, finalKbBase:7, finalKbScale:0.12, finalKbAngle:-30, spinKB:true },
+    aerial: { name:'空中爪撃', startup:2, active:8, recovery:8, damage:9, kbBase:3, kbScale:0.07, kbAngle:-80, hx:8, hy:-30, hw:55, hh:50, color:'#CC44FF', effect:'airkick', centerHit:true },
+    down:   { name:'急降下踏みつけ', startup:3, active:10, recovery:12, damage:12, kbBase:5, kbScale:0.09, kbAngle:80, hx:0, hy:10, hw:40, hh:45, color:'#8B00CC', effect:'meteor',
+              specialType:'divekick', diveSpeed:16 },
+    up:     { name:'爪叩き上げ', startup:3, active:7, recovery:12, damage:11, kbBase:5, kbScale:0.09, kbAngle:-88, hx:5, hy:-55, hw:45, hh:55, color:'#CC44FF', effect:'upslash',
+              specialType:'uppercut', launchVy:-12 },
+    side:   { name:'高速横斬り', startup:3, active:5, recovery:10, damage:14, kbBase:5, kbScale:0.10, kbAngle:-12, hx:16, hy:-35, hw:55, hh:38, color:'#8B00CC', effect:'sideslash' },
+    downair:{ name:'急降下爪撃', startup:3, active:10, recovery:12, damage:13, kbBase:6, kbScale:0.10, kbAngle:80, hx:0, hy:10, hw:40, hh:50, color:'#CC44FF', effect:'meteor',
+              specialType:'divekick', diveSpeed:15 },
+    dash:   { name:'ダッシュ斬り', startup:2, active:10, recovery:10, damage:12, kbBase:4, kbScale:0.08, kbAngle:-10, hx:20, hy:-35, hw:65, hh:40, color:'#CC44FF', effect:'slash',
+              specialType:'slide', slideSpeed:14 },
+    throwDmg: 8,
+  },
 };
 
 // Dragon mode attack defs (separate object)
@@ -5066,6 +5185,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
       11: ['#FFBB44', '#DD8822', '#FFE8AA'], // Catbus: orange
       12: ['#A0B858', '#6B7B3A', '#FF8833'], // Tank: olive/orange
       13: ['#FF6644', '#CC3333', '#FFFFFF'], // Namioji: red/white
+      14: ['#CC44FF', '#8B00CC', '#FF44AA'], // Tokko: purple/pink
     };
     const colors = charColors[attacker.charIdx] || ['#FFFFFF'];
     const specialCount = 30 + Math.floor(kb * 1.5);
