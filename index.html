@@ -985,7 +985,10 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
     if (tokkoImg.complete && tokkoImg.naturalWidth > 0) {
       const imgW = 75 * s;
       const imgH = 90 * s;
+      ctx.save();
+      ctx.globalCompositeOperation = 'screen';
       ctx.drawImage(tokkoImg, -imgW / 2, -35 * s, imgW, imgH);
+      ctx.restore();
     } else {
       // Canvas fallback: beast silhouette
       // Legs
@@ -1385,7 +1388,7 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
     const imgH = imgSizes[charIndex][1] * s;
     const tankOfsX = charIndex === 12 ? -5 * s : 0;
     const tankOfsY = charIndex === 12 ? -20 * s : 0;
-    const useScreen = charIndex === 12 || charIndex === 13;
+    const useScreen = charIndex === 12 || charIndex === 13 || charIndex === 14;
     if (useScreen) ctx.globalCompositeOperation = 'screen';
 
     // Damage flash: smooth 2-frame blink with fading intensity
