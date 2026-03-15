@@ -50,7 +50,7 @@ let p2Confirmed = false;
 // Game mode
 let gameMode = 'vs'; // 'vs' | 'cpu'
 let modeSelected = false; // whether mode has been chosen on select screen
-let cpuDifficulty = 1; // 0=easy, 1=normal, 2=hard
+let cpuDifficulty = 1; // 0=easy, 1=normal, 2=hard, 3=extreme
 let difficultyTime = 0;
 let difficultySelected = 0; // cursor on difficulty screen
 
@@ -244,6 +244,19 @@ const characters = [
     jumpPower: -11.0,
     weight: 1.7
   },
+  {
+    name: '波おじ',
+    type: 'テクニック型',
+    color: '#CC3333',
+    accent: '#FF6644',
+    dark: '#881111',
+    stats: { power: 3, speed: 4, tech: 5, defense: 2 },
+    desc: '荒波を超えた拳・コンボの達人ボクサー',
+    bodyColors: { main: '#CC3333', sub: '#FF6644', skin: '#FFCBA4' },
+    moveSpeed: 8.5,
+    jumpPower: -13.0,
+    weight: 1.0
+  },
 ];
 
 // --- Audio unlock on first interaction ---
@@ -299,6 +312,8 @@ const tensaiDragonImg = new Image();
 tensaiDragonImg.src = 'images/tensai_dragon.png';
 const tankImg = new Image();
 tankImg.src = 'images/tank.png';
+const namiojiImg = new Image();
+namiojiImg.src = 'images/namioji.png';
 
 // --- Particles ---
 function spawnTitleParticle() {
@@ -929,6 +944,27 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.fillStyle = '#CCFF44';
       ctx.fillRect(-8 * s, -28 * s, 16 * s, 5 * s);
     }
+  } else if (charIndex === 13) {
+    // 波おじ - ボクサーおじさん
+    if (namiojiImg.complete && namiojiImg.naturalWidth > 0) {
+      const imgW = 90 * s;
+      const imgH = 110 * s;
+      ctx.save();
+      ctx.globalCompositeOperation = 'screen';
+      ctx.drawImage(namiojiImg, -imgW / 2, -50 * s, imgW, imgH);
+      ctx.restore();
+    } else {
+      // Canvas fallback: simple boxer
+      ctx.fillStyle = '#FFCBA4';
+      ctx.beginPath(); ctx.arc(0, -28 * s, 12 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(-12 * s, -15 * s, 24 * s, 30 * s);
+      ctx.fillStyle = '#222';
+      ctx.fillRect(-10 * s, 15 * s, 20 * s, 20 * s);
+      ctx.fillStyle = '#CC3333';
+      ctx.beginPath(); ctx.arc(-16 * s, 0, 7 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(16 * s, 0, 7 * s, 0, Math.PI * 2); ctx.fill();
+    }
   } else if (charIndex === 10) {
     // 天才 - 変形型ドラゴン
     const isDragon = typeof players !== 'undefined' && players.some(p => p.charIdx === 10 && p.dragonMode);
@@ -1096,6 +1132,12 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
         bobY = Math.sin(t * 0.02) * 2 + Math.sin(t * 0.04) * 0.5;
         scaleX = 1 + Math.sin(t * 0.02) * 0.008;
         scaleY = 1 + Math.sin(t * 0.02 + 0.5) * 0.012;
+      } else if (charIndex === 13) {
+        // Namioji: boxer bounce
+        bobY = Math.sin(t * 0.06) * 3 + Math.sin(t * 0.12) * 1;
+        scaleX = 1 + Math.sin(t * 0.06) * 0.012;
+        scaleY = 1 + Math.sin(t * 0.06 + 0.5) * 0.01;
+        armAngle = Math.sin(t * 0.05) * 0.04;
       }
     }
 
@@ -1159,6 +1201,13 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
         walkLean = Math.sin(phase) * 0.02;
         legAngle = Math.sin(phase) * 0.08;
         armSwing = -Math.sin(phase) * 0.06;
+      } else if (charIndex === 13) {
+        // Namioji: light boxing footwork
+        bobY = Math.abs(Math.sin(phase)) * 3;
+        walkLean = Math.sin(phase) * 0.08;
+        scaleY = 0.97 + Math.abs(Math.sin(phase)) * 0.03;
+        legAngle = Math.sin(phase) * 0.14;
+        armSwing = -Math.sin(phase) * 0.12;
       }
     }
 
@@ -1239,15 +1288,15 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
   // 天才 uses different images per mode
   const tensaiIsDragon = animData && animData.dragonMode;
   const tensaiActiveImg = tensaiIsDragon ? tensaiDragonImg : tensaiHumanImg;
-  const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg, bulletImg, shaudenImg, judgemanImg, tensaiActiveImg, catbusImg, tankImg];
-  const imgSizes = [[70, 90], [80, 95], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [168, 112]];
+  const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg, bulletImg, shaudenImg, judgemanImg, tensaiActiveImg, catbusImg, tankImg, namiojiImg];
+  const imgSizes = [[70, 90], [80, 95], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [168, 112], [90, 110]];
   const img = imgs[charIndex];
   if (img && img.complete && img.naturalWidth > 0) {
     const imgW = imgSizes[charIndex][0] * s;
     const imgH = imgSizes[charIndex][1] * s;
     const tankOfsX = charIndex === 12 ? -5 * s : 0;
-    const tankOfsY = charIndex === 12 ? -20 * s : 0;
-    const useScreen = charIndex === 12;
+    const tankOfsY = charIndex === 12 ? -20 * s : (charIndex === 13 ? -15 * s : 0);
+    const useScreen = charIndex === 12 || charIndex === 13;
     if (useScreen) ctx.globalCompositeOperation = 'screen';
 
     // Damage flash: smooth 2-frame blink with fading intensity
@@ -3612,13 +3661,18 @@ function drawDifficulty(dt) {
     { name: 'やさしい', desc: 'ランダムに動く・たまに攻撃', color: '#44CC44', stars: 1 },
     { name: 'ふつう',   desc: '近づいて攻撃・たまにジャンプ', color: '#FFAA22', stars: 2 },
     { name: 'つよい',   desc: '積極追撃・必殺技も使う', color: '#FF4444', stars: 3 },
+    { name: 'さいきょう', desc: 'コンボ・復帰・即反撃', color: '#CC44FF', stars: 4 },
   ];
 
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < difficulties.length; i++) {
     const d = difficulties[i];
-    const cx = 160 + i * 240;
+    const totalCards = difficulties.length;
+    const cardW = 170;
+    const gap = 16;
+    const totalW2 = totalCards * cardW + (totalCards - 1) * gap;
+    const cx = (960 - totalW2) / 2 + i * (cardW + gap);
     const cy = 160;
-    const w = 210;
+    const w = cardW;
     const h = 300;
     const sel = difficultySelected === i;
     const bounce = sel ? Math.sin(difficultyTime * 0.005) * 4 : 0;
@@ -3641,19 +3695,22 @@ function drawDifficulty(dt) {
 
     // Stars
     const starY = cy + 50 + bounce;
-    for (let s = 0; s < 3; s++) {
+    const maxStars = d.stars <= 3 ? 3 : 4;
+    const starSpacing = maxStars <= 3 ? 30 : 24;
+    const starStartX = cx + w/2 - (maxStars - 1) * starSpacing / 2;
+    for (let s = 0; s < maxStars; s++) {
       ctx.fillStyle = s < d.stars ? d.color : '#333';
-      drawStar(cx + w/2 - 30 + s * 30, starY, 14, 5, ctx);
+      drawStar(starStartX + s * starSpacing, starY, maxStars <= 3 ? 14 : 12, 5, ctx);
     }
 
     // Name
-    ctx.font = 'bold 28px sans-serif';
+    ctx.font = 'bold 24px sans-serif';
     ctx.textAlign = 'center';
     ctx.fillStyle = sel ? '#FFF' : '#888';
     ctx.fillText(d.name, cx + w / 2, cy + 110 + bounce);
 
     // Description
-    ctx.font = '13px sans-serif';
+    ctx.font = '12px sans-serif';
     ctx.fillStyle = '#AAA';
     const words = d.desc.split('・');
     for (let j = 0; j < words.length; j++) {
@@ -3672,8 +3729,8 @@ function drawDifficulty(dt) {
     ctx.fillText(p2Ch.name, cx + w / 2 + 35, cy + 215 + bounce);
 
     // Draw mini characters
-    drawCharacterBody(cx + w/2 - 40, cy + 260 + bounce, 0.55, p1Select, difficultyTime, false);
-    drawCharacterBody(cx + w/2 + 40, cy + 260 + bounce, 0.55, p2Select, difficultyTime, true);
+    drawCharacterBody(cx + w/2 - 30, cy + 260 + bounce, 0.45, p1Select, difficultyTime, false);
+    drawCharacterBody(cx + w/2 + 30, cy + 260 + bounce, 0.45, p2Select, difficultyTime, true);
 
     ctx.restore();
   }
@@ -4296,6 +4353,16 @@ const commandDefs = {
     { name:'地雷設置', seq:['D','B','D','B'], cooldownKey:'cmd3', chargeCmd:true,
       attack:{ startup:10, active:10, recovery:20, damage:22, kbBase:8, kbScale:0.13, kbAngle:-60, hx:0, hy:-10, hw:100, hh:40, color:'#FF6600', effect:'shockwave', centerHit:true } },
   ],
+  13: [ // 波おじ
+    { name:'ライジングアッパー', seq:['D','U','D','U'], cooldownKey:'cmd1',
+      attack:{ startup:5, active:10, recovery:18, damage:16, kbBase:7, kbScale:0.11, kbAngle:-88, hx:8, hy:-55, hw:50, hh:60, color:'#FF6644', effect:'upslash',
+        specialType:'uppercut', launchVy:-14 } },
+    { name:'ラッシュ', seq:['F','F','F'], cooldownKey:'cmd2',
+      attack:{ startup:4, active:24, recovery:16, damage:3, kbBase:1.5, kbScale:0.03, kbAngle:-10, hx:14, hy:-35, hw:50, hh:40, color:'#FF8844', effect:'punch',
+        multiHit:true, hitInterval:4, finalDamage:12, finalKbBase:6, finalKbScale:0.10, finalKbAngle:-25, spinKB:true } },
+    { name:'ボディブロー', seq:['D','B','D','B'], cooldownKey:'cmd3', chargeCmd:true,
+      attack:{ startup:8, active:8, recovery:18, damage:14, kbBase:5, kbScale:0.09, kbAngle:60, hx:16, hy:-20, hw:55, hh:35, color:'#FF4422', effect:'punch' } },
+  ],
 };
 
 // Dragon mode commands (separate)
@@ -4645,6 +4712,23 @@ const attackDefs = {
               specialType:'cmdCharge', chargeSpeed:7 },
     throwDmg: 15,
   },
+  // 波おじ - Boxer Technique
+  13: {
+    normal: { name:'ジャブ', startup:2, active:4, recovery:6, damage:4, kbBase:1.5, kbScale:0.03, kbAngle:-10, hx:14, hy:-35, hw:40, hh:35, color:'#FF6644', effect:'punch' },
+    strong: { name:'アッパーカット', startup:6, active:8, recovery:16, damage:12, kbBase:5, kbScale:0.09, kbAngle:-85, hx:10, hy:-50, hw:45, hh:55, color:'#FF4422', effect:'uppercut',
+              specialType:'uppercut', launchVy:-10 },
+    special:{ name:'波おじストレート', startup:18, active:6, recovery:22, damage:20, kbBase:8, kbScale:0.13, kbAngle:-10, hx:20, hy:-35, hw:70, hh:40, color:'#FFFFFF', effect:'bigpunch' },
+    aerial: { name:'空中フック', startup:3, active:8, recovery:10, damage:9, kbBase:3, kbScale:0.07, kbAngle:-80, hx:12, hy:-30, hw:50, hh:45, color:'#FF6644', effect:'airkick' },
+    down:   { name:'かかとドロップ', startup:5, active:10, recovery:14, damage:12, kbBase:5, kbScale:0.09, kbAngle:80, hx:0, hy:10, hw:40, hh:45, color:'#FF4422', effect:'meteor',
+              specialType:'divekick', diveSpeed:12 },
+    up:     { name:'ジャンピングアッパー', startup:4, active:8, recovery:14, damage:11, kbBase:5, kbScale:0.09, kbAngle:-88, hx:5, hy:-55, hw:45, hh:55, color:'#FF6644', effect:'upslash',
+              specialType:'uppercut', launchVy:-11 },
+    side:   { name:'フック', startup:5, active:7, recovery:12, damage:13, kbBase:5, kbScale:0.09, kbAngle:-12, hx:18, hy:-35, hw:65, hh:38, color:'#FF4422', effect:'sideslash' },
+    downair:{ name:'ハンマーパンチ', startup:5, active:10, recovery:14, damage:13, kbBase:5, kbScale:0.10, kbAngle:80, hx:0, hy:10, hw:40, hh:50, color:'#FF6644', effect:'meteor' },
+    dash:   { name:'ダッシュパンチ', startup:3, active:8, recovery:12, damage:10, kbBase:4, kbScale:0.07, kbAngle:-15, hx:18, hy:-35, hw:60, hh:40, color:'#FF6644', effect:'punch',
+              specialType:'slide', slideSpeed:9 },
+    throwDmg: 10,
+  },
 };
 
 // Dragon mode attack defs (separate object)
@@ -4987,6 +5071,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
       10: ['#FF6600', '#FF8833', '#CC4400'], // Tensai: fire
       11: ['#FFBB44', '#DD8822', '#FFE8AA'], // Catbus: orange
       12: ['#A0B858', '#6B7B3A', '#FF8833'], // Tank: olive/orange
+      13: ['#FF6644', '#CC3333', '#FFFFFF'], // Namioji: red/white
     };
     const colors = charColors[attacker.charIdx] || ['#FFFFFF'];
     const specialCount = 30 + Math.floor(kb * 1.5);
@@ -5394,13 +5479,22 @@ function getCpuGuard(cpu, target) {
   } else if (cpuDifficulty === 1) {
     // Normal: sometimes guards when attacked nearby
     return target.attacking && dist < 100 && Math.random() < 0.04;
-  } else {
+  } else if (cpuDifficulty === 2) {
     // Hard: guards reactively, sometimes just guards
     if (target.attacking && dist < 120) return Math.random() < 0.08;
     // Guard against projectiles
     for (const pr of projectiles) {
       if (pr.ownerId !== cpu.id && Math.abs(pr.x - cpu.x) < 100 && Math.abs(pr.y - cpu.y) < 60) {
         return Math.random() < 0.12;
+      }
+    }
+    return false;
+  } else {
+    // Extreme: highly reactive guard
+    if (target.attacking && dist < 140) return Math.random() < 0.15;
+    for (const pr of projectiles) {
+      if (pr.ownerId !== cpu.id && Math.abs(pr.x - cpu.x) < 130 && Math.abs(pr.y - cpu.y) < 70) {
+        return Math.random() < 0.2;
       }
     }
     return false;
@@ -5411,11 +5505,12 @@ function getCpuInput(cpu, target) {
   const result = { moveX: 0, jump: false, attack: null, grab: false, throwDir: null };
   if (!target.alive || !cpu.alive) return result;
 
-  // CPU ledge hang: climb up after ~60-90 frames
+  // CPU ledge hang: climb up (extreme = fast, others = slow)
   if (cpu.isHanging) {
     if (!cpu._hangTimer) cpu._hangTimer = 0;
     cpu._hangTimer++;
-    if (cpu._hangTimer >= 60 + Math.floor(Math.random() * 30)) {
+    const hangThreshold = cpuDifficulty >= 3 ? (10 + Math.floor(Math.random() * 10)) : (60 + Math.floor(Math.random() * 30));
+    if (cpu._hangTimer >= hangThreshold) {
       result.jump = true; // triggers ledgeClimbUp via up input
       cpu._hangTimer = 0;
     }
@@ -5488,7 +5583,7 @@ function getCpuInput(cpu, target) {
     if (cpu.x > STAGE_RIGHT - 20) result.moveX = -1;
     if (cpu.y > STAGE_GROUND_Y + 50) result.jump = true;
 
-  } else {
+  } else if (cpuDifficulty === 2) {
     // --- HARD ---
     if (dist > 60) {
       result.moveX = dirToTarget;
@@ -5502,7 +5597,6 @@ function getCpuInput(cpu, target) {
     if (cpuAttackCooldown <= 0) {
       // Aerial attacks when airborne
       if (isAirborne && dist < 70 && Math.random() < 0.08) {
-        // 空中で相手が下にいたらメテオ（下空中攻撃）
         if (dy > 20 && Math.random() < 0.4) {
           result.attack = 'downair';
         } else {
@@ -5560,6 +5654,139 @@ function getCpuInput(cpu, target) {
     if (cpu.x < STAGE_LEFT - 50 || cpu.x > STAGE_RIGHT + 50) {
       result.moveX = cpu.x < 480 ? 1 : -1;
       result.jump = true;
+    }
+
+  } else {
+    // --- EXTREME (最強) ---
+    // ③ Movement: always chase, dash in fast
+    if (dist > 40) {
+      result.moveX = dirToTarget;
+    } else if (dist > 20) {
+      result.moveX = Math.random() < 0.7 ? dirToTarget : 0;
+    }
+    // Jump: reactive evasion + aerial approach
+    if (dy < -40 && Math.random() < 0.1) result.jump = true;
+    if (target.attacking && dist < 120 && Math.random() < 0.15) result.jump = true;
+    if (Math.random() < 0.015) result.jump = true;
+
+    // ① Combo system: track last hit
+    if (!cpu._comboState) cpu._comboState = 0; // 0=none, 1=hit landed waiting, 2+=combo step
+    if (!cpu._comboTimer) cpu._comboTimer = 0;
+
+    // Detect if our attack just hit (target in hitstun and we just attacked)
+    if (target.hitstun > 0 && cpu.attacking && cpu._comboState === 0) {
+      cpu._comboState = 1;
+      cpu._comboTimer = 0;
+    }
+    if (cpu._comboState > 0) cpu._comboTimer++;
+
+    // Combo follow-up
+    if (cpu._comboState >= 1 && !cpu.attacking && cpuAttackCooldown <= 0 && target.hitstun > 0 && dist < 100) {
+      if (cpu._comboTimer >= 5 && cpu._comboTimer <= 10) {
+        if (cpu._comboState === 1) {
+          // First follow-up: strong or direction attack
+          const roll = Math.random();
+          if (roll < 0.3) result.attack = 'strong';
+          else if (roll < 0.5) result.attack = 'up';
+          else if (roll < 0.7) result.attack = 'side';
+          else result.attack = 'down';
+          cpuAttackCooldown = 6;
+          cpu._comboState = 2;
+          cpu._comboTimer = 0;
+        } else if (cpu._comboState === 2 && target.damage >= 100) {
+          // Finisher: special at high damage
+          result.attack = 'special';
+          cpuAttackCooldown = 8;
+          cpu._comboState = 0;
+          cpu._comboTimer = 0;
+        } else {
+          cpu._comboState = 0;
+        }
+      } else if (cpu._comboTimer > 15) {
+        cpu._comboState = 0; // combo window expired
+      }
+    }
+    if (target.hitstun <= 0 && cpu._comboState > 0 && cpu._comboTimer > 5) {
+      cpu._comboState = 0;
+    }
+
+    if (cpuAttackCooldown <= 0 && cpu._comboState === 0) {
+      // Aerial attacks
+      if (isAirborne && dist < 80 && Math.random() < 0.12) {
+        if (dy > 20 && Math.random() < 0.5) result.attack = 'downair';
+        else result.attack = 'aerial';
+        cpuAttackCooldown = 10;
+      }
+      // Grab at close range
+      else if (dist < GRAB_RANGE && cpu.grounded && Math.random() < 0.05 && cpu.throwCooldown <= 0) {
+        result.grab = true;
+        cpuAttackCooldown = 12;
+      }
+      // Close range: fast attacks
+      else if (dist < 60) {
+        if (Math.random() < 0.12) {
+          const roll = Math.random();
+          if (roll < 0.3) result.attack = 'normal';
+          else if (roll < 0.45) result.attack = 'strong';
+          else if (roll < 0.6) result.attack = 'down';
+          else if (roll < 0.75) result.attack = 'up';
+          else if (roll < 0.9) result.attack = 'side';
+          else result.attack = 'special';
+          cpuAttackCooldown = 12;
+        }
+      }
+      // Mid range
+      else if (dist < 120) {
+        if (Math.random() < 0.06) {
+          result.attack = Math.random() < 0.5 ? 'dash' : 'special';
+          cpuAttackCooldown = 15;
+        }
+      }
+      // Long range: dash or projectile
+      else if (dist < 250 && Math.random() < 0.04) {
+        result.attack = 'special';
+        cpuAttackCooldown = 20;
+      }
+
+      // ③ Instant counter-attack after hitstun ends
+      if (cpu.hitstun === 1 && dist < 80) {
+        result.attack = 'normal';
+        cpuAttackCooldown = 5;
+        cpu._comboState = 0;
+      }
+    }
+
+    // Punish target's recovery
+    if (target.hitstun > 0 && dist < 90 && cpuAttackCooldown <= 0 && Math.random() < 0.2) {
+      result.attack = 'normal';
+      cpuAttackCooldown = 6;
+    }
+
+    // Command attacks (more frequent than hard)
+    if (cpuAttackCooldown <= 0 && Math.random() < 0.015) {
+      const cmds = commandDefs[cpu.charIdx];
+      if (cmds) {
+        const cmd = cmds[Math.floor(Math.random() * cmds.length)];
+        if (cpu['cd_' + cmd.cooldownKey] <= 0 && dist < 180) {
+          result.command = cmd;
+          cpuAttackCooldown = 30;
+        }
+      }
+    }
+
+    // ② Recovery: aggressively return to stage
+    if (cpu.x < STAGE_LEFT + 10) result.moveX = 1;
+    if (cpu.x > STAGE_RIGHT - 10) result.moveX = -1;
+    if (cpu.y > STAGE_GROUND_Y + 20) result.jump = true;
+    // Off-stage recovery: immediate jump + move toward stage
+    if (cpu.x < STAGE_LEFT - 30 || cpu.x > STAGE_RIGHT + 30) {
+      result.moveX = cpu.x < 480 ? 1 : -1;
+      result.jump = true;
+    }
+    // Below stage: always jump
+    if (cpu.y > STAGE_GROUND_Y + 50) {
+      result.jump = true;
+      result.moveX = cpu.x < 480 ? 1 : -1;
     }
   }
 
@@ -9971,7 +10198,7 @@ function handleKeyDown(e) {
     }
   } else if (scene === 'difficulty') {
     if (e.key === 'ArrowLeft') difficultySelected = Math.max(0, difficultySelected - 1);
-    if (e.key === 'ArrowRight') difficultySelected = Math.min(2, difficultySelected + 1);
+    if (e.key === 'ArrowRight') difficultySelected = Math.min(3, difficultySelected + 1);
     if (e.key === 'Enter') {
       cpuDifficulty = difficultySelected;
       startTransition('vsintro');
