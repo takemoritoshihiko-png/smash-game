@@ -3839,13 +3839,13 @@ const GRAVITY_FALL = 0.78;       // 落下中の重力（強め）
 const GRAVITY_APEX = 0.32;       // 頂点付近の重力（とても弱い）
 const APEX_THRESHOLD = 2.8;      // 頂点判定の速度閾値
 const MAX_FALL_SPEED = 16.8;
-const STAGE_LEFT = 180;
-const STAGE_RIGHT = 780;
+const STAGE_LEFT = 90;
+const STAGE_RIGHT = 870;
 const STAGE_GROUND_Y = 450;
 const BLAST_TOP = -450;
 const BLAST_BOTTOM = 1000;
-const BLAST_LEFT = -500;
-const BLAST_RIGHT = 1460;
+const BLAST_LEFT = -600;
+const BLAST_RIGHT = 1560;
 
 // 慣性・摩擦パラメータ
 const GROUND_ACCEL = 0.45;       // 地上加速度
@@ -3888,9 +3888,9 @@ const cam = {
   smoothX: 0.08,       // camera position lerp speed
   smoothY: 0.08,
   smoothZoom: 0.06,    // zoom lerp speed
-  minZoom: 0.55,       // max zoom out (see full stage)
+  minZoom: 0.45,       // max zoom out (see full stage)
   maxZoom: 1.4,        // max zoom in
-  padX: 120,           // padding around players in world units
+  padX: 150,           // padding around players in world units
   padY: 100,
 };
 
