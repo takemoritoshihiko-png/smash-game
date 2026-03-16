@@ -7258,15 +7258,7 @@ function updateBattle(dt) {
         }
       }
 
-      // End attack
-      if (p.attackFrame >= totalFrames) {
-        // Show MISS if melee attack hit nobody (skip projectile-only attacks)
-        if (p.hitTargets.length === 0 && atk.hw > 0) {
-          const dir = p.facingLeft ? -1 : 1;
-          showHitDisplay(p.x + 30 * dir, p.y, false);
-          playHitSound('miss');
-        }
-      // ドスボス: ランダムキャノン - 必殺技発動時にランダムパターン決定
+      // ドスボス: ランダムキャノン - startup終了後の最初のactiveフレームで発動
       if (atk.dosbossRandom && p.attackFrame === atk.startup + 1) {
         const pattern = Math.floor(Math.random() * 3);
         p.dosbossRandomPattern = pattern;
@@ -7294,15 +7286,12 @@ function updateBattle(dt) {
         } else {
           // パターンC: 自爆爆発 - 自分もダメージ、周囲に大ダメージ
           cmdNameDisplay.push({ text: 'BOOM!', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#FF6600' });
-          // 自分にダメージ
           p.damage = Math.min(999, p.damage + 8);
-          // 周囲への攻撃判定
           const boomHitbox = { x: p.x - 70, y: p.y - 70, w: 140, h: 100 };
           checkHitboxAgainstPlayers(p, boomHitbox, 22, 8, 0.14, -40, 'special');
           triggerScreenShake(8, 15);
           hitFlash.alpha = 0.3;
           hitFlash.color = '#FF6600';
-          // 爆発エフェクト
           hitEffects.push({ x: p.x, y: p.y - 35, life: 20, maxLife: 20, color: '#FF6600', size: 80 });
           hitEffects.push({ x: p.x, y: p.y - 35, life: 15, maxLife: 15, color: '#9944CC', size: 120, type: 'ring' });
         }
@@ -7325,6 +7314,14 @@ function updateBattle(dt) {
         cmdNameDisplay.push({ text: 'デコイ！', x: decoyX, y: p.y - 80, life: 45, maxLife: 45, color: '#CC66FF' });
       }
 
+      // End attack
+      if (p.attackFrame >= totalFrames) {
+        // Show MISS if melee attack hit nobody (skip projectile-only attacks)
+        if (p.hitTargets.length === 0 && atk.hw > 0) {
+          const dir = p.facingLeft ? -1 : 1;
+          showHitDisplay(p.x + 30 * dir, p.y, false);
+          playHitSound('miss');
+        }
         // セン: 満腹パワーバフ発動
         if (atk.senBuff) {
           p.senBuffTimer = 600; // 10 seconds
