@@ -3280,6 +3280,7 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
         if (phase === 'startup') squash = easeIn * 0.15;
         else if (phase === 'active') squash = 0.15 - easeOut * 0.25;
         else squash = -0.1 * (1 - easeOut);
+        ctx.save();
         ctx.scale(1 + squash, 1 - squash);
         ctx.fillStyle = '#555';
         ctx.globalAlpha = 0.4;
@@ -3291,6 +3292,7 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
           ctx.beginPath(); ctx.ellipse(0, 12 * s, 18 * s, 10 * s, 0, 0, Math.PI * 2); ctx.fill();
           ctx.globalAlpha = 1;
         }
+        ctx.restore();
       } else if (atkType === 'up') {
         // 上攻撃: 両手振り上げ
         let angle;
@@ -3352,6 +3354,7 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
         if (phase === 'startup') squash = easeIn * 0.1;
         else if (phase === 'active') squash = 0.1 + easeOut * 0.15;
         else squash = 0.25 * (1 - easeOut);
+        ctx.save();
         ctx.scale(1 + squash, 1 - squash);
         if (phase === 'active') {
           ctx.globalAlpha = 0.4 * (1 - phaseT);
@@ -3359,6 +3362,7 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
           ctx.beginPath(); ctx.ellipse(0, 20 * s, 14 * s, 8 * s, 0, 0, Math.PI * 2); ctx.fill();
           ctx.globalAlpha = 1;
         }
+        ctx.restore();
       }
     }
     // ─── バレット（銃使い・遠距離型）───
