@@ -5687,13 +5687,21 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
     finalKbScale *= 1.3;
   }
 
+  // ディフェンス補正: defense値が高いほど被ダメージ軽減 (defense 1=1.25倍, 3=1.0倍, 5=0.8倍)
+  const targetDef = characters[target.charIdx] ? characters[target.charIdx].stats.defense : 3;
+  const defMultiplier = 1.15 - targetDef * 0.07;
+  finalDamage *= defMultiplier;
+
   target.damage = Math.min(999, target.damage + finalDamage);
   playHitSE();
   const kb = calcKnockback(target.damage, kbBase, finalKbScale);
+  // 体重補正: weight が大きいほど吹っ飛びにくい (weight 0.7=1.43倍, 1.0=1.0倍, 1.5=0.67倍)
+  const targetWeight = characters[target.charIdx] ? characters[target.charIdx].weight : 1.0;
+  const weightedKb = kb / targetWeight;
   const rad = kbAngle * Math.PI / 180;
   const dir = attacker.x < target.x ? 1 : -1;
-  target.vx = Math.cos(rad) * kb * dir;
-  target.vy = Math.sin(rad) * kb;
+  target.vx = Math.cos(rad) * weightedKb * dir;
+  target.vy = Math.sin(rad) * weightedKb;
   target.hitstun = Math.floor(8 + target.damage * 0.12);
   target.damageTint = 12;
 
@@ -6144,22 +6152,25 @@ function executeThrow(grabber, dirX, dirY) {
   target.damage = Math.min(999, target.damage + throwDmg);
 
   const kb = THROW_BASE_KB + target.damage * THROW_KB_SCALE;
+  // 体重補正: 投げにも適用
+  const throwWeight = characters[target.charIdx] ? characters[target.charIdx].weight : 1.0;
+  const wKb = kb / throwWeight;
 
   // Determine throw direction
   if (dirY < 0) {
     // Up throw
     target.vx = 0;
-    target.vy = -kb * 1.2;
+    target.vy = -wKb * 1.2;
   } else if (dirY > 0) {
     // Down throw (slam into ground, bounce up)
     target.vx = 0;
-    target.vy = -kb * 0.5;
+    target.vy = -wKb * 0.5;
     target.damage = Math.min(999, target.damage + 3); // bonus damage
   } else {
     // Forward/back throw
     const throwDir = dirX !== 0 ? dirX : (grabber.facingLeft ? -1 : 1);
-    target.vx = throwDir * kb;
-    target.vy = -kb * 0.6;
+    target.vx = throwDir * wKb;
+    target.vy = -wKb * 0.6;
   }
 
   target.hitstun = Math.floor(10 + target.damage * 0.1);
