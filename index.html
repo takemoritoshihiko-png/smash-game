@@ -322,6 +322,19 @@ const characters = [
     jumpPower: -12.94,
     weight: 1.0
   },
+  {
+    name: 'ドスボス',
+    type: 'トリッキー型',
+    color: '#9944CC',
+    accent: '#CC66FF',
+    dark: '#4A2266',
+    stats: { power: 3, speed: 2, tech: 5, defense: 4 },
+    desc: '予測不能の鋼鉄将軍',
+    bodyColors: { main: '#9944CC', sub: '#CC66FF', skin: '#AAAAAA' },
+    moveSpeed: 7.0,
+    jumpPower: -11.5,
+    weight: 1.35
+  },
 ];
 
 // --- Audio unlock on first interaction ---
@@ -389,6 +402,8 @@ const onpaImg = new Image();
 onpaImg.src = 'images/onpa.png';
 const senImg = new Image();
 senImg.src = 'images/sen.png';
+const dosbossImg = new Image();
+dosbossImg.src = 'images/dosboss.png';
 
 // --- Particles ---
 function spawnTitleParticle() {
@@ -1405,6 +1420,59 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.fillStyle = '#DAA520';
       ctx.fillRect(13 * s, 9 * s, 4 * s, 2 * s);
     }
+  } else if (charIndex === 19) {
+    // ドスボス - 鋼鉄将軍
+    if (dosbossImg.complete && dosbossImg.naturalWidth > 0) {
+      const imgW = 75 * s;
+      const imgH = 100 * s;
+      ctx.globalCompositeOperation = 'screen';
+      const nw = dosbossImg.naturalWidth;
+      const nh = dosbossImg.naturalHeight;
+      const cropH = nh * 0.85;
+      const cropY = nh * 0.05;
+      ctx.drawImage(dosbossImg, 0, cropY, nw, cropH, -imgW / 2, -45 * s, imgW, imgH);
+      ctx.globalCompositeOperation = 'source-over';
+    } else {
+      // Canvas fallback: tank boss
+      // Wheels
+      ctx.fillStyle = '#333';
+      ctx.beginPath(); ctx.arc(-12 * s, 35 * s, 10 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(10 * s, 38 * s, 7 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#9944CC';
+      ctx.beginPath(); ctx.arc(-12 * s, 35 * s, 5 * s, 0, Math.PI * 2); ctx.fill();
+      // Body (boxy tank)
+      ctx.fillStyle = '#AAAAAA';
+      ctx.fillRect(-14 * s, -15 * s, 28 * s, 40 * s);
+      // Purple armor plates
+      ctx.fillStyle = '#9944CC';
+      ctx.fillRect(-16 * s, -5 * s, 8 * s, 15 * s);
+      ctx.fillRect(8 * s, -5 * s, 8 * s, 15 * s);
+      ctx.fillRect(-12 * s, 15 * s, 24 * s, 10 * s);
+      // Head
+      ctx.fillStyle = '#AAAAAA';
+      ctx.fillRect(-10 * s, -28 * s, 20 * s, 16 * s);
+      // Cap
+      ctx.fillStyle = '#222';
+      ctx.fillRect(-12 * s, -34 * s, 24 * s, 8 * s);
+      ctx.fillRect(-8 * s, -36 * s, 16 * s, 4 * s);
+      // Eye
+      ctx.fillStyle = '#FFF';
+      ctx.beginPath(); ctx.ellipse(4 * s, -22 * s, 3 * s, 2.5 * s, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#111';
+      ctx.beginPath(); ctx.arc(4 * s, -22 * s, 1.5 * s, 0, Math.PI * 2); ctx.fill();
+      // Cannon (right side)
+      ctx.fillStyle = '#555';
+      ctx.fillRect(10 * s, -24 * s, 10 * s, 6 * s);
+      // Cross emblems
+      ctx.fillStyle = '#FF3333';
+      ctx.fillRect(-3 * s, -8 * s, 6 * s, 2 * s);
+      ctx.fillRect(-1 * s, -10 * s, 2 * s, 6 * s);
+      // Tree on back
+      ctx.fillStyle = '#44AA22';
+      ctx.beginPath(); ctx.moveTo(-14 * s, -5 * s); ctx.lineTo(-18 * s, 5 * s); ctx.lineTo(-10 * s, 5 * s); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#33881A';
+      ctx.fillRect(-15 * s, 5 * s, 2 * s, 8 * s);
+    }
   } else if (charIndex === 10) {
     // 天才 - 変形型ドラゴン
     const isDragon = typeof players !== 'undefined' && players.some(p => p.charIdx === 10 && p.dragonMode);
@@ -1607,6 +1675,11 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
         scaleX = 1 + Math.sin(t * 0.04) * 0.008;
         scaleY = 1 + Math.sin(t * 0.04 + 0.5) * 0.006;
         armAngle = Math.sin(t * 0.03) * 0.02;
+      } else if (charIndex === 19) {
+        // Dosboss: heavy idle rumble
+        bobY = Math.sin(t * 0.03) * 1.5 + Math.sin(t * 0.09) * 0.5;
+        scaleX = 1 + Math.sin(t * 0.03) * 0.006;
+        scaleY = 1 + Math.sin(t * 0.03 + 0.5) * 0.01;
       }
     }
 
@@ -1713,6 +1786,14 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
         scaleY = 0.97 + Math.abs(Math.sin(phase)) * 0.03;
         legAngle = Math.sin(phase) * 0.12;
         armSwing = -Math.sin(phase) * 0.1;
+      } else if (charIndex === 19) {
+        // Dosboss: heavy tank roll
+        bobY = Math.abs(Math.sin(phase)) * 2;
+        walkLean = Math.sin(phase) * 0.03;
+        scaleX = 1 + Math.sin(phase) * 0.02;
+        scaleY = 1 - Math.abs(Math.sin(phase)) * 0.03;
+        legAngle = Math.sin(phase) * 0.08;
+        armSwing = -Math.sin(phase) * 0.06;
       }
     }
 
@@ -1793,15 +1874,15 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
   // 天才 uses different images per mode
   const tensaiIsDragon = animData && animData.dragonMode;
   const tensaiActiveImg = tensaiIsDragon ? tensaiDragonImg : tensaiHumanImg;
-  const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg, bulletImg, shaudenImg, judgemanImg, tensaiActiveImg, catbusImg, tankImg, namiojiImg, tokkoImg, samImg, kingImg, onpaImg, senImg];
-  const imgSizes = [[70, 90], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [168, 112], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [85, 85]];
+  const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg, bulletImg, shaudenImg, judgemanImg, tensaiActiveImg, catbusImg, tankImg, namiojiImg, tokkoImg, samImg, kingImg, onpaImg, senImg, dosbossImg];
+  const imgSizes = [[70, 90], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [168, 112], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [85, 85], [75, 100]];
   const img = imgs[charIndex];
   if (img && img.complete && img.naturalWidth > 0) {
     const imgW = imgSizes[charIndex][0] * s;
     const imgH = imgSizes[charIndex][1] * s;
     const tankOfsX = charIndex === 12 ? -5 * s : 0;
     const tankOfsY = charIndex === 12 ? -20 * s : 0;
-    const useScreen = charIndex === 12 || charIndex === 13 || charIndex === 18;
+    const useScreen = charIndex === 12 || charIndex === 13 || charIndex === 18 || charIndex === 19;
     if (useScreen) ctx.globalCompositeOperation = 'screen';
 
     // Source crop for landscape images (うる男)
@@ -1810,6 +1891,11 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
       const cropW = sh * (imgSizes[5][0] / imgSizes[5][1]);
       sx = (sw - cropW) / 2;
       sw = cropW;
+    }
+    if (charIndex === 19) {
+      const cropH = sh * 0.85;
+      sy = sh * 0.05;
+      sh = cropH;
     }
 
     // Damage flash: smooth 2-frame blink with fading intensity
@@ -4929,6 +5015,18 @@ const commandDefs = {
       attack:{ startup:6, active:5, recovery:16, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FFD700', effect:'none',
         projectile:{ speed:12, damage:5, kbBase:7, kbScale:0.12, kbAngle:-25, w:30, h:25, life:50, color:'#FFD700', pcolor:'#DAA520' } } },
   ],
+  19: [ // ドスボス
+    { name:'デコイ設置', seq:['F','D','F'], cooldownKey:'cmd1',
+      attack:{ startup:8, active:1, recovery:16, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#CC66FF', effect:'none',
+        dosbossDecoy:true } },
+    { name:'重力砲', seq:['D','U','D'], cooldownKey:'cmd2',
+      attack:{ startup:10, active:5, recovery:18, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#9944CC', effect:'none',
+        projectile:{ speed:8, damage:8, kbBase:3, kbScale:0.06, kbAngle:-10, w:25, h:25, life:45, color:'#9944CC', pcolor:'#660099' },
+        gravityDebuff:true } },
+    { name:'逆噴射', seq:['B','F','B'], cooldownKey:'cmd3', chargeCmd:true,
+      attack:{ startup:6, active:10, recovery:14, damage:14, kbBase:6, kbScale:0.10, kbAngle:-30, hx:-20, hy:-35, hw:60, hh:45, color:'#FF6600', effect:'shockwave',
+        specialType:'cmdCharge', chargeSpeed:-13 } },
+  ],
 };
 
 // Dragon mode commands (separate)
@@ -5382,6 +5480,24 @@ const attackDefs = {
               specialType:'slide', slideSpeed:10 },
     throwDmg: 8,
   },
+  // ドスボス - Tricky Type (Random specials, debuffs)
+  19: {
+    normal: { name:'キャノン連射', startup:4, active:9, recovery:10, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#CC66FF', effect:'none',
+              projectile:{ speed:12, damage:4, kbBase:2, kbScale:0.04, kbAngle:-15, w:12, h:12, life:30, color:'#CC66FF', pcolor:'#9944CC' },
+              multiShot:3, shotInterval:3 },
+    strong: { name:'ブルドーザーチャージ', startup:10, active:12, recovery:18, damage:16, kbBase:6, kbScale:0.11, kbAngle:-20, hx:20, hy:-30, hw:70, hh:50, color:'#9944CC', effect:'dash',
+              specialType:'cmdCharge', chargeSpeed:14 },
+    special:{ name:'ランダムキャノン', startup:8, active:8, recovery:16, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#CC66FF', effect:'none',
+              dosbossRandom:true },
+    aerial: { name:'空中砲撃', startup:4, active:6, recovery:10, damage:9, kbBase:3, kbScale:0.07, kbAngle:-70, hx:10, hy:-30, hw:45, hh:45, color:'#CC66FF', effect:'airkick' },
+    down:   { name:'重量叩きつけ', startup:6, active:8, recovery:16, damage:14, kbBase:5, kbScale:0.09, kbAngle:70, hx:0, hy:5, hw:55, hh:40, color:'#9944CC', effect:'shockwave', centerHit:true },
+    up:     { name:'対空砲', startup:5, active:7, recovery:14, damage:11, kbBase:5, kbScale:0.09, kbAngle:-88, hx:5, hy:-55, hw:40, hh:55, color:'#CC66FF', effect:'upslash' },
+    side:   { name:'キャタピラ轢き', startup:6, active:8, recovery:14, damage:12, kbBase:5, kbScale:0.09, kbAngle:-15, hx:20, hy:-30, hw:65, hh:40, color:'#9944CC', effect:'slash' },
+    downair:{ name:'急降下プレス', startup:6, active:10, recovery:16, damage:15, kbBase:6, kbScale:0.10, kbAngle:80, hx:0, hy:10, hw:50, hh:50, color:'#9944CC', effect:'meteor', specialType:'divekick', diveSpeed:14 },
+    dash:   { name:'突撃キャノン', startup:4, active:6, recovery:12, damage:8, kbBase:3, kbScale:0.06, kbAngle:-10, hx:18, hy:-35, hw:55, hh:40, color:'#CC66FF', effect:'dash',
+              specialType:'slide', slideSpeed:11 },
+    throwDmg: 10,
+  },
 };
 
 // Dragon mode attack defs (separate object)
@@ -5513,6 +5629,9 @@ function createPlayer(id, charIdx, startX) {
     kingComboTimer: 0,   // frames since last combo hit (expires at 15)
     // セン バフ状態
     senBuffTimer: 0,     // remaining buff frames (600 = 10 sec)
+    // ドスボス トリッキー状態
+    dosbossRandomPattern: 0,  // 0=通常砲撃, 1=木投げ, 2=自爆爆発
+    gravityDebuffTimer: 0,    // 重力砲デバフ残り時間
     // コンボシステム
     cancelWindow: 0,     // キャンセル受付残りフレーム
     comboWindow: 0,      // コンボ継続可能フレーム
@@ -5807,6 +5926,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
       16: ['#FFD700', '#DAA520', '#FFFFFF'], // King: gold/white
       17: ['#88FFFF', '#44DDEE', '#FFFFFF'], // Onpa: cyan/white
       18: ['#335577', '#FF8844', '#FFFFFF'], // Sen: navy/orange
+      19: ['#9944CC', '#CC66FF', '#FF6600'], // Dosboss: purple/orange
     };
     const colors = charColors[attacker.charIdx] || ['#FFFFFF'];
     const specialCount = 30 + Math.floor(kb * 1.5);
@@ -6050,6 +6170,7 @@ function spawnProjectile(p, projDef) {
     pierce: projDef.pierce || false,
     ink: projDef.ink || false,
     meshitero: !!(p.attackData && p.attackData.meshitero),
+    gravityDebuff: !!(p.attackData && p.attackData.gravityDebuff),
     hitTargets: [],
   });
 }
@@ -6572,6 +6693,20 @@ function updateBattle(dt) {
     s.vx *= (s.drag || 0.97);
     if (s.spin) s.angle = (s.angle || 0) + s.spin; // 回転更新
     s.life--;
+    // ドスボス デコイ爆発
+    if (s.type === 'dosbossDecoy' && s.life === 1) {
+      const boomHitbox = { x: s.decoyX - 50, y: s.decoyY - 50, w: 100, h: 80 };
+      const decoyOwner = players.find(pp => pp.id === s.ownerId);
+      if (decoyOwner) {
+        const savedTargets = decoyOwner.hitTargets;
+        decoyOwner.hitTargets = [];
+        checkHitboxAgainstPlayers(decoyOwner, boomHitbox, 14, 5, 0.09, -40, 'special');
+        decoyOwner.hitTargets = savedTargets;
+      }
+      hitEffects.push({ x: s.decoyX, y: s.decoyY - 30, life: 15, maxLife: 15, color: '#CC66FF', size: 60 });
+      hitEffects.push({ x: s.decoyX, y: s.decoyY - 30, life: 12, maxLife: 12, color: '#FF6600', size: 80, type: 'ring' });
+      triggerScreenShake(4, 8);
+    }
     if (s.life <= 0) sparks.splice(i, 1);
   }
 
@@ -6736,6 +6871,11 @@ function updateBattle(dt) {
         if (pr.meshitero) {
           cmdNameDisplay.push({ text: '飯テロ！', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#FF8844' });
         }
+        // ドスボス: 重力砲デバフ
+        if (pr.gravityDebuff || (owner && owner.attackData && owner.attackData.gravityDebuff)) {
+          p.gravityDebuffTimer = 180; // 3 seconds
+          cmdNameDisplay.push({ text: '重力低下！', x: p.x, y: p.y - 100, life: 45, maxLife: 45, color: '#9944CC' });
+        }
         if (pr.ink) p.inkBlindTimer = 120; // 2 seconds of ink blind
         if (pr.pierce) { if (pr.hitTargets) pr.hitTargets.push(p.id); }
         else { projectiles.splice(i, 1); hitSomething = true; }
@@ -6758,6 +6898,7 @@ function updateBattle(dt) {
         p.guarding = false; p.guardDurability = GUARD_MAX_DURABILITY; p.guardBreakStun = 0; p.justGuardTimer = 0;
         p.animState = 'fall'; p.spinAngle = 0; p.damageTint = 0; p.landSquash = 0; p.jumpSquash = 0;
         p.senBuffTimer = 0;
+        p.gravityDebuffTimer = 0;
       }
       continue;
     }
@@ -6773,6 +6914,7 @@ function updateBattle(dt) {
     if (p.inkBlindTimer > 0) p.inkBlindTimer--;
     if (p.kingComboTimer > 0) { p.kingComboTimer--; if (p.kingComboTimer <= 0) { p.kingComboHits = 0; } }
     if (p.senBuffTimer > 0) p.senBuffTimer--;
+    if (p.gravityDebuffTimer > 0) p.gravityDebuffTimer--;
     if (p.cancelWindow > 0) p.cancelWindow--;
     if (p.comboWindow > 0) p.comboWindow--;
     if (p.airComboTimer > 0) p.airComboTimer--;
@@ -7124,6 +7266,65 @@ function updateBattle(dt) {
           showHitDisplay(p.x + 30 * dir, p.y, false);
           playHitSound('miss');
         }
+      // ドスボス: ランダムキャノン - 必殺技発動時にランダムパターン決定
+      if (atk.dosbossRandom && p.attackFrame === atk.startup + 1) {
+        const pattern = Math.floor(Math.random() * 3);
+        p.dosbossRandomPattern = pattern;
+        const dir = p.facingLeft ? -1 : 1;
+        if (pattern === 0) {
+          // パターンA: 通常砲撃 - 大きな砲弾
+          spawnProjectile(p, { speed:11, damage:16, kbBase:6, kbScale:0.10, kbAngle:-25, w:30, h:28, life:45, color:'#CC66FF', pcolor:'#9944CC' });
+          cmdNameDisplay.push({ text: '通常砲撃！', x: p.x, y: p.y - 100, life: 45, maxLife: 45, color: '#CC66FF' });
+        } else if (pattern === 1) {
+          // パターンB: 木投げ - スタン付き飛び道具
+          const proj = { speed:9, damage:10, kbBase:3, kbScale:0.05, kbAngle:-15, w:20, h:28, life:40, color:'#44AA22', pcolor:'#33881A' };
+          const pr = {
+            x: p.x + 30 * dir, y: p.y - 40,
+            vx: proj.speed * dir, vy: -2,
+            w: proj.w, h: proj.h,
+            damage: proj.damage, kbBase: proj.kbBase, kbScale: proj.kbScale, kbAngle: proj.kbAngle,
+            life: proj.life, ownerId: p.id,
+            color: proj.color, pcolor: proj.pcolor,
+            shape: 'rect', ownerCharIdx: p.charIdx, time: 0,
+            stun: true, stunFrames: 30,
+            meshitero: false,
+          };
+          projectiles.push(pr);
+          cmdNameDisplay.push({ text: '木投げ！', x: p.x, y: p.y - 100, life: 45, maxLife: 45, color: '#44AA22' });
+        } else {
+          // パターンC: 自爆爆発 - 自分もダメージ、周囲に大ダメージ
+          cmdNameDisplay.push({ text: 'BOOM!', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#FF6600' });
+          // 自分にダメージ
+          p.damage = Math.min(999, p.damage + 8);
+          // 周囲への攻撃判定
+          const boomHitbox = { x: p.x - 70, y: p.y - 70, w: 140, h: 100 };
+          checkHitboxAgainstPlayers(p, boomHitbox, 22, 8, 0.14, -40, 'special');
+          triggerScreenShake(8, 15);
+          hitFlash.alpha = 0.3;
+          hitFlash.color = '#FF6600';
+          // 爆発エフェクト
+          hitEffects.push({ x: p.x, y: p.y - 35, life: 20, maxLife: 20, color: '#FF6600', size: 80 });
+          hitEffects.push({ x: p.x, y: p.y - 35, life: 15, maxLife: 15, color: '#9944CC', size: 120, type: 'ring' });
+        }
+      }
+
+      // ドスボス: デコイ設置
+      if (atk.dosbossDecoy && p.attackFrame === atk.startup + 1) {
+        const dir = p.facingLeft ? -1 : 1;
+        const decoyX = p.x + 80 * dir;
+        sparks.push({
+          x: decoyX, y: p.y,
+          vx: 0, vy: 0,
+          life: 180, maxLife: 180,
+          color: '#CC66FF',
+          type: 'dosbossDecoy',
+          gravity: 0, drag: 1,
+          ownerId: p.id, ownerCharIdx: p.charIdx,
+          decoyX: decoyX, decoyY: p.y,
+        });
+        cmdNameDisplay.push({ text: 'デコイ！', x: decoyX, y: p.y - 80, life: 45, maxLife: 45, color: '#CC66FF' });
+      }
+
         // セン: 満腹パワーバフ発動
         if (atk.senBuff) {
           p.senBuffTimer = 600; // 10 seconds
@@ -7491,7 +7692,8 @@ function applyMovement(p, moveX, ch) {
   const accel = p.grounded ? GROUND_ACCEL : AIR_ACCEL;
   const friction = p.grounded ? GROUND_FRICTION * STAGE_FRICTION : AIR_FRICTION;
   const senSpeedMult = (p.charIdx === 18 && p.senBuffTimer > 0) ? 1.3 : 1;
-  const targetVx = moveX * ch.moveSpeed * senSpeedMult;
+  const gravDebuffMult = (p.gravityDebuffTimer > 0) ? 0.5 : 1;
+  const targetVx = moveX * ch.moveSpeed * senSpeedMult * gravDebuffMult;
 
   if (moveX !== 0) {
     // 入力あり: 目標速度に向かって加速
@@ -8105,7 +8307,20 @@ function drawBattle(dt) {
     ctx.save();
     ctx.globalAlpha = Math.min(1, t * 1.5);
 
-    if (s.type === 'slash') {
+    if (s.type === 'dosbossDecoy') {
+      ctx.globalAlpha = 0.4 + Math.sin(s.life * 0.1) * 0.15;
+      ctx.fillStyle = '#CC66FF';
+      ctx.beginPath(); ctx.ellipse(s.decoyX, s.decoyY - 30, 16, 28, 0, 0, Math.PI * 2); ctx.fill();
+      // ? mark
+      ctx.font = 'bold 14px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#FFF';
+      ctx.globalAlpha = 0.6 * t;
+      ctx.fillText('?', s.decoyX, s.decoyY - 55);
+      ctx.globalAlpha = 1;
+      ctx.restore();
+      continue;
+    } else if (s.type === 'slash') {
       // Blue slash line spark
       ctx.strokeStyle = s.color;
       ctx.lineWidth = s.size * t;
@@ -8489,6 +8704,28 @@ function drawBattle(dt) {
         ctx.arc(p.x, p.y - 100, 8, -Math.PI/2, -Math.PI/2 + Math.PI * 2 * buffRatio / 0.3);
         ctx.stroke();
       }
+      ctx.restore();
+    }
+    // ドスボス: ランダム必殺技「?」表示
+    if (p.charIdx === 19 && p.attacking && p.attackData && p.attackData.dosbossRandom && p.attackFrame <= p.attackData.startup) {
+      ctx.save();
+      ctx.font = 'bold 28px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#CC66FF';
+      ctx.globalAlpha = 0.7 + Math.sin(battleTime * 0.2) * 0.3;
+      ctx.fillText('?', p.x, p.y - 90);
+      ctx.globalAlpha = 1;
+      ctx.restore();
+    }
+    // ドスボス: 重力デバフ表示
+    if (p.gravityDebuffTimer > 0) {
+      ctx.save();
+      const gdt = p.gravityDebuffTimer / 180;
+      ctx.globalAlpha = 0.3 * gdt;
+      ctx.strokeStyle = '#9944CC';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(p.x, p.y - 40, 20 + Math.sin(battleTime * 0.1) * 5, 0, Math.PI * 2); ctx.stroke();
+      ctx.globalAlpha = 1;
       ctx.restore();
     }
 
@@ -10014,6 +10251,7 @@ function serializePlayer(p) {
     animTimer: p.animTimer, charIdx: p.charIdx,
     kingComboHits: p.kingComboHits, kingComboTimer: p.kingComboTimer,
     senBuffTimer: p.senBuffTimer,
+    dosbossRandomPattern: p.dosbossRandomPattern, gravityDebuffTimer: p.gravityDebuffTimer,
     cancelWindow: p.cancelWindow, comboWindow: p.comboWindow, airComboTimer: p.airComboTimer,
   };
 }
@@ -10081,6 +10319,7 @@ function applyHostState(data) {
     target.animTimer = src.animTimer; target.charIdx = src.charIdx;
     target.kingComboHits = src.kingComboHits; target.kingComboTimer = src.kingComboTimer;
     target.senBuffTimer = src.senBuffTimer;
+    target.dosbossRandomPattern = src.dosbossRandomPattern || 0; target.gravityDebuffTimer = src.gravityDebuffTimer || 0;
     target.cancelWindow = src.cancelWindow || 0; target.comboWindow = src.comboWindow || 0; target.airComboTimer = src.airComboTimer || 0;
     // Restore attackData from attackType
     if (src.attacking && src.attackType) {
