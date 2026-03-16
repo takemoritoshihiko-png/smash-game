@@ -10846,6 +10846,12 @@ function handleKeyDown(e) {
   } else if (scene === 'select') {
     // Mode selection phase
     if (!modeSelected) {
+      // オンライン対戦中はCPUモード選択不可→自動的にVS固定
+      if (onlineMode) {
+        gameMode = 'vs';
+        modeSelected = true;
+        return;
+      }
       if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
         gameMode = gameMode === 'vs' ? 'cpu' : 'vs';
       }
@@ -10917,7 +10923,7 @@ function handleKeyDown(e) {
 
     if (e.key === 'Escape') {
       if (p1Confirmed || p2Confirmed) { p1Confirmed = false; p2Confirmed = false; }
-      else { modeSelected = false; }
+      else if (!onlineMode) { modeSelected = false; }
     }
   } else if (scene === 'difficulty') {
     if (e.key === 'ArrowLeft') difficultySelected = Math.max(0, difficultySelected - 1);
