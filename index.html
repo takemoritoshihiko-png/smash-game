@@ -309,6 +309,19 @@ const characters = [
     jumpPower: -14.0,
     weight: 0.7
   },
+  {
+    name: 'セン',
+    type: 'テクニック型',
+    color: '#335577',
+    accent: '#FF8844',
+    dark: '#1A2A3A',
+    stats: { power: 3, speed: 3, tech: 5, defense: 3 },
+    desc: '書類とご飯で戦うサラリーマン戦士',
+    bodyColors: { main: '#335577', sub: '#FF8844', skin: '#FFDBB8' },
+    moveSpeed: 7.56,
+    jumpPower: -12.94,
+    weight: 1.0
+  },
 ];
 
 // --- Audio unlock on first interaction ---
@@ -374,6 +387,8 @@ const kingImg = new Image();
 kingImg.src = 'images/king.png';
 const onpaImg = new Image();
 onpaImg.src = 'images/onpa.png';
+const senImg = new Image();
+senImg.src = 'images/sen.png';
 
 // --- Particles ---
 function spawnTitleParticle() {
@@ -1322,6 +1337,72 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       }
       ctx.lineWidth = 1;
     }
+  } else if (charIndex === 18) {
+    // セン - サラリーマン戦士
+    if (senImg.complete && senImg.naturalWidth > 0) {
+      const imgW = 75 * s;
+      const imgH = 90 * s;
+      ctx.drawImage(senImg, -imgW / 2, -35 * s, imgW, imgH);
+    } else {
+      // Canvas fallback: salaryman
+      // Legs (dark pants)
+      ctx.fillStyle = '#1A2A3A';
+      ctx.fillRect(-9 * s, 25 * s, 7 * s, 20 * s);
+      ctx.fillRect(2 * s, 25 * s, 7 * s, 20 * s);
+      // Shoes
+      ctx.fillStyle = '#222';
+      ctx.fillRect(-10 * s, 43 * s, 9 * s, 4 * s);
+      ctx.fillRect(1 * s, 43 * s, 9 * s, 4 * s);
+      // Body (suit jacket)
+      ctx.fillStyle = '#335577';
+      ctx.fillRect(-13 * s, -16 * s, 26 * s, 42 * s);
+      // Tie
+      ctx.fillStyle = '#FF8844';
+      ctx.beginPath();
+      ctx.moveTo(-2 * s, -12 * s); ctx.lineTo(0, 10 * s); ctx.lineTo(2 * s, -12 * s);
+      ctx.closePath(); ctx.fill();
+      // Shirt collar
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(-6 * s, -14 * s, 12 * s, 5 * s);
+      // Arms
+      ctx.fillStyle = '#335577';
+      ctx.fillRect(-17 * s, -12 * s, 6 * s, 24 * s);
+      ctx.fillRect(11 * s, -12 * s, 6 * s, 24 * s);
+      // Hands
+      ctx.fillStyle = '#FFDBB8';
+      ctx.beginPath(); ctx.arc(-14 * s, 14 * s, 3.5 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(14 * s, 14 * s, 3.5 * s, 0, Math.PI * 2); ctx.fill();
+      // Head
+      ctx.fillStyle = '#FFDBB8';
+      ctx.beginPath(); ctx.arc(0, -26 * s, 12 * s, 0, Math.PI * 2); ctx.fill();
+      // Hair (short, neat)
+      ctx.fillStyle = '#1A1A2A';
+      ctx.beginPath(); ctx.arc(0, -30 * s, 12 * s, Math.PI, 0); ctx.fill();
+      // Eyes
+      ctx.fillStyle = '#111';
+      ctx.beginPath(); ctx.ellipse(-4 * s, -26 * s, 2 * s, 2.5 * s, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(4 * s, -26 * s, 2 * s, 2.5 * s, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#FFF';
+      ctx.beginPath(); ctx.arc(-3.5 * s, -27 * s, 0.8 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(4.5 * s, -27 * s, 0.8 * s, 0, Math.PI * 2); ctx.fill();
+      // Mouth
+      ctx.strokeStyle = '#AA6644';
+      ctx.lineWidth = 1.2 * s;
+      ctx.beginPath(); ctx.arc(0, -20 * s, 3 * s, 0.2, Math.PI - 0.2); ctx.stroke();
+      ctx.lineWidth = 1;
+      // Glasses
+      ctx.strokeStyle = '#444';
+      ctx.lineWidth = 1.2 * s;
+      ctx.beginPath(); ctx.rect(-7 * s, -28 * s, 6 * s, 5 * s); ctx.stroke();
+      ctx.beginPath(); ctx.rect(1 * s, -28 * s, 6 * s, 5 * s); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-1 * s, -26 * s); ctx.lineTo(1 * s, -26 * s); ctx.stroke();
+      ctx.lineWidth = 1;
+      // Briefcase (right hand)
+      ctx.fillStyle = '#8B4513';
+      ctx.fillRect(10 * s, 10 * s, 10 * s, 8 * s);
+      ctx.fillStyle = '#DAA520';
+      ctx.fillRect(13 * s, 9 * s, 4 * s, 2 * s);
+    }
   } else if (charIndex === 10) {
     // 天才 - 変形型ドラゴン
     const isDragon = typeof players !== 'undefined' && players.some(p => p.charIdx === 10 && p.dragonMode);
@@ -1518,6 +1599,12 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
         bobY = Math.sin(t * 0.06) * 2 + Math.sin(t * 0.18) * 1;
         scaleX = 1 + Math.sin(t * 0.12) * 0.01;
         scaleY = 1 + Math.sin(t * 0.06 + 0.5) * 0.008;
+      } else if (charIndex === 18) {
+        // Sen: salaryman slight nod
+        bobY = Math.sin(t * 0.04) * 2 + Math.sin(t * 0.08) * 0.5;
+        scaleX = 1 + Math.sin(t * 0.04) * 0.008;
+        scaleY = 1 + Math.sin(t * 0.04 + 0.5) * 0.006;
+        armAngle = Math.sin(t * 0.03) * 0.02;
       }
     }
 
@@ -1617,6 +1704,13 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
         scaleX = 1 + Math.sin(phase * 2) * 0.015;
         legAngle = Math.sin(phase) * 0.1;
         armSwing = -Math.sin(phase) * 0.08;
+      } else if (charIndex === 18) {
+        // Sen: business walk
+        bobY = Math.abs(Math.sin(phase)) * 2.5;
+        walkLean = Math.sin(phase) * 0.06;
+        scaleY = 0.97 + Math.abs(Math.sin(phase)) * 0.03;
+        legAngle = Math.sin(phase) * 0.12;
+        armSwing = -Math.sin(phase) * 0.1;
       }
     }
 
@@ -1697,8 +1791,8 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
   // 天才 uses different images per mode
   const tensaiIsDragon = animData && animData.dragonMode;
   const tensaiActiveImg = tensaiIsDragon ? tensaiDragonImg : tensaiHumanImg;
-  const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg, bulletImg, shaudenImg, judgemanImg, tensaiActiveImg, catbusImg, tankImg, namiojiImg, tokkoImg, samImg, kingImg, onpaImg];
-  const imgSizes = [[70, 90], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [168, 112], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90]];
+  const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg, bulletImg, shaudenImg, judgemanImg, tensaiActiveImg, catbusImg, tankImg, namiojiImg, tokkoImg, samImg, kingImg, onpaImg, senImg];
+  const imgSizes = [[70, 90], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [168, 112], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90]];
   const img = imgs[charIndex];
   if (img && img.complete && img.naturalWidth > 0) {
     const imgW = imgSizes[charIndex][0] * s;
@@ -4824,6 +4918,15 @@ const commandDefs = {
     { name:'高周波スクリーム', seq:['U','F','U'], cooldownKey:'cmd3', chargeCmd:true,
       attack:{ startup:6, active:12, recovery:16, damage:2, kbBase:10.5, kbScale:0.18, kbAngle:-80, hx:0, hy:-60, hw:150, hh:120, color:'#FFFFFF', effect:'upslash', centerHit:true } },
   ],
+  18: [ // セン
+    { name:'残業パンチ', seq:['D','F','D'], cooldownKey:'cmd1',
+      attack:{ startup:10, active:8, recovery:20, damage:20, kbBase:7, kbScale:0.12, kbAngle:-30, hx:20, hy:-35, hw:60, hh:50, color:'#FF8844', effect:'punch' } },
+    { name:'接待ゴルフ', seq:['F','U','F'], cooldownKey:'cmd2',
+      attack:{ startup:8, active:10, recovery:18, damage:16, kbBase:6, kbScale:0.10, kbAngle:-70, hx:15, hy:-45, hw:50, hh:60, color:'#44AA44', effect:'upslash' } },
+    { name:'経費で落とす', seq:['D','B','D'], cooldownKey:'cmd3', chargeCmd:true,
+      attack:{ startup:6, active:5, recovery:16, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FFD700', effect:'none',
+        projectile:{ speed:12, damage:18, kbBase:7, kbScale:0.12, kbAngle:-25, w:30, h:25, life:50, color:'#FFD700', pcolor:'#DAA520' } } },
+  ],
 };
 
 // Dragon mode commands (separate)
@@ -5261,6 +5364,22 @@ const attackDefs = {
               specialType:'slide', slideSpeed:8 },
     throwDmg: 3,
   },
+  // セン - Technique Type (Salaryman + Food themed)
+  18: {
+    normal: { name:'書類アタック', startup:4, active:5, recovery:10, damage:7, kbBase:3, kbScale:0.06, kbAngle:-15, hx:18, hy:-35, hw:40, hh:40, color:'#FFFFFF', effect:'slash' },
+    strong: { name:'おにぎり投げ', startup:8, active:5, recovery:14, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF8844', effect:'none',
+              projectile:{ speed:10, damage:12, kbBase:5, kbScale:0.10, kbAngle:-20, w:22, h:20, life:40, color:'#F5DEB3', pcolor:'#2A2A2A' }, meshitero:true },
+    special:{ name:'満腹パワー', startup:30, active:1, recovery:10, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF8844', effect:'none',
+              senBuff:true },
+    aerial: { name:'空中書類', startup:4, active:6, recovery:10, damage:8, kbBase:3, kbScale:0.07, kbAngle:-60, hx:12, hy:-30, hw:40, hh:40, color:'#FFFFFF', effect:'airslash' },
+    down:   { name:'弁当箱プレス', startup:5, active:8, recovery:14, damage:10, kbBase:4, kbScale:0.08, kbAngle:70, hx:0, hy:5, hw:45, hh:35, color:'#8B4513', effect:'meteor' },
+    up:     { name:'名刺斬り上げ', startup:4, active:7, recovery:12, damage:9, kbBase:4, kbScale:0.08, kbAngle:-88, hx:5, hy:-55, hw:40, hh:50, color:'#FFFFFF', effect:'upslash' },
+    side:   { name:'ネクタイウィップ', startup:5, active:6, recovery:12, damage:10, kbBase:4, kbScale:0.08, kbAngle:-12, hx:20, hy:-35, hw:55, hh:35, color:'#FF8844', effect:'slash' },
+    downair:{ name:'鞄プレス', startup:5, active:10, recovery:14, damage:12, kbBase:5, kbScale:0.09, kbAngle:80, hx:0, hy:10, hw:40, hh:45, color:'#8B4513', effect:'meteor', specialType:'divekick', diveSpeed:13 },
+    dash:   { name:'通勤ダッシュ', startup:4, active:6, recovery:12, damage:8, kbBase:3, kbScale:0.07, kbAngle:-10, hx:15, hy:-35, hw:50, hh:40, color:'#335577', effect:'dash',
+              specialType:'slide', slideSpeed:10 },
+    throwDmg: 8,
+  },
 };
 
 // Dragon mode attack defs (separate object)
@@ -5390,6 +5509,8 @@ function createPlayer(id, charIdx, startX) {
     // キング コンボ追跡 (Z×3→X(1.5倍)→C(2倍))
     kingComboHits: 0,    // 0=none, 1-3=Z hits, 4=X hit
     kingComboTimer: 0,   // frames since last combo hit (expires at 15)
+    // セン バフ状態
+    senBuffTimer: 0,     // remaining buff frames (600 = 10 sec)
   };
 }
 
@@ -5509,6 +5630,10 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   // サム空中攻撃補正: 空中時1.3倍ダメージ
   let finalDamage = damage;
   if (attacker.charIdx === 15 && !attacker.grounded) {
+    finalDamage *= 1.3;
+  }
+  // セン: 満腹パワーバフ中は1.3倍ダメージ
+  if (attacker.charIdx === 18 && attacker.senBuffTimer > 0) {
     finalDamage *= 1.3;
   }
   // キングコンボ補正: Z×3→X(1.5倍)→C(2倍)
@@ -5652,6 +5777,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
       15: ['#FFD700', '#FF4444', '#4488FF'], // Sam: gold/red/blue
       16: ['#FFD700', '#DAA520', '#FFFFFF'], // King: gold/white
       17: ['#88FFFF', '#44DDEE', '#FFFFFF'], // Onpa: cyan/white
+      18: ['#335577', '#FF8844', '#FFFFFF'], // Sen: navy/orange
     };
     const colors = charColors[attacker.charIdx] || ['#FFFFFF'];
     const specialCount = 30 + Math.floor(kb * 1.5);
@@ -5894,6 +6020,7 @@ function spawnProjectile(p, projDef) {
     homing: projDef.homing || false,
     pierce: projDef.pierce || false,
     ink: projDef.ink || false,
+    meshitero: !!(p.attackData && p.attackData.meshitero),
     hitTargets: [],
   });
 }
@@ -6554,9 +6681,13 @@ function updateBattle(dt) {
       if (pr.pierce && pr.hitTargets && pr.hitTargets.includes(p.id)) continue;
       const ph = getPlayerHitbox(p);
       if (hitboxCollides(pr.x - pr.w/2, pr.y - pr.h/2, pr.w, pr.h, ph.x, ph.y, ph.w, ph.h)) {
-        const fakeAttacker = { x: pr.x - pr.vx * 5, charIdx: pr.ownerCharIdx };
+        const owner = players.find(pl => pl.id === pr.ownerId);
+        const fakeAttacker = { x: pr.x - pr.vx * 5, charIdx: pr.ownerCharIdx, senBuffTimer: owner ? owner.senBuffTimer : 0 };
         applyHit(fakeAttacker, p, pr.damage, pr.kbBase, pr.kbScale, pr.kbAngle, 'projectile');
         showHitDisplay(p.x, p.y, true);
+        if (pr.meshitero) {
+          cmdNameDisplay.push({ text: '飯テロ！', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#FF8844' });
+        }
         if (pr.ink) p.inkBlindTimer = 120; // 2 seconds of ink blind
         if (pr.pierce) { if (pr.hitTargets) pr.hitTargets.push(p.id); }
         else { projectiles.splice(i, 1); hitSomething = true; }
@@ -6578,6 +6709,7 @@ function updateBattle(dt) {
         p.attacking = false; p.hitstun = 0; p.specialState = null;
         p.guarding = false; p.guardDurability = GUARD_MAX_DURABILITY; p.guardBreakStun = 0; p.justGuardTimer = 0;
         p.animState = 'fall'; p.spinAngle = 0; p.damageTint = 0; p.landSquash = 0; p.jumpSquash = 0;
+        p.senBuffTimer = 0;
       }
       continue;
     }
@@ -6592,6 +6724,7 @@ function updateBattle(dt) {
     if (p.sniperCooldown > 0) p.sniperCooldown--;
     if (p.inkBlindTimer > 0) p.inkBlindTimer--;
     if (p.kingComboTimer > 0) { p.kingComboTimer--; if (p.kingComboTimer <= 0) { p.kingComboHits = 0; } }
+    if (p.senBuffTimer > 0) p.senBuffTimer--;
     if (p.dragonCooldown > 0) p.dragonCooldown--;
 
     // 天才: ドラゴンモード処理
@@ -6937,6 +7070,11 @@ function updateBattle(dt) {
           const dir = p.facingLeft ? -1 : 1;
           showHitDisplay(p.x + 30 * dir, p.y, false);
           playHitSound('miss');
+        }
+        // セン: 満腹パワーバフ発動
+        if (atk.senBuff) {
+          p.senBuffTimer = 600; // 10 seconds
+          cmdNameDisplay.push({ text: '満腹パワー！', x: p.x, y: p.y - 120, life: 90, maxLife: 90, color: '#FF8844' });
         }
         p.attacking = false;
         p.specialState = null;
@@ -7299,7 +7437,8 @@ function getGravity(p) {
 function applyMovement(p, moveX, ch) {
   const accel = p.grounded ? GROUND_ACCEL : AIR_ACCEL;
   const friction = p.grounded ? GROUND_FRICTION * STAGE_FRICTION : AIR_FRICTION;
-  const targetVx = moveX * ch.moveSpeed;
+  const senSpeedMult = (p.charIdx === 18 && p.senBuffTimer > 0) ? 1.3 : 1;
+  const targetVx = moveX * ch.moveSpeed * senSpeedMult;
 
   if (moveX !== 0) {
     // 入力あり: 目標速度に向かって加速
@@ -8265,6 +8404,37 @@ function drawBattle(dt) {
         ctx.beginPath();
         ctx.arc(p.x, p.y - 40, 35, 0, Math.PI * 2);
         ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    // セン: 満腹パワーバフ中のスチームエフェクト
+    if (p.charIdx === 18 && p.senBuffTimer > 0) {
+      ctx.save();
+      const pulse = Math.sin(battleTime * 0.08) * 0.1;
+      ctx.globalAlpha = 0.2 + pulse;
+      const sg = ctx.createRadialGradient(p.x, p.y - 40, 5, p.x, p.y - 40, 35);
+      sg.addColorStop(0, '#FF8844');
+      sg.addColorStop(0.5, '#FF884466');
+      sg.addColorStop(1, 'rgba(255,136,68,0)');
+      ctx.fillStyle = sg;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y - 40, 35, 0, Math.PI * 2);
+      ctx.fill();
+      // Steam particles
+      if (battleTime % 8 === 0) {
+        sparks.push({ x: p.x + (Math.random()-0.5)*20, y: p.y - 30, vx: (Math.random()-0.5)*1.5, vy: -1.5-Math.random()*1.5,
+          life: 12, maxLife: 15, color: '#FFDDAA', size: 2+Math.random()*2, gravity: -0.03, drag: 0.98 });
+      }
+      // Buff timer indicator (flashing when low)
+      const buffRatio = p.senBuffTimer / 600;
+      if (buffRatio < 0.3 && battleTime % 10 < 5) {
+        ctx.globalAlpha = 0.5;
+        ctx.strokeStyle = '#FF8844';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y - 100, 8, -Math.PI/2, -Math.PI/2 + Math.PI * 2 * buffRatio / 0.3);
+        ctx.stroke();
       }
       ctx.restore();
     }
@@ -9790,6 +9960,7 @@ function serializePlayer(p) {
     throwCooldown: p.throwCooldown, inkBlindTimer: p.inkBlindTimer,
     animTimer: p.animTimer, charIdx: p.charIdx,
     kingComboHits: p.kingComboHits, kingComboTimer: p.kingComboTimer,
+    senBuffTimer: p.senBuffTimer,
   };
 }
 
@@ -9855,6 +10026,7 @@ function applyHostState(data) {
     target.throwCooldown = src.throwCooldown; target.inkBlindTimer = src.inkBlindTimer;
     target.animTimer = src.animTimer; target.charIdx = src.charIdx;
     target.kingComboHits = src.kingComboHits; target.kingComboTimer = src.kingComboTimer;
+    target.senBuffTimer = src.senBuffTimer;
     // Restore attackData from attackType
     if (src.attacking && src.attackType) {
       const defs = (target.charIdx === 10 && target.dragonMode) ? dragonAttackDefs : attackDefs[target.charIdx];
