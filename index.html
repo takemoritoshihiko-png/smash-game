@@ -4927,7 +4927,7 @@ const commandDefs = {
       attack:{ startup:8, active:10, recovery:18, damage:16, kbBase:6, kbScale:0.10, kbAngle:-70, hx:15, hy:-45, hw:50, hh:60, color:'#44AA44', effect:'upslash' } },
     { name:'経費で落とす', seq:['D','B','D'], cooldownKey:'cmd3', chargeCmd:true,
       attack:{ startup:6, active:5, recovery:16, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FFD700', effect:'none',
-        projectile:{ speed:12, damage:18, kbBase:7, kbScale:0.12, kbAngle:-25, w:30, h:25, life:50, color:'#FFD700', pcolor:'#DAA520' } } },
+        projectile:{ speed:12, damage:5, kbBase:7, kbScale:0.12, kbAngle:-25, w:30, h:25, life:50, color:'#FFD700', pcolor:'#DAA520' } } },
   ],
 };
 
@@ -5319,7 +5319,7 @@ const attackDefs = {
     normal: { name:'くちばしつつき', startup:3, active:5, recovery:8, damage:5, kbBase:2, kbScale:0.04, kbAngle:-12, hx:14, hy:-35, hw:45, hh:35, color:'#FFAA00', effect:'punch' },
     strong: { name:'羽ばたきアタック', startup:6, active:10, recovery:14, damage:11, kbBase:4, kbScale:0.08, kbAngle:-30, hx:0, hy:-30, hw:90, hh:55, color:'#FFD700', effect:'airkick', centerHit:true },
     special:{ name:'ピエロ爆弾', startup:10, active:5, recovery:16, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF4444', effect:'none',
-              projectile:{ speed:6, damage:14, kbBase:5, kbScale:0.09, kbAngle:-50, w:22, h:22, life:50, color:'#FF4444', pcolor:'#FFD700', dirAngle:60 } },
+              projectile:{ speed:6, damage:7, kbBase:5, kbScale:0.09, kbAngle:-50, w:22, h:22, life:50, color:'#FF4444', pcolor:'#FFD700', dirAngle:60 } },
     aerial: { name:'空中くちばし', startup:3, active:8, recovery:8, damage:8, kbBase:3, kbScale:0.07, kbAngle:-80, hx:8, hy:-30, hw:55, hh:50, color:'#FFAA00', effect:'airkick', centerHit:true },
     down:   { name:'両足キック', startup:4, active:10, recovery:14, damage:12, kbBase:5, kbScale:0.09, kbAngle:80, hx:0, hy:10, hw:40, hh:45, color:'#FF8800', effect:'meteor',
               specialType:'divekick', diveSpeed:14 },
@@ -5370,7 +5370,7 @@ const attackDefs = {
   18: {
     normal: { name:'書類アタック', startup:4, active:5, recovery:10, damage:7, kbBase:3, kbScale:0.06, kbAngle:-15, hx:18, hy:-35, hw:40, hh:40, color:'#FFFFFF', effect:'slash' },
     strong: { name:'おにぎり投げ', startup:8, active:5, recovery:14, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF8844', effect:'none',
-              projectile:{ speed:10, damage:12, kbBase:5, kbScale:0.10, kbAngle:-20, w:22, h:20, life:40, color:'#F5DEB3', pcolor:'#2A2A2A' }, meshitero:true },
+              projectile:{ speed:10, damage:5, kbBase:5, kbScale:0.10, kbAngle:-20, w:22, h:20, life:40, color:'#F5DEB3', pcolor:'#2A2A2A' }, meshitero:true },
     special:{ name:'満腹パワー', startup:30, active:1, recovery:10, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF8844', effect:'none',
               senBuff:true },
     aerial: { name:'空中書類', startup:4, active:6, recovery:10, damage:8, kbBase:3, kbScale:0.07, kbAngle:-60, hx:12, hy:-30, hw:40, hh:40, color:'#FFFFFF', effect:'airslash' },
