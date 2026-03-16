@@ -439,8 +439,8 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
   } else if (charIndex === 1) {
     // Don - image
     if (donImg.complete && donImg.naturalWidth > 0) {
-      const imgW = 80 * s;
-      const imgH = 95 * s;
+      const imgW = 75 * s;
+      const imgH = 90 * s;
       ctx.drawImage(donImg, -imgW / 2, -35 * s, imgW, imgH);
     }
   } else if (charIndex === 2) {
@@ -502,11 +502,17 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.fillRect(-2 * s, -8 * s, 4 * s, 4 * s);
     }
   } else if (charIndex === 5) {
-    // うる男 - 狼系獣人
+    // うる男 - 狼系獣人 (landscape image: center-crop to portrait)
     if (uruoImg.complete && uruoImg.naturalWidth > 0) {
       const imgW = 75 * s;
       const imgH = 90 * s;
-      ctx.drawImage(uruoImg, -imgW / 2, -35 * s, imgW, imgH);
+      const nw = uruoImg.naturalWidth;
+      const nh = uruoImg.naturalHeight;
+      // Crop center portion to match 75:90 (5:6) portrait aspect ratio
+      const cropH = nh;
+      const cropW = cropH * (75 / 90);
+      const cropX = (nw - cropW) / 2;
+      ctx.drawImage(uruoImg, cropX, 0, cropW, cropH, -imgW / 2, -35 * s, imgW, imgH);
     } else {
       // Canvas描画：狼系獣人
       // 脚
@@ -1692,7 +1698,7 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
   const tensaiIsDragon = animData && animData.dragonMode;
   const tensaiActiveImg = tensaiIsDragon ? tensaiDragonImg : tensaiHumanImg;
   const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg, bulletImg, shaudenImg, judgemanImg, tensaiActiveImg, catbusImg, tankImg, namiojiImg, tokkoImg, samImg, kingImg, onpaImg];
-  const imgSizes = [[70, 90], [80, 95], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [168, 112], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90]];
+  const imgSizes = [[70, 90], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [168, 112], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90]];
   const img = imgs[charIndex];
   if (img && img.complete && img.naturalWidth > 0) {
     const imgW = imgSizes[charIndex][0] * s;
@@ -1701,6 +1707,14 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
     const tankOfsY = charIndex === 12 ? -20 * s : 0;
     const useScreen = charIndex === 12 || charIndex === 13;
     if (useScreen) ctx.globalCompositeOperation = 'screen';
+
+    // Source crop for landscape images (うる男)
+    let sx = 0, sy = 0, sw = img.naturalWidth, sh = img.naturalHeight;
+    if (charIndex === 5) {
+      const cropW = sh * (imgSizes[5][0] / imgSizes[5][1]);
+      sx = (sw - cropW) / 2;
+      sw = cropW;
+    }
 
     // Damage flash: smooth 2-frame blink with fading intensity
     if (animData && animData.damageTint > 0) {
@@ -1726,15 +1740,15 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
         tctx.globalAlpha = 1;
         // Slight shake on damage
         const shake = intensity * 2;
-        ctx.drawImage(tc, -imgW / 2 + tankOfsX + (Math.random() - 0.5) * shake, -35 * s + tankOfsY + (Math.random() - 0.5) * shake, imgW, imgH);
+        ctx.drawImage(tc, sx, sy, sw, sh, -imgW / 2 + tankOfsX + (Math.random() - 0.5) * shake, -35 * s + tankOfsY + (Math.random() - 0.5) * shake, imgW, imgH);
       } else {
         // Normal frame (white flash)
         ctx.globalAlpha = 0.7 + 0.3 * intensity;
-        ctx.drawImage(img, -imgW / 2 + tankOfsX, -35 * s + tankOfsY, imgW, imgH);
+        ctx.drawImage(img, sx, sy, sw, sh, -imgW / 2 + tankOfsX, -35 * s + tankOfsY, imgW, imgH);
         ctx.globalAlpha = 1;
       }
     } else {
-      ctx.drawImage(img, -imgW / 2 + tankOfsX, -35 * s + tankOfsY, imgW, imgH);
+      ctx.drawImage(img, sx, sy, sw, sh, -imgW / 2 + tankOfsX, -35 * s + tankOfsY, imgW, imgH);
     }
     if (useScreen) ctx.globalCompositeOperation = 'source-over';
   } else if (charIndex === 4) {
