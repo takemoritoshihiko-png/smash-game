@@ -5513,6 +5513,10 @@ function createPlayer(id, charIdx, startX) {
     kingComboTimer: 0,   // frames since last combo hit (expires at 15)
     // セン バフ状態
     senBuffTimer: 0,     // remaining buff frames (600 = 10 sec)
+    // コンボシステム
+    cancelWindow: 0,     // キャンセル受付残りフレーム
+    comboWindow: 0,      // コンボ継続可能フレーム
+    airComboTimer: 0,    // 空中コンボ用 落下速度低下タイマー
   };
 }
 
@@ -5702,8 +5706,23 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   const dir = attacker.x < target.x ? 1 : -1;
   target.vx = Math.cos(rad) * weightedKb * dir;
   target.vy = Math.sin(rad) * weightedKb;
-  target.hitstun = Math.floor(8 + target.damage * 0.12);
+  // コンボ継続中はヒットストップ追加（追撃しやすくする）
+  const comboBonus = (attacker.comboWindow > 0) ? 4 : 0;
+  target.hitstun = Math.floor(8 + target.damage * 0.12) + comboBonus;
   target.damageTint = 12;
+
+  // ① キャンセルウィンドウ: ヒット確認後10F以内にキャンセル可能
+  if (attacker.id !== undefined) {
+    const realAttacker = players.find(pp => pp.id === attacker.id);
+    if (realAttacker) {
+      realAttacker.cancelWindow = 10;
+      realAttacker.comboWindow = 20;
+    }
+  }
+  // ③ 空中コンボ: 空中の相手は落下速度低下で追撃しやすい
+  if (!target.grounded) {
+    target.airComboTimer = 20;
+  }
 
   // Spin knockback for certain attacks (瞬身乱舞、百裂拳)
   const atkData = attacker.attackData;
@@ -6036,6 +6055,22 @@ function spawnProjectile(p, projDef) {
 }
 
 // --- Start attack ---
+// ① キャンセル攻撃: 攻撃中でもヒット確認後にキャンセルして次の技に繋ぐ
+function tryCancelAttack(p, type) {
+  if (p.cancelWindow <= 0 || !p.attacking) return false;
+  const from = p.attackType;
+  // Z(normal/aerial/side/up/down/downair/dash)→X(strong), X(strong)→C(special) のみ許可
+  const canCancel = (from !== 'strong' && from !== 'special' && from !== 'command' && type === 'strong')
+                 || (from === 'strong' && type === 'special');
+  if (!canCancel) return false;
+  // キャンセル実行: 現在の攻撃を中断して新しい攻撃開始
+  p.attacking = false;
+  p.specialState = null;
+  p.cancelWindow = 0;
+  startAttack(p, type);
+  return p.attacking; // startAttack が成功したか
+}
+
 function startAttack(p, type) {
   if (p.attacking || p.hitstun > 0 || !p.alive || p.grabbing || p.grabbed || p.guarding || p.guardBreakStun > 0) return;
 
@@ -6738,6 +6773,9 @@ function updateBattle(dt) {
     if (p.inkBlindTimer > 0) p.inkBlindTimer--;
     if (p.kingComboTimer > 0) { p.kingComboTimer--; if (p.kingComboTimer <= 0) { p.kingComboHits = 0; } }
     if (p.senBuffTimer > 0) p.senBuffTimer--;
+    if (p.cancelWindow > 0) p.cancelWindow--;
+    if (p.comboWindow > 0) p.comboWindow--;
+    if (p.airComboTimer > 0) p.airComboTimer--;
     if (p.dragonCooldown > 0) p.dragonCooldown--;
 
     // 天才: ドラゴンモード処理
@@ -6843,8 +6881,10 @@ function updateBattle(dt) {
         p.spinAngle += (p.vx > 0 ? spinRate : -spinRate);
       }
       // 吹っ飛び中も上昇/落下で重力が変化（放物線が自然に）
-      p.vy += getGravity(p);
-      if (p.vy > MAX_FALL_SPEED) p.vy = MAX_FALL_SPEED;
+      // ③ 空中コンボ: 落下速度低下で追撃しやすくする
+      const gravMult = p.airComboTimer > 0 ? 0.5 : 1.0;
+      p.vy += getGravity(p) * gravMult;
+      if (p.vy > MAX_FALL_SPEED * (p.airComboTimer > 0 ? 0.6 : 1.0)) p.vy = MAX_FALL_SPEED * (p.airComboTimer > 0 ? 0.6 : 1.0);
       p.x += p.vx;
       p.y += p.vy;
       // 空気抵抗（速いほど減衰が弱い = 遠くまで飛ぶ）
@@ -9974,6 +10014,7 @@ function serializePlayer(p) {
     animTimer: p.animTimer, charIdx: p.charIdx,
     kingComboHits: p.kingComboHits, kingComboTimer: p.kingComboTimer,
     senBuffTimer: p.senBuffTimer,
+    cancelWindow: p.cancelWindow, comboWindow: p.comboWindow, airComboTimer: p.airComboTimer,
   };
 }
 
@@ -10040,6 +10081,7 @@ function applyHostState(data) {
     target.animTimer = src.animTimer; target.charIdx = src.charIdx;
     target.kingComboHits = src.kingComboHits; target.kingComboTimer = src.kingComboTimer;
     target.senBuffTimer = src.senBuffTimer;
+    target.cancelWindow = src.cancelWindow || 0; target.comboWindow = src.comboWindow || 0; target.airComboTimer = src.airComboTimer || 0;
     // Restore attackData from attackType
     if (src.attacking && src.attackType) {
       const defs = (target.charIdx === 10 && target.dragonMode) ? dragonAttackDefs : attackDefs[target.charIdx];
@@ -10735,7 +10777,7 @@ function processPlayerKeydown(key, p, playerId, keyState) {
       else startAttack(p, 'normal');
     }
   }
-  // Strong attack (X)
+  // Strong attack (X) - キャンセル対応
   if (key === 'x' || key === 'X') {
     if (p.grabbing) {
       let dx = 0, dy = 0;
@@ -10744,14 +10786,16 @@ function processPlayerKeydown(key, p, playerId, keyState) {
       if (keyState['ArrowUp']) dy = -1;
       if (keyState['ArrowDown']) dy = 1;
       executeThrow(p, dx, dy);
-    } else {
+    } else if (!tryCancelAttack(p, 'strong')) {
       startAttack(p, 'strong');
     }
   }
-  // Special (C)
+  // Special (C) - キャンセル対応
   if (key === 'c' || key === 'C') {
     if (!(p.charIdx === 10 && !p.dragonMode && p.damage >= 80 && p.dragonCooldown <= 0 && p.grounded)) {
-      startAttack(p, 'special');
+      if (!tryCancelAttack(p, 'special')) {
+        startAttack(p, 'special');
+      }
     }
   }
   // Guard (V)
@@ -11007,13 +11051,15 @@ function handleKeyDown(e) {
           if (keys['w'] || keys['W']) dy = -1;
           if (keys['s'] || keys['S']) dy = 1;
           executeThrow(p2, dx, dy);
-        } else {
+        } else if (!tryCancelAttack(p2, 'strong')) {
           startAttack(p2, 'strong');
         }
       }
       if (e.key === 'o' || e.key === 'O') {
         if (!(p2.charIdx === 10 && !p2.dragonMode && p2.damage >= 80 && p2.dragonCooldown <= 0 && p2.grounded)) {
-          startAttack(p2, 'special');
+          if (!tryCancelAttack(p2, 'special')) {
+            startAttack(p2, 'special');
+          }
         }
       }
     }
@@ -11089,19 +11135,19 @@ function gameLoop(timestamp) {
             } else if (rk.down) { startAttack(rp, 'down');
             } else { startAttack(rp, 'normal'); }
           }
-          // X pressed
+          // X pressed - キャンセル対応
           if (rk.x && !prk.x) {
             if (rp.grabbing) {
               let dx = 0, dy = 0;
               if (rk.left) dx = -1; if (rk.right) dx = 1;
               if (rk.up) dy = -1; if (rk.down) dy = 1;
               executeThrow(rp, dx, dy);
-            } else { startAttack(rp, 'strong'); }
+            } else if (!tryCancelAttack(rp, 'strong')) { startAttack(rp, 'strong'); }
           }
-          // C pressed
+          // C pressed - キャンセル対応
           if (rk.c && !prk.c) {
             if (!(rp.charIdx === 10 && !rp.dragonMode && rp.damage >= 80 && rp.dragonCooldown <= 0 && rp.grounded)) {
-              startAttack(rp, 'special');
+              if (!tryCancelAttack(rp, 'special')) { startAttack(rp, 'special'); }
             }
           }
           // Direction commands
