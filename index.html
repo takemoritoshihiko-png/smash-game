@@ -1340,9 +1340,11 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
   } else if (charIndex === 18) {
     // セン - サラリーマン戦士
     if (senImg.complete && senImg.naturalWidth > 0) {
-      const imgW = 75 * s;
-      const imgH = 90 * s;
+      const imgW = 85 * s;
+      const imgH = 85 * s;
+      ctx.globalCompositeOperation = 'screen';
       ctx.drawImage(senImg, -imgW / 2, -35 * s, imgW, imgH);
+      ctx.globalCompositeOperation = 'source-over';
     } else {
       // Canvas fallback: salaryman
       // Legs (dark pants)
@@ -1792,14 +1794,14 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
   const tensaiIsDragon = animData && animData.dragonMode;
   const tensaiActiveImg = tensaiIsDragon ? tensaiDragonImg : tensaiHumanImg;
   const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg, bulletImg, shaudenImg, judgemanImg, tensaiActiveImg, catbusImg, tankImg, namiojiImg, tokkoImg, samImg, kingImg, onpaImg, senImg];
-  const imgSizes = [[70, 90], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [168, 112], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90]];
+  const imgSizes = [[70, 90], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [168, 112], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [85, 85]];
   const img = imgs[charIndex];
   if (img && img.complete && img.naturalWidth > 0) {
     const imgW = imgSizes[charIndex][0] * s;
     const imgH = imgSizes[charIndex][1] * s;
     const tankOfsX = charIndex === 12 ? -5 * s : 0;
     const tankOfsY = charIndex === 12 ? -20 * s : 0;
-    const useScreen = charIndex === 12 || charIndex === 13;
+    const useScreen = charIndex === 12 || charIndex === 13 || charIndex === 18;
     if (useScreen) ctx.globalCompositeOperation = 'screen';
 
     // Source crop for landscape images (うる男)
