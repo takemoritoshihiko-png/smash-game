@@ -5021,10 +5021,10 @@ const commandDefs = {
         dosbossDecoy:true } },
     { name:'重力砲', seq:['D','U','D'], cooldownKey:'cmd2',
       attack:{ startup:10, active:5, recovery:18, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#9944CC', effect:'none',
-        projectile:{ speed:8, damage:8, kbBase:3, kbScale:0.06, kbAngle:-10, w:25, h:25, life:45, color:'#9944CC', pcolor:'#660099' },
+        projectile:{ speed:8, damage:6, kbBase:3, kbScale:0.06, kbAngle:-10, w:25, h:25, life:45, color:'#9944CC', pcolor:'#660099' },
         gravityDebuff:true } },
     { name:'逆噴射', seq:['B','F','B'], cooldownKey:'cmd3', chargeCmd:true,
-      attack:{ startup:6, active:10, recovery:14, damage:14, kbBase:6, kbScale:0.10, kbAngle:-30, hx:-20, hy:-35, hw:60, hh:45, color:'#FF6600', effect:'shockwave',
+      attack:{ startup:6, active:10, recovery:14, damage:10, kbBase:6, kbScale:0.10, kbAngle:-30, hx:-20, hy:-35, hw:60, hh:45, color:'#FF6600', effect:'shockwave',
         specialType:'cmdCharge', chargeSpeed:-13 } },
   ],
 };
@@ -5483,20 +5483,20 @@ const attackDefs = {
   // ドスボス - Tricky Type (Random specials, debuffs)
   19: {
     normal: { name:'キャノン連射', startup:4, active:9, recovery:10, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#CC66FF', effect:'none',
-              projectile:{ speed:12, damage:4, kbBase:2, kbScale:0.04, kbAngle:-15, w:12, h:12, life:30, color:'#CC66FF', pcolor:'#9944CC' },
+              projectile:{ speed:12, damage:3, kbBase:2, kbScale:0.04, kbAngle:-15, w:12, h:12, life:30, color:'#CC66FF', pcolor:'#9944CC' },
               multiShot:3, shotInterval:3 },
-    strong: { name:'ブルドーザーチャージ', startup:10, active:12, recovery:18, damage:16, kbBase:6, kbScale:0.11, kbAngle:-20, hx:20, hy:-30, hw:70, hh:50, color:'#9944CC', effect:'dash',
+    strong: { name:'ブルドーザーチャージ', startup:10, active:12, recovery:18, damage:11, kbBase:6, kbScale:0.11, kbAngle:-20, hx:20, hy:-30, hw:70, hh:50, color:'#9944CC', effect:'dash',
               specialType:'cmdCharge', chargeSpeed:14 },
     special:{ name:'ランダムキャノン', startup:8, active:8, recovery:16, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#CC66FF', effect:'none',
               dosbossRandom:true },
-    aerial: { name:'空中砲撃', startup:4, active:6, recovery:10, damage:9, kbBase:3, kbScale:0.07, kbAngle:-70, hx:10, hy:-30, hw:45, hh:45, color:'#CC66FF', effect:'airkick' },
-    down:   { name:'重量叩きつけ', startup:6, active:8, recovery:16, damage:14, kbBase:5, kbScale:0.09, kbAngle:70, hx:0, hy:5, hw:55, hh:40, color:'#9944CC', effect:'shockwave', centerHit:true },
-    up:     { name:'対空砲', startup:5, active:7, recovery:14, damage:11, kbBase:5, kbScale:0.09, kbAngle:-88, hx:5, hy:-55, hw:40, hh:55, color:'#CC66FF', effect:'upslash' },
-    side:   { name:'キャタピラ轢き', startup:6, active:8, recovery:14, damage:12, kbBase:5, kbScale:0.09, kbAngle:-15, hx:20, hy:-30, hw:65, hh:40, color:'#9944CC', effect:'slash' },
-    downair:{ name:'急降下プレス', startup:6, active:10, recovery:16, damage:15, kbBase:6, kbScale:0.10, kbAngle:80, hx:0, hy:10, hw:50, hh:50, color:'#9944CC', effect:'meteor', specialType:'divekick', diveSpeed:14 },
-    dash:   { name:'突撃キャノン', startup:4, active:6, recovery:12, damage:8, kbBase:3, kbScale:0.06, kbAngle:-10, hx:18, hy:-35, hw:55, hh:40, color:'#CC66FF', effect:'dash',
+    aerial: { name:'空中砲撃', startup:4, active:6, recovery:10, damage:6, kbBase:3, kbScale:0.07, kbAngle:-70, hx:10, hy:-30, hw:45, hh:45, color:'#CC66FF', effect:'airkick' },
+    down:   { name:'重量叩きつけ', startup:6, active:8, recovery:16, damage:10, kbBase:5, kbScale:0.09, kbAngle:70, hx:0, hy:5, hw:55, hh:40, color:'#9944CC', effect:'shockwave', centerHit:true },
+    up:     { name:'対空砲', startup:5, active:7, recovery:14, damage:8, kbBase:5, kbScale:0.09, kbAngle:-88, hx:5, hy:-55, hw:40, hh:55, color:'#CC66FF', effect:'upslash' },
+    side:   { name:'キャタピラ轢き', startup:6, active:8, recovery:14, damage:8, kbBase:5, kbScale:0.09, kbAngle:-15, hx:20, hy:-30, hw:65, hh:40, color:'#9944CC', effect:'slash' },
+    downair:{ name:'急降下プレス', startup:6, active:10, recovery:16, damage:11, kbBase:6, kbScale:0.10, kbAngle:80, hx:0, hy:10, hw:50, hh:50, color:'#9944CC', effect:'meteor', specialType:'divekick', diveSpeed:14 },
+    dash:   { name:'突撃キャノン', startup:4, active:6, recovery:12, damage:6, kbBase:3, kbScale:0.06, kbAngle:-10, hx:18, hy:-35, hw:55, hh:40, color:'#CC66FF', effect:'dash',
               specialType:'slide', slideSpeed:11 },
-    throwDmg: 10,
+    throwDmg: 7,
   },
 };
 
@@ -6700,7 +6700,7 @@ function updateBattle(dt) {
       if (decoyOwner) {
         const savedTargets = decoyOwner.hitTargets;
         decoyOwner.hitTargets = [];
-        checkHitboxAgainstPlayers(decoyOwner, boomHitbox, 14, 5, 0.09, -40, 'special');
+        checkHitboxAgainstPlayers(decoyOwner, boomHitbox, 10, 5, 0.09, -40, 'special');
         decoyOwner.hitTargets = savedTargets;
       }
       hitEffects.push({ x: s.decoyX, y: s.decoyY - 30, life: 15, maxLife: 15, color: '#CC66FF', size: 60 });
@@ -7265,11 +7265,11 @@ function updateBattle(dt) {
         const dir = p.facingLeft ? -1 : 1;
         if (pattern === 0) {
           // パターンA: 通常砲撃 - 大きな砲弾
-          spawnProjectile(p, { speed:11, damage:16, kbBase:6, kbScale:0.10, kbAngle:-25, w:30, h:28, life:45, color:'#CC66FF', pcolor:'#9944CC' });
+          spawnProjectile(p, { speed:11, damage:11, kbBase:6, kbScale:0.10, kbAngle:-25, w:30, h:28, life:45, color:'#CC66FF', pcolor:'#9944CC' });
           cmdNameDisplay.push({ text: '通常砲撃！', x: p.x, y: p.y - 100, life: 45, maxLife: 45, color: '#CC66FF' });
         } else if (pattern === 1) {
           // パターンB: 木投げ - スタン付き飛び道具
-          const proj = { speed:9, damage:10, kbBase:3, kbScale:0.05, kbAngle:-15, w:20, h:28, life:40, color:'#44AA22', pcolor:'#33881A' };
+          const proj = { speed:9, damage:7, kbBase:3, kbScale:0.05, kbAngle:-15, w:20, h:28, life:40, color:'#44AA22', pcolor:'#33881A' };
           const pr = {
             x: p.x + 30 * dir, y: p.y - 40,
             vx: proj.speed * dir, vy: -2,
@@ -7286,9 +7286,9 @@ function updateBattle(dt) {
         } else {
           // パターンC: 自爆爆発 - 自分もダメージ、周囲に大ダメージ
           cmdNameDisplay.push({ text: 'BOOM!', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#FF6600' });
-          p.damage = Math.min(999, p.damage + 8);
+          p.damage = Math.min(999, p.damage + 6);
           const boomHitbox = { x: p.x - 70, y: p.y - 70, w: 140, h: 100 };
-          checkHitboxAgainstPlayers(p, boomHitbox, 22, 8, 0.14, -40, 'special');
+          checkHitboxAgainstPlayers(p, boomHitbox, 15, 8, 0.14, -40, 'special');
           triggerScreenShake(8, 15);
           hitFlash.alpha = 0.3;
           hitFlash.color = '#FF6600';
