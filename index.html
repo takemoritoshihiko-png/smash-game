@@ -5192,9 +5192,9 @@ function executeCommand(player, cmd) {
 }
 
 const attackDefs = {
-  // Zen - Sword
+  // Zen - Sword [バランス調整: normal 8→6]
   0: {
-    normal: { name:'斬り', startup:5, active:8, recovery:12, damage:8, kbBase:3, kbScale:0.06, kbAngle:-15, hx:15, hy:-40, hw:60, hh:45, color:'#88CCFF', effect:'slash' },
+    normal: { name:'斬り', startup:5, active:8, recovery:12, damage:6, kbBase:3, kbScale:0.06, kbAngle:-15, hx:15, hy:-40, hw:60, hh:45, color:'#88CCFF', effect:'slash' },
     strong: { name:'居合斬り', startup:12, active:6, recovery:20, damage:14, kbBase:5, kbScale:0.10, kbAngle:-45, hx:15, hy:-35, hw:95, hh:35, color:'#AADDFF', effect:'bigslash' },
     special:{ name:'真空斬り', startup:15, active:5, recovery:18, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#66BBFF', effect:'none',
               projectile:{ speed:8, damage:10, kbBase:4, kbScale:0.07, kbAngle:-20, w:35, h:20, life:55, color:'#88DDFF', pcolor:'#AAEEFF' } },
@@ -5207,19 +5207,19 @@ const attackDefs = {
     dash:   { name:'ダッシュ斬り', startup:4, active:8, recovery:14, damage:10, kbBase:4, kbScale:0.07, kbAngle:-20, hx:20, hy:-35, hw:70, hh:40, color:'#88CCFF', effect:'sideslash', specialType:'slide', slideSpeed:8 },
     throwDmg: 10,
   },
-  // Don - Power
+  // Don - Power [バランス調整: normal 13→6, strong 18→14, special 22→20, aerial 14→10]
   1: {
-    normal: { name:'殴り', startup:7, active:5, recovery:16, damage:13, kbBase:4, kbScale:0.08, kbAngle:-10, hx:10, hy:-35, hw:45, hh:45, color:'#FF8866', effect:'punch' },
-    strong: { name:'大槌叩き', startup:22, active:10, recovery:26, damage:18, kbBase:6, kbScale:0.11, kbAngle:-55, hx:0, hy:-10, hw:110, hh:35, color:'#FF6644', effect:'shockwave', centerHit:true },
-    special:{ name:'超ジャンプ叩き', startup:10, active:0, recovery:20, damage:22, kbBase:8, kbScale:0.13, kbAngle:-80, hx:0, hy:-10, hw:70, hh:50, color:'#FF4422', effect:'slam',
+    normal: { name:'殴り', startup:7, active:5, recovery:16, damage:6, kbBase:4, kbScale:0.08, kbAngle:-10, hx:10, hy:-35, hw:45, hh:45, color:'#FF8866', effect:'punch' },
+    strong: { name:'大槌叩き', startup:22, active:10, recovery:26, damage:14, kbBase:6, kbScale:0.11, kbAngle:-55, hx:0, hy:-10, hw:110, hh:35, color:'#FF6644', effect:'shockwave', centerHit:true },
+    special:{ name:'超ジャンプ叩き', startup:10, active:0, recovery:20, damage:20, kbBase:8, kbScale:0.13, kbAngle:-80, hx:0, hy:-10, hw:70, hh:50, color:'#FF4422', effect:'slam',
               specialType:'jumpSlam', jumpPower:-16, slamActive:8, slamHx:0, slamHy:-10, slamHw:80, slamHh:50 },
-    aerial: { name:'空中叩きつけ', startup:6, active:8, recovery:12, damage:14, kbBase:6, kbScale:0.10, kbAngle:60, hx:0, hy:10, hw:50, hh:50, color:'#FF6644', effect:'airslam', centerHit:true },
+    aerial: { name:'空中叩きつけ', startup:6, active:8, recovery:12, damage:10, kbBase:6, kbScale:0.10, kbAngle:60, hx:0, hy:10, hw:50, hh:50, color:'#FF6644', effect:'airslam', centerHit:true },
     down:   { name:'ローキック', startup:6, active:5, recovery:18, damage:12, kbBase:4, kbScale:0.08, kbAngle:25, hx:10, hy:-10, hw:40, hh:25, color:'#FF8866', effect:'lowkick' },
     up:     { name:'ハンマー叩き上げ', startup:8, active:7, recovery:16, damage:15, kbBase:6, kbScale:0.10, kbAngle:-88, hx:5, hy:-55, hw:50, hh:50, color:'#FF8844', effect:'upslash' },
     side:   { name:'横薙ぎハンマー', startup:9, active:8, recovery:16, damage:16, kbBase:6, kbScale:0.10, kbAngle:-12, hx:15, hy:-30, hw:90, hh:40, color:'#FF6644', effect:'sideslash' },
     downair:{ name:'ハンマー叩き落とし', startup:8, active:10, recovery:16, damage:16, kbBase:7, kbScale:0.11, kbAngle:80, hx:0, hy:10, hw:45, hh:55, color:'#FF4422', effect:'meteor', centerHit:true },
-    dash:   { name:'肩タックル', startup:5, active:10, recovery:16, damage:14, kbBase:5, kbScale:0.09, kbAngle:-15, hx:18, hy:-30, hw:55, hh:50, color:'#FF6644', effect:'punch', specialType:'cmdCharge', chargeSpeed:10 },
-    throwDmg: 14,
+    dash:   { name:'肩タックル', startup:5, active:10, recovery:16, damage:10, kbBase:5, kbScale:0.09, kbAngle:-15, hx:18, hy:-30, hw:55, hh:50, color:'#FF6644', effect:'punch', specialType:'cmdCharge', chargeSpeed:10 },
+    throwDmg: 12,
   },
   // Saisoku - Ninja
   2: {
@@ -5253,9 +5253,9 @@ const attackDefs = {
     dash:   { name:'ダッシュアッパー', startup:4, active:8, recovery:14, damage:11, kbBase:4, kbScale:0.08, kbAngle:-70, hx:15, hy:-40, hw:50, hh:50, color:'#FFAA22', effect:'uppercut', specialType:'uppercut', launchVy:-8 },
     throwDmg: 11,
   },
-  // Long - Mechanical Spear
+  // Long - Mechanical Spear [バランス調整: normal 7→6]
   4: {
-    normal: { name:'槍突き', startup:4, active:6, recovery:10, damage:7, kbBase:3, kbScale:0.05, kbAngle:-10, hx:20, hy:-38, hw:80, hh:30, color:'#8899EE', effect:'slash' },
+    normal: { name:'槍突き', startup:4, active:6, recovery:10, damage:6, kbBase:3, kbScale:0.05, kbAngle:-10, hx:20, hy:-38, hw:80, hh:30, color:'#8899EE', effect:'slash' },
     strong: { name:'槍回転', startup:10, active:12, recovery:18, damage:12, kbBase:5, kbScale:0.09, kbAngle:-40, hx:0, hy:-30, hw:120, hh:45, color:'#A0B4FF', effect:'bigslash', centerHit:true },
     special:{ name:'ロケット突進', startup:8, active:14, recovery:16, damage:14, kbBase:5, kbScale:0.10, kbAngle:-15, hx:15, hy:-38, hw:70, hh:40, color:'#44FFCC', effect:'dash',
               specialType:'shadowDash', dashSpeed:13 },
@@ -5268,10 +5268,10 @@ const attackDefs = {
     dash:   { name:'槍突進', startup:4, active:10, recovery:14, damage:10, kbBase:4, kbScale:0.07, kbAngle:-10, hx:25, hy:-38, hw:85, hh:30, color:'#A0B4FF', effect:'slash', specialType:'slide', slideSpeed:10 },
     throwDmg: 9,
   },
-  // うる男 - Wolf Beast
+  // うる男 - Wolf Beast [バランス調整: normal 7→6, strong 16→14]
   5: {
-    normal: { name:'爪引っ掻き', startup:4, active:6, recovery:10, damage:7, kbBase:3, kbScale:0.05, kbAngle:-15, hx:14, hy:-35, hw:50, hh:40, color:'#C8A878', effect:'slash' },
-    strong: { name:'ウルフパンチ', startup:10, active:7, recovery:18, damage:16, kbBase:6, kbScale:0.10, kbAngle:-20, hx:14, hy:-35, hw:55, hh:45, color:'#FFD700', effect:'punch' },
+    normal: { name:'爪引っ掻き', startup:4, active:6, recovery:10, damage:6, kbBase:3, kbScale:0.05, kbAngle:-15, hx:14, hy:-35, hw:50, hh:40, color:'#C8A878', effect:'slash' },
+    strong: { name:'ウルフパンチ', startup:10, active:7, recovery:18, damage:14, kbBase:6, kbScale:0.10, kbAngle:-20, hx:14, hy:-35, hw:55, hh:45, color:'#FFD700', effect:'punch' },
     special:{ name:'ウルフジャンプ', startup:10, active:0, recovery:20, damage:20, kbBase:7, kbScale:0.12, kbAngle:-80, hx:0, hy:-10, hw:70, hh:50, color:'#C8A878', effect:'slam',
               specialType:'jumpSlam', jumpPower:-15, slamActive:8, slamHx:0, slamHy:-10, slamHw:80, slamHh:50 },
     aerial: { name:'回転爪撃', startup:4, active:10, recovery:10, damage:9, kbBase:3, kbScale:0.07, kbAngle:-85, hx:5, hy:-25, hw:55, hh:55, color:'#C8A878', effect:'airkick' },
@@ -5304,9 +5304,9 @@ const attackDefs = {
     normal: { name:'ピストルショット', startup:5, active:3, recovery:14, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF66AA', effect:'none',
               projectile:{ speed:12, damage:7, kbBase:3, kbScale:0.05, kbAngle:-15, w:12, h:8, life:50, color:'#FF66AA', pcolor:'#FFAACC' } },
     strong: { name:'チャージショット', startup:18, active:4, recovery:20, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF3366', effect:'none',
-              projectile:{ speed:14, damage:16, kbBase:6, kbScale:0.11, kbAngle:-20, w:25, h:18, life:70, color:'#FF3366', pcolor:'#FF88AA' } },
+              projectile:{ speed:14, damage:13, kbBase:6, kbScale:0.11, kbAngle:-20, w:25, h:18, life:70, color:'#FF3366', pcolor:'#FF88AA' } },
     special:{ name:'スナイパー', startup:20, active:3, recovery:24, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF0044', effect:'none',
-              projectile:{ speed:20, damage:22, kbBase:8, kbScale:0.14, kbAngle:-10, w:18, h:8, life:80, color:'#FF0044', pcolor:'#FF4488', pierce:true } },
+              projectile:{ speed:20, damage:18, kbBase:8, kbScale:0.14, kbAngle:-10, w:18, h:8, life:80, color:'#FF0044', pcolor:'#FF4488', pierce:true } },
     aerial: { name:'空中射撃', startup:4, active:3, recovery:12, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF66AA', effect:'none',
               projectile:{ speed:10, damage:6, kbBase:2, kbScale:0.04, kbAngle:80, w:10, h:10, life:40, color:'#FFAA66', pcolor:'#FFCC88', dirAngle:90 } },
     down:   { name:'爆発弾設置', startup:6, active:5, recovery:16, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF6600', effect:'none',
@@ -5338,8 +5338,9 @@ const attackDefs = {
     dash:   { name:'触手突進', startup:3, active:10, recovery:10, damage:9, kbBase:3, kbScale:0.06, kbAngle:-15, hx:20, hy:-30, hw:65, hh:40, color:'#FF80B0', effect:'slash', specialType:'slide', slideSpeed:11 },
     throwDmg: 7,
   },
+  // Judge [バランス調整: normal 8→5]
   9: {
-    normal: { name:'判決槌', startup:5, active:7, recovery:12, damage:8, kbBase:3, kbScale:0.06, kbAngle:-20, hx:14, hy:-35, hw:55, hh:40, color:'#C0A0FF', effect:'punch' },
+    normal: { name:'判決槌', startup:5, active:7, recovery:12, damage:5, kbBase:3, kbScale:0.06, kbAngle:-20, hx:14, hy:-35, hw:55, hh:40, color:'#C0A0FF', effect:'punch' },
     strong: { name:'有罪宣告', startup:10, active:6, recovery:18, damage:12, kbBase:5, kbScale:0.09, kbAngle:-30, hx:0, hy:0, hw:0, hh:0, color:'#2A2A3A', effect:'none',
               projectile:{ speed:10, damage:12, kbBase:5, kbScale:0.08, kbAngle:-25, w:24, h:24, life:40, color:'#2A2A3A', pcolor:'#9966DD' } },
     special:{ name:'最終審判', startup:14, active:8, recovery:22, damage:16, kbBase:7, kbScale:0.12, kbAngle:-60, hx:0, hy:-30, hw:80, hh:70, color:'#C0A0FF', effect:'bigpunch', centerHit:true,
@@ -5353,12 +5354,12 @@ const attackDefs = {
     dash:   { name:'マント突進', startup:4, active:10, recovery:14, damage:11, kbBase:4, kbScale:0.07, kbAngle:-20, hx:18, hy:-35, hw:65, hh:50, color:'#3A2050', effect:'sideslash', specialType:'slide', slideSpeed:9 },
     throwDmg: 10,
   },
-  // 天才 - 人型モード
+  // 天才 - 人型モード [バランス調整: special projectile 8→12]
   10: {
     normal: { name:'連続パンチ', startup:3, active:6, recovery:8, damage:5, kbBase:2, kbScale:0.04, kbAngle:-12, hx:12, hy:-35, hw:45, hh:35, color:'#FF8833', effect:'punch' },
     strong: { name:'回し蹴り', startup:6, active:8, recovery:14, damage:10, kbBase:4, kbScale:0.08, kbAngle:-20, hx:14, hy:-35, hw:60, hh:40, color:'#CC4400', effect:'airkick' },
     special:{ name:'小炎ブレス', startup:6, active:5, recovery:14, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF6600', effect:'none',
-              projectile:{ speed:10, damage:8, kbBase:3, kbScale:0.06, kbAngle:-15, w:18, h:18, life:35, color:'#FF6600', pcolor:'#FFAA44' } },
+              projectile:{ speed:10, damage:12, kbBase:3, kbScale:0.06, kbAngle:-15, w:18, h:18, life:35, color:'#FF6600', pcolor:'#FFAA44' } },
     aerial: { name:'空中回転蹴り', startup:3, active:8, recovery:8, damage:7, kbBase:3, kbScale:0.06, kbAngle:-80, hx:0, hy:-30, hw:55, hh:50, color:'#FF8833', effect:'airkick', centerHit:true },
     down:   { name:'足払い', startup:3, active:8, recovery:10, damage:6, kbBase:3, kbScale:0.05, kbAngle:20, hx:15, hy:-8, hw:60, hh:22, color:'#CC4400', effect:'sweep', specialType:'slide', slideSpeed:5 },
     up:     { name:'昇り蹴り', startup:4, active:8, recovery:12, damage:9, kbBase:4, kbScale:0.08, kbAngle:-88, hx:5, hy:-55, hw:40, hh:50, color:'#FF8833', effect:'upslash', specialType:'uppercut', launchVy:-10 },
@@ -5386,22 +5387,22 @@ const attackDefs = {
               specialType:'cmdCharge', chargeSpeed:16 },
     throwDmg: 8,
   },
-  // タンク - Heavy Tank
+  // タンク - Heavy Tank [バランス調整: normal 14→6, strong 20→14, aerial 15→10, side 16→12, downair 17→12, dash 15→10, throwDmg 15→10]
   12: {
-    normal: { name:'砲身パンチ', startup:8, active:7, recovery:16, damage:14, kbBase:5, kbScale:0.09, kbAngle:-12, hx:18, hy:-35, hw:65, hh:45, color:'#A0B858', effect:'punch' },
-    strong: { name:'装甲タックル', startup:14, active:12, recovery:24, damage:20, kbBase:8, kbScale:0.13, kbAngle:-10, hx:18, hy:-30, hw:70, hh:50, color:'#6B7B3A', effect:'punch',
+    normal: { name:'砲身パンチ', startup:8, active:7, recovery:16, damage:6, kbBase:5, kbScale:0.09, kbAngle:-12, hx:18, hy:-35, hw:65, hh:45, color:'#A0B858', effect:'punch' },
+    strong: { name:'装甲タックル', startup:14, active:12, recovery:24, damage:14, kbBase:8, kbScale:0.13, kbAngle:-10, hx:18, hy:-30, hw:70, hh:50, color:'#6B7B3A', effect:'punch',
               specialType:'cmdCharge', chargeSpeed:8 },
     special:{ name:'キャノンショット', startup:16, active:5, recovery:22, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF8833', effect:'none',
               projectile:{ speed:9, damage:18, kbBase:6, kbScale:0.11, kbAngle:-18, w:28, h:22, life:60, color:'#FF8833', pcolor:'#FFBB66' } },
-    aerial: { name:'空中プレス', startup:7, active:10, recovery:14, damage:15, kbBase:6, kbScale:0.10, kbAngle:70, hx:0, hy:10, hw:55, hh:50, color:'#6B7B3A', effect:'airslam', centerHit:true },
+    aerial: { name:'空中プレス', startup:7, active:10, recovery:14, damage:10, kbBase:6, kbScale:0.10, kbAngle:70, hx:0, hy:10, hw:55, hh:50, color:'#6B7B3A', effect:'airslam', centerHit:true },
     down:   { name:'ストンプ', startup:6, active:8, recovery:18, damage:13, kbBase:5, kbScale:0.09, kbAngle:80, hx:0, hy:5, hw:60, hh:30, color:'#A0B858', effect:'shockwave', centerHit:true },
     up:     { name:'砲身突き上げ', startup:7, active:8, recovery:16, damage:14, kbBase:6, kbScale:0.10, kbAngle:-88, hx:5, hy:-55, hw:50, hh:55, color:'#A0B858', effect:'upslash' },
-    side:   { name:'砲身叩きつけ', startup:8, active:8, recovery:16, damage:16, kbBase:6, kbScale:0.10, kbAngle:-15, hx:20, hy:-35, hw:80, hh:40, color:'#6B7B3A', effect:'sideslash' },
-    downair:{ name:'急降下プレス', startup:7, active:12, recovery:16, damage:17, kbBase:7, kbScale:0.12, kbAngle:80, hx:0, hy:10, hw:50, hh:55, color:'#6B7B3A', effect:'meteor', centerHit:true,
+    side:   { name:'砲身叩きつけ', startup:8, active:8, recovery:16, damage:12, kbBase:6, kbScale:0.10, kbAngle:-15, hx:20, hy:-35, hw:80, hh:40, color:'#6B7B3A', effect:'sideslash' },
+    downair:{ name:'急降下プレス', startup:7, active:12, recovery:16, damage:12, kbBase:7, kbScale:0.12, kbAngle:80, hx:0, hy:10, hw:50, hh:55, color:'#6B7B3A', effect:'meteor', centerHit:true,
               specialType:'divekick', diveSpeed:11 },
-    dash:   { name:'突撃タックル', startup:6, active:12, recovery:18, damage:15, kbBase:6, kbScale:0.10, kbAngle:-12, hx:20, hy:-30, hw:65, hh:50, color:'#A0B858', effect:'punch',
+    dash:   { name:'突撃タックル', startup:6, active:12, recovery:18, damage:10, kbBase:6, kbScale:0.10, kbAngle:-12, hx:20, hy:-30, hw:65, hh:50, color:'#A0B858', effect:'punch',
               specialType:'cmdCharge', chargeSpeed:7 },
-    throwDmg: 15,
+    throwDmg: 10,
   },
   // 波おじ - Boxer Technique
   13: {
@@ -5420,10 +5421,10 @@ const attackDefs = {
               specialType:'slide', slideSpeed:9 },
     throwDmg: 10,
   },
-  // とっこ - Speed/Power Beast
+  // とっこ - Speed/Power Beast [バランス調整: strong 14→12, side 14→11]
   14: {
     normal: { name:'高速爪斬り', startup:2, active:3, recovery:5, damage:4, kbBase:1.5, kbScale:0.03, kbAngle:-10, hx:14, hy:-35, hw:45, hh:35, color:'#CC44FF', effect:'slash' },
-    strong: { name:'跳びかかり', startup:5, active:10, recovery:14, damage:14, kbBase:5, kbScale:0.10, kbAngle:-15, hx:18, hy:-35, hw:60, hh:45, color:'#8B00CC', effect:'dash',
+    strong: { name:'跳びかかり', startup:5, active:10, recovery:14, damage:12, kbBase:5, kbScale:0.10, kbAngle:-15, hx:18, hy:-35, hw:60, hh:45, color:'#8B00CC', effect:'dash',
               specialType:'cmdCharge', chargeSpeed:14 },
     special:{ name:'狂乱ラッシュ', startup:4, active:24, recovery:20, damage:3, kbBase:1.5, kbScale:0.03, kbAngle:-10, hx:14, hy:-38, hw:50, hh:45, color:'#FF44AA', effect:'punch',
               multiHit:true, hitInterval:4, finalDamage:14, finalKbBase:7, finalKbScale:0.12, finalKbAngle:-30, spinKB:true },
@@ -5432,7 +5433,7 @@ const attackDefs = {
               specialType:'divekick', diveSpeed:16 },
     up:     { name:'爪叩き上げ', startup:3, active:7, recovery:12, damage:11, kbBase:5, kbScale:0.09, kbAngle:-88, hx:5, hy:-55, hw:45, hh:55, color:'#CC44FF', effect:'upslash',
               specialType:'uppercut', launchVy:-12 },
-    side:   { name:'高速横斬り', startup:3, active:5, recovery:10, damage:14, kbBase:5, kbScale:0.10, kbAngle:-12, hx:16, hy:-35, hw:55, hh:38, color:'#8B00CC', effect:'sideslash' },
+    side:   { name:'高速横斬り', startup:3, active:5, recovery:10, damage:11, kbBase:5, kbScale:0.10, kbAngle:-12, hx:16, hy:-35, hw:55, hh:38, color:'#8B00CC', effect:'sideslash' },
     downair:{ name:'急降下爪撃', startup:3, active:10, recovery:12, damage:13, kbBase:6, kbScale:0.10, kbAngle:80, hx:0, hy:10, hw:40, hh:50, color:'#CC44FF', effect:'meteor',
               specialType:'divekick', diveSpeed:15 },
     dash:   { name:'ダッシュ斬り', startup:2, active:10, recovery:10, damage:12, kbBase:4, kbScale:0.08, kbAngle:-10, hx:20, hy:-35, hw:65, hh:40, color:'#CC44FF', effect:'slash',
@@ -5491,9 +5492,9 @@ const attackDefs = {
               specialType:'slide', slideSpeed:8 },
     throwDmg: 3,
   },
-  // セン - Technique Type (Salaryman + Food themed)
+  // セン - Technique Type (Salaryman + Food themed) [バランス調整: normal 7→5]
   18: {
-    normal: { name:'書類アタック', startup:4, active:5, recovery:10, damage:7, kbBase:3, kbScale:0.06, kbAngle:-15, hx:18, hy:-35, hw:40, hh:40, color:'#FFFFFF', effect:'slash' },
+    normal: { name:'書類アタック', startup:4, active:5, recovery:10, damage:5, kbBase:3, kbScale:0.06, kbAngle:-15, hx:18, hy:-35, hw:40, hh:40, color:'#FFFFFF', effect:'slash' },
     strong: { name:'おにぎり投げ', startup:8, active:5, recovery:14, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF8844', effect:'none',
               projectile:{ speed:10, damage:5, kbBase:5, kbScale:0.10, kbAngle:-20, w:22, h:20, life:40, color:'#F5DEB3', pcolor:'#2A2A2A' }, meshitero:true },
     special:{ name:'満腹パワー', startup:30, active:1, recovery:10, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF8844', effect:'none',
