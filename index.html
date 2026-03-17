@@ -404,6 +404,8 @@ const senImg = new Image();
 senImg.src = 'images/sen.png';
 const dosbossImg = new Image();
 dosbossImg.src = 'images/dosboss.png';
+const bgImg = new Image();
+bgImg.src = 'images/bg.png';
 
 // --- Particles ---
 function spawnTitleParticle() {
@@ -8013,177 +8015,13 @@ function drawBattle(dt) {
     ctx.translate(screenShake.x, screenShake.y);
   }
 
-  // ===== 和風背景 =====
-  // Sky gradient: 藍色→夕焼け紫
-  const skyGrad = ctx.createLinearGradient(0, 0, 0, 640);
-  skyGrad.addColorStop(0, '#0e1428');
-  skyGrad.addColorStop(0.3, '#1a1a3e');
-  skyGrad.addColorStop(0.55, '#2e1a3a');
-  skyGrad.addColorStop(0.75, '#4a1942');
-  skyGrad.addColorStop(1, '#1a0a1a');
-  ctx.fillStyle = skyGrad;
-  ctx.fillRect(0, 0, 960, 640);
-
-  // Stars (sparse, calm)
-  const starSeed = [
-    [120,35,1.5],[300,55,1.2],[500,25,1.8],[680,50,1.3],[850,30,1.6],
-    [80,110,1],[220,130,1.4],[440,100,1.1],[600,85,1.7],[780,120,1.2],
-    [170,180,1.3],[350,170,1],[550,160,1.5],[730,190,1.1],[900,150,1.4],
-  ];
-  for (const [sx, sy, sr] of starSeed) {
-    ctx.globalAlpha = 0.5 + 0.3 * Math.sin(sx + sy);
-    ctx.fillStyle = '#EEDDCC';
-    ctx.beginPath();
-    ctx.arc(sx, sy, sr, 0, Math.PI * 2);
-    ctx.fill();
+  // ===== 背景画像 =====
+  if (bgImg.complete && bgImg.naturalWidth > 0) {
+    ctx.drawImage(bgImg, 0, 0, 960, 640);
+  } else {
+    ctx.fillStyle = '#87CEEB';
+    ctx.fillRect(0, 0, 960, 640);
   }
-  ctx.globalAlpha = 1;
-
-  // Moon (右上)
-  const moonX = 760, moonY = 90, moonR = 50;
-  // Moon glow
-  const moonGlow = ctx.createRadialGradient(moonX, moonY, moonR * 0.3, moonX, moonY, moonR * 3);
-  moonGlow.addColorStop(0, 'rgba(255, 240, 200, 0.15)');
-  moonGlow.addColorStop(0.5, 'rgba(255, 220, 180, 0.05)');
-  moonGlow.addColorStop(1, 'rgba(255, 200, 150, 0)');
-  ctx.fillStyle = moonGlow;
-  ctx.beginPath(); ctx.arc(moonX, moonY, moonR * 3, 0, Math.PI * 2); ctx.fill();
-  // Moon body
-  const moonBodyGrad = ctx.createRadialGradient(moonX - 8, moonY - 8, 2, moonX, moonY, moonR);
-  moonBodyGrad.addColorStop(0, '#FFFDE8');
-  moonBodyGrad.addColorStop(0.6, '#F5E6B8');
-  moonBodyGrad.addColorStop(1, '#D4C090');
-  ctx.fillStyle = moonBodyGrad;
-  ctx.beginPath(); ctx.arc(moonX, moonY, moonR, 0, Math.PI * 2); ctx.fill();
-  // Moon craters (subtle)
-  ctx.fillStyle = 'rgba(180, 160, 120, 0.2)';
-  ctx.beginPath(); ctx.arc(moonX - 12, moonY - 8, 8, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.arc(moonX + 15, moonY + 5, 6, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.arc(moonX + 5, moonY + 18, 5, 0, Math.PI * 2); ctx.fill();
-
-  // Mountains (遠景: 3 layers)
-  // Layer 3 (farthest, darkest)
-  ctx.fillStyle = '#0e0e22';
-  ctx.beginPath();
-  ctx.moveTo(0, 420);
-  ctx.lineTo(80, 310); ctx.lineTo(180, 350); ctx.lineTo(280, 280);
-  ctx.lineTo(380, 330); ctx.lineTo(480, 260); ctx.lineTo(560, 300);
-  ctx.lineTo(650, 270); ctx.lineTo(750, 320); ctx.lineTo(850, 290);
-  ctx.lineTo(960, 340); ctx.lineTo(960, 420);
-  ctx.closePath(); ctx.fill();
-  // Layer 2 (富士山風)
-  ctx.fillStyle = '#141432';
-  ctx.beginPath();
-  ctx.moveTo(0, 420);
-  ctx.lineTo(100, 360); ctx.lineTo(200, 380);
-  ctx.lineTo(340, 300); ctx.lineTo(420, 230); ctx.lineTo(500, 300); // 富士山
-  ctx.lineTo(600, 360); ctx.lineTo(700, 340); ctx.lineTo(800, 370);
-  ctx.lineTo(900, 350); ctx.lineTo(960, 380); ctx.lineTo(960, 420);
-  ctx.closePath(); ctx.fill();
-  // Snow cap on Fuji
-  ctx.fillStyle = 'rgba(200, 210, 230, 0.25)';
-  ctx.beginPath();
-  ctx.moveTo(400, 260); ctx.lineTo(420, 230); ctx.lineTo(440, 260);
-  ctx.closePath(); ctx.fill();
-  // Layer 1 (nearest mountain)
-  ctx.fillStyle = '#1a1a38';
-  ctx.beginPath();
-  ctx.moveTo(0, 420);
-  ctx.lineTo(60, 390); ctx.lineTo(150, 400); ctx.lineTo(250, 370);
-  ctx.lineTo(350, 395); ctx.lineTo(480, 360); ctx.lineTo(600, 390);
-  ctx.lineTo(720, 375); ctx.lineTo(830, 395); ctx.lineTo(960, 385);
-  ctx.lineTo(960, 420);
-  ctx.closePath(); ctx.fill();
-
-  // Torii gate (鳥居 - 中央奥)
-  const toriiX = 480, toriiBase = 410, toriiH = 80;
-  ctx.fillStyle = '#8B1A1A';
-  // Pillars
-  ctx.fillRect(toriiX - 50, toriiBase - toriiH, 6, toriiH);
-  ctx.fillRect(toriiX + 44, toriiBase - toriiH, 6, toriiH);
-  // Top beam (kasagi)
-  ctx.fillRect(toriiX - 60, toriiBase - toriiH - 6, 120, 8);
-  // Secondary beam (nuki)
-  ctx.fillRect(toriiX - 45, toriiBase - toriiH + 18, 90, 5);
-  // Kasagi ends (curved tips)
-  ctx.fillStyle = '#8B1A1A';
-  ctx.beginPath();
-  ctx.moveTo(toriiX - 65, toriiBase - toriiH - 6);
-  ctx.lineTo(toriiX - 60, toriiBase - toriiH + 2);
-  ctx.lineTo(toriiX - 55, toriiBase - toriiH - 6);
-  ctx.closePath(); ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(toriiX + 55, toriiBase - toriiH - 6);
-  ctx.lineTo(toriiX + 60, toriiBase - toriiH + 2);
-  ctx.lineTo(toriiX + 65, toriiBase - toriiH - 6);
-  ctx.closePath(); ctx.fill();
-
-  // Lanterns (灯籠 - 3つ)
-  const lanternPositions = [[200, 400], [480, 405], [750, 398]];
-  for (const [lx, ly] of lanternPositions) {
-    // Pole
-    ctx.fillStyle = '#444';
-    ctx.fillRect(lx - 1, ly - 20, 3, 20);
-    // Lantern body
-    ctx.fillStyle = '#CC8833';
-    ctx.fillRect(lx - 5, ly - 28, 11, 10);
-    // Glow
-    ctx.globalAlpha = 0.3;
-    const lglow = ctx.createRadialGradient(lx, ly - 23, 2, lx, ly - 23, 18);
-    lglow.addColorStop(0, '#FFCC66');
-    lglow.addColorStop(1, 'rgba(255, 180, 60, 0)');
-    ctx.fillStyle = lglow;
-    ctx.beginPath(); ctx.arc(lx, ly - 23, 18, 0, Math.PI * 2); ctx.fill();
-    ctx.globalAlpha = 1;
-    // Roof
-    ctx.fillStyle = '#333';
-    ctx.beginPath();
-    ctx.moveTo(lx - 7, ly - 28); ctx.lineTo(lx, ly - 34); ctx.lineTo(lx + 7, ly - 28);
-    ctx.closePath(); ctx.fill();
-  }
-
-  // Sakura trees (桜の木 - ステージ両端)
-  function drawSakuraTree(tx, ty, treeScale) {
-    const ts = treeScale;
-    // Trunk
-    ctx.fillStyle = '#3A2520';
-    ctx.beginPath();
-    ctx.moveTo(tx - 5 * ts, ty);
-    ctx.quadraticCurveTo(tx - 8 * ts, ty - 40 * ts, tx - 3 * ts, ty - 70 * ts);
-    ctx.lineTo(tx + 3 * ts, ty - 70 * ts);
-    ctx.quadraticCurveTo(tx + 8 * ts, ty - 40 * ts, tx + 5 * ts, ty);
-    ctx.closePath(); ctx.fill();
-    // Branches
-    ctx.strokeStyle = '#3A2520';
-    ctx.lineWidth = 3 * ts; ctx.lineCap = 'round';
-    ctx.beginPath(); ctx.moveTo(tx, ty - 55 * ts);
-    ctx.quadraticCurveTo(tx - 25 * ts, ty - 65 * ts, tx - 40 * ts, ty - 60 * ts); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(tx, ty - 60 * ts);
-    ctx.quadraticCurveTo(tx + 20 * ts, ty - 75 * ts, tx + 35 * ts, ty - 68 * ts); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(tx - 5 * ts, ty - 45 * ts);
-    ctx.quadraticCurveTo(tx - 30 * ts, ty - 50 * ts, tx - 35 * ts, ty - 42 * ts); ctx.stroke();
-    ctx.lineWidth = 1; ctx.lineCap = 'butt';
-    // Blossom clusters (pink cloud shapes)
-    const blossomClusters = [
-      [tx - 38 * ts, ty - 62 * ts, 16 * ts],
-      [tx - 20 * ts, ty - 72 * ts, 14 * ts],
-      [tx + 5 * ts, ty - 78 * ts, 18 * ts],
-      [tx + 32 * ts, ty - 70 * ts, 15 * ts],
-      [tx - 33 * ts, ty - 44 * ts, 12 * ts],
-      [tx + 20 * ts, ty - 60 * ts, 13 * ts],
-      [tx - 10 * ts, ty - 65 * ts, 10 * ts],
-    ];
-    for (const [bx, by, br] of blossomClusters) {
-      ctx.fillStyle = 'rgba(255, 180, 200, 0.7)';
-      ctx.beginPath(); ctx.arc(bx, by, br, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = 'rgba(255, 200, 210, 0.5)';
-      ctx.beginPath(); ctx.arc(bx + br * 0.3, by - br * 0.2, br * 0.7, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = 'rgba(255, 160, 190, 0.4)';
-      ctx.beginPath(); ctx.arc(bx - br * 0.3, by + br * 0.2, br * 0.6, 0, Math.PI * 2); ctx.fill();
-    }
-  }
-  drawSakuraTree(70, 430, 1.1);
-  drawSakuraTree(890, 425, 1.0);
 
   // === Apply dynamic camera transform ===
   ctx.save();
