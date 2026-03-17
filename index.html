@@ -4841,10 +4841,11 @@ const JUST_GUARD_WINDOW = 5; // frames of perfect guard at start
 const JUST_GUARD_STAGGER = 30; // frames attacker is staggered on just guard
 
 // Command input system
-const CMD_INPUT_TIMEOUT = 30; // 0.5sec at 60fps (30フレーム猶予)
+const CMD_INPUT_WINDOW = 45; // コマンド入力猶予フレーム数（45F = 0.75秒）
 const CMD_COOLDOWN = 300; // 5sec at 60fps
 const cmdInputBuffers = [[], []]; // direction input history for P1/P2
-const cmdInputTimestamps = [[], []];
+const cmdInputFrames = [[], []]; // フレームカウント（時間ベースではなくフレームベース）
+let cmdFrameCounter = 0; // グローバルフレームカウンタ
 let cmdNameDisplay = []; // {text, x, y, life, maxLife, color}
 
 // Command definitions per character
@@ -5083,19 +5084,27 @@ const dragonCommandDefs = [
 })();
 
 function addCmdInput(playerId, dir) {
-  const now = performance.now();
+  // キーリピート防止: 直前と同じ方向の連続入力は無視
+  const buf = cmdInputBuffers[playerId];
+  if (buf.length > 0 && buf[buf.length - 1] === dir && cmdInputFrames[playerId].length > 0 && cmdFrameCounter - cmdInputFrames[playerId][cmdInputFrames[playerId].length - 1] < 3) return;
   cmdInputBuffers[playerId].push(dir);
-  cmdInputTimestamps[playerId].push(now);
-  // Trim old entries
-  while (cmdInputTimestamps[playerId].length > 0 && now - cmdInputTimestamps[playerId][0] > CMD_INPUT_TIMEOUT * 16.67) {
+  cmdInputFrames[playerId].push(cmdFrameCounter);
+  // 古いエントリを削除（フレームベース）
+  while (cmdInputFrames[playerId].length > 0 && cmdFrameCounter - cmdInputFrames[playerId][0] > CMD_INPUT_WINDOW) {
     cmdInputBuffers[playerId].shift();
-    cmdInputTimestamps[playerId].shift();
+    cmdInputFrames[playerId].shift();
   }
 }
 
 function checkCommandInput(player) {
   const pid = player.id;
   const buf = cmdInputBuffers[pid];
+  const frames = cmdInputFrames[pid];
+  // 古いエントリをZ押下時にも削除
+  while (frames.length > 0 && cmdFrameCounter - frames[0] > CMD_INPUT_WINDOW) {
+    buf.shift();
+    frames.shift();
+  }
   if (buf.length < 4) return null;
   // 天才: ドラゴンモード時は別のcommandDefsを使用
   const cmds = (player.charIdx === 10 && player.dragonMode) ? dragonCommandDefs : commandDefs[player.charIdx];
@@ -5104,21 +5113,18 @@ function checkCommandInput(player) {
   for (const cmd of cmds) {
     if (player['cd_' + cmd.cooldownKey] > 0) continue;
     const seq = cmd.seq;
-    if (buf.length < seq.length) continue;
-    // Check if the last N entries match the sequence
-    const tail = buf.slice(buf.length - seq.length);
-    // Convert relative directions (F/B) to absolute based on facing
-    let match = true;
-    for (let i = 0; i < seq.length; i++) {
-      let expected = seq[i];
+    // 部分列マッチング: バッファ内にシーケンスが順番通りに含まれているか
+    let seqIdx = 0;
+    for (let i = 0; i < buf.length && seqIdx < seq.length; i++) {
+      let expected = seq[seqIdx];
       if (expected === 'F') expected = player.facingLeft ? 'L' : 'R';
       else if (expected === 'B') expected = player.facingLeft ? 'R' : 'L';
-      if (tail[i] !== expected) { match = false; break; }
+      if (buf[i] === expected) seqIdx++;
     }
-    if (match) {
+    if (seqIdx === seq.length) {
       // Clear buffer on success
       cmdInputBuffers[pid] = [];
-      cmdInputTimestamps[pid] = [];
+      cmdInputFrames[pid] = [];
       return cmd;
     }
   }
@@ -5699,7 +5705,8 @@ function initBattle() {
   koSlowMotion = { active: false, frames: 0, maxFrames: 90 };
   stockLossAnim = { active: false, playerId: -1, life: 0, maxLife: 30, x: 0, y: 0 };
   cmdInputBuffers[0] = []; cmdInputBuffers[1] = [];
-  cmdInputTimestamps[0] = []; cmdInputTimestamps[1] = [];
+  cmdInputFrames[0] = []; cmdInputFrames[1] = [];
+  cmdFrameCounter = 0;
   cpuActionTimer = 0;
   cpuAttackCooldown = 0;
   players = [
@@ -6691,6 +6698,7 @@ function getCpuInput(cpu, target) {
 
 function updateBattle(dt) {
   battleTime += dt;
+  cmdFrameCounter++; // コマンド入力用フレームカウンタ
 
   if (battleCountdown > 0) { battleCountdown--; return; }
   battleStarted = true;
