@@ -1024,10 +1024,7 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
     if (tankImg.complete && tankImg.naturalWidth > 0) {
       const imgW = 168 * s;
       const imgH = 112 * s;
-      ctx.save();
-      ctx.globalCompositeOperation = 'screen';
       ctx.drawImage(tankImg, -imgW / 2 - 5 * s, -55 * s, imgW, imgH);
-      ctx.restore();
     } else {
       // Canvas fallback
       ctx.fillStyle = '#6B7B3A';
@@ -1047,10 +1044,7 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
     if (namiojiImg.complete && namiojiImg.naturalWidth > 0) {
       const imgW = 75 * s;
       const imgH = 90 * s;
-      ctx.save();
-      ctx.globalCompositeOperation = 'screen';
       ctx.drawImage(namiojiImg, -imgW / 2, -35 * s, imgW, imgH);
-      ctx.restore();
     } else {
       // Canvas fallback: simple boxer
       ctx.fillStyle = '#FFCBA4';
@@ -1359,9 +1353,7 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
     if (senImg.complete && senImg.naturalWidth > 0) {
       const imgW = 85 * s;
       const imgH = 85 * s;
-      ctx.globalCompositeOperation = 'screen';
       ctx.drawImage(senImg, -imgW / 2, -35 * s, imgW, imgH);
-      ctx.globalCompositeOperation = 'source-over';
     } else {
       // Canvas fallback: salaryman
       // Legs (dark pants)
@@ -1427,13 +1419,11 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
     if (dosbossImg.complete && dosbossImg.naturalWidth > 0) {
       const imgW = 75 * s;
       const imgH = 100 * s;
-      ctx.globalCompositeOperation = 'screen';
       const nw = dosbossImg.naturalWidth;
       const nh = dosbossImg.naturalHeight;
       const cropH = nh * 0.85;
       const cropY = nh * 0.05;
       ctx.drawImage(dosbossImg, 0, cropY, nw, cropH, -imgW / 2, -45 * s, imgW, imgH);
-      ctx.globalCompositeOperation = 'source-over';
     } else {
       // Canvas fallback: tank boss
       // Wheels
@@ -1884,8 +1874,7 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
     const imgH = imgSizes[charIndex][1] * s;
     const tankOfsX = charIndex === 12 ? -5 * s : 0;
     const tankOfsY = charIndex === 12 ? -20 * s : 0;
-    const useScreen = charIndex === 12 || charIndex === 13 || charIndex === 18 || charIndex === 19;
-    if (useScreen) ctx.globalCompositeOperation = 'screen';
+    // 全キャラ source-over で描画（明るい背景対応）
 
     // Source crop for landscape images (うる男)
     let sx = 0, sy = 0, sw = img.naturalWidth, sh = img.naturalHeight;
@@ -1934,7 +1923,6 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
     } else {
       ctx.drawImage(img, sx, sy, sw, sh, -imgW / 2 + tankOfsX, -35 * s + tankOfsY, imgW, imgH);
     }
-    if (useScreen) ctx.globalCompositeOperation = 'source-over';
   } else if (charIndex === 4) {
     // Long: Canvas fallback for battle
     ctx.fillStyle = '#5A6AAE';
