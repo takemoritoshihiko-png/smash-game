@@ -4830,6 +4830,11 @@ const GUARD_BREAK_STUN = 120; // 2 seconds at 60fps
 const JUST_GUARD_WINDOW = 5; // frames of perfect guard at start
 const JUST_GUARD_STAGGER = 30; // frames attacker is staggered on just guard
 
+// Air dodge system
+const AIR_DODGE_INVINCIBLE_FRAMES = 30; // 0.5秒 (30F at 60fps)
+const AIR_DODGE_ENDLAG_FRAMES = 18;     // 0.3秒硬直 (18F at 60fps)
+const AIR_DODGE_SPEED = 14;             // 回避ダッシュ速度
+
 // Command input system
 const CMD_INPUT_WINDOW = 120; // コマンド入力猶予フレーム数（120F = 2秒）
 const CMD_COOLDOWN = 300; // 5sec at 60fps
@@ -5660,6 +5665,11 @@ function createPlayer(id, charIdx, startX) {
     cancelWindow: 0,     // キャンセル受付残りフレーム
     comboWindow: 0,      // コンボ継続可能フレーム
     airComboTimer: 0,    // 空中コンボ用 落下速度低下タイマー
+    // 空中回避
+    airDodging: false,       // 空中回避中フラグ
+    airDodgeTimer: 0,        // 無敵フレームカウントダウン
+    airDodgeEndlag: 0,       // 硬直フレームカウントダウン
+    airDodgeUsed: false,     // 1ジャンプにつき1回制限
   };
 }
 
@@ -5716,7 +5726,7 @@ function calcKnockback(damage, kbBase, kbScale) {
 }
 
 function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
-  if (target.invincibleTimer > 0) return;
+  if (target.invincibleTimer > 0 || target.airDodgeTimer > 0) return;
   // hitType: 'normal', 'strong', 'special', 'cmd', 'aerial', 'down', 'projectile'
   if (!hitType) hitType = 'normal';
 
@@ -5884,6 +5894,8 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   target.attacking = false;
   target.specialState = null;
   target.attackFrame = 0;
+  // 被弾時にガードブレイクスタンを解除（ヒットスタンに移行）
+  target.guardBreakStun = 0;
   // Break grab
   if (target.grabbing) releaseGrab(target);
   if (target.grabbed) {
@@ -6302,7 +6314,7 @@ function tryGrab(p) {
   if (p.attacking || p.hitstun > 0 || !p.alive || p.grabbing || p.grabbed || !p.grounded) return;
   if (p.throwCooldown > 0) return;
   for (const target of players) {
-    if (target.id === p.id || !target.alive || target.invincibleTimer > 0 || target.grabbed) continue;
+    if (target.id === p.id || !target.alive || target.invincibleTimer > 0 || target.airDodgeTimer > 0 || target.grabbed) continue;
     const dist = Math.abs(p.x - target.x);
     if (dist < GRAB_RANGE) {
       // Grab!
@@ -6886,7 +6898,7 @@ function updateBattle(dt) {
     // Check hit against players
     let hitSomething = false;
     for (const p of players) {
-      if (p.id === pr.ownerId || !p.alive || p.invincibleTimer > 0) continue;
+      if (p.id === pr.ownerId || !p.alive || p.invincibleTimer > 0 || p.airDodgeTimer > 0) continue;
       if (pr.pierce && pr.hitTargets && pr.hitTargets.includes(p.id)) continue;
       const ph = getPlayerHitbox(p);
       if (hitboxCollides(pr.x - pr.w/2, pr.y - pr.h/2, pr.w, pr.h, ph.x, ph.y, ph.w, ph.h)) {
@@ -7027,6 +7039,11 @@ function updateBattle(dt) {
     if (p.guardBreakStun > 0) {
       p.guardBreakStun--;
       p.guarding = false;
+      // スタン終了時にガード耐久値を最低30%まで回復（即再ブレイク防止）
+      if (p.guardBreakStun <= 0) {
+        p.guardBreakStun = 0;
+        p.guardDurability = Math.max(p.guardDurability, GUARD_MAX_DURABILITY * 0.3);
+      }
       p.vx *= 0.88;
       p.vy += getGravity(p);
       if (p.vy > MAX_FALL_SPEED) p.vy = MAX_FALL_SPEED;
@@ -7431,6 +7448,41 @@ function updateBattle(dt) {
       continue;
     }
 
+    // --- Air dodge update ---
+    if (p.airDodgeTimer > 0) {
+      p.airDodgeTimer--;
+      if (p.airDodgeTimer <= 0) {
+        p.airDodging = false;
+        p.airDodgeEndlag = AIR_DODGE_ENDLAG_FRAMES;
+        p.vx *= 0.3;
+        p.vy *= 0.3;
+      }
+    }
+    if (p.airDodgeEndlag > 0) {
+      p.airDodgeEndlag--;
+    }
+    if (p.airDodging) {
+      // 空中回避中: 慣性で移動、重力軽減
+      p.vx *= 0.92;
+      p.vy *= 0.92;
+      p.x += p.vx;
+      p.y += p.vy;
+      landingCheck(p);
+      blastCheck(p);
+      continue;
+    }
+    if (p.airDodgeEndlag > 0 && !p.grounded) {
+      // 硬直中: 攻撃・移動不可、重力のみ適用
+      p.vy += getGravity(p);
+      if (p.vy > MAX_FALL_SPEED) p.vy = MAX_FALL_SPEED;
+      p.x += p.vx * 0.1;
+      p.y += p.vy;
+      p.vx *= 0.9;
+      landingCheck(p);
+      blastCheck(p);
+      continue;
+    }
+
     // --- Normal movement ---
     let moveX = 0;
     let jumpPress = false;
@@ -7689,7 +7741,7 @@ function resolvePlayerCollisions() {
 function checkHitboxAgainstPlayers(attacker, hitbox, damage, kbBase, kbScale, kbAngle, hitType) {
   let hit = false;
   for (const target of players) {
-    if (target.id === attacker.id || !target.alive || target.invincibleTimer > 0) continue;
+    if (target.id === attacker.id || !target.alive || target.invincibleTimer > 0 || target.airDodgeTimer > 0) continue;
     if (attacker.hitTargets.includes(target.id)) continue;
     const th = getPlayerHitbox(target);
     if (hitboxCollides(hitbox.x, hitbox.y, hitbox.w, hitbox.h, th.x, th.y, th.w, th.h)) {
@@ -7750,6 +7802,7 @@ function landingCheck(p) {
     if (p.x >= STAGE_LEFT && p.x <= STAGE_RIGHT) {
       if (p.y >= STAGE_GROUND_Y && p.y - p.vy < STAGE_GROUND_Y + 8) {
         p.y = STAGE_GROUND_Y; p.vy = 0; p.grounded = true; p.jumps = p.charIdx === 15 ? 3 : 2; p.strongLocked = false;
+        p.airDodgeUsed = false; p.airDodging = false; p.airDodgeTimer = 0; p.airDodgeEndlag = 0;
         // divekick着地で攻撃終了
         if (p.attacking && p.attackData && p.attackData.specialType === 'divekick') {
           p.attacking = false; p.specialState = null; p.attackFrame = 0;
@@ -7760,6 +7813,7 @@ function landingCheck(p) {
       if (p.x >= plat.x && p.x <= plat.x + plat.w) {
         if (p.y >= plat.y && p.y - p.vy < plat.y + 8) {
           p.y = plat.y; p.vy = 0; p.grounded = true; p.jumps = p.charIdx === 15 ? 3 : 2; p.strongLocked = false;
+          p.airDodgeUsed = false; p.airDodging = false; p.airDodgeTimer = 0; p.airDodgeEndlag = 0;
           if (p.attacking && p.attackData && p.attackData.specialType === 'divekick') {
             p.attacking = false; p.specialState = null; p.attackFrame = 0;
           }
@@ -7843,6 +7897,9 @@ function blastCheck(p) {
     playKOSE();
     p.alive = false;
     p.damage = 0;
+    p.guardBreakStun = 0;
+    p.guarding = false;
+    p.hitstun = 0;
     playHitSound('ko');
     triggerScreenShake(10, 20);
 
@@ -8448,7 +8505,19 @@ function drawBattle(dt) {
     if (!p.alive) continue;
     ctx.save();
 
-    if (p.invincibleTimer > 0 && Math.floor(p.invincibleTimer / 4) % 2 === 0) {
+    // 空中回避エフェクト: 残像 + 半透明
+    if (p.airDodging || p.airDodgeTimer > 0) {
+      // 残像エフェクト（移動方向の逆に2つ）
+      const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+      if (speed > 2) {
+        ctx.globalAlpha = 0.2;
+        drawBattleCharacter(p.x - p.vx * 2, p.y - p.vy * 2 - 55, 1.0, p.charIdx, battleTime, p.facingLeft, p);
+        ctx.globalAlpha = 0.08;
+        drawBattleCharacter(p.x - p.vx * 4, p.y - p.vy * 4 - 55, 1.0, p.charIdx, battleTime, p.facingLeft, p);
+      }
+      // 本体半透明
+      ctx.globalAlpha = 0.35;
+    } else if (p.invincibleTimer > 0 && Math.floor(p.invincibleTimer / 4) % 2 === 0) {
       ctx.globalAlpha = 0.4;
     }
 
@@ -10083,6 +10152,7 @@ function sendGuestInput() {
     x: !!(keys['x'] || keys['X']),
     c: !!(keys['c'] || keys['C']),
     v: !!(keys['v'] || keys['V']),
+    s: !!(keys['s'] || keys['S']),
   };
   peerConn.send({ type: 'input', keys: myKeys });
 }
@@ -10112,6 +10182,7 @@ function serializePlayer(p) {
     senBuffTimer: p.senBuffTimer,
     dosbossRandomPattern: p.dosbossRandomPattern, gravityDebuffTimer: p.gravityDebuffTimer,
     cancelWindow: p.cancelWindow, comboWindow: p.comboWindow, airComboTimer: p.airComboTimer,
+    airDodging: p.airDodging, airDodgeTimer: p.airDodgeTimer, airDodgeUsed: p.airDodgeUsed, airDodgeEndlag: p.airDodgeEndlag,
   };
 }
 
@@ -10852,6 +10923,50 @@ function drawTransition() {
   }
 }
 
+// --- Air dodge trigger ---
+function triggerAirDodge(p, dirKeys) {
+  p.airDodging = true;
+  p.airDodgeTimer = AIR_DODGE_INVINCIBLE_FRAMES;
+  p.airDodgeUsed = true;
+  p.attacking = false;
+  p.specialState = null;
+  p.attackFrame = 0;
+
+  // 方向入力に応じた回避ダッシュ
+  let dx = 0, dy = 0;
+  // Arrow keys (P1, or online remote)
+  if (dirKeys['ArrowLeft']) dx -= 1;
+  if (dirKeys['ArrowRight']) dx += 1;
+  if (dirKeys['ArrowUp']) dy -= 1;
+  if (dirKeys['ArrowDown']) dy += 1;
+  // WASD keys (P2 local)
+  if (dirKeys['a'] || dirKeys['A']) dx -= 1;
+  if (dirKeys['d'] || dirKeys['D']) dx += 1;
+  if (dirKeys['w'] || dirKeys['W']) dy -= 1;
+  // Note: S key is the air dodge trigger for P2, so don't count it as down direction here
+
+  // Clamp
+  if (dx > 1) dx = 1; if (dx < -1) dx = -1;
+  if (dy > 1) dy = 1; if (dy < -1) dy = -1;
+
+  if (dx !== 0 || dy !== 0) {
+    const len = Math.sqrt(dx * dx + dy * dy);
+    p.vx = (dx / len) * AIR_DODGE_SPEED;
+    p.vy = (dy / len) * AIR_DODGE_SPEED;
+    if (dx !== 0) p.facingLeft = dx < 0;
+  } else {
+    // その場回避: 動きを停止
+    p.vx = 0;
+    p.vy = 0;
+  }
+}
+
+function canAirDodge(p) {
+  return !p.grounded && !p.airDodging && !p.airDodgeUsed && p.airDodgeEndlag <= 0
+    && !p.attacking && p.hitstun <= 0 && !p.grabbed && !p.grabbing
+    && p.guardBreakStun <= 0 && p.alive;
+}
+
 // Process a keydown event for a specific player
 function processPlayerKeydown(key, p, playerId, keyState) {
   // Direction commands
@@ -10901,6 +11016,12 @@ function processPlayerKeydown(key, p, playerId, keyState) {
     if (p.grounded && !p.attacking && !p.guarding && p.guardDurability > 0 && p.guardBreakStun <= 0) {
       p.guarding = true;
       p.justGuardTimer = typeof JUST_GUARD_WINDOW !== 'undefined' ? JUST_GUARD_WINDOW : 6;
+    }
+  }
+  // Air Dodge (S) - P1
+  if (key === 's' || key === 'S') {
+    if (canAirDodge(p)) {
+      triggerAirDodge(p, keyState);
     }
   }
 }
@@ -11126,6 +11247,12 @@ function handleKeyDown(e) {
         startAttack(p1, 'special');
       }
     }
+    // P1 Air Dodge (S)
+    if (e.key === 's' || e.key === 'S') {
+      if (canAirDodge(p1)) {
+        triggerAirDodge(p1, keys);
+      }
+    }
 
     // P2 attacks: U I O (only in local VS mode, skip for online)
     if (gameMode === 'vs' && !onlineMode) {
@@ -11181,6 +11308,12 @@ function handleKeyDown(e) {
           if (!tryCancelAttack(p2, 'special')) {
             startAttack(p2, 'special');
           }
+        }
+      }
+      // P2 Air Dodge (E)
+      if (e.key === 'e' || e.key === 'E') {
+        if (canAirDodge(p2)) {
+          triggerAirDodge(p2, keys);
         }
       }
     }
@@ -11276,6 +11409,13 @@ function gameLoop(timestamp) {
           if (rk.up && !prk.up) addCmdInput(1, 'U');
           if (rk.left && !prk.left) addCmdInput(1, 'L');
           if (rk.right && !prk.right) addCmdInput(1, 'R');
+          // S pressed - Air Dodge
+          if (rk.s && !prk.s) {
+            if (canAirDodge(rp)) {
+              const dirKeys = { ArrowLeft: rk.left, ArrowRight: rk.right, ArrowUp: rk.up, ArrowDown: rk.down };
+              triggerAirDodge(rp, dirKeys);
+            }
+          }
         }
         prevRemoteKeys = { ...remoteKeys };
       }
