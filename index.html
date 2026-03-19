@@ -4880,6 +4880,14 @@ const CHAR_THROW_TYPE = [
 function getThrowDmg(charIdx) {
   return CHAR_THROW_DMG[CHAR_THROW_TYPE[charIdx] || 'balance'];
 }
+// 相手ダメージに応じた掴み持続ボーナスフレーム
+function getGrabDurationBonus(targetDamage) {
+  if (targetDamage <= 30) return 0;
+  if (targetDamage <= 60) return 3;
+  if (targetDamage <= 100) return 6;
+  if (targetDamage <= 150) return 9;
+  return 12;
+}
 const THROW_IMMUNE_FRAMES = 20; // 投げ後の投げ無敵（20F）
 const THROW_TECH_WINDOW = 10;   // 投げ抜け受付フレーム（10F）
 
@@ -6397,7 +6405,7 @@ function tryGrab(p) {
       p.grabTimer = 0;
       p.attacking = false;
       p.throwPhase = 1; // 掴みフェーズ開始
-      p.throwPhaseTimer = getGrabFrames(p.charIdx);
+      p.throwPhaseTimer = getGrabFrames(p.charIdx) + getGrabDurationBonus(target.damage);
       target.grabbed = true;
       target.grabbedBy = p.id;
       target.hitstun = 0;
