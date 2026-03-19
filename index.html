@@ -6003,7 +6003,34 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   if (attacker.charIdx === 17) weightedKb *= 1.1;
   // パッシブ: 波おじ(13) コンボ強化 コンボ最終ヒットKB+15%
   if (attacker.charIdx === 13 && attacker.comboWindow > 0 && attacker.cancelWindow <= 0) weightedKb *= 1.15;
-  const rad = kbAngle * Math.PI / 180;
+  // --- ノックバック角度補正 ---
+  let finalAngle = kbAngle;
+  // 全キャラ共通の角度設定（hitTypeベース）
+  const isAir = attacker.grounded !== undefined ? !attacker.grounded : false;
+  if (hitType === 'normal') finalAngle = isAir ? -45 : -35;
+  else if (hitType === 'strong') finalAngle = isAir ? -60 : -50;
+  else if (hitType === 'special') finalAngle = isAir ? -65 : -55;
+  else if (hitType === 'aerial') finalAngle = -45;
+  else if (hitType === 'downair') finalAngle = 90; // スパイク（真下）
+  else if (hitType === 'up') finalAngle = -85;
+  else if (hitType === 'side') finalAngle = -30;
+  else if (hitType === 'down') finalAngle = 90; // 真下
+  else if (hitType === 'dash') finalAngle = -25;
+  else if (hitType === 'cmd') finalAngle = kbAngle; // コマンド技は定義値を維持
+  else if (hitType === 'projectile') finalAngle = kbAngle; // 飛び道具も定義値維持
+  // キャラ別特殊角度
+  const aci = attacker.charIdx;
+  if (aci === 0 && hitType === 'side') finalAngle = -40;        // ゼン: 横攻撃を少し浮かせる
+  if (aci === 1 && hitType !== 'cmd' && hitType !== 'projectile') finalAngle -= 5; // ドン: 全技5度上補正
+  if (aci === 2 && hitType === 'side') finalAngle = -20;        // サイソク: 低く鋭く
+  if (aci === 12 && hitType !== 'cmd' && hitType !== 'projectile') finalAngle += 5; // タンク: 5度下補正
+  if (aci === 15 && isAir) finalAngle = -70;                    // サム: 空中攻撃で高く浮かせる
+  if (aci === 17 && hitType !== 'cmd' && hitType !== 'projectile') { // おんぱ: 放射状
+    const dx = target.x - attacker.x;
+    const dy = (target.y - 35) - (attacker.y !== undefined ? attacker.y - 35 : target.y - 35);
+    if (Math.abs(dx) > 1 || Math.abs(dy) > 1) finalAngle = Math.atan2(dy, Math.abs(dx)) * 180 / Math.PI;
+  }
+  const rad = finalAngle * Math.PI / 180;
   const dir = attacker.x < target.x ? 1 : -1;
   target.vx = Math.cos(rad) * weightedKb * dir;
   target.vy = Math.sin(rad) * weightedKb;
@@ -6597,46 +6624,47 @@ function executeThrow(grabber, dirX, dirY) {
   // D技: 熊太郎 熊の怒り（投げ2倍、1回消費）
   if (grabber.dSkillBuff === 'bearRage') { kumaPassive *= 2.0; grabber.dSkillActive = false; grabber.dSkillBuff = null; }
 
-  // 方向別ダメージ/ノックバック
-  let throwDmg, kbBase, kbScale, kbAngleDir;
+  // 方向別ダメージ/ノックバック（角度ベース）
+  let throwDmg, kbBase, kbScale;
+  let throwAngle, throwDir; // 角度（度数、負=上）, 方向
+  // 波おじ: 下投げを低めに
+  const namiDownAngle = grabber.charIdx === 13 ? -15 : -20;
   if (dirY < 0) {
-    // 上投げ: 真上にノックバック（追撃しやすい）
+    // 上投げ: 真上80度
     throwDmg = dmgTable.up * kumaPassive;
-    kbBase = 9;
-    kbScale = 0.09;
-    const kb = (kbBase + target.damage * kbScale) / targetWeight * kbMult * kumaPassive;
-    target.vx = 0;
-    target.vy = -kb * 1.3;
+    kbBase = 9; kbScale = 0.09;
+    throwAngle = -80; throwDir = 0;
     target.hitstun = Math.floor(15 + target.damage * 0.12);
   } else if (dirY > 0) {
-    // 下投げ: 真下に叩きつけ（コンボ起点）
+    // 下投げ: 低い角度20度（コンボ起点）
     throwDmg = dmgTable.down * kumaPassive;
-    kbBase = 6;
-    kbScale = 0.06;
-    const kb = (kbBase + target.damage * kbScale) / targetWeight * kbMult * kumaPassive;
-    target.vx = (grabber.facingLeft ? -1 : 1) * kb * 0.3;
-    target.vy = -kb * 0.4;
+    kbBase = 6; kbScale = 0.06;
+    throwAngle = namiDownAngle; throwDir = grabber.facingLeft ? -1 : 1;
     target.hitstun = Math.floor(18 + target.damage * 0.12);
   } else if (dirX !== 0 && dirX !== (grabber.facingLeft ? -1 : 1)) {
-    // 後ろ投げ: 後方に強くノックバック
+    // 後ろ投げ: 斜め上30度（後方）
     throwDmg = dmgTable.back * kumaPassive;
-    kbBase = 10;
-    kbScale = 0.12;
-    const kb = (kbBase + target.damage * kbScale) / targetWeight * kbMult * kumaPassive;
-    const throwD = grabber.facingLeft ? 1 : -1;
-    target.vx = throwD * kb;
-    target.vy = -kb * 0.5;
+    kbBase = 10; kbScale = 0.12;
+    throwAngle = -30; throwDir = grabber.facingLeft ? 1 : -1;
     target.hitstun = Math.floor(10 + target.damage * 0.1);
   } else {
-    // 前投げ: 前方にノックバック
+    // 前投げ: 斜め上30度
     throwDmg = dmgTable.front * kumaPassive;
-    kbBase = 8;
-    kbScale = 0.10;
-    const kb = (kbBase + target.damage * kbScale) / targetWeight * kbMult * kumaPassive;
-    const throwD = grabber.facingLeft ? -1 : 1; // 前方
-    target.vx = throwD * kb;
-    target.vy = -kb * 0.6;
+    kbBase = 8; kbScale = 0.10;
+    throwAngle = -30; throwDir = grabber.facingLeft ? -1 : 1;
     target.hitstun = Math.floor(10 + target.damage * 0.1);
+  }
+  {
+    const kb = (kbBase + target.damage * kbScale) / targetWeight * kbMult * kumaPassive;
+    const tRad = throwAngle * Math.PI / 180;
+    if (throwDir === 0) {
+      // 上投げ: 真上
+      target.vx = 0;
+      target.vy = -kb * 1.3;
+    } else {
+      target.vx = Math.cos(tRad) * kb * throwDir;
+      target.vy = Math.sin(tRad) * kb;
+    }
   }
 
   target.damage = Math.min(999, target.damage + throwDmg);
