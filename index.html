@@ -7397,14 +7397,14 @@ function updateBattle(dt) {
     // --- Guard handling ---
     let wantsGuard = false;
     if (p.id === 0) {
-      wantsGuard = (onlineMode && !isHost) ? !!remoteKeys.v : !!(keys['v'] || keys['V']);
+      wantsGuard = (onlineMode && !isHost) ? !!remoteKeys.s : !!(keys['s'] || keys['S']);
     } else if (p.id === 1 && gameMode === 'cpu') {
       const cpuTarget = players[0];
       wantsGuard = getCpuGuard(p, cpuTarget);
     } else if (onlineMode && isHost) {
-      wantsGuard = !!remoteKeys.v;
+      wantsGuard = !!remoteKeys.s;
     } else if (onlineMode && !isHost) {
-      wantsGuard = !!(keys['v'] || keys['V']);
+      wantsGuard = !!(keys['s'] || keys['S']);
     } else {
       wantsGuard = !!(keys['p'] || keys['P']);
     }
@@ -10151,7 +10151,6 @@ function sendGuestInput() {
     z: !!(keys['z'] || keys['Z']),
     x: !!(keys['x'] || keys['X']),
     c: !!(keys['c'] || keys['C']),
-    v: !!(keys['v'] || keys['V']),
     s: !!(keys['s'] || keys['S']),
   };
   peerConn.send({ type: 'input', keys: myKeys });
@@ -11011,17 +11010,19 @@ function processPlayerKeydown(key, p, playerId, keyState) {
       }
     }
   }
-  // Guard (V)
-  if (key === 'v' || key === 'V') {
-    if (p.grounded && !p.attacking && !p.guarding && p.guardDurability > 0 && p.guardBreakStun <= 0) {
-      p.guarding = true;
-      p.justGuardTimer = typeof JUST_GUARD_WINDOW !== 'undefined' ? JUST_GUARD_WINDOW : 6;
-    }
-  }
-  // Air Dodge (S) - P1
+  // Guard (ground) / Air Dodge (air) - S key
   if (key === 's' || key === 'S') {
-    if (canAirDodge(p)) {
-      triggerAirDodge(p, keyState);
+    if (p.grounded) {
+      // 地上: ガード
+      if (!p.attacking && !p.guarding && p.guardDurability > 0 && p.guardBreakStun <= 0) {
+        p.guarding = true;
+        p.justGuardTimer = typeof JUST_GUARD_WINDOW !== 'undefined' ? JUST_GUARD_WINDOW : 6;
+      }
+    } else {
+      // 空中: 空中回避
+      if (canAirDodge(p)) {
+        triggerAirDodge(p, keyState);
+      }
     }
   }
 }
@@ -11247,10 +11248,17 @@ function handleKeyDown(e) {
         startAttack(p1, 'special');
       }
     }
-    // P1 Air Dodge (S)
+    // P1 Guard (ground) / Air Dodge (air) - S key
     if (e.key === 's' || e.key === 'S') {
-      if (canAirDodge(p1)) {
-        triggerAirDodge(p1, keys);
+      if (p1.grounded) {
+        if (!p1.attacking && !p1.guarding && p1.guardDurability > 0 && p1.guardBreakStun <= 0) {
+          p1.guarding = true;
+          p1.justGuardTimer = typeof JUST_GUARD_WINDOW !== 'undefined' ? JUST_GUARD_WINDOW : 6;
+        }
+      } else {
+        if (canAirDodge(p1)) {
+          triggerAirDodge(p1, keys);
+        }
       }
     }
 
