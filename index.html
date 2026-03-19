@@ -5841,7 +5841,9 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
     }
 
     // Normal Guard: 80% damage reduction, reduced knockback, lose durability
-    const reducedDamage = damage * GUARD_DAMAGE_REDUCTION;
+    // パッシブ: ジャッジマン(9) ガード強化 ガード中被ダメ-15%
+    const guardPassive = target.charIdx === 9 ? 0.85 : 1.0;
+    const reducedDamage = damage * GUARD_DAMAGE_REDUCTION * guardPassive;
     target.damage = Math.min(999, target.damage + reducedDamage);
     target.guardDurability -= damage * GUARD_DURABILITY_COST;
     // Small pushback
@@ -5876,6 +5878,22 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   if (attacker.charIdx === 15 && !attacker.grounded) {
     finalDamage *= 1.3;
   }
+  // パッシブ: メテオ(3) 空中攻撃強化 +10%
+  if (attacker.charIdx === 3 && !attacker.grounded && (hitType === 'aerial' || hitType === 'downair')) {
+    finalDamage *= 1.1;
+  }
+  // パッシブ: とっこ(14) 初段強化 +15%（コンボ外の最初の一撃）
+  if (attacker.charIdx === 14 && attacker.comboWindow <= 0) {
+    finalDamage *= 1.15;
+  }
+  // パッシブ: バレット(7) 飛び道具強化 +15%
+  if (attacker.charIdx === 7 && hitType === 'projectile') {
+    finalDamage *= 1.15;
+  }
+  // パッシブ: ゼン(0) コンボ補正緩和 コンボ中ダメージ減衰10%少ない
+  if (attacker.charIdx === 0 && attacker.comboWindow > 0) {
+    finalDamage *= 1.1;
+  }
   // セン: 満腹パワーバフ中は1.3倍ダメージ
   if (attacker.charIdx === 18 && attacker.senBuffTimer > 0) {
     finalDamage *= 1.3;
@@ -5895,8 +5913,8 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
         ap.kingComboTimer = 15;
         hitEffects.push({ x: target.x, y: target.y - 35, life: 12, maxLife: 12, color: '#FFD700', size: 50 });
       } else if (hitType === 'special' && ap.kingComboHits >= 4) {
-        // フルコンボ: Z→Z→Z→X→C = 2倍ダメージ + 衝撃波リング + 画面フラッシュ
-        finalDamage *= 2;
+        // フルコンボ: Z→Z→Z→X→C = 2.2倍ダメージ + 衝撃波リング + 画面フラッシュ（パッシブ+10%込み）
+        finalDamage *= 2.2;
         ap.kingComboHits = 0;
         ap.kingComboTimer = 0;
         hitEffects.push({ x: target.x, y: target.y - 35, life: 15, maxLife: 15, color: '#FFFFFF', size: 80 });
@@ -5933,13 +5951,23 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   const targetDef = characters[target.charIdx] ? characters[target.charIdx].stats.defense : 3;
   const defMultiplier = 1.15 - targetDef * 0.07;
   finalDamage *= defMultiplier;
+  // パッシブ: うる男(5) 防御強化 被ダメ-10%
+  if (target.charIdx === 5) finalDamage *= 0.9;
+  // パッシブ: タンク(12) 装甲 被ダメ-15%
+  if (target.charIdx === 12) finalDamage *= 0.85;
 
   target.damage = Math.min(999, target.damage + finalDamage);
   playHitSE();
   const kb = calcKnockback(target.damage, kbBase, finalKbScale);
   // 体重補正: weight が大きいほど吹っ飛びにくい (weight 0.7=1.43倍, 1.0=1.0倍, 1.5=0.67倍)
   const targetWeight = characters[target.charIdx] ? characters[target.charIdx].weight : 1.0;
-  const weightedKb = kb / targetWeight;
+  let weightedKb = kb / targetWeight;
+  // パッシブ: ドン(1) 重量強化 吹っ飛び-10%
+  if (target.charIdx === 1) weightedKb *= 0.9;
+  // パッシブ: おんぱ(17) ノックバック強化 全KB+10%
+  if (attacker.charIdx === 17) weightedKb *= 1.1;
+  // パッシブ: 波おじ(13) コンボ強化 コンボ最終ヒットKB+15%
+  if (attacker.charIdx === 13 && attacker.comboWindow > 0 && attacker.cancelWindow <= 0) weightedKb *= 1.15;
   const rad = kbAngle * Math.PI / 180;
   const dir = attacker.x < target.x ? 1 : -1;
   target.vx = Math.cos(rad) * weightedKb * dir;
@@ -6259,10 +6287,12 @@ function getPlayerHitbox(p) {
 
 function getAttackHitbox(p, atk) {
   const dir = p.facingLeft ? -1 : 1;
-  const cx = p.x + atk.hx * dir;
-  const hw = atk.hw;
+  // パッシブ: ロング(4) リーチ強化 攻撃範囲+10%
+  const reachMult = p.charIdx === 4 ? 1.1 : 1.0;
+  const cx = p.x + atk.hx * dir * reachMult;
+  const hw = atk.hw * reachMult;
   const hx = dir > 0 ? cx : cx - hw;
-  return { x: hx, y: p.y + atk.hy, w: hw, h: atk.hh };
+  return { x: hx, y: p.y + atk.hy, w: hw, h: atk.hh * reachMult };
 }
 
 // --- Projectile spawning ---
@@ -6461,43 +6491,45 @@ function executeThrow(grabber, dirX, dirY) {
   const targetWeight = characters[target.charIdx] ? characters[target.charIdx].weight : 1.0;
   const dmgTable = getThrowDmg(grabber.charIdx);
   const kbMult = getThrowKbMultiplier(target.damage);
+  // パッシブ: 熊太郎(6) 投げ強化 投げダメ/KB+15%
+  const kumaPassive = grabber.charIdx === 6 ? 1.15 : 1.0;
 
   // 方向別ダメージ/ノックバック
   let throwDmg, kbBase, kbScale, kbAngleDir;
   if (dirY < 0) {
     // 上投げ: 真上にノックバック（追撃しやすい）
-    throwDmg = dmgTable.up;
+    throwDmg = dmgTable.up * kumaPassive;
     kbBase = 9;
     kbScale = 0.09;
-    const kb = (kbBase + target.damage * kbScale) / targetWeight * kbMult;
+    const kb = (kbBase + target.damage * kbScale) / targetWeight * kbMult * kumaPassive;
     target.vx = 0;
     target.vy = -kb * 1.3;
     target.hitstun = Math.floor(15 + target.damage * 0.12);
   } else if (dirY > 0) {
     // 下投げ: 真下に叩きつけ（コンボ起点）
-    throwDmg = dmgTable.down;
+    throwDmg = dmgTable.down * kumaPassive;
     kbBase = 6;
     kbScale = 0.06;
-    const kb = (kbBase + target.damage * kbScale) / targetWeight * kbMult;
+    const kb = (kbBase + target.damage * kbScale) / targetWeight * kbMult * kumaPassive;
     target.vx = (grabber.facingLeft ? -1 : 1) * kb * 0.3;
     target.vy = -kb * 0.4;
     target.hitstun = Math.floor(18 + target.damage * 0.12);
   } else if (dirX !== 0 && dirX !== (grabber.facingLeft ? -1 : 1)) {
     // 後ろ投げ: 後方に強くノックバック
-    throwDmg = dmgTable.back;
+    throwDmg = dmgTable.back * kumaPassive;
     kbBase = 10;
     kbScale = 0.12;
-    const kb = (kbBase + target.damage * kbScale) / targetWeight * kbMult;
+    const kb = (kbBase + target.damage * kbScale) / targetWeight * kbMult * kumaPassive;
     const throwD = grabber.facingLeft ? 1 : -1;
     target.vx = throwD * kb;
     target.vy = -kb * 0.5;
     target.hitstun = Math.floor(10 + target.damage * 0.1);
   } else {
     // 前投げ: 前方にノックバック
-    throwDmg = dmgTable.front;
+    throwDmg = dmgTable.front * kumaPassive;
     kbBase = 8;
     kbScale = 0.10;
-    const kb = (kbBase + target.damage * kbScale) / targetWeight * kbMult;
+    const kb = (kbBase + target.damage * kbScale) / targetWeight * kbMult * kumaPassive;
     const throwD = grabber.facingLeft ? -1 : 1; // 前方
     target.vx = throwD * kb;
     target.vy = -kb * 0.6;
@@ -7520,10 +7552,12 @@ function updateBattle(dt) {
           cmdNameDisplay.push({ text: '木投げ！', x: p.x, y: p.y - 100, life: 45, maxLife: 45, color: '#44AA22' });
         } else {
           // パターンC: 自爆爆発 - 自分もダメージ、周囲に大ダメージ
+          // パッシブ: ドスボス(19) ランダム強化 パターンCダメージ+15%
           cmdNameDisplay.push({ text: 'BOOM!', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#FF6600' });
           p.damage = Math.min(999, p.damage + 6);
           const boomHitbox = { x: p.x - 70, y: p.y - 70, w: 140, h: 100 };
-          checkHitboxAgainstPlayers(p, boomHitbox, 15, 8, 0.14, -40, 'special');
+          const boomDmg = p.charIdx === 19 ? Math.floor(15 * 1.15) : 15;
+          checkHitboxAgainstPlayers(p, boomHitbox, boomDmg, 8, 0.14, -40, 'special');
           triggerScreenShake(8, 15);
           hitFlash.alpha = 0.3;
           hitFlash.color = '#FF6600';
@@ -7559,7 +7593,8 @@ function updateBattle(dt) {
         }
         // セン: 満腹パワーバフ発動
         if (atk.senBuff) {
-          p.senBuffTimer = 600; // 10 seconds
+          // パッシブ: セン(18) バフ延長+15%
+          p.senBuffTimer = p.charIdx === 18 ? 690 : 600; // 11.5秒 or 10秒
           cmdNameDisplay.push({ text: '満腹パワー！', x: p.x, y: p.y - 120, life: 90, maxLife: 90, color: '#FF8844' });
         }
         p.attacking = false;
@@ -7806,7 +7841,12 @@ function updateBattle(dt) {
     }
 
     if (jumpPress && !p.jumpUsed && p.jumps > 0) {
-      p.vy = ch.jumpPower;
+      let jumpMult = 1.0;
+      // パッシブ: 天才(10) 復帰強化 ジャンプ力+10%
+      if (p.charIdx === 10) jumpMult = 1.1;
+      // パッシブ: サム(15) 3段ジャンプ強化 3回目+15%
+      if (p.charIdx === 15 && p.jumps === 1) jumpMult = 1.15;
+      p.vy = ch.jumpPower * jumpMult;
       p.jumps--; p.jumpUsed = true; p.grounded = false;
       p.jumpSquash = 6; // jump anticipation squash
       playHitSound('jump');
@@ -7828,7 +7868,9 @@ function updateBattle(dt) {
       if (p.charIdx === 13) p.airStrongCount = 0;
       const prevVy = p.vy || 0;
       const impactStrength = Math.min(Math.abs(prevVy) / MAX_FALL_SPEED, 1);
-      p.landSquash = Math.floor(8 + impactStrength * 4);
+      // パッシブ: Catbus(11) 着地強化 着地硬直-15%
+      const landLag = p.charIdx === 11 ? 0.85 : 1.0;
+      p.landSquash = Math.floor((8 + impactStrength * 4) * landLag);
 
       // ③ 着地時パーティクル（攻撃専用エフェクトがある場合はスキップ）
       if (impactStrength > 0.15 && p.specialState !== 'slamHit' && p.specialState !== 'slamming') {
@@ -7961,7 +8003,11 @@ function applyMovement(p, moveX, ch) {
   const friction = p.grounded ? GROUND_FRICTION * STAGE_FRICTION : AIR_FRICTION;
   const senSpeedMult = (p.charIdx === 18 && p.senBuffTimer > 0) ? 1.3 : 1;
   const gravDebuffMult = (p.gravityDebuffTimer > 0) ? 0.5 : 1;
-  const targetVx = moveX * ch.moveSpeed * senSpeedMult * gravDebuffMult;
+  // パッシブ: サイソク(2) ダッシュ速度+15%（地上）
+  const saisokuMult = (p.charIdx === 2 && p.grounded) ? 1.15 : 1;
+  // パッシブ: シャうでん(8) 空中機動強化+15%（空中）
+  const shaudenMult = (p.charIdx === 8 && !p.grounded) ? 1.15 : 1;
+  const targetVx = moveX * ch.moveSpeed * senSpeedMult * gravDebuffMult * saisokuMult * shaudenMult;
 
   if (moveX !== 0) {
     // 入力あり: 目標速度に向かって加速
