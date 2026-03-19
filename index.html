@@ -4847,6 +4847,39 @@ const CHAR_GRAB_FRAMES = [
 function getGrabFrames(charIdx) {
   return CHAR_GRAB_FRAMES[charIdx] || THROW_GRAB_FRAMES;
 }
+// キャラ別投げダメージ { front, back, up, down }
+// 掴み速度に反比例: 速い=低ダメ, 遅い=高ダメ
+const CHAR_THROW_DMG = {
+  speed:   { front: 5,  back: 5,  up: 4,  down: 3  }, // 9F組
+  balance: { front: 8,  back: 8,  up: 6,  down: 5  }, // 13F組
+  ranged:  { front: 10, back: 10, up: 8,  down: 7  }, // 15F組
+  power:   { front: 13, back: 13, up: 10, down: 9  }, // 17F組
+};
+const CHAR_THROW_TYPE = [
+  'balance', // 0:ゼン
+  'power',   // 1:ドン
+  'speed',   // 2:サイソク
+  'ranged',  // 3:メテオ
+  'ranged',  // 4:ロング
+  'ranged',  // 5:うる男
+  'balance', // 6:熊太郎
+  'ranged',  // 7:バレット
+  'speed',   // 8:シャうでん
+  'balance', // 9:ジャッジマン
+  'ranged',  // 10:天才
+  'speed',   // 11:Catbus
+  'power',   // 12:タンク
+  'balance', // 13:波おじ
+  'speed',   // 14:とっこ
+  'speed',   // 15:サム
+  'balance', // 16:キング
+  'ranged',  // 17:おんぱ
+  'balance', // 18:セン
+  'power',   // 19:ドスボス
+];
+function getThrowDmg(charIdx) {
+  return CHAR_THROW_DMG[CHAR_THROW_TYPE[charIdx] || 'balance'];
+}
 const THROW_IMMUNE_FRAMES = 20; // 投げ後の投げ無敵（20F）
 const THROW_TECH_WINDOW = 10;   // 投げ抜け受付フレーム（10F）
 
@@ -6410,40 +6443,41 @@ function executeThrow(grabber, dirX, dirY) {
   if (!target) { releaseGrab(grabber); return; }
 
   const targetWeight = characters[target.charIdx] ? characters[target.charIdx].weight : 1.0;
+  const dmgTable = getThrowDmg(grabber.charIdx);
 
   // 方向別ダメージ/ノックバック
   let throwDmg, kbBase, kbScale, kbAngleDir;
   if (dirY < 0) {
-    // 上投げ: ダメージ6・真上にノックバック（追撃しやすい）
-    throwDmg = 6;
+    // 上投げ: 真上にノックバック（追撃しやすい）
+    throwDmg = dmgTable.up;
     kbBase = 9;
     kbScale = 0.09;
     const kb = (kbBase + target.damage * kbScale) / targetWeight;
     target.vx = 0;
     target.vy = -kb * 1.3;
-    target.hitstun = Math.floor(15 + target.damage * 0.12); // 長めの硬直
+    target.hitstun = Math.floor(15 + target.damage * 0.12);
   } else if (dirY > 0) {
-    // 下投げ: ダメージ5・真下に叩きつけ（コンボ起点）
-    throwDmg = 5;
+    // 下投げ: 真下に叩きつけ（コンボ起点）
+    throwDmg = dmgTable.down;
     kbBase = 6;
     kbScale = 0.06;
     const kb = (kbBase + target.damage * kbScale) / targetWeight;
     target.vx = (grabber.facingLeft ? -1 : 1) * kb * 0.3;
     target.vy = -kb * 0.4;
-    target.hitstun = Math.floor(18 + target.damage * 0.12); // 最も長い硬直（コンボ起点）
+    target.hitstun = Math.floor(18 + target.damage * 0.12);
   } else if (dirX !== 0 && dirX !== (grabber.facingLeft ? -1 : 1)) {
-    // 後ろ投げ: ダメージ8・後方に強くノックバック
-    throwDmg = 8;
+    // 後ろ投げ: 後方に強くノックバック
+    throwDmg = dmgTable.back;
     kbBase = 10;
     kbScale = 0.12;
     const kb = (kbBase + target.damage * kbScale) / targetWeight;
-    const throwD = grabber.facingLeft ? 1 : -1; // 後方
+    const throwD = grabber.facingLeft ? 1 : -1;
     target.vx = throwD * kb;
     target.vy = -kb * 0.5;
     target.hitstun = Math.floor(10 + target.damage * 0.1);
   } else {
-    // 前投げ: ダメージ8・前方にノックバック
-    throwDmg = 8;
+    // 前投げ: 前方にノックバック
+    throwDmg = dmgTable.front;
     kbBase = 8;
     kbScale = 0.10;
     const kb = (kbBase + target.damage * kbScale) / targetWeight;
