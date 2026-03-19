@@ -4380,15 +4380,16 @@ const BLAST_BOTTOM = 1000;
 const BLAST_LEFT = -600;
 const BLAST_RIGHT = 1560;
 
-// 慣性・摩擦パラメータ（旧値: GROUND_ACCEL=0.45, FRICTION=0.82, AIR_ACCEL=0.28, AIR_FRICTION=0.94）
-const GROUND_ACCEL = 0.22;       // 地上加速度（5Fで最高速→緩やかに加速）
+// 慣性・摩擦パラメータ（旧値: GROUND_ACCEL=0.22, AIR_ACCEL=0.14, AIR_SPEED_MULT=0.85, DASH=1.4）
+const GROUND_ACCEL = 0.35;       // 地上加速度（旧0.22→速い加速）
 const GROUND_FRICTION = 0.72;    // 地上摩擦（3Fで停止→慣性あり）
-const AIR_ACCEL = 0.14;          // 空中加速度（地上より遅い方向転換）
+const GROUND_SPEED_MULT = 1.3;   // 地上最高速度倍率（×1.3）
+const AIR_ACCEL = 0.22;          // 空中加速度（旧0.14→速い方向転換）
 const AIR_FRICTION = 0.96;       // 空中摩擦（慣性が残りやすい）
-const AIR_SPEED_MULT = 0.85;     // 空中移動速度制限
+const AIR_SPEED_MULT = 0.9;      // 空中移動速度制限（旧0.85→緩和）
 const STAGE_FRICTION = 1.0;      // ステージ摩擦倍率（1.0=通常、0.5=氷）
 // ダッシュ
-const DASH_SPEED_MULT = 1.4;     // ダッシュ時速度倍率
+const DASH_SPEED_MULT = 1.68;    // ダッシュ時速度倍率（旧1.4×1.2）
 const DASH_INPUT_WINDOW = 12;    // ダッシュ入力受付フレーム
 const DASH_TURN_FRICTION = 0.85; // ダッシュターン時の滑り
 // 着地硬直
@@ -8074,11 +8075,11 @@ function applyMovement(p, moveX, ch) {
   const saisokuMult = (p.charIdx === 2 && p.grounded) ? 1.15 : 1;
   // パッシブ: シャうでん(8) 空中機動強化+15%（空中）
   const shaudenMult = (p.charIdx === 8 && !p.grounded) ? 1.15 : 1;
-  // 空中移動速度制限
-  const airMult = p.grounded ? 1.0 : AIR_SPEED_MULT;
+  // 地上最高速度倍率 / 空中移動速度制限
+  const speedMult = p.grounded ? GROUND_SPEED_MULT : AIR_SPEED_MULT;
   // ダッシュ倍率
   const dashMult = (p.dashing && p.grounded) ? DASH_SPEED_MULT : 1.0;
-  const targetVx = moveX * ch.moveSpeed * senSpeedMult * gravDebuffMult * saisokuMult * shaudenMult * airMult * dashMult;
+  const targetVx = moveX * ch.moveSpeed * senSpeedMult * gravDebuffMult * saisokuMult * shaudenMult * speedMult * dashMult;
 
   if (moveX !== 0) {
     // ダッシュターン: ダッシュ中に逆方向入力→少し滑る
