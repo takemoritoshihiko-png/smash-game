@@ -5753,6 +5753,12 @@ function createPlayer(id, charIdx, startX) {
     lastMoveDirTime: 0,    // 前回方向入力フレーム
     fastFalling: false,    // 急降下中
     landLag: 0,            // 着地硬直フレーム
+    // D技（固有追加技）
+    dHoldTimer: 0,          // Dキー長押しフレーム
+    dSkillCooldown: 0,      // クールダウン残りフレーム（600=10秒）
+    dSkillActive: false,    // D技発動中
+    dSkillTimer: 0,         // D技効果残りフレーム
+    dSkillBuff: null,       // バフ種類
     // 波おじ空中強攻撃カウント
     airStrongCount: 0,
     // キング コンボ追跡 (Z×3→X(1.5倍)→C(2倍))
@@ -5973,6 +5979,17 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   if (target.charIdx === 5) finalDamage *= 0.9;
   // パッシブ: タンク(12) 装甲 被ダメ-15%
   if (target.charIdx === 12) finalDamage *= 0.85;
+  // D技バフ: 被ダメ減少
+  if (target.dSkillBuff === 'ironWall') finalDamage *= 0.5;     // うる男 鉄壁
+  if (target.dSkillBuff === 'fortress') finalDamage *= 0.3;     // タンク 要塞化
+  if (target.dSkillBuff === 'killIntent') finalDamage *= 1.2;   // とっこ 被ダメ1.2倍
+  // D技バフ: 与ダメ増加
+  if (attacker.dSkillBuff === 'tensaiBoost') finalDamage *= 1.5; // 天才 覚醒
+  if (attacker.dSkillBuff === 'killIntent') finalDamage *= 1.5;  // とっこ 殺意
+  if (attacker.dSkillBuff === 'fortress') finalDamage *= 1.5;    // タンク 要塞化
+  // D技: メテオ 燃焼拳（1回消費）
+  if (attacker.dSkillBuff === 'burnFist') { finalDamage += 5; attacker.dSkillActive = false; attacker.dSkillBuff = null; }
+  // D技: 熊太郎 熊の怒り（投げ以外では消費しない→投げ側で処理）
 
   target.damage = Math.min(999, target.damage + finalDamage);
   playHitSE();
@@ -6576,7 +6593,9 @@ function executeThrow(grabber, dirX, dirY) {
   const dmgTable = getThrowDmg(grabber.charIdx);
   const kbMult = getThrowKbMultiplier(target.damage);
   // パッシブ: 熊太郎(6) 投げ強化 投げダメ/KB+15%
-  const kumaPassive = grabber.charIdx === 6 ? 1.15 : 1.0;
+  let kumaPassive = grabber.charIdx === 6 ? 1.15 : 1.0;
+  // D技: 熊太郎 熊の怒り（投げ2倍、1回消費）
+  if (grabber.dSkillBuff === 'bearRage') { kumaPassive *= 2.0; grabber.dSkillActive = false; grabber.dSkillBuff = null; }
 
   // 方向別ダメージ/ノックバック
   let throwDmg, kbBase, kbScale, kbAngleDir;
@@ -7227,6 +7246,28 @@ function updateBattle(dt) {
     if (p.comboWindow > 0) p.comboWindow--;
     if (p.airComboTimer > 0) p.airComboTimer--;
     if (p.dragonCooldown > 0) p.dragonCooldown--;
+    updateDSkill(p);
+
+    // Dキー長押し検出
+    let dKeyHeld = false;
+    if (p.id === 0) {
+      dKeyHeld = (onlineMode && !isHost) ? !!remoteKeys.d : !!(keys['d'] || keys['D']);
+    } else if (gameMode === 'cpu') {
+      dKeyHeld = false;
+    } else if (onlineMode && isHost) {
+      dKeyHeld = !!remoteKeys.d;
+    } else {
+      dKeyHeld = !!(keys['r'] || keys['R']); // P2ローカル: Rキー
+    }
+    if (dKeyHeld && p.dSkillCooldown <= 0 && !p.dSkillActive && p.alive && p.hitstun <= 0 && !p.grabbed) {
+      p.dHoldTimer++;
+      if (p.dHoldTimer >= D_SKILL_HOLD_FRAMES) {
+        triggerDSkill(p);
+        p.dHoldTimer = 0;
+      }
+    } else {
+      p.dHoldTimer = 0;
+    }
 
     // 天才: ドラゴンモード処理
     if (p.charIdx === 10) {
@@ -8146,7 +8187,9 @@ function applyMovement(p, moveX, ch) {
   const speedMult = p.grounded ? GROUND_SPEED_MULT : AIR_SPEED_MULT;
   // ダッシュ倍率
   const dashMult = (p.dashing && p.grounded) ? DASH_SPEED_MULT : 1.0;
-  const targetVx = moveX * ch.moveSpeed * senSpeedMult * gravDebuffMult * saisokuMult * shaudenMult * speedMult * dashMult;
+  // D技: 天才 覚醒 速度1.3倍 / タンク 要塞化 移動不可
+  const dSkillSpeedMult = p.dSkillBuff === 'tensaiBoost' ? 1.3 : p.dSkillBuff === 'fortress' ? 0 : 1.0;
+  const targetVx = moveX * ch.moveSpeed * senSpeedMult * gravDebuffMult * saisokuMult * shaudenMult * speedMult * dashMult * dSkillSpeedMult;
 
   if (moveX !== 0) {
     // ダッシュターン: ダッシュ中に逆方向入力→少し滑る
@@ -10580,6 +10623,7 @@ function sendGuestInput() {
     c: !!(keys['c'] || keys['C']),
     s: !!(keys['s'] || keys['S']),
     a: !!(keys['a'] || keys['A']),
+    d: !!(keys['d'] || keys['D']),
   };
   peerConn.send({ type: 'input', keys: myKeys });
 }
@@ -10614,6 +10658,7 @@ function serializePlayer(p) {
     cancelWindow: p.cancelWindow, comboWindow: p.comboWindow, airComboTimer: p.airComboTimer,
     airDodging: p.airDodging, airDodgeTimer: p.airDodgeTimer, airDodgeUsed: p.airDodgeUsed, airDodgeEndlag: p.airDodgeEndlag,
     dashing: p.dashing, fastFalling: p.fastFalling, landLag: p.landLag,
+    dSkillCooldown: p.dSkillCooldown, dSkillActive: p.dSkillActive, dSkillTimer: p.dSkillTimer, dSkillBuff: p.dSkillBuff,
   };
 }
 
@@ -11351,6 +11396,211 @@ function drawTransition() {
   if (selectTransition > 0) {
     ctx.fillStyle = `rgba(0, 0, 0, ${selectTransition})`;
     ctx.fillRect(0, 0, 960, 640);
+  }
+}
+
+// --- D技（固有追加技）システム ---
+const D_SKILL_HOLD_FRAMES = 30;   // 0.5秒長押し
+const D_SKILL_COOLDOWN = 600;     // 10秒クールダウン
+
+function triggerDSkill(p) {
+  if (p.dSkillCooldown > 0 || p.dSkillActive || !p.alive || p.hitstun > 0 || p.grabbed) return;
+  p.dSkillCooldown = D_SKILL_COOLDOWN;
+  const target = players.find(pp => pp.id !== p.id && pp.alive);
+  const dir = p.facingLeft ? -1 : 1;
+  const ci = p.charIdx;
+
+  if (ci === 0 && target) {
+    // ゼン「居合い」: 相手の背後に瞬間移動して斬る
+    const behindDir = target.facingLeft ? 1 : -1;
+    p.x = target.x + behindDir * 50;
+    p.y = target.y;
+    p.facingLeft = behindDir < 0;
+    p.vx = 0; p.vy = 0;
+    const hitbox = { x: p.x - 40, y: p.y - 60, w: 80, h: 80 };
+    checkHitboxAgainstPlayers(p, hitbox, 12, 7, 0.10, -30, 'special');
+    hitEffects.push({ x: p.x, y: p.y - 40, life: 15, maxLife: 15, color: '#AADDFF', size: 40, type: 'charSlash' });
+    cmdNameDisplay.push({ text: '居合い！', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#AADDFF' });
+  } else if (ci === 1) {
+    // ドン「大地震」: 地面を叩いて周囲にダメージ・浮かせる
+    if (p.grounded) {
+      const hitbox = { x: p.x - 90, y: p.y - 30, w: 180, h: 50 };
+      checkHitboxAgainstPlayers(p, hitbox, 10, 8, 0.08, -70, 'special');
+      triggerScreenShake(6, 12);
+      hitEffects.push({ x: p.x, y: p.y, life: 15, maxLife: 15, color: '#FF6644', size: 80, type: 'shockwave' });
+      cmdNameDisplay.push({ text: '大地震！', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FF4422' });
+    }
+  } else if (ci === 2) {
+    // サイソク「分身」: 0.5秒間分身バフ
+    p.dSkillActive = true; p.dSkillTimer = 30; p.dSkillBuff = 'bunshin';
+    cmdNameDisplay.push({ text: '分身！', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#44FF88' });
+  } else if (ci === 3) {
+    // メテオ「燃焼拳」: 次の攻撃に+5ダメージ
+    p.dSkillActive = true; p.dSkillTimer = 600; p.dSkillBuff = 'burnFist';
+    cmdNameDisplay.push({ text: '燃焼拳！', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FF8833' });
+  } else if (ci === 4) {
+    // ロング「砲台展開」: 1秒間連続射撃
+    p.dSkillActive = true; p.dSkillTimer = 60; p.dSkillBuff = 'turret';
+    cmdNameDisplay.push({ text: '砲台展開！', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#66DDFF' });
+  } else if (ci === 5) {
+    // うる男「鉄壁」: 3秒間被ダメ50%減
+    p.dSkillActive = true; p.dSkillTimer = 180; p.dSkillBuff = 'ironWall';
+    cmdNameDisplay.push({ text: '鉄壁！', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#AA88CC' });
+  } else if (ci === 6) {
+    // 熊太郎「熊の怒り」: 次の投げ2倍
+    p.dSkillActive = true; p.dSkillTimer = 600; p.dSkillBuff = 'bearRage';
+    cmdNameDisplay.push({ text: '熊の怒り！', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FF6B6B' });
+  } else if (ci === 7) {
+    // バレット「スナイパー」: 貫通弾を発射
+    const pr = { x: p.x + 30 * dir, y: p.y - 40, vx: 18 * dir, vy: 0, w: 12, h: 6,
+      damage: 15, kbBase: 9, kbScale: 0.12, kbAngle: -20, life: 60, ownerId: p.id,
+      color: '#FFEE44', pcolor: '#FFAA00', shape: 'rect', ownerCharIdx: ci, time: 0, pierce: true, hitTargets: [] };
+    projectiles.push(pr);
+    cmdNameDisplay.push({ text: 'スナイパー！', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FFEE44' });
+  } else if (ci === 8 && target) {
+    // シャうでん「墨吐き」: 前方スタン攻撃
+    const hitbox = { x: p.x + (dir > 0 ? 0 : -80), y: p.y - 50, w: 80, h: 60 };
+    for (const t2 of players) {
+      if (t2.id === p.id || !t2.alive || t2.invincibleTimer > 0) continue;
+      const th = getPlayerHitbox(t2);
+      if (hitboxCollides(hitbox.x, hitbox.y, hitbox.w, hitbox.h, th.x, th.y, th.w, th.h)) {
+        t2.hitstun = Math.max(t2.hitstun, 30); t2.vx = 0; t2.vy = 0;
+        t2.damage = Math.min(999, t2.damage + 5);
+        hitEffects.push({ x: t2.x, y: t2.y - 40, life: 15, maxLife: 15, color: '#222222', size: 30 });
+      }
+    }
+    cmdNameDisplay.push({ text: '墨吐き！', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#222266' });
+  } else if (ci === 9 && target) {
+    // ジャッジマン「判決」: 100%以上で即撃墜
+    if (target.damage >= 100) {
+      target.vx = dir * 30; target.vy = -20;
+      target.hitstun = 60;
+      hitFlash.alpha = 0.5; hitFlash.color = '#FFD700';
+      triggerScreenShake(10, 20);
+      hitEffects.push({ x: target.x, y: target.y - 40, life: 20, maxLife: 20, color: '#FFD700', size: 80 });
+      cmdNameDisplay.push({ text: '有罪！', x: target.x, y: target.y - 120, life: 60, maxLife: 60, color: '#FFD700' });
+    } else {
+      cmdNameDisplay.push({ text: '無罪…', x: target.x, y: target.y - 100, life: 50, maxLife: 50, color: '#888888' });
+    }
+  } else if (ci === 10) {
+    // 天才「変形」: 2秒間攻撃1.5倍・速度1.3倍
+    p.dSkillActive = true; p.dSkillTimer = 120; p.dSkillBuff = 'tensaiBoost';
+    cmdNameDisplay.push({ text: '覚醒！', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FF6600' });
+  } else if (ci === 11) {
+    // Catbus「全力疾走」: 超高速ダッシュ攻撃
+    p.vx = dir * 25; p.vy = 0;
+    p.dSkillActive = true; p.dSkillTimer = 15; p.dSkillBuff = 'catbusDash';
+    const hitbox = { x: p.x - 30, y: p.y - 50, w: 60, h: 60 };
+    checkHitboxAgainstPlayers(p, hitbox, 14, 8, 0.10, -25, 'special');
+    cmdNameDisplay.push({ text: '全力疾走！', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FFBB44' });
+  } else if (ci === 12) {
+    // タンク「要塞化」: 3秒間移動不可・被ダメ70%減・攻撃1.5倍
+    p.dSkillActive = true; p.dSkillTimer = 180; p.dSkillBuff = 'fortress';
+    cmdNameDisplay.push({ text: '要塞化！', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#A0B858' });
+  } else if (ci === 13) {
+    // 波おじ「怒涛のラッシュ」: 10連打
+    p.dSkillActive = true; p.dSkillTimer = 30; p.dSkillBuff = 'rush';
+    cmdNameDisplay.push({ text: '怒涛のラッシュ！', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FF6644' });
+  } else if (ci === 14) {
+    // とっこ「殺意の波動」: 5秒間全技1.5倍・被ダメ1.2倍
+    p.dSkillActive = true; p.dSkillTimer = 300; p.dSkillBuff = 'killIntent';
+    cmdNameDisplay.push({ text: '殺意の波動！', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#CC44FF' });
+  } else if (ci === 15) {
+    // サム「カーニバル」: 爆弾5個ばら撒き
+    for (let i = 0; i < 5; i++) {
+      const angle = -Math.PI * 0.8 + (i / 4) * Math.PI * 0.6;
+      const spd = 6 + Math.random() * 3;
+      projectiles.push({ x: p.x, y: p.y - 40, vx: Math.cos(angle) * spd * dir, vy: Math.sin(angle) * spd - 3,
+        w: 10, h: 10, damage: 8, kbBase: 6, kbScale: 0.08, kbAngle: -40, life: 50, ownerId: p.id,
+        color: ['#FFD700','#FF4444','#4488FF','#44FF88','#FF88AA'][i], pcolor: '#FFFFFF',
+        shape: 'star', ownerCharIdx: ci, time: 0 });
+    }
+    cmdNameDisplay.push({ text: 'カーニバル！', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FFD700' });
+  } else if (ci === 16 && target) {
+    // キング「王の威圧」: 相手の移動速度3秒間0.7倍
+    target.gravityDebuffTimer = Math.max(target.gravityDebuffTimer, 180);
+    cmdNameDisplay.push({ text: '王の威圧！', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FFD700' });
+    hitEffects.push({ x: target.x, y: target.y - 40, life: 20, maxLife: 20, color: '#FFD700', size: 40, type: 'ring' });
+  } else if (ci === 17) {
+    // おんぱ「超音波」: 画面全体に音波ノックバック
+    for (const t2 of players) {
+      if (t2.id === p.id || !t2.alive || t2.invincibleTimer > 0) continue;
+      const pushDir = t2.x > p.x ? 1 : -1;
+      t2.vx = pushDir * 12; t2.vy = -8;
+      t2.hitstun = 15; t2.damage = Math.min(999, t2.damage + 5);
+    }
+    hitEffects.push({ x: p.x, y: p.y - 35, life: 18, maxLife: 18, color: '#88FFFF', size: 120, type: 'ring' });
+    triggerScreenShake(5, 10);
+    cmdNameDisplay.push({ text: '超音波！', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#88FFFF' });
+  } else if (ci === 18) {
+    // セン「大盛りパワー」: 満腹パワー即発動・効果時間2倍
+    p.senBuffTimer = 1200; // 20秒
+    cmdNameDisplay.push({ text: '大盛りパワー！', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FF8844' });
+  } else if (ci === 19) {
+    // ドスボス「全弾発射」: A・B・C全パターン同時
+    // A: 砲弾
+    spawnProjectile(p, { speed:11, damage:11, kbBase:6, kbScale:0.10, kbAngle:-25, w:30, h:28, life:45, color:'#CC66FF', pcolor:'#9944CC' });
+    // B: スタン弾
+    projectiles.push({ x: p.x + 30*dir, y: p.y - 50, vx: 9*dir, vy: -2, w:20, h:28,
+      damage:7, kbBase:3, kbScale:0.05, kbAngle:-15, life:40, ownerId: p.id,
+      color:'#44AA22', pcolor:'#33881A', shape:'rect', ownerCharIdx:ci, time:0, stun:true, stunFrames:30 });
+    // C: 爆発
+    const boomHitbox = { x: p.x - 70, y: p.y - 70, w: 140, h: 100 };
+    checkHitboxAgainstPlayers(p, boomHitbox, 15, 8, 0.14, -40, 'special');
+    p.damage = Math.min(999, p.damage + 6);
+    triggerScreenShake(8, 15);
+    hitEffects.push({ x: p.x, y: p.y - 35, life: 20, maxLife: 20, color: '#FF6600', size: 80 });
+    cmdNameDisplay.push({ text: '全弾発射！', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#CC66FF' });
+  }
+  playHitSound('cmd');
+}
+
+// --- D技更新（メインループから毎フレーム呼ぶ） ---
+function updateDSkill(p) {
+  if (p.dSkillCooldown > 0) p.dSkillCooldown--;
+  if (!p.dSkillActive) return;
+  p.dSkillTimer--;
+  if (p.dSkillTimer <= 0) { p.dSkillActive = false; p.dSkillBuff = null; return; }
+  const dir = p.facingLeft ? -1 : 1;
+
+  // 分身（サイソク）: 毎フレーム分身が攻撃判定
+  if (p.dSkillBuff === 'bunshin') {
+    const bx = p.x - dir * 30, by = p.y;
+    const hitbox = { x: bx - 20, y: by - 50, w: 40, h: 50 };
+    for (const t of players) {
+      if (t.id === p.id || !t.alive || t.invincibleTimer > 0) continue;
+      const th = getPlayerHitbox(t);
+      if (hitboxCollides(hitbox.x, hitbox.y, hitbox.w, hitbox.h, th.x, th.y, th.w, th.h) && p.dSkillTimer % 6 === 0) {
+        applyHit(p, t, 3, 2, 0.02, -20, 'normal');
+      }
+    }
+  }
+  // 砲台展開（ロング）: 10Fごとに弾発射
+  if (p.dSkillBuff === 'turret' && p.dSkillTimer % 10 === 0) {
+    projectiles.push({ x: p.x + 20*dir, y: p.y - 40, vx: 12*dir, vy: (Math.random()-0.5)*2,
+      w: 8, h: 6, damage: 4, kbBase: 3, kbScale: 0.04, kbAngle: -15, life: 30, ownerId: p.id,
+      color: '#66DDFF', pcolor: '#A0B4FF', shape: 'rect', ownerCharIdx: p.charIdx, time: 0 });
+  }
+  // Catbus全力疾走: ダッシュ中ヒット判定
+  if (p.dSkillBuff === 'catbusDash') {
+    const hitbox = { x: p.x - 30, y: p.y - 50, w: 60, h: 60 };
+    for (const t of players) {
+      if (t.id === p.id || !t.alive || t.invincibleTimer > 0) continue;
+      const th = getPlayerHitbox(t);
+      if (hitboxCollides(hitbox.x, hitbox.y, hitbox.w, hitbox.h, th.x, th.y, th.w, th.h) && p.dSkillTimer % 5 === 0) {
+        applyHit(p, t, 8, 6, 0.08, -30, 'strong');
+      }
+    }
+  }
+  // 波おじ ラッシュ: 3Fごとにパンチ判定
+  if (p.dSkillBuff === 'rush' && p.dSkillTimer % 3 === 0) {
+    const hitbox = { x: p.x + (dir > 0 ? 0 : -50), y: p.y - 50, w: 50, h: 50 };
+    checkHitboxAgainstPlayers(p, hitbox, 3, 2, 0.03, -15, 'normal');
+    p.hitTargets = []; // 毎回リセットで連打
+  }
+  // 要塞化（タンク）: 移動不可
+  if (p.dSkillBuff === 'fortress') {
+    p.vx = 0;
   }
 }
 
