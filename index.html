@@ -6169,6 +6169,72 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
     });
   }
 
+  // --- キャラ固有ヒットエフェクト（小さめ・0.2〜0.3秒） ---
+  const efx = hx, efy = hy;
+  const ci = attacker.charIdx;
+  if (ci === 0) {
+    // ゼン: 細い青白い斬撃線
+    hitEffects.push({ x: efx, y: efy, life: 14, maxLife: 14, color: '#AADDFF', size: 18, type: 'charSlash' });
+  } else if (ci === 1) {
+    // ドン: 小さな赤い火花
+    for (let i = 0; i < 3; i++) sparks.push({ x: efx + (Math.random()-0.5)*12, y: efy + (Math.random()-0.5)*12, vx: (Math.random()-0.5)*4, vy: -1-Math.random()*2, life: 12, maxLife: 12, color: '#FF4422', size: 2+Math.random(), gravity: 0.1, drag: 0.96 });
+  } else if (ci === 2) {
+    // サイソク: 薄い緑の残像1枚
+    hitEffects.push({ x: efx, y: efy, life: 12, maxLife: 12, color: 'rgba(68,255,136,0.3)', size: 15, type: 'charGhost' });
+  } else if (ci === 3) {
+    // メテオ: 小さなオレンジ粒子3〜4個
+    for (let i = 0; i < 3+Math.floor(Math.random()*2); i++) sparks.push({ x: efx+(Math.random()-0.5)*10, y: efy+(Math.random()-0.5)*10, vx: (Math.random()-0.5)*3, vy: -1-Math.random()*2, life: 14, maxLife: 14, color: '#FFAA33', size: 1.5+Math.random(), gravity: 0.08, drag: 0.97 });
+  } else if (ci === 4) {
+    // ロング: 小さな水色スパーク
+    hitEffects.push({ x: efx, y: efy, life: 10, maxLife: 10, color: '#66DDFF', size: 12, type: 'charSpark' });
+  } else if (ci === 5) {
+    // うる男: 薄い紫の円
+    hitEffects.push({ x: efx, y: efy, life: 15, maxLife: 15, color: '#AA88CC', size: 16, type: 'ring' });
+  } else if (ci === 6) {
+    // 熊太郎: 小さな茶色い土煙
+    for (let i = 0; i < 3; i++) sparks.push({ x: efx+(Math.random()-0.5)*10, y: efy+5, vx: (Math.random()-0.5)*2, vy: -0.5-Math.random(), life: 14, maxLife: 14, color: '#AA8855', size: 2+Math.random()*2, gravity: 0.03, drag: 0.95 });
+  } else if (ci === 7) {
+    // バレット: 細い黄色ライン
+    hitEffects.push({ x: efx, y: efy, life: 12, maxLife: 12, color: '#FFEE44', size: 16, type: 'charSlash' });
+  } else if (ci === 8) {
+    // シャうでん: 小さな水色リング
+    hitEffects.push({ x: efx, y: efy, life: 14, maxLife: 14, color: '#66EEFF', size: 14, type: 'ring' });
+  } else if (ci === 9) {
+    // ジャッジマン: 薄い金色の光
+    hitEffects.push({ x: efx, y: efy, life: 15, maxLife: 15, color: '#FFD700', size: 12, type: 'charGlow' });
+  } else if (ci === 10) {
+    // 天才: 小さな黒紫の粒子
+    for (let i = 0; i < 3; i++) sparks.push({ x: efx+(Math.random()-0.5)*10, y: efy+(Math.random()-0.5)*10, vx: (Math.random()-0.5)*3, vy: -1-Math.random(), life: 14, maxLife: 14, color: '#6622AA', size: 1.5+Math.random(), gravity: 0.06, drag: 0.97 });
+  } else if (ci === 11) {
+    // Catbus: 薄い黄色ライン
+    hitEffects.push({ x: efx, y: efy, life: 12, maxLife: 12, color: '#FFCC44', size: 14, type: 'charSlash' });
+  } else if (ci === 12) {
+    // タンク: 小さな灰色の煙
+    for (let i = 0; i < 3; i++) sparks.push({ x: efx+(Math.random()-0.5)*10, y: efy, vx: (Math.random()-0.5)*2, vy: -0.5-Math.random()*1.5, life: 16, maxLife: 16, color: '#999999', size: 2.5+Math.random()*2, gravity: -0.02, drag: 0.95 });
+  } else if (ci === 13) {
+    // 波おじ: 小さな赤い円
+    hitEffects.push({ x: efx, y: efy, life: 12, maxLife: 12, color: '#FF4444', size: 12, type: 'ring' });
+  } else if (ci === 14) {
+    // とっこ: 細い緑ライン
+    hitEffects.push({ x: efx, y: efy, life: 10, maxLife: 10, color: '#44FF88', size: 16, type: 'charSlash' });
+  } else if (ci === 15) {
+    // サム: 小さなカラフル粒子2〜3個
+    const samColors = ['#FFD700','#FF4444','#4488FF'];
+    for (let i = 0; i < 2+Math.floor(Math.random()*2); i++) sparks.push({ x: efx+(Math.random()-0.5)*10, y: efy+(Math.random()-0.5)*10, vx: (Math.random()-0.5)*3, vy: -1-Math.random()*2, life: 14, maxLife: 14, color: samColors[i%3], size: 1.5+Math.random(), gravity: 0.08, drag: 0.97 });
+  } else if (ci === 16) {
+    // キング: 薄い金色リング
+    hitEffects.push({ x: efx, y: efy, life: 14, maxLife: 14, color: '#FFD700', size: 14, type: 'ring' });
+  } else if (ci === 17) {
+    // おんぱ: 小さな水色波紋
+    hitEffects.push({ x: efx, y: efy, life: 16, maxLife: 16, color: '#88FFFF', size: 18, type: 'ring' });
+  } else if (ci === 18) {
+    // セン: 小さな白い粒子（湯気）
+    for (let i = 0; i < 3; i++) sparks.push({ x: efx+(Math.random()-0.5)*8, y: efy, vx: (Math.random()-0.5)*1.5, vy: -1-Math.random()*1.5, life: 16, maxLife: 16, color: '#FFFFFF', size: 2+Math.random()*1.5, gravity: -0.03, drag: 0.96 });
+  } else if (ci === 19) {
+    // ドスボス: 小さな紫の火花
+    for (let i = 0; i < 3; i++) sparks.push({ x: efx+(Math.random()-0.5)*12, y: efy+(Math.random()-0.5)*8, vx: (Math.random()-0.5)*4, vy: -1-Math.random()*2, life: 12, maxLife: 12, color: '#CC66FF', size: 2+Math.random(), gravity: 0.1, drag: 0.96 });
+  }
+
   // Floating damage number (larger for strong/special)
   const numScale = isSpecial ? Math.min(2.5, 1.2 + kb * 0.08) : isStrong ? Math.min(2.2, 1.0 + kb * 0.07) : Math.min(1.8, 0.8 + kb * 0.06);
   damageNumbers.push({
@@ -8499,6 +8565,42 @@ function drawBattle(dt) {
       ctx.beginPath();
       ctx.arc(e.x, e.y, radius, 0, Math.PI * 2);
       ctx.stroke();
+    } else if (e.type === 'charSlash') {
+      // キャラ固有: 細い斬撃線
+      ctx.globalAlpha = (1 - t) * 0.7;
+      ctx.strokeStyle = e.color;
+      ctx.lineWidth = 1.5 * (1 - t);
+      const angle = Math.random() * 0.5 - 0.25 + (e.x % 2 ? 0.8 : -0.8);
+      const len = e.size * (0.5 + t * 0.5);
+      ctx.beginPath();
+      ctx.moveTo(e.x - Math.cos(angle) * len, e.y - Math.sin(angle) * len);
+      ctx.lineTo(e.x + Math.cos(angle) * len, e.y + Math.sin(angle) * len);
+      ctx.stroke();
+    } else if (e.type === 'charGhost') {
+      // キャラ固有: 薄い残像円
+      ctx.globalAlpha = (1 - t) * 0.3;
+      ctx.fillStyle = e.color;
+      ctx.beginPath();
+      ctx.arc(e.x, e.y, e.size * (1 - t * 0.5), 0, Math.PI * 2);
+      ctx.fill();
+    } else if (e.type === 'charSpark') {
+      // キャラ固有: 小さなスパーク（十字）
+      ctx.globalAlpha = (1 - t) * 0.7;
+      ctx.strokeStyle = e.color;
+      ctx.lineWidth = 1.5 * (1 - t);
+      const r = e.size * (0.3 + t * 0.7);
+      ctx.beginPath(); ctx.moveTo(e.x - r, e.y); ctx.lineTo(e.x + r, e.y); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(e.x, e.y - r); ctx.lineTo(e.x, e.y + r); ctx.stroke();
+    } else if (e.type === 'charGlow') {
+      // キャラ固有: 薄い光（グラデーション円）
+      ctx.globalAlpha = (1 - t) * 0.5;
+      const g = ctx.createRadialGradient(e.x, e.y, 0, e.x, e.y, e.size * (1 - t * 0.3));
+      g.addColorStop(0, e.color);
+      g.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(e.x, e.y, e.size * (1 - t * 0.3), 0, Math.PI * 2);
+      ctx.fill();
     } else if (e.type === 'shockwave') {
       // 着地衝撃波 - 横に広がる半円
       ctx.globalAlpha = (1 - t) * 0.6;
