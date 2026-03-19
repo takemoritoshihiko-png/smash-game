@@ -4364,12 +4364,14 @@ function drawDifficulty(dt) {
 // ============================================================
 // BATTLE SYSTEM
 // ============================================================
-const GRAVITY = 0.66;
-const GRAVITY_RISE = 0.52;       // 上昇中の重力（弱め）
-const GRAVITY_FALL = 0.78;       // 落下中の重力（強め）
-const GRAVITY_APEX = 0.32;       // 頂点付近の重力（とても弱い）
-const APEX_THRESHOLD = 2.8;      // 頂点判定の速度閾値
-const MAX_FALL_SPEED = 16.8;
+// 旧値: GRAVITY=0.66, RISE=0.52, FALL=0.78, APEX=0.32, MAX_FALL=16.8
+const GRAVITY = 0.858;            // 通常重力（旧0.66×1.3）
+const GRAVITY_RISE = 0.573;       // 上昇中の重力（旧×1.3×0.85=弱め）
+const GRAVITY_FALL = 1.014;       // 落下中の重力（旧×1.3=速い落下）
+const GRAVITY_APEX = 0.291;       // 頂点付近の重力（旧×1.3×0.7=滞空感）
+const APEX_THRESHOLD = 3.2;       // 頂点判定の速度閾値（やや広め）
+const MAX_FALL_SPEED = 18.5;      // 落下上限（旧16.8→速め）
+const FAST_FALL_MULT = 1.8;       // 急降下倍率
 const STAGE_LEFT = 90;
 const STAGE_RIGHT = 870;
 const STAGE_GROUND_Y = 450;
@@ -4378,12 +4380,20 @@ const BLAST_BOTTOM = 1000;
 const BLAST_LEFT = -600;
 const BLAST_RIGHT = 1560;
 
-// 慣性・摩擦パラメータ
-const GROUND_ACCEL = 0.45;       // 地上加速度
-const GROUND_FRICTION = 0.82;    // 地上摩擦（入力なし時）
-const AIR_ACCEL = 0.28;          // 空中加速度
-const AIR_FRICTION = 0.94;       // 空中摩擦（入力なし時・慣性大）
+// 慣性・摩擦パラメータ（旧値: GROUND_ACCEL=0.45, FRICTION=0.82, AIR_ACCEL=0.28, AIR_FRICTION=0.94）
+const GROUND_ACCEL = 0.22;       // 地上加速度（5Fで最高速→緩やかに加速）
+const GROUND_FRICTION = 0.72;    // 地上摩擦（3Fで停止→慣性あり）
+const AIR_ACCEL = 0.14;          // 空中加速度（地上より遅い方向転換）
+const AIR_FRICTION = 0.96;       // 空中摩擦（慣性が残りやすい）
+const AIR_SPEED_MULT = 0.85;     // 空中移動速度制限
 const STAGE_FRICTION = 1.0;      // ステージ摩擦倍率（1.0=通常、0.5=氷）
+// ダッシュ
+const DASH_SPEED_MULT = 1.4;     // ダッシュ時速度倍率
+const DASH_INPUT_WINDOW = 12;    // ダッシュ入力受付フレーム
+const DASH_TURN_FRICTION = 0.85; // ダッシュターン時の滑り
+// 着地硬直
+const LAND_LAG_NORMAL = 2;       // 通常着地硬直
+const LAND_LAG_FASTFALL = 4;     // 急降下着地硬直
 
 // 壁バウンドパラメータ
 const WALL_BOUNCE_THRESHOLD = 10; // この速度以上で壁バウンド発生
@@ -5735,6 +5745,13 @@ function createPlayer(id, charIdx, startX) {
     damageTint: 0,    // frames of red flash
     spinAngle: 0,     // rotation from strong knockback
     wasGrounded: true, // for landing detection
+    // ダッシュ・急降下
+    dashing: false,
+    dashTimer: 0,          // ダッシュ持続
+    lastMoveDir: 0,        // 前回入力方向
+    lastMoveDirTime: 0,    // 前回方向入力フレーム
+    fastFalling: false,    // 急降下中
+    landLag: 0,            // 着地硬直フレーム
     // 波おじ空中強攻撃カウント
     airStrongCount: 0,
     // キング コンボ追跡 (Z×3→X(1.5倍)→C(2倍))
@@ -7755,6 +7772,47 @@ function updateBattle(dt) {
       }
     }
 
+    // --- ダッシュ検出: 同方向に素早く2回入力 ---
+    if (moveX !== 0 && p.grounded && !p.dashing) {
+      if (moveX === p.lastMoveDir && (battleTime - p.lastMoveDirTime) < DASH_INPUT_WINDOW && p.lastMoveDirTime > 0) {
+        p.dashing = true;
+      }
+      if (moveX !== p.lastMoveDir) {
+        p.lastMoveDir = moveX;
+        p.lastMoveDirTime = battleTime;
+      }
+    }
+    if (p.dashing && !p.grounded) p.dashing = false; // 空中ではダッシュ解除
+
+    // --- 急降下: 下キー入力で落下速度アップ ---
+    let downPress = false;
+    if (p.id === 0) {
+      downPress = (onlineMode && !isHost) ? !!remoteKeys.down : !!keys['ArrowDown'];
+    } else if (gameMode === 'cpu') {
+      downPress = false;
+    } else if (onlineMode && isHost) {
+      downPress = !!remoteKeys.down;
+    } else if (onlineMode && !isHost) {
+      downPress = !!keys['ArrowDown'];
+    } else {
+      downPress = !!(keys['s'] || keys['S']);
+    }
+    if (downPress && !p.grounded && p.vy > 0 && !p.fastFalling) {
+      p.fastFalling = true;
+    }
+    if (p.grounded) p.fastFalling = false;
+
+    // --- 着地硬直 ---
+    if (p.landLag > 0) {
+      p.landLag--;
+      p.vx *= 0.8; // 硬直中は減速
+      p.vy += getGravity(p);
+      if (p.vy > MAX_FALL_SPEED) p.vy = MAX_FALL_SPEED;
+      p.y += p.vy;
+      landingCheck(p);
+      continue;
+    }
+
     applyMovement(p, moveX, ch);
     if (moveX < 0) p.facingLeft = true;
     if (moveX > 0) p.facingLeft = false;
@@ -7841,13 +7899,14 @@ function updateBattle(dt) {
     }
 
     if (jumpPress && !p.jumpUsed && p.jumps > 0) {
-      let jumpMult = 1.0;
+      let jumpMult = 1.15; // ジャンプ初速を旧値より15%アップ
       // パッシブ: 天才(10) 復帰強化 ジャンプ力+10%
-      if (p.charIdx === 10) jumpMult = 1.1;
+      if (p.charIdx === 10) jumpMult *= 1.1;
       // パッシブ: サム(15) 3段ジャンプ強化 3回目+15%
-      if (p.charIdx === 15 && p.jumps === 1) jumpMult = 1.15;
+      if (p.charIdx === 15 && p.jumps === 1) jumpMult *= 1.15;
       p.vy = ch.jumpPower * jumpMult;
       p.jumps--; p.jumpUsed = true; p.grounded = false;
+      p.fastFalling = false; // ジャンプ時に急降下リセット
       p.jumpSquash = 6; // jump anticipation squash
       playHitSound('jump');
     }
@@ -7855,7 +7914,10 @@ function updateBattle(dt) {
 
     // スマブラ風重力: 上昇=弱、頂点=極弱、落下=強
     p.vy += getGravity(p);
-    if (p.vy > MAX_FALL_SPEED) p.vy = MAX_FALL_SPEED;
+    // 急降下: 落下速度を倍率で加速
+    const effectiveMaxFall = p.fastFalling ? MAX_FALL_SPEED * FAST_FALL_MULT : MAX_FALL_SPEED;
+    if (p.fastFalling && p.vy > 0) p.vy = Math.min(p.vy * 1.1, effectiveMaxFall); // 急降下時加速
+    if (p.vy > effectiveMaxFall) p.vy = effectiveMaxFall;
     p.x += p.vx;
     p.y += p.vy;
     const wasGroundedBefore = p.grounded;
@@ -7863,14 +7925,19 @@ function updateBattle(dt) {
     wallBounceCheck(p);
     blastCheck(p);
 
-    // Landing detection - stronger squash for faster falls + dust particles
+    // Landing detection - stronger squash for faster falls + dust particles + 着地硬直
     if (!wasGroundedBefore && p.grounded) {
       if (p.charIdx === 13) p.airStrongCount = 0;
       const prevVy = p.vy || 0;
       const impactStrength = Math.min(Math.abs(prevVy) / MAX_FALL_SPEED, 1);
       // パッシブ: Catbus(11) 着地強化 着地硬直-15%
-      const landLag = p.charIdx === 11 ? 0.85 : 1.0;
-      p.landSquash = Math.floor((8 + impactStrength * 4) * landLag);
+      const landLagPassive = p.charIdx === 11 ? 0.85 : 1.0;
+      p.landSquash = Math.floor((8 + impactStrength * 4) * landLagPassive);
+      // 着地硬直フレーム
+      const baseLandLag = p.fastFalling ? LAND_LAG_FASTFALL : LAND_LAG_NORMAL;
+      p.landLag = Math.floor(baseLandLag * landLagPassive);
+      p.fastFalling = false;
+      p.dashing = false;
 
       // ③ 着地時パーティクル（攻撃専用エフェクトがある場合はスキップ）
       if (impactStrength > 0.15 && p.specialState !== 'slamHit' && p.specialState !== 'slamming') {
@@ -8000,22 +8067,33 @@ function getGravity(p) {
 // 慣性付き速度更新
 function applyMovement(p, moveX, ch) {
   const accel = p.grounded ? GROUND_ACCEL : AIR_ACCEL;
-  const friction = p.grounded ? GROUND_FRICTION * STAGE_FRICTION : AIR_FRICTION;
+  let friction = p.grounded ? GROUND_FRICTION * STAGE_FRICTION : AIR_FRICTION;
   const senSpeedMult = (p.charIdx === 18 && p.senBuffTimer > 0) ? 1.3 : 1;
   const gravDebuffMult = (p.gravityDebuffTimer > 0) ? 0.5 : 1;
   // パッシブ: サイソク(2) ダッシュ速度+15%（地上）
   const saisokuMult = (p.charIdx === 2 && p.grounded) ? 1.15 : 1;
   // パッシブ: シャうでん(8) 空中機動強化+15%（空中）
   const shaudenMult = (p.charIdx === 8 && !p.grounded) ? 1.15 : 1;
-  const targetVx = moveX * ch.moveSpeed * senSpeedMult * gravDebuffMult * saisokuMult * shaudenMult;
+  // 空中移動速度制限
+  const airMult = p.grounded ? 1.0 : AIR_SPEED_MULT;
+  // ダッシュ倍率
+  const dashMult = (p.dashing && p.grounded) ? DASH_SPEED_MULT : 1.0;
+  const targetVx = moveX * ch.moveSpeed * senSpeedMult * gravDebuffMult * saisokuMult * shaudenMult * airMult * dashMult;
 
   if (moveX !== 0) {
+    // ダッシュターン: ダッシュ中に逆方向入力→少し滑る
+    if (p.dashing && p.grounded && moveX !== 0 && Math.sign(p.vx) !== 0 && Math.sign(p.vx) !== moveX) {
+      p.vx *= DASH_TURN_FRICTION;
+      p.dashing = false;
+    }
     // 入力あり: 目標速度に向かって加速
     p.vx += (targetVx - p.vx) * accel;
   } else {
     // 入力なし: 摩擦で減速
     p.vx *= friction;
     if (Math.abs(p.vx) < 0.1) p.vx = 0;
+    // 地上で入力なし→ダッシュ解除
+    if (p.grounded) p.dashing = false;
   }
 }
 
@@ -10431,6 +10509,7 @@ function serializePlayer(p) {
     dosbossRandomPattern: p.dosbossRandomPattern, gravityDebuffTimer: p.gravityDebuffTimer,
     cancelWindow: p.cancelWindow, comboWindow: p.comboWindow, airComboTimer: p.airComboTimer,
     airDodging: p.airDodging, airDodgeTimer: p.airDodgeTimer, airDodgeUsed: p.airDodgeUsed, airDodgeEndlag: p.airDodgeEndlag,
+    dashing: p.dashing, fastFalling: p.fastFalling, landLag: p.landLag,
   };
 }
 
