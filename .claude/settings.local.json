@@ -46,7 +46,9 @@
       "Bash(~/bin/gh auth:*)",
       "Bash(~/bin/gh api:*)",
       "WebFetch(domain:takemoritoshihiko-png.github.io)",
-      "Bash(pip3 install:*)"
+      "Bash(pip3 install:*)",
+      "Bash(~/bin/gh repo:*)",
+      "Bash(pip install:*)"
     ]
   }
 }
