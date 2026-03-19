@@ -4819,8 +4819,34 @@ const GRAB_HOLD_FRAMES = 20;    // (legacy, unused)
 const GRAB_DURATION = 90;       // max frames holding grabbed opponent
 const THROW_BASE_KB = 8;
 const THROW_KB_SCALE = 0.10;
-const THROW_GRAB_FRAMES = 10;   // 掴みモーション（10F）
-const THROW_EXEC_FRAMES = 15;   // 投げ実行モーション（15F）
+const THROW_GRAB_FRAMES = 10;   // 掴みモーション デフォルト（10F）
+const THROW_EXEC_FRAMES = 10;   // 投げ実行モーション（10F）※旧15Fから5F短縮
+// キャラ別掴み発生フレーム数
+const CHAR_GRAB_FRAMES = [
+  10, // 0:ゼン (バランス型)
+  14, // 1:ドン (パワー型)
+   6, // 2:サイソク (スピード型)
+  12, // 3:メテオ (テクニック型→遠距離/特殊)
+  12, // 4:ロング (機械槍型→遠距離/特殊)
+  12, // 5:うる男 (ディフェンス型→遠距離/特殊)
+  10, // 6:熊太郎 (テクニック型→バランス)
+  12, // 7:バレット (完全遠距離型→遠距離/特殊)
+   6, // 8:シャうでん (スピード型)
+  10, // 9:ジャッジマン (バランス型)
+  12, // 10:天才 (変形型→遠距離/特殊)
+   6, // 11:Catbus (スピード型)
+  14, // 12:タンク (パワー型)
+  10, // 13:波おじ (テクニック型→バランス)
+   6, // 14:とっこ (超攻撃型→スピード)
+   6, // 15:サム (空中戦型→スピード)
+  10, // 16:キング (上級者型→バランス)
+  12, // 17:おんぱ (音波型→遠距離/特殊)
+  10, // 18:セン (テクニック型→バランス)
+  14, // 19:ドスボス (トリッキー型→パワー)
+];
+function getGrabFrames(charIdx) {
+  return CHAR_GRAB_FRAMES[charIdx] || THROW_GRAB_FRAMES;
+}
 const THROW_IMMUNE_FRAMES = 20; // 投げ後の投げ無敵（20F）
 const THROW_TECH_WINDOW = 10;   // 投げ抜け受付フレーム（10F）
 
@@ -6338,7 +6364,7 @@ function tryGrab(p) {
       p.grabTimer = 0;
       p.attacking = false;
       p.throwPhase = 1; // 掴みフェーズ開始
-      p.throwPhaseTimer = THROW_GRAB_FRAMES;
+      p.throwPhaseTimer = getGrabFrames(p.charIdx);
       target.grabbed = true;
       target.grabbedBy = p.id;
       target.hitstun = 0;
