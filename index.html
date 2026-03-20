@@ -387,6 +387,19 @@ const characters = [
     jumpPower: -11.5,
     weight: 1.25
   },
+  {
+    name: '怖',
+    type: 'ホラー型',
+    color: '#440022',
+    accent: '#CC0044',
+    dark: '#220011',
+    stats: { power: 4, speed: 3, tech: 4, defense: 1 },
+    desc: '恐怖を喰らう亡霊',
+    bodyColors: { main: '#440022', sub: '#CC0044', skin: '#AAAAAA' },
+    moveSpeed: 7.56,
+    jumpPower: -13.5,
+    weight: 0.75
+  },
 ];
 
 // --- Audio unlock on first interaction ---
@@ -464,6 +477,8 @@ const kingkingImg = new Image();
 kingkingImg.src = 'images/kingking.png?v=2';
 const satoruImg = new Image();
 satoruImg.src = 'images/satoru.png';
+const kowaiImg = new Image();
+kowaiImg.src = 'images/kowai.png';
 const bgImg = new Image();
 bgImg.src = 'images/bg.png';
 
@@ -1867,6 +1882,59 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.beginPath(); ctx.moveTo(-3 * s, -15 * s); ctx.lineTo(3 * s, -15 * s); ctx.stroke();
       ctx.lineWidth = 1;
     }
+  } else if (charIndex === 24) {
+    // 怖 - 恐怖を喰らう亡霊
+    if (kowaiImg.complete && kowaiImg.naturalWidth > 0) {
+      const imgW = 75 * s;
+      const imgH = 95 * s;
+      ctx.drawImage(kowaiImg, -imgW / 2, -38 * s, imgW, imgH);
+    } else {
+      // Canvas fallback: ホラー系亡霊
+      // 浮遊する裾
+      ctx.fillStyle = '#220011';
+      ctx.beginPath();
+      ctx.moveTo(-12 * s, 15 * s);
+      ctx.lineTo(-16 * s, 44 * s);
+      ctx.lineTo(-8 * s, 40 * s);
+      ctx.lineTo(0, 44 * s);
+      ctx.lineTo(8 * s, 40 * s);
+      ctx.lineTo(16 * s, 44 * s);
+      ctx.lineTo(12 * s, 15 * s);
+      ctx.closePath(); ctx.fill();
+      // 体（ローブ）
+      ctx.fillStyle = '#330018';
+      ctx.beginPath(); ctx.ellipse(0, 0, 13 * s, 18 * s, 0, 0, Math.PI * 2); ctx.fill();
+      // 腕（爪つき）
+      ctx.fillStyle = '#440022';
+      ctx.fillRect(-18 * s, -5 * s, 6 * s, 18 * s);
+      ctx.fillRect(12 * s, -5 * s, 6 * s, 18 * s);
+      // 爪
+      ctx.fillStyle = '#CC0044';
+      for (let i = 0; i < 3; i++) {
+        ctx.fillRect(-18 * s + i * 2 * s, 13 * s, 1.5 * s, 5 * s);
+        ctx.fillRect(12 * s + i * 2 * s, 13 * s, 1.5 * s, 5 * s);
+      }
+      // 頭
+      ctx.fillStyle = '#AAAAAA';
+      ctx.beginPath(); ctx.arc(0, -22 * s, 11 * s, 0, Math.PI * 2); ctx.fill();
+      // 長い髪
+      ctx.fillStyle = '#111';
+      ctx.fillRect(-12 * s, -30 * s, 24 * s, 12 * s);
+      ctx.fillRect(-13 * s, -18 * s, 8 * s, 20 * s);
+      ctx.fillRect(5 * s, -18 * s, 8 * s, 20 * s);
+      // 目（赤く光る）
+      ctx.fillStyle = '#FF0033';
+      ctx.beginPath(); ctx.arc(-4 * s, -22 * s, 2 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(4 * s, -22 * s, 2 * s, 0, Math.PI * 2); ctx.fill();
+      // 口（大きく裂けた）
+      ctx.strokeStyle = '#CC0044';
+      ctx.lineWidth = 1.5 * s;
+      ctx.beginPath();
+      ctx.moveTo(-7 * s, -15 * s);
+      ctx.quadraticCurveTo(0, -11 * s, 7 * s, -15 * s);
+      ctx.stroke();
+      ctx.lineWidth = 1;
+    }
   }
 
   ctx.restore();
@@ -1988,6 +2056,11 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
         bobY = Math.sin(t * 0.04) * 2;
         scaleX = 1 + Math.sin(t * 0.04) * 0.01;
         scaleY = 1 + Math.sin(t * 0.04 + 0.5) * 0.012;
+      } else if (charIndex === 24) {
+        // Kowai: eerie floating
+        bobY = Math.sin(t * 0.03) * 5 + Math.sin(t * 0.07) * 2;
+        scaleX = 1 + Math.sin(t * 0.05) * 0.02;
+        scaleY = 1 - Math.sin(t * 0.05) * 0.015;
       }
     }
 
@@ -2126,6 +2199,12 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
         walkLean = Math.sin(phase) * 0.025;
         legAngle = Math.sin(phase) * 0.22;
         armSwing = -Math.sin(phase) * 0.18;
+      } else if (charIndex === 24) {
+        // Kowai: ghostly glide
+        bobY = Math.sin(phase * 0.6) * 4;
+        walkLean = Math.sin(phase * 0.8) * 0.03;
+        legAngle = 0;
+        armSwing = Math.sin(phase) * 0.1;
       }
     }
 
@@ -2206,8 +2285,8 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
   // 天才 uses different images per mode
   const tensaiIsDragon = animData && animData.dragonMode;
   const tensaiActiveImg = tensaiIsDragon ? tensaiDragonImg : tensaiHumanImg;
-  const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg, bulletImg, shaudenImg, judgemanImg, tensaiActiveImg, catbusImg, tankImg, namiojiImg, tokkoImg, samImg, kingImg, onpaImg, senImg, dosbossImg, microImg, mrtwoImg, kingkingImg, satoruImg];
-  const imgSizes = [[70, 90], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [168, 112], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [85, 85], [75, 100], [80, 100], [85, 95], [80, 95], [80, 95]];
+  const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg, bulletImg, shaudenImg, judgemanImg, tensaiActiveImg, catbusImg, tankImg, namiojiImg, tokkoImg, samImg, kingImg, onpaImg, senImg, dosbossImg, microImg, mrtwoImg, kingkingImg, satoruImg, kowaiImg];
+  const imgSizes = [[70, 90], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [168, 112], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [85, 85], [75, 100], [80, 100], [85, 95], [80, 95], [80, 95], [75, 95]];
   const img = imgs[charIndex];
   if (img && img.complete && img.naturalWidth > 0) {
     const imgW = imgSizes[charIndex][0] * s;
@@ -5219,6 +5298,7 @@ const CHAR_GRAB_FRAMES = [
   15, // 21:ミスターツー (超能力型→遠距離/特殊)
   17, // 22:金金 (パワー型)
   13, // 23:サトル (テクニック型→バランス)
+  15, // 24:怖 (ホラー型→遠距離/特殊)
 ];
 function getGrabFrames(charIdx) {
   return CHAR_GRAB_FRAMES[charIdx] || THROW_GRAB_FRAMES;
@@ -5256,6 +5336,7 @@ const CHAR_THROW_TYPE = [
   'ranged',  // 21:ミスターツー
   'power',   // 22:金金
   'balance', // 23:サトル
+  'ranged',  // 24:怖
 ];
 function getThrowDmg(charIdx) {
   return CHAR_THROW_DMG[CHAR_THROW_TYPE[charIdx] || 'balance'];
@@ -5552,6 +5633,18 @@ const commandDefs = {
       attack:{ startup:6, active:5, recovery:14, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#44AAFF', effect:'none',
         projectile:{ speed:10, damage:6, kbBase:3, kbScale:0.05, kbAngle:-15, w:14, h:10, life:35, color:'#44AAFF', pcolor:'#88DDFF' },
         multiShot:5, shotInterval:4 } },
+  ],
+  24: [ // 怖
+    { name:'瞬間移動', seq:['F','F','D','D'], cooldownKey:'cmd1',
+      attack:{ startup:4, active:8, recovery:16, damage:12, kbBase:5, kbScale:0.09, kbAngle:-25, hx:15, hy:-40, hw:60, hh:50, color:'#440022', effect:'slash',
+        specialType:'shadowDash', dashSpeed:16, kowaiFear:15 } },
+    { name:'鎌鼬', seq:['F','F','U','U'], cooldownKey:'cmd2',
+      attack:{ startup:6, active:5, recovery:14, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#CC0044', effect:'none',
+        projectile:{ speed:14, damage:10, kbBase:4, kbScale:0.07, kbAngle:-20, w:18, h:14, life:40, color:'#CC0044', pcolor:'#440022' },
+        kowaiFear:20 } },
+    { name:'地獄の手', seq:['U','U','D','D'], cooldownKey:'cmd3',
+      attack:{ startup:10, active:12, recovery:20, damage:8, kbBase:2, kbScale:0.03, kbAngle:-10, hx:0, hy:5, hw:90, hh:30, color:'#220011', effect:'shockwave', centerHit:true,
+        stun:true, stunFrames:60, kowaiFear:30 } },
   ],
 };
 
@@ -6093,6 +6186,20 @@ const attackDefs = {
               specialType:'slide', slideSpeed:11 },
     throwDmg: 10,
   },
+  // 怖 - Horror Type [ホラー・トリッキー]
+  24: {
+    normal: { name:'爪引っ掻き', startup:4, active:5, recovery:8, damage:5, kbBase:2, kbScale:0.04, kbAngle:-15, hx:14, hy:-38, hw:45, hh:40, color:'#CC0044', effect:'slash', kowaiFear:8 },
+    strong: { name:'口裂け斬り', startup:10, active:8, recovery:18, damage:14, kbBase:6, kbScale:0.11, kbAngle:-25, hx:18, hy:-35, hw:60, hh:50, color:'#440022', effect:'bigslash', kowaiFear:25 },
+    special:{ name:'恐怖の絶叫', startup:12, active:10, recovery:20, damage:10, kbBase:5, kbScale:0.09, kbAngle:-45, hx:0, hy:-35, hw:90, hh:70, color:'#330018', effect:'shockwave', centerHit:true, kowaiFear:35 },
+    aerial: { name:'空中爪撃', startup:4, active:6, recovery:10, damage:7, kbBase:3, kbScale:0.06, kbAngle:-40, hx:12, hy:-35, hw:50, hh:45, color:'#CC0044', effect:'airkick', kowaiFear:8 },
+    down:   { name:'地面引っ掻き', startup:5, active:7, recovery:12, damage:8, kbBase:4, kbScale:0.07, kbAngle:-50, hx:0, hy:5, hw:55, hh:30, color:'#440022', effect:'sweep', centerHit:true, kowaiFear:10 },
+    up:     { name:'爪斬り上げ', startup:5, active:6, recovery:12, damage:9, kbBase:5, kbScale:0.09, kbAngle:-85, hx:3, hy:-55, hw:40, hh:55, color:'#CC0044', effect:'upslash', kowaiFear:10 },
+    side:   { name:'横爪斬り', startup:5, active:6, recovery:12, damage:10, kbBase:5, kbScale:0.09, kbAngle:-20, hx:20, hy:-35, hw:65, hh:40, color:'#CC0044', effect:'sideslash', kowaiFear:12 },
+    downair:{ name:'急降下爪', startup:5, active:8, recovery:14, damage:12, kbBase:6, kbScale:0.10, kbAngle:80, hx:0, hy:10, hw:45, hh:45, color:'#440022', effect:'meteor', specialType:'divekick', diveSpeed:14, kowaiFear:15 },
+    dash:   { name:'影走り', startup:4, active:5, recovery:10, damage:7, kbBase:3, kbScale:0.06, kbAngle:-15, hx:16, hy:-35, hw:50, hh:35, color:'#330018', effect:'dash',
+              specialType:'slide', slideSpeed:12, kowaiFear:10 },
+    throwDmg: 8,
+  },
 };
 
 // Dragon mode attack defs (separate object)
@@ -6256,6 +6363,9 @@ function createPlayer(id, charIdx, startX) {
     airDodgeUsed: false,     // 1ジャンプにつき1回制限
     // 金金: お金の鎧
     kingkingArmorTimer: 0,   // 鎧残りフレーム
+    // 怖: 恐怖システム
+    fearGauge: 0,            // 恐怖ゲージ(0〜100)
+    fearTimer: 0,            // 恐怖状態残りフレーム
     // 自己バフ
     autoBuff: 0,             // 自己バフ残りフレーム
     autoBuffType: null,      // バフ種別
@@ -6472,6 +6582,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   if (attacker.dSkillBuff === 'fortress') finalDamage *= 1.5;    // タンク 要塞化
   if (attacker.dSkillBuff === 'microStar') finalDamage *= 1.3;  // マイクロ スター変身
   if (attacker.dSkillBuff === 'satoruHaki') finalDamage *= 1.3; // サトル 海王類の覇気
+  if (attacker.dSkillBuff === 'kowaiStealth') finalDamage *= 1.5; // 怖 口裂け変身
   // D技: メテオ 燃焼拳（1回消費）
   if (attacker.dSkillBuff === 'burnFist') { finalDamage += 5; attacker.dSkillActive = false; attacker.dSkillBuff = null; }
   // D技: 熊太郎 熊の怒り（投げ以外では消費しない→投げ側で処理）
@@ -6494,6 +6605,8 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   if (tci === 12 && target.grounded) finalDamage *= 0.9;              // タンク「装甲」地上
   if (tci === 18 && target.senBuffTimer > 0) finalDamage *= 0.9;      // セン「満腹」バフ中
   if (tci === 22 && target.kingkingArmorTimer > 0) finalDamage *= 0.7; // 金金「お金の鎧」被ダメ
+  // 恐怖状態: 攻撃力0.8倍
+  if (attacker.fearTimer > 0) finalDamage *= 0.8;
 
   target.damage = Math.min(999, target.damage + finalDamage);
   playHitSE();
@@ -6565,6 +6678,19 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   }
   if (attacker.charIdx === 17) attacker.consecutiveHits++;  // おんぱ「共鳴」カウント
   if (attacker.charIdx === 14) attacker.consecutiveHits++;  // とっこ「殺気」カウント
+
+  // 怖: 恐怖ゲージ蓄積
+  if (attacker.charIdx === 24) {
+    const atkData2 = attacker.attackData;
+    const fearAdd = (atkData2 && atkData2.kowaiFear) ? atkData2.kowaiFear : 5;
+    const fearMult = (attacker.dSkillBuff === 'kowaiStealth') ? 2.0 : 1.0;
+    target.fearGauge = Math.min(100, (target.fearGauge || 0) + fearAdd * fearMult);
+    if (target.fearGauge >= 100 && target.fearTimer <= 0) {
+      target.fearTimer = 180; // 3秒間恐怖状態
+      target.fearGauge = 0;
+      cmdNameDisplay.push({ text: '恐怖！', x: target.x, y: target.y - 100, life: 60, maxLife: 60, color: '#CC0044' });
+    }
+  }
 
   // Spin knockback for certain attacks (瞬身乱舞、百裂拳)
   const atkData = attacker.attackData;
@@ -6656,6 +6782,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
       21: ['#7733CC', '#AA66FF', '#440066'], // MrTwo: purple/dark
       22: ['#FFD700', '#DAA520', '#8B6914'], // KingKing: gold
       23: ['#2266AA', '#44AAFF', '#88DDFF'], // Satoru: water blue
+      24: ['#440022', '#CC0044', '#220011'], // Kowai: dark red
     };
     const colors = charColors[attacker.charIdx] || ['#FFFFFF'];
     const specialCount = 30 + Math.floor(kb * 1.5);
@@ -6810,6 +6937,10 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
     // サトル: 水しぶきパーティクル
     hitEffects.push({ x: efx, y: efy, life: 12, maxLife: 12, color: '#44AAFF', size: 16, type: 'ring' });
     for (let i = 0; i < 3; i++) sparks.push({ x: efx+(Math.random()-0.5)*10, y: efy+(Math.random()-0.5)*8, vx:(Math.random()-0.5)*4, vy:-2-Math.random()*2, life:12, maxLife:12, color:i%2?'#44AAFF':'#88DDFF', size:2+Math.random(), gravity:0.12, drag:0.96 });
+  } else if (ci === 24) {
+    // 怖: 赤い引っ掻きライン + 黒い霧
+    hitEffects.push({ x: efx, y: efy, life: 14, maxLife: 14, color: '#CC0044', size: 18, type: 'charSlash' });
+    sparks.push({ x: efx, y: efy, vx:(Math.random()-0.5)*2, vy:-1-Math.random(), life:16, maxLife:16, color:'#220011', size:3+Math.random()*2, gravity:-0.02, drag:0.95 });
   }
 
   // Floating damage number (larger for strong/special)
@@ -6968,6 +7099,7 @@ function getPlayerHitbox(p) {
   if (ci === 21) return { x: p.x - 22, y: p.y - 65, w: 44, h: 65 }; // ミスターツー: 横広
   if (ci === 22) return { x: p.x - 22, y: p.y - 72, w: 44, h: 72 }; // 金金: 大きめ鎧
   if (ci === 23) return { x: p.x - 20, y: p.y - 68, w: 40, h: 68 }; // サトル: がっしり標準
+  if (ci === 24) return { x: p.x - 16, y: p.y - 75, w: 32, h: 75 }; // 怖: 細長い亡霊
   return { x: p.x - 18, y: p.y - 70, w: 36, h: 70 };
 }
 
@@ -7841,6 +7973,8 @@ function updateBattle(dt) {
     if (p.kingComboTimer > 0) { p.kingComboTimer--; if (p.kingComboTimer <= 0) { p.kingComboHits = 0; } }
     if (p.senBuffTimer > 0) p.senBuffTimer--;
     if (p.kingkingArmorTimer > 0) p.kingkingArmorTimer--;
+    if (p.fearTimer > 0) p.fearTimer--;
+    if (p.fearGauge > 0 && p.fearTimer <= 0) p.fearGauge = Math.max(0, p.fearGauge - 0.1); // ゲージ自然減少
     if (p.gravityDebuffTimer > 0) p.gravityDebuffTimer--;
     if (p.cancelWindow > 0) p.cancelWindow--;
     if (p.comboWindow > 0) p.comboWindow--;
@@ -8817,7 +8951,8 @@ function applyMovement(p, moveX, ch) {
   const dSkillSpeedMult = p.dSkillBuff === 'tensaiBoost' ? 1.3 : p.dSkillBuff === 'fortress' ? 0 : 1.0;
   // 自己バフ: 天才「変形解放」ダメ80%↑で速度1.2倍 / Catbus「全速力」ダッシュ継続で加速
   const kkArmorSpeed = (p.charIdx === 22 && p.kingkingArmorTimer > 0) ? 1.2 : 1.0;
-  const autoSpeedMult = ((p.charIdx === 10 && p.damage >= 80) ? 1.2 : (p.charIdx === 11 && p.dashing) ? Math.min(1.3, 1 + p.dashTimer * 0.002) : 1.0) * kkArmorSpeed;
+  const fearSpeedMult = (p.fearTimer > 0) ? 0.7 : 1.0;
+  const autoSpeedMult = ((p.charIdx === 10 && p.damage >= 80) ? 1.2 : (p.charIdx === 11 && p.dashing) ? Math.min(1.3, 1 + p.dashTimer * 0.002) : 1.0) * kkArmorSpeed * fearSpeedMult;
   if (p.charIdx === 11 && p.dashing) p.dashTimer++;
   if (!p.dashing) p.dashTimer = 0;
   const targetVx = moveX * ch.moveSpeed * senSpeedMult * gravDebuffMult * saisokuMult * shaudenMult * speedMult * dashMult * dSkillSpeedMult * autoSpeedMult;
@@ -11284,7 +11419,7 @@ function serializePlayer(p) {
     inkBlindTimer: p.inkBlindTimer,
     animTimer: p.animTimer, charIdx: p.charIdx,
     kingComboHits: p.kingComboHits, kingComboTimer: p.kingComboTimer,
-    senBuffTimer: p.senBuffTimer, kingkingArmorTimer: p.kingkingArmorTimer,
+    senBuffTimer: p.senBuffTimer, kingkingArmorTimer: p.kingkingArmorTimer, fearGauge: p.fearGauge, fearTimer: p.fearTimer,
     dosbossRandomPattern: p.dosbossRandomPattern, gravityDebuffTimer: p.gravityDebuffTimer,
     cancelWindow: p.cancelWindow, comboWindow: p.comboWindow, airComboTimer: p.airComboTimer,
     airDodging: p.airDodging, airDodgeTimer: p.airDodgeTimer, airDodgeUsed: p.airDodgeUsed, airDodgeEndlag: p.airDodgeEndlag,
@@ -12310,6 +12445,14 @@ function triggerDSkill(p) {
       sparks.push({ x: p.x+Math.cos(a)*30, y: p.y-35+Math.sin(a)*20, vx:Math.cos(a)*5, vy:Math.sin(a)*3-1, life:18, maxLife:18, color:i%2?'#44AAFF':'#88DDFF', size:3+Math.random()*2, gravity:0.03, drag:0.96 });
     }
     cmdNameDisplay.push({ text: '海王類の覇気！', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#44AAFF' });
+  } else if (ci === 24) {
+    // 怖「口裂け変身」: 2秒間透明化+攻撃力1.5倍
+    p.dSkillActive = true; p.dSkillTimer = 120; p.dSkillBuff = 'kowaiStealth';
+    p.invincibleTimer = Math.max(p.invincibleTimer, 120);
+    hitEffects.push({ x: p.x, y: p.y - 40, life: 20, maxLife: 20, color: '#220011', size: 50, type: 'charGlow' });
+    hitEffects.push({ x: p.x, y: p.y - 40, life: 16, maxLife: 16, color: '#440022', size: 40, type: 'ring' });
+    for (let i = 0; i < 10; i++) sparks.push({ x: p.x+(Math.random()-0.5)*35, y: p.y-40+(Math.random()-0.5)*35, vx:(Math.random()-0.5)*3, vy:-1-Math.random()*2, life:18, maxLife:18, color:i%2?'#440022':'#220011', size:2.5+Math.random()*2, gravity:-0.03, drag:0.96 });
+    cmdNameDisplay.push({ text: '口裂け変身！', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#CC0044' });
   }
   playHitSound('cmd');
 }
@@ -12352,6 +12495,10 @@ function updateDSkill(p) {
     // マイクロ: 黄色い星パーティクル
     const a = Math.random() * Math.PI * 2;
     sparks.push({ x: p.x+Math.cos(a)*20, y: p.y-35+Math.sin(a)*15, vx:Math.cos(a)*1.5, vy:-1-Math.random()*0.5, life:12, maxLife:12, color:Math.random()>0.5?'#FFD700':'#FFEE88', size:2+Math.random()*1.5, gravity:0.02, drag:0.97 });
+  }
+  if (p.dSkillBuff === 'kowaiStealth' && p.dSkillTimer % 8 === 0) {
+    // 怖: 透明化中の黒い霧
+    sparks.push({ x: p.x+(Math.random()-0.5)*25, y: p.y-35+(Math.random()-0.5)*25, vx:(Math.random()-0.5)*1.5, vy:-0.5-Math.random()*0.5, life:14, maxLife:14, color:'#220011', size:2.5+Math.random()*2, gravity:-0.03, drag:0.96 });
   }
   if (p.dSkillBuff === 'satoruHaki' && p.dSkillTimer % 6 === 0) {
     // サトル: 青いオーラ
