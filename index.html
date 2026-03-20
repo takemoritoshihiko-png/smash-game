@@ -439,6 +439,19 @@ const characters = [
     jumpPower: -14.0,
     weight: 1.0
   },
+  {
+    name: 'ムッシー',
+    type: '虫合体型',
+    color: '#228822',
+    accent: '#44CC44',
+    dark: '#114411',
+    stats: { power: 3, speed: 4, tech: 4, defense: 2 },
+    desc: '百虫の覇者',
+    bodyColors: { main: '#228822', sub: '#44CC44', skin: '#88CC44' },
+    moveSpeed: 8.5,
+    jumpPower: -14.0,
+    weight: 0.8
+  },
 ];
 
 // --- Audio unlock on first interaction ---
@@ -524,6 +537,8 @@ const poyoImg = new Image();
 poyoImg.src = 'images/poyo.png';
 const pullImg = new Image();
 pullImg.src = 'images/pull.png?v=2';
+const mussyImg = new Image();
+mussyImg.src = 'images/mussy.png';
 const bgImg = new Image();
 bgImg.src = 'images/bg.png';
 
@@ -2128,6 +2143,49 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.beginPath(); ctx.moveTo(0, -3*s); ctx.lineTo(0, 7*s); ctx.stroke();
       ctx.lineWidth = 1;
     }
+  } else if (charIndex === 28) {
+    // ムッシー - 百虫の覇者
+    if (mussyImg.complete && mussyImg.naturalWidth > 0) {
+      const imgW = 75 * s; const imgH = 90 * s;
+      ctx.drawImage(mussyImg, -imgW / 2, -35 * s, imgW, imgH);
+    } else {
+      // Canvas fallback: 虫合体キャラ
+      // 脚（6本・虫っぽい）
+      ctx.fillStyle = '#114411';
+      for (let i = 0; i < 3; i++) {
+        ctx.fillRect((-10 + i*7) * s, 22 * s, 4 * s, 20 * s);
+      }
+      // 体（緑・甲殻）
+      ctx.fillStyle = '#228822';
+      ctx.beginPath(); ctx.ellipse(0, 5 * s, 14 * s, 18 * s, 0, 0, Math.PI * 2); ctx.fill();
+      // 甲殻模様
+      ctx.fillStyle = '#44CC44';
+      ctx.beginPath(); ctx.ellipse(0, 2 * s, 10 * s, 12 * s, 0, 0, Math.PI * 2); ctx.fill();
+      // カマ（腕）
+      ctx.fillStyle = '#228822';
+      ctx.beginPath(); ctx.moveTo(-14*s, -8*s); ctx.lineTo(-22*s, -18*s); ctx.lineTo(-18*s, -5*s); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(14*s, -8*s); ctx.lineTo(22*s, -18*s); ctx.lineTo(18*s, -5*s); ctx.closePath(); ctx.fill();
+      // 頭
+      ctx.fillStyle = '#88CC44';
+      ctx.beginPath(); ctx.arc(0, -20 * s, 10 * s, 0, Math.PI * 2); ctx.fill();
+      // 触角
+      ctx.strokeStyle = '#228822'; ctx.lineWidth = 2 * s;
+      ctx.beginPath(); ctx.moveTo(-5*s, -28*s); ctx.quadraticCurveTo(-10*s, -40*s, -6*s, -38*s); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(5*s, -28*s); ctx.quadraticCurveTo(10*s, -40*s, 6*s, -38*s); ctx.stroke();
+      ctx.lineWidth = 1;
+      // 目（複眼・赤）
+      ctx.fillStyle = '#FF2200';
+      ctx.beginPath(); ctx.ellipse(-4*s, -21*s, 3*s, 3.5*s, 0, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(4*s, -21*s, 3*s, 3.5*s, 0, 0, Math.PI*2); ctx.fill();
+      // 複眼模様
+      ctx.fillStyle = '#FF6644';
+      ctx.beginPath(); ctx.arc(-3*s, -22*s, 1.2*s, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(5*s, -22*s, 1.2*s, 0, Math.PI*2); ctx.fill();
+      // 大顎
+      ctx.fillStyle = '#663300';
+      ctx.beginPath(); ctx.moveTo(-3*s, -14*s); ctx.lineTo(-6*s, -10*s); ctx.lineTo(-1*s, -12*s); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(3*s, -14*s); ctx.lineTo(6*s, -10*s); ctx.lineTo(1*s, -12*s); ctx.closePath(); ctx.fill();
+    }
   }
 
   ctx.restore();
@@ -2269,6 +2327,11 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
         bobY = Math.sin(t * 0.035) * 4 + Math.sin(t * 0.09) * 1.5;
         scaleX = 1 + Math.sin(t * 0.04) * 0.012;
         scaleY = 1 + Math.sin(t * 0.04 + 0.5) * 0.012;
+      } else if (charIndex === 28) {
+        // Mussy: twitchy insect idle
+        bobY = Math.sin(t * 0.06) * 2 + (Math.random() > 0.95 ? 3 : 0);
+        scaleX = 1 + Math.sin(t * 0.07) * 0.015;
+        scaleY = 1 - Math.sin(t * 0.07) * 0.01;
       }
     }
 
@@ -2432,6 +2495,12 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
         walkLean = Math.sin(phase) * 0.02;
         legAngle = Math.sin(phase) * 0.08;
         armSwing = -Math.sin(phase * 0.6) * 0.12;
+      } else if (charIndex === 28) {
+        // Mussy: quick insect scuttle
+        bobY = Math.abs(Math.sin(phase * 1.5)) * 3;
+        walkLean = Math.sin(phase) * 0.03;
+        legAngle = Math.sin(phase * 1.5) * 0.3;
+        armSwing = -Math.sin(phase * 1.2) * 0.2;
       }
     }
 
@@ -2512,8 +2581,8 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
   // 天才 uses different images per mode
   const tensaiIsDragon = animData && animData.dragonMode;
   const tensaiActiveImg = tensaiIsDragon ? tensaiDragonImg : tensaiHumanImg;
-  const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg, bulletImg, shaudenImg, judgemanImg, tensaiActiveImg, catbusImg, tankImg, namiojiImg, tokkoImg, samImg, kingImg, onpaImg, senImg, dosbossImg, microImg, mrtwoImg, kingkingImg, satoruImg, kowaiImg, yahoImg, poyoImg, pullImg];
-  const imgSizes = [[70, 90], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [168, 112], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [85, 85], [75, 100], [80, 100], [85, 95], [80, 95], [80, 95], [75, 95], [75, 90], [75, 75], [75, 90]];
+  const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg, bulletImg, shaudenImg, judgemanImg, tensaiActiveImg, catbusImg, tankImg, namiojiImg, tokkoImg, samImg, kingImg, onpaImg, senImg, dosbossImg, microImg, mrtwoImg, kingkingImg, satoruImg, kowaiImg, yahoImg, poyoImg, pullImg, mussyImg];
+  const imgSizes = [[70, 90], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [168, 112], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [85, 85], [75, 100], [80, 100], [85, 95], [80, 95], [80, 95], [75, 95], [75, 90], [75, 75], [75, 90], [75, 90]];
   const img = imgs[charIndex];
   if (img && img.complete && img.naturalWidth > 0) {
     const imgW = imgSizes[charIndex][0] * s;
@@ -5566,6 +5635,7 @@ const CHAR_GRAB_FRAMES = [
   13, // 25:ヤッホ (ふざけ型→バランス)
   13, // 26:ぽよ (初心者型→バランス)
   15, // 27:プル (重力操作型→遠距離/特殊)
+   9, // 28:ムッシー (虫合体型→スピード)
 ];
 function getGrabFrames(charIdx) {
   return CHAR_GRAB_FRAMES[charIdx] || THROW_GRAB_FRAMES;
@@ -5607,6 +5677,7 @@ const CHAR_THROW_TYPE = [
   'balance', // 25:ヤッホ
   'balance', // 26:ぽよ
   'ranged',  // 27:プル
+  'speed',   // 28:ムッシー
 ];
 function getThrowDmg(charIdx) {
   return CHAR_THROW_DMG[CHAR_THROW_TYPE[charIdx] || 'balance'];
@@ -5947,6 +6018,16 @@ const commandDefs = {
     { name:'引力フィールド', seq:['U','U','D','D'], cooldownKey:'cmd3',
       attack:{ startup:6, active:1, recovery:12, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#6622AA', effect:'none',
         pullField:true } },
+  ],
+  28: [ // ムッシー
+    { name:'ハチの針ラッシュ', seq:['F','F','D','D'], cooldownKey:'cmd1',
+      attack:{ startup:5, active:15, recovery:14, damage:3, kbBase:1.5, kbScale:0.03, kbAngle:-15, hx:16, hy:-38, hw:50, hh:45, color:'#FFCC00', effect:'punch',
+        multiHit:true, hitInterval:3, finalDamage:8, finalKbBase:5, finalKbScale:0.09, finalKbAngle:-40 } },
+    { name:'タマムシ飛行', seq:['F','F','U','U'], cooldownKey:'cmd2',
+      attack:{ startup:6, active:14, recovery:16, damage:12, kbBase:5, kbScale:0.09, kbAngle:-25, hx:16, hy:-40, hw:60, hh:50, color:'#44CC44', effect:'dash',
+        specialType:'shadowDash', dashSpeed:16 } },
+    { name:'クワガタ大顎', seq:['U','U','D','D'], cooldownKey:'cmd3',
+      attack:{ startup:10, active:8, recovery:20, damage:16, kbBase:8, kbScale:0.13, kbAngle:-50, hx:15, hy:-35, hw:55, hh:50, color:'#663300', effect:'bigpunch', spinKB:true } },
   ],
 };
 
@@ -6548,6 +6629,22 @@ const attackDefs = {
               specialType:'slide', slideSpeed:10 },
     throwDmg: 8,
   },
+  // ムッシー - Insect Type [虫合体型]
+  28: {
+    normal: { name:'カマキリのカマ', startup:4, active:6, recovery:10, damage:6, kbBase:3, kbScale:0.06, kbAngle:-15, hx:18, hy:-38, hw:60, hh:40, color:'#44CC44', effect:'slash' },
+    strong: { name:'アリのパワー', startup:12, active:8, recovery:16, damage:14, kbBase:7, kbScale:0.12, kbAngle:-30, hx:16, hy:-35, hw:55, hh:50, color:'#886633', effect:'bigpunch' },
+    special:{ name:'ムカデの毒', startup:6, active:5, recovery:14, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#88CC00', effect:'none',
+              projectile:{ speed:9, damage:4, kbBase:2, kbScale:0.03, kbAngle:-10, w:18, h:14, life:45, color:'#88CC00', pcolor:'#AADD22' },
+              mussyPoison:true },
+    aerial: { name:'空中カマ斬り', startup:3, active:6, recovery:8, damage:7, kbBase:3, kbScale:0.06, kbAngle:-40, hx:14, hy:-35, hw:55, hh:40, color:'#44CC44', effect:'airkick' },
+    down:   { name:'ムカデ足払い', startup:4, active:7, recovery:10, damage:7, kbBase:3, kbScale:0.06, kbAngle:-40, hx:0, hy:5, hw:60, hh:25, color:'#88CC00', effect:'sweep', centerHit:true, mussyPoison:true },
+    up:     { name:'触角アッパー', startup:4, active:6, recovery:10, damage:8, kbBase:5, kbScale:0.08, kbAngle:-85, hx:0, hy:-55, hw:40, hh:55, color:'#44CC44', effect:'upslash' },
+    side:   { name:'カマ横薙ぎ', startup:4, active:6, recovery:10, damage:9, kbBase:4, kbScale:0.08, kbAngle:-20, hx:22, hy:-35, hw:75, hh:35, color:'#228822', effect:'sideslash' },
+    downair:{ name:'急降下カマ', startup:4, active:8, recovery:12, damage:11, kbBase:5, kbScale:0.10, kbAngle:80, hx:0, hy:10, hw:45, hh:45, color:'#228822', effect:'meteor', specialType:'divekick', diveSpeed:14 },
+    dash:   { name:'虫ダッシュ', startup:3, active:6, recovery:8, damage:6, kbBase:3, kbScale:0.05, kbAngle:-15, hx:16, hy:-35, hw:50, hh:35, color:'#44CC44', effect:'dash',
+              specialType:'slide', slideSpeed:12 },
+    throwDmg: 8,
+  },
 };
 
 // Dragon mode attack defs (separate object)
@@ -6719,6 +6816,8 @@ function createPlayer(id, charIdx, startX) {
     airDodgeUsed: false,     // 1ジャンプにつき1回制限
     // 金金: お金の鎧
     kingkingArmorTimer: 0,   // 鎧残りフレーム
+    // ムッシー: 毒状態
+    poisonTimer: 0,          // 毒残りフレーム（180=3秒）
     // 怖: 恐怖システム
     fearGauge: 0,            // 恐怖ゲージ(0〜100)
     fearTimer: 0,            // 恐怖状態残りフレーム
@@ -7047,6 +7146,14 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   if (attacker.charIdx === 17) attacker.consecutiveHits++;  // おんぱ「共鳴」カウント
   if (attacker.charIdx === 14) attacker.consecutiveHits++;  // とっこ「殺気」カウント
 
+  // ムッシー: 毒付与
+  if (attacker.charIdx === 28) {
+    const atkData3 = attacker.attackData;
+    if (atkData3 && atkData3.mussyPoison) {
+      target.poisonTimer = Math.max(target.poisonTimer || 0, 180); // 3秒
+    }
+  }
+
   // 怖: 恐怖ゲージ蓄積
   if (attacker.charIdx === 24) {
     const atkData2 = attacker.attackData;
@@ -7154,6 +7261,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
       25: ['#FF8800', '#FFCC44', '#88DDFF'], // Yaho: orange/yellow
       26: ['#44CCEE', '#88EEFF', '#AAEEFF'], // Poyo: cyan
       27: ['#6622AA', '#9944DD', '#CC88FF'], // Pull: purple
+      28: ['#228822', '#44CC44', '#88CC00'], // Mussy: green/insect
     };
     const colors = charColors[attacker.charIdx] || ['#FFFFFF'];
     const specialCount = 30 + Math.floor(kb * 1.5);
@@ -7324,6 +7432,10 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
     // プル: 紫の引力波紋（内向き）
     hitEffects.push({ x: efx, y: efy, life: 14, maxLife: 14, color: '#9944DD', size: 20, type: 'ring' });
     for (let i = 0; i < 2; i++) sparks.push({ x: efx+(Math.random()-0.5)*15, y: efy+(Math.random()-0.5)*10, vx:(Math.random()-0.5)*2, vy:(Math.random()-0.5)*2, life:12, maxLife:12, color:i%2?'#6622AA':'#CC88FF', size:2+Math.random(), gravity:-0.03, drag:0.97 });
+  } else if (ci === 28) {
+    // ムッシー: 緑の斬撃ライン
+    hitEffects.push({ x: efx, y: efy, life: 12, maxLife: 12, color: '#44CC44', size: 18, type: 'charSlash' });
+    sparks.push({ x: efx, y: efy, vx:(Math.random()-0.5)*3, vy:-2-Math.random(), life:10, maxLife:10, color:'#88CC00', size:2+Math.random(), gravity:0.08, drag:0.96 });
   }
 
   // Floating damage number (larger for strong/special)
@@ -7486,6 +7598,7 @@ function getPlayerHitbox(p) {
   if (ci === 25) return { x: p.x - 18, y: p.y - 68, w: 36, h: 68 }; // ヤッホ: 標準
   if (ci === 26) return { x: p.x - 20, y: p.y - 50, w: 40, h: 50 }; // ぽよ: 丸い低め
   if (ci === 27) return { x: p.x - 18, y: p.y - 72, w: 36, h: 72 }; // プル: やや縦長
+  if (ci === 28) return { x: p.x - 16, y: p.y - 68, w: 32, h: 68 }; // ムッシー: 細め虫
   return { x: p.x - 18, y: p.y - 70, w: 36, h: 70 };
 }
 
@@ -8360,6 +8473,7 @@ function updateBattle(dt) {
     if (p.senBuffTimer > 0) p.senBuffTimer--;
     if (p.kingkingArmorTimer > 0) p.kingkingArmorTimer--;
     if (p.fearTimer > 0) p.fearTimer--;
+    if (p.poisonTimer > 0) { p.poisonTimer--; if (p.poisonTimer % 60 === 0) p.damage = Math.min(999, p.damage + 1); }
     if (p.fearGauge > 0 && p.fearTimer <= 0) p.fearGauge = Math.max(0, p.fearGauge - 0.1); // ゲージ自然減少
     if (p.gravityDebuffTimer > 0) p.gravityDebuffTimer--;
     if (p.cancelWindow > 0) p.cancelWindow--;
@@ -9363,7 +9477,8 @@ function applyMovement(p, moveX, ch) {
   // 自己バフ: 天才「変形解放」ダメ80%↑で速度1.2倍 / Catbus「全速力」ダッシュ継続で加速
   const kkArmorSpeed = (p.charIdx === 22 && p.kingkingArmorTimer > 0) ? 1.2 : 1.0;
   const fearSpeedMult = (p.fearTimer > 0) ? 0.7 : 1.0;
-  const autoSpeedMult = ((p.charIdx === 10 && p.damage >= 80) ? 1.2 : (p.charIdx === 11 && p.dashing) ? Math.min(1.3, 1 + p.dashTimer * 0.002) : 1.0) * kkArmorSpeed * fearSpeedMult;
+  const poisonSpeedMult = (p.poisonTimer > 0) ? 0.9 : 1.0;
+  const autoSpeedMult = ((p.charIdx === 10 && p.damage >= 80) ? 1.2 : (p.charIdx === 11 && p.dashing) ? Math.min(1.3, 1 + p.dashTimer * 0.002) : 1.0) * kkArmorSpeed * fearSpeedMult * poisonSpeedMult;
   if (p.charIdx === 11 && p.dashing) p.dashTimer++;
   if (!p.dashing) p.dashTimer = 0;
   const targetVx = moveX * ch.moveSpeed * senSpeedMult * gravDebuffMult * saisokuMult * shaudenMult * speedMult * dashMult * dSkillSpeedMult * autoSpeedMult;
@@ -11830,7 +11945,7 @@ function serializePlayer(p) {
     inkBlindTimer: p.inkBlindTimer,
     animTimer: p.animTimer, charIdx: p.charIdx,
     kingComboHits: p.kingComboHits, kingComboTimer: p.kingComboTimer,
-    senBuffTimer: p.senBuffTimer, kingkingArmorTimer: p.kingkingArmorTimer, fearGauge: p.fearGauge, fearTimer: p.fearTimer,
+    senBuffTimer: p.senBuffTimer, kingkingArmorTimer: p.kingkingArmorTimer, fearGauge: p.fearGauge, fearTimer: p.fearTimer, poisonTimer: p.poisonTimer,
     dosbossRandomPattern: p.dosbossRandomPattern, gravityDebuffTimer: p.gravityDebuffTimer,
     cancelWindow: p.cancelWindow, comboWindow: p.comboWindow, airComboTimer: p.airComboTimer,
     airDodging: p.airDodging, airDodgeTimer: p.airDodgeTimer, airDodgeUsed: p.airDodgeUsed, airDodgeEndlag: p.airDodgeEndlag,
@@ -12985,6 +13100,25 @@ function triggerDSkill(p) {
     hitEffects.push({ x: p.x, y: p.y - 35, life: 18, maxLife: 18, color: '#CC88FF', size: 80, type: 'ring' });
     for (let i = 0; i < 12; i++) sparks.push({ x: p.x+(Math.random()-0.5)*60, y: p.y-35+(Math.random()-0.5)*60, vx:(p.x-(p.x+(Math.random()-0.5)*120))*0.05, vy:(p.y-35-(p.y-35+(Math.random()-0.5)*80))*0.05, life:20, maxLife:20, color:i%2?'#9944DD':'#6622AA', size:3+Math.random()*2, gravity:-0.02, drag:0.96 });
     cmdNameDisplay.push({ text: '超重力崩壊！', x: p.x, y: p.y - 100, life: 70, maxLife: 70, color: '#CC88FF' });
+  } else if (ci === 28) {
+    // ムッシー「虫の大群」: 全方向に虫の群れ + 毒
+    const swarm = { x: p.x - 80, y: p.y - 80, w: 160, h: 120 };
+    checkHitboxAgainstPlayers(p, swarm, 16, 7, 0.11, -40, 'special');
+    p.hitTargets = [];
+    // 毒付与
+    for (const t2 of players) {
+      if (t2.id === p.id || !t2.alive) continue;
+      const th = getPlayerHitbox(t2);
+      if (hitboxCollides(swarm.x, swarm.y, swarm.w, swarm.h, th.x, th.y, th.w, th.h)) t2.poisonTimer = 180;
+    }
+    triggerScreenShake(6, 12);
+    hitEffects.push({ x: p.x, y: p.y-35, life: 22, maxLife: 22, color: '#228822', size: 80, type: 'ring' });
+    hitEffects.push({ x: p.x, y: p.y-35, life: 18, maxLife: 18, color: '#88CC00', size: 60, type: 'charGlow' });
+    for (let i = 0; i < 20; i++) {
+      const a = Math.random() * Math.PI * 2;
+      sparks.push({ x: p.x+(Math.random()-0.5)*60, y: p.y-35+(Math.random()-0.5)*50, vx:Math.cos(a)*5, vy:Math.sin(a)*4-1, life:18, maxLife:18, color:i%3===0?'#111':(i%3===1?'#228822':'#88CC00'), size:2+Math.random()*2, gravity:0.05, drag:0.96 });
+    }
+    cmdNameDisplay.push({ text: '虫の大群！', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#44CC44' });
   }
   playHitSound('cmd');
 }
