@@ -4058,12 +4058,12 @@ function drawSelect(dt) {
   ctx.fillRect(0, 0, 960, 640);
 
   // Header (compact)
-  ctx.font = 'bold 28px sans-serif';
+  ctx.font = 'bold 22px sans-serif';
   ctx.textAlign = 'center';
   ctx.fillStyle = '#FFF';
   ctx.shadowColor = '#FF4466';
-  ctx.shadowBlur = 10;
-  ctx.fillText('CHARACTER SELECT', 480, 28);
+  ctx.shadowBlur = 8;
+  ctx.fillText('CHARACTER SELECT', 480, 20);
   ctx.shadowBlur = 0;
 
   // Divider
@@ -4072,22 +4072,22 @@ function drawSelect(dt) {
   lineGrad.addColorStop(0.5, '#FF4466');
   lineGrad.addColorStop(1, 'transparent');
   ctx.strokeStyle = lineGrad;
-  ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.moveTo(100, 42); ctx.lineTo(860, 42); ctx.stroke();
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(100, 30); ctx.lineTo(860, 30); ctx.stroke();
 
-  // Character cards - grid layout (+ random slot)
+  // Character cards - grid layout (+ random slot) - 8列対応（最大32体）
   const charCount = characters.length;
   const totalSlots = charCount + 1; // +1 for random
   const RANDOM_IDX = charCount;
-  const cols = Math.min(totalSlots, 7);
+  const cols = 8;
   const rows = Math.ceil(totalSlots / cols);
   const cardW = 90;
-  const cardH = rows <= 1 ? 220 : 130;
-  const gapX = 6;
-  const gapY = 4;
+  const cardH = rows <= 2 ? 130 : 105;
+  const gapX = 5;
+  const gapY = 3;
   const totalW = cols * cardW + (cols - 1) * gapX;
   const gridStartX = (960 - totalW) / 2;
-  const gridStartY = 46;
+  const gridStartY = 34;
 
   for (let i = 0; i < totalSlots; i++) {
     const isRandom = i === RANDOM_IDX;
@@ -4182,8 +4182,8 @@ function drawSelect(dt) {
     }
 
     // Character / Random "?" icon
-    const charScale = rows <= 1 ? 1.0 : 0.55;
-    const charY = rows <= 1 ? cy + 115 : cy + 72;
+    const charScale = cardH <= 105 ? 0.45 : (rows <= 1 ? 1.0 : 0.55);
+    const charY = cardH <= 105 ? cy + 62 : (rows <= 1 ? cy + 115 : cy + 72);
     if (isRandom) {
       ctx.font = 'bold ' + Math.floor(48 * charScale) + 'px sans-serif';
       ctx.textAlign = 'center';
@@ -4196,7 +4196,7 @@ function drawSelect(dt) {
     }
 
     // Name
-    ctx.font = rows <= 1 ? 'bold 22px sans-serif' : 'bold 13px sans-serif';
+    ctx.font = rows <= 1 ? 'bold 22px sans-serif' : (cardH <= 105 ? 'bold 11px sans-serif' : 'bold 13px sans-serif');
     ctx.textAlign = 'center';
     ctx.fillStyle = (isP1 || isP2) ? '#FFF' : '#888';
     ctx.fillText(isRandom ? 'ランダム' : ch.name, cx + cardW / 2, cy + cardH - 8);
@@ -4279,7 +4279,7 @@ function drawSelectDetail(px, py, charIdx, label, color, isConfirmed) {
   const isRandom = charIdx >= characters.length;
   const ch = isRandom ? { name:'ランダム', type:'RANDOM', accent:'#FFDD44', desc:'ランダムでキャラが選ばれる', stats:{power:0,speed:0,tech:0,defense:0} } : characters[charIdx];
   const pw = 400;
-  const ph = 190;
+  const ph = Math.min(190, 640 - py - 30);
 
   ctx.fillStyle = 'rgba(15, 15, 30, 0.85)';
   roundRect(ctx, px, py, pw, ph, 10);
@@ -4296,15 +4296,17 @@ function drawSelectDetail(px, py, charIdx, label, color, isConfirmed) {
   ctx.fillText(label, px + 12, py + 18);
 
   // Character preview
+  const detailScale = ph < 160 ? 0.85 : 1.15;
+  const detailCharY = ph < 160 ? py + 75 : py + 95;
   if (isRandom) {
-    ctx.font = 'bold 60px sans-serif';
+    ctx.font = `bold ${ph < 160 ? 40 : 60}px sans-serif`;
     ctx.textAlign = 'center';
     ctx.fillStyle = '#FFDD44';
     ctx.globalAlpha = 0.7 + Math.sin(selectTime * 0.005) * 0.3;
-    ctx.fillText('?', px + 75, py + 105);
+    ctx.fillText('?', px + 75, detailCharY + 10);
     ctx.globalAlpha = 1;
   } else {
-    drawCharacterBody(px + 75, py + 95, 1.15, charIdx, selectTime, false);
+    drawCharacterBody(px + 75, detailCharY, detailScale, charIdx, selectTime, false);
   }
 
   // Info
@@ -4326,8 +4328,10 @@ function drawSelectDetail(px, py, charIdx, label, color, isConfirmed) {
   const statKeys = ['power', 'speed', 'tech', 'defense'];
   const statColors = ['#FF4444', '#44FF88', '#FFDD44', '#4488FF'];
 
+  const statGap = ph < 160 ? 16 : 20;
+  const statStartY = ph < 160 ? py + 68 : py + 84;
   for (let i = 0; i < 4; i++) {
-    const sy = py + 84 + i * 20;
+    const sy = statStartY + i * statGap;
     ctx.font = 'bold 10px sans-serif';
     ctx.textAlign = 'left';
     ctx.fillStyle = '#777';
