@@ -48,7 +48,8 @@
       "WebFetch(domain:takemoritoshihiko-png.github.io)",
       "Bash(pip3 install:*)",
       "Bash(~/bin/gh repo:*)",
-      "Bash(pip install:*)"
+      "Bash(pip install:*)",
+      "Bash(md5:*)"
     ]
   }
 }
