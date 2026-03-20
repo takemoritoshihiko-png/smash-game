@@ -361,6 +361,19 @@ const characters = [
     jumpPower: -14.5,
     weight: 0.7
   },
+  {
+    name: '金金',
+    type: 'パワー型',
+    color: '#DAA520',
+    accent: '#FFD700',
+    dark: '#8B6914',
+    stats: { power: 4, speed: 2, tech: 3, defense: 4 },
+    desc: '黄金の覇者',
+    bodyColors: { main: '#DAA520', sub: '#FFD700', skin: '#FFDAB9' },
+    moveSpeed: 7.0,
+    jumpPower: -11.5,
+    weight: 1.3
+  },
 ];
 
 // --- Audio unlock on first interaction ---
@@ -434,6 +447,8 @@ const microImg = new Image();
 microImg.src = 'images/micro.png';
 const mrtwoImg = new Image();
 mrtwoImg.src = 'images/mrtwo.png';
+const kingkingImg = new Image();
+kingkingImg.src = 'images/kingking.png';
 const bgImg = new Image();
 bgImg.src = 'images/bg.png';
 
@@ -1726,6 +1741,66 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.beginPath(); ctx.arc(-4 * s, -24 * s, 1 * s, 0, Math.PI * 2); ctx.fill();
       ctx.beginPath(); ctx.arc(4 * s, -24 * s, 1 * s, 0, Math.PI * 2); ctx.fill();
     }
+  } else if (charIndex === 22) {
+    // 金金 - 黄金の覇者
+    if (kingkingImg.complete && kingkingImg.naturalWidth > 0) {
+      const imgW = 80 * s;
+      const imgH = 95 * s;
+      ctx.drawImage(kingkingImg, -imgW / 2, -38 * s, imgW, imgH);
+    } else {
+      // Canvas fallback: 金色の甲冑騎士
+      // 脚
+      ctx.fillStyle = '#8B6914';
+      ctx.fillRect(-9 * s, 22 * s, 7 * s, 22 * s);
+      ctx.fillRect(2 * s, 22 * s, 7 * s, 22 * s);
+      // ブーツ
+      ctx.fillStyle = '#DAA520';
+      ctx.fillRect(-10 * s, 40 * s, 9 * s, 5 * s);
+      ctx.fillRect(1 * s, 40 * s, 9 * s, 5 * s);
+      // 鎧（体）
+      ctx.fillStyle = '#FFD700';
+      ctx.fillRect(-13 * s, -12 * s, 26 * s, 36 * s);
+      // 肩当て
+      ctx.fillStyle = '#DAA520';
+      ctx.fillRect(-17 * s, -14 * s, 8 * s, 10 * s);
+      ctx.fillRect(9 * s, -14 * s, 8 * s, 10 * s);
+      // 腕
+      ctx.fillStyle = '#DAA520';
+      ctx.fillRect(-16 * s, -4 * s, 5 * s, 22 * s);
+      ctx.fillRect(11 * s, -4 * s, 5 * s, 22 * s);
+      // ベルト
+      ctx.fillStyle = '#8B6914';
+      ctx.fillRect(-13 * s, 16 * s, 26 * s, 4 * s);
+      // 宝石
+      ctx.fillStyle = '#FF0000';
+      ctx.beginPath(); ctx.arc(0, 18 * s, 3 * s, 0, Math.PI * 2); ctx.fill();
+      // 頭（兜）
+      ctx.fillStyle = '#FFD700';
+      ctx.beginPath(); ctx.arc(0, -22 * s, 12 * s, 0, Math.PI * 2); ctx.fill();
+      // 兜の飾り
+      ctx.fillStyle = '#DAA520';
+      ctx.beginPath();
+      ctx.moveTo(-3 * s, -33 * s);
+      ctx.lineTo(0, -44 * s);
+      ctx.lineTo(3 * s, -33 * s);
+      ctx.closePath(); ctx.fill();
+      // バイザー
+      ctx.fillStyle = '#333';
+      ctx.fillRect(-8 * s, -25 * s, 16 * s, 5 * s);
+      // 目（バイザー越し）
+      ctx.fillStyle = '#FFEE00';
+      ctx.beginPath(); ctx.arc(-4 * s, -23 * s, 1.5 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(4 * s, -23 * s, 1.5 * s, 0, Math.PI * 2); ctx.fill();
+      // 金貨（右手）
+      ctx.fillStyle = '#FFD700';
+      ctx.strokeStyle = '#DAA520';
+      ctx.lineWidth = 1 * s;
+      ctx.beginPath(); ctx.arc(14 * s, 16 * s, 5 * s, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#8B6914';
+      ctx.font = `bold ${5 * s}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.fillText('$', 14 * s, 18 * s);
+    }
   }
 
   ctx.restore();
@@ -1837,6 +1912,11 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
         bobY = Math.sin(t * 0.035) * 4 + Math.sin(t * 0.08) * 1.5;
         scaleX = 1 + Math.sin(t * 0.04) * 0.01;
         scaleY = 1 + Math.sin(t * 0.04 + 0.5) * 0.012;
+      } else if (charIndex === 22) {
+        // KingKing: heavy noble idle
+        bobY = Math.sin(t * 0.03) * 2;
+        scaleX = 1 + Math.sin(t * 0.03) * 0.008;
+        scaleY = 1 + Math.sin(t * 0.03 + 0.5) * 0.01;
       }
     }
 
@@ -1963,6 +2043,12 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
         walkLean = Math.sin(phase) * 0.02;
         legAngle = Math.sin(phase) * 0.1;
         armSwing = -Math.sin(phase * 0.8) * 0.15;
+      } else if (charIndex === 22) {
+        // KingKing: heavy armored march
+        bobY = Math.abs(Math.sin(phase)) * 2.5;
+        walkLean = Math.sin(phase) * 0.03;
+        legAngle = Math.sin(phase) * 0.2;
+        armSwing = -Math.sin(phase) * 0.15;
       }
     }
 
@@ -2043,8 +2129,8 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
   // 天才 uses different images per mode
   const tensaiIsDragon = animData && animData.dragonMode;
   const tensaiActiveImg = tensaiIsDragon ? tensaiDragonImg : tensaiHumanImg;
-  const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg, bulletImg, shaudenImg, judgemanImg, tensaiActiveImg, catbusImg, tankImg, namiojiImg, tokkoImg, samImg, kingImg, onpaImg, senImg, dosbossImg, microImg, mrtwoImg];
-  const imgSizes = [[70, 90], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [168, 112], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [85, 85], [75, 100], [80, 100], [85, 95]];
+  const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg, bulletImg, shaudenImg, judgemanImg, tensaiActiveImg, catbusImg, tankImg, namiojiImg, tokkoImg, samImg, kingImg, onpaImg, senImg, dosbossImg, microImg, mrtwoImg, kingkingImg];
+  const imgSizes = [[70, 90], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [168, 112], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [85, 85], [75, 100], [80, 100], [85, 95], [80, 95]];
   const img = imgs[charIndex];
   if (img && img.complete && img.naturalWidth > 0) {
     const imgW = imgSizes[charIndex][0] * s;
@@ -5053,6 +5139,7 @@ const CHAR_GRAB_FRAMES = [
   17, // 19:ドスボス (トリッキー型→パワー)
   13, // 20:マイクロ (バランス型)
   15, // 21:ミスターツー (超能力型→遠距離/特殊)
+  17, // 22:金金 (パワー型)
 ];
 function getGrabFrames(charIdx) {
   return CHAR_GRAB_FRAMES[charIdx] || THROW_GRAB_FRAMES;
@@ -5088,6 +5175,7 @@ const CHAR_THROW_TYPE = [
   'power',   // 19:ドスボス
   'balance', // 20:マイクロ
   'ranged',  // 21:ミスターツー
+  'power',   // 22:金金
 ];
 function getThrowDmg(charIdx) {
   return CHAR_THROW_DMG[CHAR_THROW_TYPE[charIdx] || 'balance'];
@@ -5361,6 +5449,18 @@ const commandDefs = {
       attack:{ startup:6, active:5, recovery:16, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#440066', effect:'none',
         projectile:{ speed:10, damage:12, kbBase:5, kbScale:0.09, kbAngle:-15, w:30, h:20, life:50, color:'#440066', pcolor:'#7733CC' },
         stun:true, stunFrames:25 } },
+  ],
+  22: [ // 金金
+    { name:'コインシャワー', seq:['F','F','D','D'], cooldownKey:'cmd1',
+      attack:{ startup:10, active:5, recovery:18, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FFD700', effect:'none',
+        projectile:{ speed:4, damage:10, kbBase:5, kbScale:0.08, kbAngle:-60, w:16, h:16, life:45, color:'#FFD700', pcolor:'#DAA520' },
+        multiShot:5, shotInterval:3 } },
+    { name:'マネーダッシュ', seq:['F','F','U','U'], cooldownKey:'cmd2',
+      attack:{ startup:8, active:14, recovery:18, damage:14, kbBase:6, kbScale:0.11, kbAngle:-20, hx:16, hy:-35, hw:70, hh:50, color:'#FFD700', effect:'dash',
+        specialType:'shadowDash', dashSpeed:15 } },
+    { name:'ゴールドクラッシュ', seq:['U','U','D','D'], cooldownKey:'cmd3',
+      attack:{ startup:10, active:10, recovery:20, damage:16, kbBase:8, kbScale:0.13, kbAngle:-55, hx:0, hy:5, hw:100, hh:50, color:'#FFD700', effect:'shockwave', centerHit:true,
+        specialType:'divekick', diveSpeed:16 } },
   ],
 };
 
@@ -5872,6 +5972,21 @@ const attackDefs = {
               specialType:'slide', slideSpeed:12 },
     throwDmg: 10,
   },
+  // 金金 - Power Type [黄金の覇者]
+  22: {
+    normal: { name:'お金パンチ', startup:5, active:6, recovery:10, damage:7, kbBase:3, kbScale:0.06, kbAngle:-15, hx:15, hy:-38, hw:50, hh:45, color:'#FFD700', effect:'punch' },
+    strong: { name:'マネーソード', startup:10, active:8, recovery:18, damage:15, kbBase:7, kbScale:0.12, kbAngle:-25, hx:22, hy:-38, hw:100, hh:40, color:'#FFD700', effect:'bigslash' },
+    special:{ name:'お金の鎧', startup:180, active:1, recovery:10, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FFD700', effect:'none',
+              kingkingArmor:true },
+    aerial: { name:'空中金貨', startup:4, active:6, recovery:10, damage:8, kbBase:4, kbScale:0.07, kbAngle:-40, hx:10, hy:-35, hw:45, hh:45, color:'#FFD700', effect:'airkick' },
+    down:   { name:'金貨ばら撒き', startup:6, active:8, recovery:14, damage:9, kbBase:4, kbScale:0.08, kbAngle:-50, hx:0, hy:5, hw:60, hh:30, color:'#DAA520', effect:'shockwave', centerHit:true },
+    up:     { name:'金貨振り上げ', startup:5, active:7, recovery:12, damage:10, kbBase:5, kbScale:0.09, kbAngle:-85, hx:3, hy:-55, hw:50, hh:55, color:'#FFD700', effect:'upslash' },
+    side:   { name:'金の盾', startup:7, active:7, recovery:14, damage:12, kbBase:6, kbScale:0.10, kbAngle:-20, hx:18, hy:-35, hw:55, hh:45, color:'#DAA520', effect:'punch' },
+    downair:{ name:'黄金プレス', startup:6, active:10, recovery:16, damage:14, kbBase:6, kbScale:0.11, kbAngle:80, hx:0, hy:10, hw:50, hh:50, color:'#FFD700', effect:'meteor', specialType:'divekick', diveSpeed:14 },
+    dash:   { name:'突進パンチ', startup:5, active:6, recovery:12, damage:9, kbBase:4, kbScale:0.07, kbAngle:-20, hx:18, hy:-35, hw:55, hh:40, color:'#FFD700', effect:'dash',
+              specialType:'slide', slideSpeed:11 },
+    throwDmg: 10,
+  },
 };
 
 // Dragon mode attack defs (separate object)
@@ -6033,6 +6148,8 @@ function createPlayer(id, charIdx, startX) {
     airDodgeTimer: 0,        // 無敵フレームカウントダウン
     airDodgeEndlag: 0,       // 硬直フレームカウントダウン
     airDodgeUsed: false,     // 1ジャンプにつき1回制限
+    // 金金: お金の鎧
+    kingkingArmorTimer: 0,   // 鎧残りフレーム
     // 自己バフ
     autoBuff: 0,             // 自己バフ残りフレーム
     autoBuffType: null,      // バフ種別
@@ -6262,12 +6379,14 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   if (aci === 9 && target.damage > attacker.damage) finalDamage *= 1.15; // ジャッジマン「公正」
   if (aci === 16 && target.damage < 50) finalDamage *= 1.15;          // キング「威圧」
   if (aci === 20 && attacker.autoBuff > 0) finalDamage *= 1.1;        // マイクロ「スター」
+  if (aci === 22 && attacker.kingkingArmorTimer > 0) finalDamage *= 1.4; // 金金「お金の鎧」攻撃力
   if (aci === 21 && attacker.autoBuff > 0) finalDamage *= 1.2;        // ミスターツー「念力増幅」
   // --- 自己バフ（防御側・被ダメ補正） ---
   const tci = target.charIdx;
   if (tci === 1 && target.stocks === 1) finalDamage *= 1.1;           // ドン「激怒」被ダメ増
   if (tci === 12 && target.grounded) finalDamage *= 0.9;              // タンク「装甲」地上
   if (tci === 18 && target.senBuffTimer > 0) finalDamage *= 0.9;      // セン「満腹」バフ中
+  if (tci === 22 && target.kingkingArmorTimer > 0) finalDamage *= 0.7; // 金金「お金の鎧」被ダメ
 
   target.damage = Math.min(999, target.damage + finalDamage);
   playHitSE();
@@ -6428,6 +6547,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
       19: ['#9944CC', '#CC66FF', '#FF6600'], // Dosboss: purple/orange
       20: ['#3388FF', '#66BBFF', '#FF4400'], // Micro: blue/fire
       21: ['#7733CC', '#AA66FF', '#440066'], // MrTwo: purple/dark
+      22: ['#FFD700', '#DAA520', '#8B6914'], // KingKing: gold
     };
     const colors = charColors[attacker.charIdx] || ['#FFFFFF'];
     const specialCount = 30 + Math.floor(kb * 1.5);
@@ -6575,6 +6695,9 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
     // ミスターツー: 紫の念波パーティクル
     hitEffects.push({ x: efx, y: efy, life: 14, maxLife: 14, color: '#AA66FF', size: 16, type: 'charGlow' });
     for (let i = 0; i < 2; i++) sparks.push({ x: efx+(Math.random()-0.5)*10, y: efy+(Math.random()-0.5)*10, vx:(Math.random()-0.5)*3, vy:-1.5-Math.random()*1.5, life:12, maxLife:12, color:i%2?'#AA66FF':'#7733CC', size:2+Math.random(), gravity:-0.02, drag:0.97 });
+  } else if (ci === 22) {
+    // 金金: 金貨が2〜3枚飛び散る
+    for (let i = 0; i < 2+Math.floor(Math.random()*2); i++) sparks.push({ x: efx+(Math.random()-0.5)*12, y: efy+(Math.random()-0.5)*8, vx:(Math.random()-0.5)*5, vy:-2-Math.random()*3, life:14, maxLife:14, color:i%2?'#FFD700':'#DAA520', size:2.5+Math.random(), gravity:0.15, drag:0.96 });
   }
 
   // Floating damage number (larger for strong/special)
@@ -6731,6 +6854,7 @@ function getPlayerHitbox(p) {
   if (ci === 19) return { x: p.x - 24, y: p.y - 55, w: 48, h: 55 }; // ドスボス: 横広低め
   if (ci === 20) return { x: p.x - 14, y: p.y - 68, w: 28, h: 68 }; // マイクロ: 小さめ縦長
   if (ci === 21) return { x: p.x - 22, y: p.y - 65, w: 44, h: 65 }; // ミスターツー: 横広
+  if (ci === 22) return { x: p.x - 22, y: p.y - 72, w: 44, h: 72 }; // 金金: 大きめ鎧
   return { x: p.x - 18, y: p.y - 70, w: 36, h: 70 };
 }
 
@@ -7603,6 +7727,7 @@ function updateBattle(dt) {
     if (p.inkBlindTimer > 0) p.inkBlindTimer--;
     if (p.kingComboTimer > 0) { p.kingComboTimer--; if (p.kingComboTimer <= 0) { p.kingComboHits = 0; } }
     if (p.senBuffTimer > 0) p.senBuffTimer--;
+    if (p.kingkingArmorTimer > 0) p.kingkingArmorTimer--;
     if (p.gravityDebuffTimer > 0) p.gravityDebuffTimer--;
     if (p.cancelWindow > 0) p.cancelWindow--;
     if (p.comboWindow > 0) p.comboWindow--;
@@ -8095,6 +8220,16 @@ function updateBattle(dt) {
           p.senBuffTimer = p.charIdx === 18 ? 690 : 600; // 11.5秒 or 10秒
           cmdNameDisplay.push({ text: '満腹パワー！', x: p.x, y: p.y - 120, life: 90, maxLife: 90, color: '#FF8844' });
         }
+        // 金金: お金の鎧発動
+        if (atk.kingkingArmor) {
+          p.kingkingArmorTimer = 600; // 10秒
+          cmdNameDisplay.push({ text: 'MONEY POWER!', x: p.x, y: p.y - 120, life: 90, maxLife: 90, color: '#FFD700' });
+          hitFlash.alpha = 0.25; hitFlash.color = '#FFD700';
+          triggerScreenShake(5, 10);
+          hitEffects.push({ x: p.x, y: p.y - 40, life: 25, maxLife: 25, color: '#FFD700', size: 60, type: 'ring' });
+          hitEffects.push({ x: p.x, y: p.y - 40, life: 20, maxLife: 20, color: '#DAA520', size: 40, type: 'charGlow' });
+          for (let i = 0; i < 12; i++) sparks.push({ x: p.x+(Math.random()-0.5)*40, y: p.y-40+(Math.random()-0.5)*40, vx:(Math.random()-0.5)*5, vy:-2-Math.random()*3, life:20, maxLife:20, color:i%2?'#FFD700':'#DAA520', size:3+Math.random()*2, gravity:0.1, drag:0.96 });
+        }
         p.attacking = false;
         p.specialState = null;
       }
@@ -8568,7 +8703,8 @@ function applyMovement(p, moveX, ch) {
   // D技: 天才 覚醒 速度1.3倍 / タンク 要塞化 移動不可
   const dSkillSpeedMult = p.dSkillBuff === 'tensaiBoost' ? 1.3 : p.dSkillBuff === 'fortress' ? 0 : 1.0;
   // 自己バフ: 天才「変形解放」ダメ80%↑で速度1.2倍 / Catbus「全速力」ダッシュ継続で加速
-  const autoSpeedMult = (p.charIdx === 10 && p.damage >= 80) ? 1.2 : (p.charIdx === 11 && p.dashing) ? Math.min(1.3, 1 + p.dashTimer * 0.002) : 1.0;
+  const kkArmorSpeed = (p.charIdx === 22 && p.kingkingArmorTimer > 0) ? 1.2 : 1.0;
+  const autoSpeedMult = ((p.charIdx === 10 && p.damage >= 80) ? 1.2 : (p.charIdx === 11 && p.dashing) ? Math.min(1.3, 1 + p.dashTimer * 0.002) : 1.0) * kkArmorSpeed;
   if (p.charIdx === 11 && p.dashing) p.dashTimer++;
   if (!p.dashing) p.dashTimer = 0;
   const targetVx = moveX * ch.moveSpeed * senSpeedMult * gravDebuffMult * saisokuMult * shaudenMult * speedMult * dashMult * dSkillSpeedMult * autoSpeedMult;
@@ -11035,7 +11171,7 @@ function serializePlayer(p) {
     inkBlindTimer: p.inkBlindTimer,
     animTimer: p.animTimer, charIdx: p.charIdx,
     kingComboHits: p.kingComboHits, kingComboTimer: p.kingComboTimer,
-    senBuffTimer: p.senBuffTimer,
+    senBuffTimer: p.senBuffTimer, kingkingArmorTimer: p.kingkingArmorTimer,
     dosbossRandomPattern: p.dosbossRandomPattern, gravityDebuffTimer: p.gravityDebuffTimer,
     cancelWindow: p.cancelWindow, comboWindow: p.comboWindow, airComboTimer: p.airComboTimer,
     airDodging: p.airDodging, airDodgeTimer: p.airDodgeTimer, airDodgeUsed: p.airDodgeUsed, airDodgeEndlag: p.airDodgeEndlag,
@@ -12033,6 +12169,20 @@ function triggerDSkill(p) {
     hitEffects.push({ x: p.x + dir*40, y: p.y - 40, life: 18, maxLife: 18, color: '#AA66FF', size: 50, type: 'ring' });
     for (let i = 0; i < 15; i++) sparks.push({ x: p.x+(Math.random()-0.5)*40, y: p.y-40+(Math.random()-0.5)*40, vx:(Math.random()-0.5)*5+dir*3, vy:-2-Math.random()*3, life:18, maxLife:18, color:i%3===0?'#7733CC':(i%3===1?'#AA66FF':'#440066'), size:3+Math.random()*2, gravity:-0.02, drag:0.96 });
     cmdNameDisplay.push({ text: 'メガシャドーボール！', x: p.x, y: p.y - 100, life: 70, maxLife: 70, color: '#AA66FF' });
+  } else if (ci === 22) {
+    // 金金「マネーボム」: 巨大金の爆弾 + 大爆発
+    const armorMult = p.kingkingArmorTimer > 0 ? 2.0 : 1.0;
+    const bombDmg = Math.floor(20 * armorMult);
+    const pr2 = { x: p.x + 30 * dir, y: p.y - 40, vx: 8 * dir, vy: -4, w: 35, h: 35,
+      damage: bombDmg, kbBase: 10, kbScale: 0.14, kbAngle: -40, life: 50, ownerId: p.id,
+      color: '#FFD700', pcolor: '#DAA520', shape: 'star', ownerCharIdx: ci, time: 0 };
+    projectiles.push(pr2);
+    hitFlash.alpha = 0.25; hitFlash.color = '#FFD700';
+    triggerScreenShake(7, 14);
+    hitEffects.push({ x: p.x, y: p.y - 40, life: 22, maxLife: 22, color: '#FFD700', size: 70, type: 'ring' });
+    hitEffects.push({ x: p.x, y: p.y - 40, life: 18, maxLife: 18, color: '#DAA520', size: 50, type: 'charGlow' });
+    for (let i = 0; i < 12; i++) sparks.push({ x: p.x+(Math.random()-0.5)*35, y: p.y-40+(Math.random()-0.5)*35, vx:(Math.random()-0.5)*6+dir*2, vy:-2-Math.random()*3, life:16, maxLife:16, color:i%2?'#FFD700':'#DAA520', size:3+Math.random()*2, gravity:0.12, drag:0.96 });
+    cmdNameDisplay.push({ text: 'マネーボム！', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#FFD700' });
   }
   playHitSound('cmd');
 }
@@ -12075,6 +12225,10 @@ function updateDSkill(p) {
     // マイクロ: 黄色い星パーティクル
     const a = Math.random() * Math.PI * 2;
     sparks.push({ x: p.x+Math.cos(a)*20, y: p.y-35+Math.sin(a)*15, vx:Math.cos(a)*1.5, vy:-1-Math.random()*0.5, life:12, maxLife:12, color:Math.random()>0.5?'#FFD700':'#FFEE88', size:2+Math.random()*1.5, gravity:0.02, drag:0.97 });
+  }
+  // 金金: 鎧中の金色オーラ（updateDSkillとは別にメインループでも呼べるが、ここでまとめる）
+  if (p.charIdx === 22 && p.kingkingArmorTimer > 0 && p.dSkillTimer % 8 === 0) {
+    sparks.push({ x: p.x+(Math.random()-0.5)*30, y: p.y-35+(Math.random()-0.5)*25, vx:(Math.random()-0.5)*1.5, vy:-0.8-Math.random()*0.5, life:12, maxLife:12, color:Math.random()>0.5?'#FFD700':'#DAA520', size:2+Math.random()*1.5, gravity:-0.02, drag:0.97 });
   }
   // 分身（サイソク）: 毎フレーム分身が攻撃判定 + 残像エフェクト
   if (p.dSkillBuff === 'bunshin') {
