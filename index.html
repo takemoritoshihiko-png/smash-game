@@ -5197,6 +5197,8 @@ let battleCountdown = 0;
 let battleStarted = false;
 let gameOver = false;
 let winner = -1;
+let gameSetTimer = 0;     // GAME SET演出タイマー
+let gameSetPhase = 0;     // 0=inactive, 1=slowmo+flash, 2=GAME SET text, 3=winner display
 
 // デバッグモード（F3キーで切り替え）
 let debugHitboxes = false;
@@ -6842,6 +6844,7 @@ function initBattle() {
   battleStarted = false;
   gameOver = false;
   winner = -1;
+  gameSetTimer = 0; gameSetPhase = 0;
   battleTimer = BATTLE_TIME_LIMIT;
   battleFrameAcc = 0;
   projectiles = [];
@@ -9710,6 +9713,8 @@ function blastCheck(p) {
       gameOver = true;
       stopBGM();
       winner = p.id === 0 ? 1 : 0;
+      gameSetTimer = 0; gameSetPhase = 1;
+      koSlowMotion.active = true; koSlowMotion.frames = 30; koSlowMotion.maxFrames = 30;
     } else {
       p.respawnTimer = RESPAWN_TIME;
     }
@@ -10306,26 +10311,31 @@ function drawBattle(dt) {
       }
     }
 
+    // アイドルモーション: 待機中にわずかに上下に揺れる（描画のみ）
+    const isIdle = p.grounded && !p.attacking && Math.abs(p.vx) < 0.5 && p.hitstun <= 0 && !p.grabbing && !p.grabbed && !p.guarding && p.guardBreakStun <= 0;
+    const idleOfs = isIdle ? Math.sin(battleTime * (Math.PI * 2 / 60)) * 3 : 0;
+    const drawY = p.y - 55 + idleOfs;
+
     // ⑤ コマンド技スケールエフェクト & ドラゴンモード拡大
     const dragonScale = (p.charIdx === 10 && p.dragonMode) ? 1.3 : 1.0;
     if (cmdScaleEffect.playerId === p.id && cmdScaleEffect.life > 0) {
       const scaleT = cmdScaleEffect.life / 12;
       const s = (1 + scaleT * 0.3) * dragonScale;
       ctx.save();
-      ctx.translate(p.x, p.y - 55);
+      ctx.translate(p.x, drawY);
       ctx.scale(s, s);
-      ctx.translate(-p.x, -(p.y - 55));
-      drawBattleCharacter(p.x, p.y - 55, 1.0, p.charIdx, battleTime, p.facingLeft, p);
+      ctx.translate(-p.x, -drawY);
+      drawBattleCharacter(p.x, drawY, 1.0, p.charIdx, battleTime, p.facingLeft, p);
       ctx.restore();
     } else if (dragonScale !== 1.0) {
       ctx.save();
-      ctx.translate(p.x, p.y - 55);
+      ctx.translate(p.x, drawY);
       ctx.scale(dragonScale, dragonScale);
-      ctx.translate(-p.x, -(p.y - 55));
-      drawBattleCharacter(p.x, p.y - 55, 1.0, p.charIdx, battleTime, p.facingLeft, p);
+      ctx.translate(-p.x, -drawY);
+      drawBattleCharacter(p.x, drawY, 1.0, p.charIdx, battleTime, p.facingLeft, p);
       ctx.restore();
     } else {
-      drawBattleCharacter(p.x, p.y - 55, 1.0, p.charIdx, battleTime, p.facingLeft, p);
+      drawBattleCharacter(p.x, drawY, 1.0, p.charIdx, battleTime, p.facingLeft, p);
     }
 
     // Draw attack effects
@@ -10622,22 +10632,85 @@ function drawBattle(dt) {
     }
   }
 
-  // Game over
+  // Game over - GAME SET演出
   if (gameOver && winner >= 0) {
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-    ctx.fillRect(0, 0, 960, 640);
-    if (battleTimer <= 0) {
-      ctx.font = 'bold 36px sans-serif'; ctx.textAlign = 'center';
-      ctx.fillStyle = '#FF8844'; ctx.fillText('TIME UP!', 480, 230);
-    }
-    const wCh = characters[players[winner].charIdx];
-    ctx.font = 'bold 50px sans-serif'; ctx.textAlign = 'center';
-    ctx.fillStyle = '#FFF'; ctx.shadowColor = wCh.color; ctx.shadowBlur = 20;
+    gameSetTimer++;
+    const wP = players[winner];
+    const wCh = characters[wP.charIdx];
     const winLabel = winner === 0 ? '1P' : (gameMode === 'cpu' ? 'CPU' : '2P');
-    ctx.fillText(`${winLabel} ${wCh.name} WIN!`, 480, 290);
-    ctx.shadowBlur = 0;
-    ctx.font = '22px sans-serif'; ctx.fillStyle = '#AAA';
-    ctx.fillText('ENTER でキャラ選択に戻る', 480, 350);
+
+    // フェーズ管理
+    if (gameSetPhase === 1 && gameSetTimer > 30) gameSetPhase = 2; // → GAME SET
+    if (gameSetPhase === 2 && gameSetTimer > 120) gameSetPhase = 3; // → 勝者表示
+
+    // Phase 1: スローモーション + 白フラッシュ
+    if (gameSetPhase === 1) {
+      const flashT = Math.max(0, 1 - gameSetTimer / 15);
+      ctx.fillStyle = `rgba(255, 255, 255, ${flashT * 0.6})`;
+      ctx.fillRect(0, 0, 960, 640);
+    }
+
+    // Phase 2: GAME SET!! テキスト
+    if (gameSetPhase >= 2) {
+      ctx.fillStyle = `rgba(0, 0, 0, ${Math.min(0.7, (gameSetTimer - 30) / 30)})`;
+      ctx.fillRect(0, 0, 960, 640);
+      const gsT = Math.min(1, (gameSetTimer - 30) / 20);
+      const gsScale = 1 + (1 - gsT) * 2; // 3x → 1x に縮小
+      ctx.save();
+      ctx.translate(480, 250);
+      ctx.scale(gsScale, gsScale);
+      ctx.font = 'bold 60px sans-serif'; ctx.textAlign = 'center';
+      ctx.strokeStyle = '#FFF'; ctx.lineWidth = 6;
+      ctx.strokeText('GAME SET!!', 0, 0);
+      ctx.fillStyle = '#FFD700';
+      ctx.shadowColor = '#FFD700'; ctx.shadowBlur = 15;
+      ctx.fillText('GAME SET!!', 0, 0);
+      ctx.shadowBlur = 0;
+      ctx.restore();
+    }
+
+    // Phase 3: 勝者表示
+    if (gameSetPhase >= 3) {
+      const p3T = Math.min(1, (gameSetTimer - 120) / 30);
+      ctx.globalAlpha = p3T;
+      // スポットライト
+      const spot = ctx.createRadialGradient(480, 320, 0, 480, 320, 250);
+      spot.addColorStop(0, 'rgba(255,215,0,0.15)');
+      spot.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = spot;
+      ctx.fillRect(0, 0, 960, 640);
+      // 勝者キャラ大表示
+      ctx.save();
+      ctx.translate(480, 350);
+      ctx.scale(2, 2);
+      drawCharacterBody(0, 0, 1.0, wP.charIdx, battleTime, false);
+      ctx.restore();
+      // WINNER テキスト
+      ctx.font = 'bold 32px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillStyle = '#FFD700'; ctx.shadowColor = '#FFD700'; ctx.shadowBlur = 10;
+      ctx.fillText('WINNER!!', 480, 180);
+      ctx.shadowBlur = 0;
+      // キャラ名
+      ctx.font = 'bold 42px sans-serif';
+      ctx.strokeStyle = '#000'; ctx.lineWidth = 4;
+      ctx.strokeText(`${winLabel}  ${wCh.name}`, 480, 225);
+      ctx.fillStyle = '#FFF';
+      ctx.fillText(`${winLabel}  ${wCh.name}`, 480, 225);
+      // 金色パーティクル（定期生成）
+      if (gameSetTimer % 8 === 0) {
+        const a = Math.random() * Math.PI * 2;
+        sparks.push({ x: 480 + Math.cos(a)*80, y: 350 + Math.sin(a)*60, vx:Math.cos(a)*2, vy:-1-Math.random()*2, life:30, maxLife:30, color:Math.random()>0.5?'#FFD700':'#FFEE88', size:2+Math.random()*2, gravity:0.02, drag:0.97 });
+      }
+      // 操作案内
+      if (gameSetTimer > 180) {
+        ctx.globalAlpha = Math.min(1, (gameSetTimer - 180) / 30);
+        ctx.font = 'bold 20px sans-serif'; ctx.fillStyle = '#44FF44';
+        ctx.fillText('ENTER : リマッチ', 380, 540);
+        ctx.fillStyle = '#AAAAAA';
+        ctx.fillText('ESC : キャラ変更', 580, 540);
+      }
+      ctx.globalAlpha = 1;
+    }
   }
 
   // デバッグ：当たり判定の可視化（F3で切り替え）
@@ -13526,7 +13599,11 @@ function handleKeyDown(e) {
       startTransition('battle');
     }
   } else if (scene === 'battle') {
-    if (gameOver && e.key === 'Enter') {
+    if (gameOver && gameSetTimer > 180 && e.key === 'Enter') {
+      // リマッチ
+      initBattle(); return;
+    }
+    if (gameOver && gameSetTimer > 180 && e.key === 'Escape') {
       stopBGM();
       startTransition('select'); return;
     }
