@@ -6033,6 +6033,11 @@ function createPlayer(id, charIdx, startX) {
     airDodgeTimer: 0,        // 無敵フレームカウントダウン
     airDodgeEndlag: 0,       // 硬直フレームカウントダウン
     airDodgeUsed: false,     // 1ジャンプにつき1回制限
+    // 自己バフ
+    autoBuff: 0,             // 自己バフ残りフレーム
+    autoBuffType: null,      // バフ種別
+    consecutiveHits: 0,      // 連続ヒット数（おんぱ・とっこ用）
+    dosbossComboCount: 0,    // ドスボス連続ランダム必殺技カウント
   };
 }
 
@@ -6121,7 +6126,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
 
     // Normal Guard: 80% damage reduction, reduced knockback, lose durability
     // パッシブ: ジャッジマン(9) ガード強化 ガード中被ダメ-15%
-    const guardPassive = target.charIdx === 9 ? 0.85 : 1.0;
+    const guardPassive = target.charIdx === 9 ? 0.85 : (target.charIdx === 5 ? 0.85 : 1.0);
     const reducedDamage = damage * GUARD_DAMAGE_REDUCTION * guardPassive;
     target.damage = Math.min(999, target.damage + reducedDamage);
     target.guardDurability -= damage * GUARD_DURABILITY_COST;
@@ -6247,6 +6252,23 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   if (attacker.dSkillBuff === 'burnFist') { finalDamage += 5; attacker.dSkillActive = false; attacker.dSkillBuff = null; }
   // D技: 熊太郎 熊の怒り（投げ以外では消費しない→投げ側で処理）
 
+  // --- 自己バフ（攻撃側・与ダメ補正） ---
+  const aci = attacker.charIdx;
+  if (aci === 0 && attacker.damage >= 50) finalDamage *= 1.2;         // ゼン「集中」
+  if (aci === 1 && attacker.stocks === 1) finalDamage *= 1.3;         // ドン「激怒」
+  if (aci === 2 && attacker.dashing) finalDamage *= 1.15;             // サイソク「加速」
+  if (aci === 3 && attacker.autoBuff > 0) finalDamage *= 1.2;         // メテオ「炎上」
+  if (aci === 6 && attacker.autoBuff > 0) finalDamage *= 1.15;        // 熊太郎「怒り」
+  if (aci === 9 && target.damage > attacker.damage) finalDamage *= 1.15; // ジャッジマン「公正」
+  if (aci === 16 && target.damage < 50) finalDamage *= 1.15;          // キング「威圧」
+  if (aci === 20 && attacker.autoBuff > 0) finalDamage *= 1.1;        // マイクロ「スター」
+  if (aci === 21 && attacker.autoBuff > 0) finalDamage *= 1.2;        // ミスターツー「念力増幅」
+  // --- 自己バフ（防御側・被ダメ補正） ---
+  const tci = target.charIdx;
+  if (tci === 1 && target.stocks === 1) finalDamage *= 1.1;           // ドン「激怒」被ダメ増
+  if (tci === 12 && target.grounded) finalDamage *= 0.9;              // タンク「装甲」地上
+  if (tci === 18 && target.senBuffTimer > 0) finalDamage *= 0.9;      // セン「満腹」バフ中
+
   target.damage = Math.min(999, target.damage + finalDamage);
   playHitSE();
   const kb = calcKnockback(target.damage, kbBase, finalKbScale);
@@ -6259,6 +6281,10 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   if (attacker.charIdx === 17) weightedKb *= 1.1;
   // パッシブ: 波おじ(13) コンボ強化 コンボ最終ヒットKB+15%
   if (attacker.charIdx === 13 && attacker.comboWindow > 0 && attacker.cancelWindow <= 0) weightedKb *= 1.15;
+  // 自己バフ: 波おじ「根性」ダメージ100%以上でKB耐性1.2倍
+  if (target.charIdx === 13 && target.damage >= 100) weightedKb *= (1 / 1.2);
+  // 自己バフ: おんぱ「共鳴」連続ヒットでKB増加
+  if (attacker.charIdx === 17 && attacker.consecutiveHits > 0) weightedKb *= (1 + Math.min(attacker.consecutiveHits * 0.05, 0.25));
   // --- ノックバック角度補正 ---
   let finalAngle = kbAngle;
   // 全キャラ共通の角度設定（hitTypeベース）
@@ -6275,7 +6301,6 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   else if (hitType === 'cmd') finalAngle = kbAngle; // コマンド技は定義値を維持
   else if (hitType === 'projectile') finalAngle = kbAngle; // 飛び道具も定義値維持
   // キャラ別特殊角度
-  const aci = attacker.charIdx;
   if (aci === 0 && hitType === 'side') finalAngle = -40;        // ゼン: 横攻撃を少し浮かせる
   if (aci === 1 && hitType !== 'cmd' && hitType !== 'projectile') finalAngle -= 5; // ドン: 全技5度上補正
   if (aci === 2 && hitType === 'side') finalAngle = -20;        // サイソク: 低く鋭く
@@ -6307,6 +6332,13 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   if (!target.grounded) {
     target.airComboTimer = 20;
   }
+
+  // --- 自己バフトリガー（ヒット成功時） ---
+  if (attacker.charIdx === 3 && (hitType === 'special' || hitType === 'cmd')) {
+    attacker.autoBuff = 180; attacker.autoBuffType = 'meteoFlame'; // メテオ「炎上」3秒
+  }
+  if (attacker.charIdx === 17) attacker.consecutiveHits++;  // おんぱ「共鳴」カウント
+  if (attacker.charIdx === 14) attacker.consecutiveHits++;  // とっこ「殺気」カウント
 
   // Spin knockback for certain attacks (瞬身乱舞、百裂拳)
   const atkData = attacker.attackData;
@@ -6675,7 +6707,30 @@ function hitboxCollides(ax, ay, aw, ah, bx, by, bw, bh) {
 }
 
 function getPlayerHitbox(p) {
-  if (p.charIdx === 12) return { x: p.x - 25, y: p.y - 98, w: 50, h: 98 };
+  // キャラ固有の当たり判定形状
+  const ci = p.charIdx;
+  if (ci === 0) return { x: p.x - 14, y: p.y - 75, w: 28, h: 75 };  // ゼン: 縦長細め
+  if (ci === 1) return { x: p.x - 22, y: p.y - 68, w: 44, h: 68 };  // ドン: 大きめ
+  if (ci === 2) return { x: p.x - 13, y: p.y - 72, w: 26, h: 72 };  // サイソク: 小さめ縦長
+  if (ci === 3) return { x: p.x - 20, y: p.y - 65, w: 40, h: 65 };  // メテオ: 横広
+  if (ci === 4) return { x: p.x - 16, y: p.y - 70, w: 42, h: 70 };  // ロング: 前方に長い
+  if (ci === 5) return { x: p.x - 22, y: p.y - 68, w: 44, h: 68 };  // うる男: 大きめ
+  if (ci === 6) return { x: p.x - 20, y: p.y - 68, w: 40, h: 68 };  // 熊太郎: 丸い大きめ
+  if (ci === 7) return { x: p.x - 13, y: p.y - 72, w: 26, h: 72 };  // バレット: 小さめ縦長
+  if (ci === 8) return { x: p.x - 22, y: p.y - 60, w: 44, h: 60 };  // シャうでん: 横広楕円
+  if (ci === 9) return { x: p.x - 18, y: p.y - 70, w: 36, h: 70 };  // ジャッジマン: 標準
+  if (ci === 10) return { x: p.x - 22, y: p.y - 72, w: 44, h: 72 }; // 天才: 横広大きめ
+  if (ci === 11) return { x: p.x - 24, y: p.y - 55, w: 48, h: 55 }; // Catbus: 横長
+  if (ci === 12) return { x: p.x - 25, y: p.y - 55, w: 50, h: 55 }; // タンク: 横広低め
+  if (ci === 13) return { x: p.x - 18, y: p.y - 70, w: 36, h: 70 }; // 波おじ: 標準
+  if (ci === 14) return { x: p.x - 13, y: p.y - 72, w: 26, h: 72 }; // とっこ: 小さめ縦長
+  if (ci === 15) return { x: p.x - 20, y: p.y - 62, w: 40, h: 62 }; // サム: 横広楕円
+  if (ci === 16) return { x: p.x - 20, y: p.y - 72, w: 40, h: 72 }; // キング: やや大きめ
+  if (ci === 17) return { x: p.x - 20, y: p.y - 65, w: 40, h: 65 }; // おんぱ: 円形
+  if (ci === 18) return { x: p.x - 18, y: p.y - 68, w: 36, h: 68 }; // セン: 丸み標準
+  if (ci === 19) return { x: p.x - 24, y: p.y - 55, w: 48, h: 55 }; // ドスボス: 横広低め
+  if (ci === 20) return { x: p.x - 14, y: p.y - 68, w: 28, h: 68 }; // マイクロ: 小さめ縦長
+  if (ci === 21) return { x: p.x - 22, y: p.y - 65, w: 44, h: 65 }; // ミスターツー: 横広
   return { x: p.x - 18, y: p.y - 70, w: 36, h: 70 };
 }
 
@@ -6959,6 +7014,8 @@ function executeThrow(grabber, dirX, dirY) {
   }
 
   grabber.throwCooldown = 30;
+  // 自己バフ: 熊太郎「怒り」投げ成功後3秒間全ダメ1.15倍
+  if (grabber.charIdx === 6) { grabber.autoBuff = 180; grabber.autoBuffType = 'kumaRage'; }
   releaseGrab(grabber);
 }
 
@@ -7483,8 +7540,19 @@ function updateBattle(dt) {
       const ph = getPlayerHitbox(p);
       if (hitboxCollides(pr.x - pr.w/2, pr.y - pr.h/2, pr.w, pr.h, ph.x, ph.y, ph.w, ph.h)) {
         const owner = players.find(pl => pl.id === pr.ownerId);
-        const fakeAttacker = { x: pr.x - pr.vx * 5, charIdx: pr.ownerCharIdx, senBuffTimer: owner ? owner.senBuffTimer : 0 };
-        applyHit(fakeAttacker, p, pr.damage, pr.kbBase, pr.kbScale, pr.kbAngle, 'projectile');
+        const fakeAttacker = { x: pr.x - pr.vx * 5, charIdx: pr.ownerCharIdx, senBuffTimer: owner ? owner.senBuffTimer : 0,
+          damage: owner ? owner.damage : 0, stocks: owner ? owner.stocks : 3, dashing: false, autoBuff: owner ? owner.autoBuff : 0,
+          autoBuffType: owner ? owner.autoBuffType : null, comboWindow: owner ? owner.comboWindow : 0, consecutiveHits: owner ? owner.consecutiveHits : 0,
+          dSkillBuff: owner ? owner.dSkillBuff : null, dSkillCooldown: owner ? owner.dSkillCooldown : 0 };
+        // 自己バフ: ロング「狙撃」距離比例ダメ増 / バレット「精密射撃」遠距離1.2倍
+        let projDmg = pr.damage;
+        if (owner) {
+          const dist = Math.abs(pr.x - (owner ? owner.x : pr.x));
+          if (pr.ownerCharIdx === 4) projDmg *= (1 + Math.min(dist / 500, 0.3));   // ロング: 最大1.3倍
+          if (pr.ownerCharIdx === 7) projDmg *= (1 + Math.min(dist / 400, 0.2));   // バレット: 最大1.2倍
+          if (pr.ownerCharIdx === 19) projDmg *= (1 + Math.min((owner.dosbossComboCount || 0) * 0.05, 0.25)); // ドスボス「混沌」
+        }
+        applyHit(fakeAttacker, p, projDmg, pr.kbBase, pr.kbScale, pr.kbAngle, 'projectile');
         showHitDisplay(p.x, p.y, true);
         if (pr.meshitero) {
           cmdNameDisplay.push({ text: '飯テロ！', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#FF8844' });
@@ -7541,6 +7609,17 @@ function updateBattle(dt) {
     if (p.airComboTimer > 0) p.airComboTimer--;
     if (p.dragonCooldown > 0) p.dragonCooldown--;
     updateDSkill(p);
+    // 自己バフタイマー
+    if (p.autoBuff > 0) p.autoBuff--;
+    if (p.autoBuff <= 0) p.autoBuffType = null;
+    // 連続ヒットリセット（2秒間ヒットなしでリセット）
+    if (p.comboWindow <= 0 && p.consecutiveHits > 0) p.consecutiveHits = 0;
+    // マイクロ: Dスキル後10秒間バフ
+    if (p.charIdx === 20 && p.dSkillCooldown === D_SKILL_COOLDOWN - 1) { p.autoBuff = 600; p.autoBuffType = 'microAfterStar'; }
+    // ミスターツー: テレポート使用後3秒バフ（specialState確認）
+    if (p.charIdx === 21 && p.specialState === 'dashing' && p.attackType === 'special') { p.autoBuff = 180; p.autoBuffType = 'mrtwoTeleAmp'; }
+    // ドスボス: ランダム必殺技使用カウント
+    if (p.charIdx === 19 && p.attacking && p.attackData && p.attackData.dosbossRandom && p.attackFrame === 1) p.dosbossComboCount++;
 
     // Dキー長押し検出
     let dKeyHeld = false;
@@ -8340,9 +8419,10 @@ function updateBattle(dt) {
       // パッシブ: Catbus(11) 着地強化 着地硬直-15%
       const landLagPassive = p.charIdx === 11 ? 0.85 : 1.0;
       p.landSquash = Math.floor((8 + impactStrength * 4) * landLagPassive);
-      // 着地硬直フレーム
+      // 着地硬直フレーム（シャうでん「水流」: 空中攻撃後の着地硬直ゼロ）
       const baseLandLag = p.fastFalling ? LAND_LAG_FASTFALL : LAND_LAG_NORMAL;
-      p.landLag = Math.floor(baseLandLag * landLagPassive);
+      const shaudenZero = (p.charIdx === 8 && p.attacking) ? 0 : 1;
+      p.landLag = Math.floor(baseLandLag * landLagPassive * shaudenZero);
       p.fastFalling = false;
       p.dashing = false;
 
@@ -8487,7 +8567,11 @@ function applyMovement(p, moveX, ch) {
   const dashMult = (p.dashing && p.grounded) ? DASH_SPEED_MULT : 1.0;
   // D技: 天才 覚醒 速度1.3倍 / タンク 要塞化 移動不可
   const dSkillSpeedMult = p.dSkillBuff === 'tensaiBoost' ? 1.3 : p.dSkillBuff === 'fortress' ? 0 : 1.0;
-  const targetVx = moveX * ch.moveSpeed * senSpeedMult * gravDebuffMult * saisokuMult * shaudenMult * speedMult * dashMult * dSkillSpeedMult;
+  // 自己バフ: 天才「変形解放」ダメ80%↑で速度1.2倍 / Catbus「全速力」ダッシュ継続で加速
+  const autoSpeedMult = (p.charIdx === 10 && p.damage >= 80) ? 1.2 : (p.charIdx === 11 && p.dashing) ? Math.min(1.3, 1 + p.dashTimer * 0.002) : 1.0;
+  if (p.charIdx === 11 && p.dashing) p.dashTimer++;
+  if (!p.dashing) p.dashTimer = 0;
+  const targetVx = moveX * ch.moveSpeed * senSpeedMult * gravDebuffMult * saisokuMult * shaudenMult * speedMult * dashMult * dSkillSpeedMult * autoSpeedMult;
 
   if (moveX !== 0) {
     // ダッシュターン: ダッシュ中に逆方向入力→少し滑る
@@ -10957,6 +11041,7 @@ function serializePlayer(p) {
     airDodging: p.airDodging, airDodgeTimer: p.airDodgeTimer, airDodgeUsed: p.airDodgeUsed, airDodgeEndlag: p.airDodgeEndlag,
     dashing: p.dashing, fastFalling: p.fastFalling, landLag: p.landLag,
     dSkillCooldown: p.dSkillCooldown, dSkillActive: p.dSkillActive, dSkillTimer: p.dSkillTimer, dSkillBuff: p.dSkillBuff,
+    autoBuff: p.autoBuff, autoBuffType: p.autoBuffType, consecutiveHits: p.consecutiveHits, dosbossComboCount: p.dosbossComboCount,
   };
 }
 
