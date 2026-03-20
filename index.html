@@ -5017,6 +5017,13 @@ const STAGE_FRICTION = 1.0;      // ステージ摩擦倍率（1.0=通常、0.5=
 const DASH_SPEED_MULT = 1.68;    // ダッシュ時速度倍率（旧1.4×1.2）
 const DASH_INPUT_WINDOW = 12;    // ダッシュ入力受付フレーム
 const DASH_TURN_FRICTION = 0.85; // ダッシュターン時の滑り
+// スマッシュ攻撃
+const SMASH_INPUT_WINDOW = 10;    // 方向2回入力受付フレーム
+const SMASH_CHARGE_MAX = 120;     // 最大溜めフレーム（2秒）
+const SMASH_DAMAGE_MULT = { upSmash: 1.4, sideSmash: 1.5, downSmash: 1.3 };
+const SMASH_CHARGE_BONUS = 0.8;   // 満タン溜めで追加0.8倍（合計1.8倍）
+// ガードフレームデータ
+const GUARD_PENALTY = { normal: 5, strong: 10, smash: 15, special: 8, cmd: 10, aerial: 5, side: 5, up: 5, down: 5, dash: 5, downair: 5, projectile: 0 };
 // 着地硬直
 const LAND_LAG_NORMAL = 2;       // 通常着地硬直
 const LAND_LAG_FASTFALL = 4;     // 急降下着地硬直
@@ -6569,6 +6576,14 @@ function createPlayer(id, charIdx, startX) {
     damageTint: 0,    // frames of red flash
     spinAngle: 0,     // rotation from strong knockback
     wasGrounded: true, // for landing detection
+    // スマッシュ攻撃
+    smashCharging: false,    // スマッシュ溜め中
+    smashChargeTime: 0,      // 溜めフレーム
+    smashType: null,         // 'upSmash'|'sideSmash'|'downSmash'
+    smashInputDir: 0,        // 最後の方向入力 (-1,0,1)
+    smashInputTime: 0,       // 最後の方向入力フレーム
+    smashInputCount: 0,      // 連続入力カウント
+    guardPenalty: 0,         // ガード硬直（攻撃側ペナルティ）
     // ダッシュ・急降下
     dashing: false,
     dashTimer: 0,          // ダッシュ持続
@@ -6726,6 +6741,17 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
         life: 8, maxLife: 8,
         color: '#44DDFF', size: 20
       });
+    }
+    // ガードフレームデータ: 攻撃側に硬直ペナルティ
+    const penaltyType = hitType === 'smash' ? 'smash' : (hitType || 'normal');
+    const penalty = GUARD_PENALTY[penaltyType] || GUARD_PENALTY.normal;
+    if (attacker.id !== undefined) {
+      const realAtk = players.find(pp => pp.id === attacker.id);
+      if (realAtk) {
+        realAtk.guardPenalty = penalty;
+        realAtk.attacking = false;
+        realAtk.specialState = null;
+      }
     }
     return;
   }
@@ -8234,6 +8260,21 @@ function updateBattle(dt) {
     if (p.airComboTimer > 0) p.airComboTimer--;
     if (p.dragonCooldown > 0) p.dragonCooldown--;
     updateDSkill(p);
+    // ガード硬直カウントダウン
+    if (p.guardPenalty > 0) { p.guardPenalty--; p.vx *= 0.9; }
+    // スマッシュ溜め更新
+    if (p.smashCharging) {
+      p.smashChargeTime++;
+      p.vx = 0; // 溜め中は移動不可
+      // Xキーリリースで発動
+      let xHeld = false;
+      if (p.id === 0) { xHeld = (onlineMode && !isHost) ? !!remoteKeys.x : !!(keys['x'] || keys['X']); }
+      else if (gameMode === 'cpu') { xHeld = false; } // CPU即発動
+      else if (onlineMode && isHost) { xHeld = !!remoteKeys.x; }
+      else { xHeld = !!(keys['i'] || keys['I']); } // P2
+      if (!xHeld || p.smashChargeTime >= SMASH_CHARGE_MAX) executeSmash(p);
+      if (p.hitstun > 0) { p.smashCharging = false; p.smashType = null; } // 被弾キャンセル
+    }
     // 自己バフタイマー
     if (p.autoBuff > 0) p.autoBuff--;
     if (p.autoBuff <= 0) p.autoBuffType = null;
@@ -8379,6 +8420,16 @@ function updateBattle(dt) {
           releaseGrab(p);
         }
       }
+      continue;
+    }
+
+    // ガード硬直ペナルティ（攻撃がガードされた時）
+    if (p.guardPenalty > 0 && !p.attacking && !p.smashCharging) {
+      p.vy += getGravity(p);
+      if (p.vy > MAX_FALL_SPEED) p.vy = MAX_FALL_SPEED;
+      p.vx *= 0.9;
+      p.y += p.vy;
+      landingCheck(p);
       continue;
     }
 
@@ -11676,7 +11727,8 @@ function serializePlayer(p) {
     dosbossRandomPattern: p.dosbossRandomPattern, gravityDebuffTimer: p.gravityDebuffTimer,
     cancelWindow: p.cancelWindow, comboWindow: p.comboWindow, airComboTimer: p.airComboTimer,
     airDodging: p.airDodging, airDodgeTimer: p.airDodgeTimer, airDodgeUsed: p.airDodgeUsed, airDodgeEndlag: p.airDodgeEndlag,
-    dashing: p.dashing, fastFalling: p.fastFalling, landLag: p.landLag,
+    dashing: p.dashing, fastFalling: p.fastFalling, landLag: p.landLag, guardPenalty: p.guardPenalty,
+    smashCharging: p.smashCharging, smashChargeTime: p.smashChargeTime, smashType: p.smashType,
     dSkillCooldown: p.dSkillCooldown, dSkillActive: p.dSkillActive, dSkillTimer: p.dSkillTimer, dSkillBuff: p.dSkillBuff,
     autoBuff: p.autoBuff, autoBuffType: p.autoBuffType, consecutiveHits: p.consecutiveHits, dosbossComboCount: p.dosbossComboCount,
   };
@@ -12419,6 +12471,82 @@ function drawTransition() {
   }
 }
 
+// --- スマッシュ攻撃システム ---
+function trackSmashInput(p, dir) {
+  if (p.smashInputDir === dir && (battleTime - p.smashInputTime) < SMASH_INPUT_WINDOW) {
+    p.smashInputCount++;
+  } else {
+    p.smashInputDir = dir;
+    p.smashInputCount = 1;
+  }
+  p.smashInputTime = battleTime;
+}
+
+function checkSmashReady(p) {
+  if (p.smashInputCount >= 2 && (battleTime - p.smashInputTime) < SMASH_INPUT_WINDOW) {
+    const dir = p.smashInputDir;
+    p.smashInputCount = 0;
+    if (dir === 'up') return 'upSmash';
+    if (dir === 'side') return 'sideSmash';
+    if (dir === 'down') return 'downSmash';
+  }
+  return null;
+}
+
+function startSmashAttack(p, smashType) {
+  if (p.attacking || p.hitstun > 0 || !p.alive || p.grabbing || p.grabbed || p.guarding || p.guardBreakStun > 0 || p.guardPenalty > 0) return;
+  if (!p.grounded) return; // 地上限定
+  p.smashCharging = true;
+  p.smashChargeTime = 0;
+  p.smashType = smashType;
+}
+
+function executeSmash(p) {
+  if (!p.smashCharging) return;
+  const chargeRatio = Math.min(p.smashChargeTime / SMASH_CHARGE_MAX, 1);
+  const chargeMult = 1 + chargeRatio * SMASH_CHARGE_BONUS;
+  const defs = (p.charIdx === 10 && p.dragonMode) ? dragonAttackDefs : attackDefs[p.charIdx];
+  const baseAtk = defs.strong;
+  if (!baseAtk) { p.smashCharging = false; return; }
+  const dir = p.facingLeft ? -1 : 1;
+  const mult = SMASH_DAMAGE_MULT[p.smashType] || 1.5;
+  const smashDmg = baseAtk.damage * mult * chargeMult;
+
+  p.smashCharging = false;
+  p.attacking = true;
+  p.attackType = 'smash';
+  p.attackFrame = 0;
+  p.hitTargets = [];
+  p.lastHitFrame = -99;
+  p.specialState = null;
+
+  let angle, startup, hw, hh, hx, hy;
+  if (p.smashType === 'upSmash') {
+    angle = -85; startup = 15; hx = 0; hy = -60; hw = 60; hh = 65;
+  } else if (p.smashType === 'downSmash') {
+    angle = -15; startup = 10; hx = 0; hy = -30; hw = 90; hh = 40;
+  } else {
+    angle = -45; startup = 20; hx = baseAtk.hx || 20; hy = -35; hw = (baseAtk.hw || 60) * 1.2; hh = baseAtk.hh || 45;
+  }
+
+  p.attackData = {
+    name: p.smashType === 'upSmash' ? '上スマッシュ' : p.smashType === 'downSmash' ? '下スマッシュ' : '横スマッシュ',
+    startup: startup, active: 6, recovery: p.smashType === 'sideSmash' ? 22 : 16,
+    damage: smashDmg, kbBase: baseAtk.kbBase * mult, kbScale: baseAtk.kbScale * 1.3,
+    kbAngle: angle, hx: hx, hy: hy, hw: hw, hh: hh,
+    color: characters[p.charIdx].accent, effect: 'bigpunch',
+    isSmash: true, smashType: p.smashType,
+    centerHit: p.smashType === 'downSmash',
+  };
+
+  // 溜めエフェクト
+  if (chargeRatio > 0.3) {
+    hitEffects.push({ x: p.x, y: p.y - 40, life: 15, maxLife: 15, color: characters[p.charIdx].accent, size: 30 + chargeRatio * 30, type: 'ring' });
+  }
+  triggerScreenShake(2 + chargeRatio * 3, 6);
+  playHitSound('cmd');
+}
+
 // --- D技（固有追加技）システム ---
 const D_SKILL_HOLD_FRAMES = 30;   // 0.5秒長押し
 const D_SKILL_COOLDOWN = 600;     // 10秒クールダウン
@@ -12885,11 +13013,11 @@ function canAirDodge(p) {
 
 // Process a keydown event for a specific player
 function processPlayerKeydown(key, p, playerId, keyState) {
-  // Direction commands
-  if (key === 'ArrowDown') addCmdInput(playerId, 'D');
-  if (key === 'ArrowUp') addCmdInput(playerId, 'U');
-  if (key === 'ArrowLeft') addCmdInput(playerId, 'L');
-  if (key === 'ArrowRight') addCmdInput(playerId, 'R');
+  // Direction commands + スマッシュ入力トラッキング
+  if (key === 'ArrowDown') { addCmdInput(playerId, 'D'); trackSmashInput(p, 'down'); }
+  if (key === 'ArrowUp') { addCmdInput(playerId, 'U'); trackSmashInput(p, 'up'); }
+  if (key === 'ArrowLeft') { addCmdInput(playerId, 'L'); trackSmashInput(p, 'side'); }
+  if (key === 'ArrowRight') { addCmdInput(playerId, 'R'); trackSmashInput(p, 'side'); }
   // Normal attack (Z)
   if (key === 'z' || key === 'Z') {
     if (p.grabbing) {
@@ -12915,8 +13043,14 @@ function processPlayerKeydown(key, p, playerId, keyState) {
       if (keyState['ArrowUp']) dy = -1;
       if (keyState['ArrowDown']) dy = 1;
       executeThrow(p, dx, dy);
-    } else if (!tryCancelAttack(p, 'strong')) {
-      startAttack(p, 'strong');
+    } else {
+      // スマッシュ攻撃チェック（方向2回+X）
+      const smash = checkSmashReady(p);
+      if (smash && p.grounded) {
+        startSmashAttack(p, smash);
+      } else if (!tryCancelAttack(p, 'strong')) {
+        startAttack(p, 'strong');
+      }
     }
   }
   // Special (C) - キャンセル対応
