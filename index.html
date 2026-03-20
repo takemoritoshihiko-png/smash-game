@@ -1587,11 +1587,18 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       }
     }
   } else if (charIndex === 20) {
-    // マイクロ - 小さな万能ファイター
+    // マイクロ - 小さな万能ファイター (1536x1024 横長画像、キャラ中央)
     if (microImg.complete && microImg.naturalWidth > 0) {
-      const imgW = 70 * s;
-      const imgH = 85 * s;
-      ctx.drawImage(microImg, -imgW / 2, -35 * s, imgW, imgH);
+      const nw = microImg.naturalWidth;
+      const nh = microImg.naturalHeight;
+      // キャラ部分をクロップ: 中央やや右、上端少しカット、下端の影をカット
+      const cropX = nw * 0.22;
+      const cropY = nh * 0.02;
+      const cropW = nw * 0.55;
+      const cropH = nh * 0.88;
+      const imgW = 80 * s;
+      const imgH = imgW * (cropH / cropW);
+      ctx.drawImage(microImg, cropX, cropY, cropW, cropH, -imgW / 2, -40 * s, imgW, imgH);
     } else {
       // Canvas fallback: マリオ風キャラ
       // 脚
@@ -1948,7 +1955,7 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
   const tensaiIsDragon = animData && animData.dragonMode;
   const tensaiActiveImg = tensaiIsDragon ? tensaiDragonImg : tensaiHumanImg;
   const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg, bulletImg, shaudenImg, judgemanImg, tensaiActiveImg, catbusImg, tankImg, namiojiImg, tokkoImg, samImg, kingImg, onpaImg, senImg, dosbossImg, microImg];
-  const imgSizes = [[70, 90], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [168, 112], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [85, 85], [75, 100], [70, 85]];
+  const imgSizes = [[70, 90], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [168, 112], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [85, 85], [75, 100], [80, 100]];
   const img = imgs[charIndex];
   if (img && img.complete && img.naturalWidth > 0) {
     const imgW = imgSizes[charIndex][0] * s;
@@ -1968,6 +1975,14 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
       const cropH = sh * 0.85;
       sy = sh * 0.05;
       sh = cropH;
+    }
+    if (charIndex === 20) {
+      // マイクロ: 横長画像の中央キャラ部分をクロップ
+      const origW = img.naturalWidth, origH = img.naturalHeight;
+      sx = origW * 0.22;
+      sy = origH * 0.02;
+      sw = origW * 0.55;
+      sh = origH * 0.88;
     }
 
     // Damage flash: smooth 2-frame blink with fading intensity
