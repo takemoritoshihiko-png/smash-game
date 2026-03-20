@@ -348,6 +348,19 @@ const characters = [
     jumpPower: -13.5,
     weight: 1.0
   },
+  {
+    name: 'ミスターツー',
+    type: '超能力型',
+    color: '#7733CC',
+    accent: '#AA66FF',
+    dark: '#3A1166',
+    stats: { power: 4, speed: 4, tech: 4, defense: 1 },
+    desc: '超能力の申し子',
+    bodyColors: { main: '#7733CC', sub: '#AA66FF', skin: '#E8D0F0' },
+    moveSpeed: 9.0,
+    jumpPower: -14.5,
+    weight: 0.7
+  },
 ];
 
 // --- Audio unlock on first interaction ---
@@ -419,6 +432,8 @@ const dosbossImg = new Image();
 dosbossImg.src = 'images/dosboss.png';
 const microImg = new Image();
 microImg.src = 'images/micro.png';
+const mrtwoImg = new Image();
+mrtwoImg.src = 'images/mrtwo.png';
 const bgImg = new Image();
 bgImg.src = 'images/bg.png';
 
@@ -1648,6 +1663,63 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.fillStyle = '#FFBB88';
       ctx.beginPath(); ctx.arc(0, -18 * s, 3 * s, 0, Math.PI * 2); ctx.fill();
     }
+  } else if (charIndex === 21) {
+    // ミスターツー - 超能力型（ミュウツー風）
+    if (mrtwoImg.complete && mrtwoImg.naturalWidth > 0) {
+      const imgW = 75 * s;
+      const imgH = 95 * s;
+      ctx.drawImage(mrtwoImg, -imgW / 2, -38 * s, imgW, imgH);
+    } else {
+      // Canvas fallback: ミュウツー風
+      // 尻尾
+      ctx.strokeStyle = '#9955DD';
+      ctx.lineWidth = 5 * s;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(-8 * s, 15 * s);
+      ctx.quadraticCurveTo(-30 * s, 5 * s, -25 * s, -15 * s);
+      ctx.stroke();
+      ctx.lineWidth = 1; ctx.lineCap = 'butt';
+      // 脚
+      ctx.fillStyle = '#9955DD';
+      ctx.fillRect(-8 * s, 22 * s, 6 * s, 20 * s);
+      ctx.fillRect(2 * s, 22 * s, 6 * s, 20 * s);
+      // 足
+      ctx.fillStyle = '#7733CC';
+      ctx.beginPath(); ctx.ellipse(-5 * s, 42 * s, 6 * s, 3 * s, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(5 * s, 42 * s, 6 * s, 3 * s, 0, 0, Math.PI * 2); ctx.fill();
+      // 体
+      ctx.fillStyle = '#BB88EE';
+      ctx.beginPath(); ctx.ellipse(0, 5 * s, 12 * s, 20 * s, 0, 0, Math.PI * 2); ctx.fill();
+      // 胸（薄い紫）
+      ctx.fillStyle = '#DDBBFF';
+      ctx.beginPath(); ctx.ellipse(0, 8 * s, 8 * s, 12 * s, 0, 0, Math.PI * 2); ctx.fill();
+      // 腕
+      ctx.fillStyle = '#9955DD';
+      ctx.fillRect(-16 * s, -8 * s, 5 * s, 22 * s);
+      ctx.fillRect(11 * s, -8 * s, 5 * s, 22 * s);
+      // 手（丸い）
+      ctx.fillStyle = '#BB88EE';
+      ctx.beginPath(); ctx.arc(-13 * s, 16 * s, 4 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(13 * s, 16 * s, 4 * s, 0, Math.PI * 2); ctx.fill();
+      // 頭（大きめ・上に突き出し）
+      ctx.fillStyle = '#BB88EE';
+      ctx.beginPath(); ctx.ellipse(0, -22 * s, 10 * s, 12 * s, 0, 0, Math.PI * 2); ctx.fill();
+      // ツノ状の突起
+      ctx.fillStyle = '#9955DD';
+      ctx.beginPath();
+      ctx.moveTo(-4 * s, -33 * s);
+      ctx.lineTo(0, -44 * s);
+      ctx.lineTo(4 * s, -33 * s);
+      ctx.closePath(); ctx.fill();
+      // 目（光る紫）
+      ctx.fillStyle = '#FF44FF';
+      ctx.beginPath(); ctx.ellipse(-4 * s, -23 * s, 2.5 * s, 3 * s, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(4 * s, -23 * s, 2.5 * s, 3 * s, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath(); ctx.arc(-4 * s, -24 * s, 1 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(4 * s, -24 * s, 1 * s, 0, Math.PI * 2); ctx.fill();
+    }
   }
 
   ctx.restore();
@@ -1754,6 +1826,11 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
         bobY = Math.sin(t * 0.05) * 3;
         scaleX = 1 + Math.sin(t * 0.05) * 0.015;
         scaleY = 1 - Math.sin(t * 0.05) * 0.015;
+      } else if (charIndex === 21) {
+        // MrTwo: floating hover
+        bobY = Math.sin(t * 0.035) * 4 + Math.sin(t * 0.08) * 1.5;
+        scaleX = 1 + Math.sin(t * 0.04) * 0.01;
+        scaleY = 1 + Math.sin(t * 0.04 + 0.5) * 0.012;
       }
     }
 
@@ -1874,6 +1951,12 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
         walkLean = Math.sin(phase) * 0.04;
         legAngle = Math.sin(phase) * 0.3;
         armSwing = -Math.sin(phase) * 0.25;
+      } else if (charIndex === 21) {
+        // MrTwo: gliding float
+        bobY = Math.sin(phase * 0.7) * 3;
+        walkLean = Math.sin(phase) * 0.02;
+        legAngle = Math.sin(phase) * 0.1;
+        armSwing = -Math.sin(phase * 0.8) * 0.15;
       }
     }
 
@@ -1954,8 +2037,8 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
   // 天才 uses different images per mode
   const tensaiIsDragon = animData && animData.dragonMode;
   const tensaiActiveImg = tensaiIsDragon ? tensaiDragonImg : tensaiHumanImg;
-  const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg, bulletImg, shaudenImg, judgemanImg, tensaiActiveImg, catbusImg, tankImg, namiojiImg, tokkoImg, samImg, kingImg, onpaImg, senImg, dosbossImg, microImg];
-  const imgSizes = [[70, 90], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [168, 112], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [85, 85], [75, 100], [80, 100]];
+  const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg, bulletImg, shaudenImg, judgemanImg, tensaiActiveImg, catbusImg, tankImg, namiojiImg, tokkoImg, samImg, kingImg, onpaImg, senImg, dosbossImg, microImg, mrtwoImg];
+  const imgSizes = [[70, 90], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [168, 112], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [85, 85], [75, 100], [80, 100], [75, 95]];
   const img = imgs[charIndex];
   if (img && img.complete && img.naturalWidth > 0) {
     const imgW = imgSizes[charIndex][0] * s;
@@ -4955,6 +5038,7 @@ const CHAR_GRAB_FRAMES = [
   13, // 18:セン (テクニック型→バランス)
   17, // 19:ドスボス (トリッキー型→パワー)
   13, // 20:マイクロ (バランス型)
+  15, // 21:ミスターツー (超能力型→遠距離/特殊)
 ];
 function getGrabFrames(charIdx) {
   return CHAR_GRAB_FRAMES[charIdx] || THROW_GRAB_FRAMES;
@@ -4989,6 +5073,7 @@ const CHAR_THROW_TYPE = [
   'balance', // 18:セン
   'power',   // 19:ドスボス
   'balance', // 20:マイクロ
+  'ranged',  // 21:ミスターツー
 ];
 function getThrowDmg(charIdx) {
   return CHAR_THROW_DMG[CHAR_THROW_TYPE[charIdx] || 'balance'];
@@ -5251,6 +5336,17 @@ const commandDefs = {
     { name:'グラウンドパウンド', seq:['U','U','D','D'], cooldownKey:'cmd3',
       attack:{ startup:8, active:10, recovery:18, damage:14, kbBase:7, kbScale:0.12, kbAngle:-60, hx:0, hy:5, hw:90, hh:40, color:'#3388FF', effect:'shockwave', centerHit:true,
         specialType:'divekick', diveSpeed:16 } },
+  ],
+  21: [ // ミスターツー
+    { name:'サイコキネシス', seq:['F','F','D','D'], cooldownKey:'cmd1',
+      attack:{ startup:10, active:12, recovery:20, damage:14, kbBase:7, kbScale:0.12, kbAngle:-75, hx:15, hy:-40, hw:70, hh:60, color:'#AA66FF', effect:'bigpunch',
+        spinKB:true } },
+    { name:'サイコストーム', seq:['F','F','U','U'], cooldownKey:'cmd2',
+      attack:{ startup:8, active:10, recovery:18, damage:16, kbBase:8, kbScale:0.13, kbAngle:-50, hx:0, hy:-35, hw:100, hh:70, color:'#7733CC', effect:'shockwave', centerHit:true } },
+    { name:'ダークパルス', seq:['U','U','D','D'], cooldownKey:'cmd3',
+      attack:{ startup:6, active:5, recovery:16, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#440066', effect:'none',
+        projectile:{ speed:10, damage:12, kbBase:5, kbScale:0.09, kbAngle:-15, w:30, h:20, life:50, color:'#440066', pcolor:'#7733CC' },
+        stun:true, stunFrames:25 } },
   ],
 };
 
@@ -5744,6 +5840,23 @@ const attackDefs = {
     dash:   { name:'ダッシュパンチ', startup:4, active:5, recovery:10, damage:7, kbBase:3, kbScale:0.06, kbAngle:-25, hx:16, hy:-35, hw:50, hh:35, color:'#66BBFF', effect:'dash',
               specialType:'slide', slideSpeed:9 },
     throwDmg: 8,
+  },
+  // ミスターツー - Psychic Type [ミュウツー風・超能力系]
+  21: {
+    normal: { name:'サイコウェーブ', startup:5, active:5, recovery:12, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#AA66FF', effect:'none',
+              projectile:{ speed:9, damage:10, kbBase:4, kbScale:0.07, kbAngle:-20, w:20, h:16, life:40, color:'#9944FF', pcolor:'#CC88FF' } },
+    strong: { name:'シャドーボール', startup:30, active:5, recovery:16, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#440066', effect:'none',
+              projectile:{ speed:11, damage:18, kbBase:8, kbScale:0.13, kbAngle:-25, w:28, h:28, life:55, color:'#330044', pcolor:'#7733CC' } },
+    special:{ name:'テレポート', startup:4, active:1, recovery:14, damage:6, kbBase:3, kbScale:0.05, kbAngle:-30, hx:0, hy:-35, hw:50, hh:50, color:'#AA66FF', effect:'none',
+              specialType:'shadowDash', shadowSpeed:18 },
+    aerial: { name:'空中念波', startup:4, active:6, recovery:10, damage:9, kbBase:4, kbScale:0.08, kbAngle:-45, hx:10, hy:-35, hw:50, hh:45, color:'#AA66FF', effect:'airkick' },
+    down:   { name:'念力叩きつけ', startup:6, active:8, recovery:14, damage:10, kbBase:5, kbScale:0.09, kbAngle:-50, hx:0, hy:5, hw:60, hh:35, color:'#7733CC', effect:'shockwave', centerHit:true },
+    up:     { name:'念力衝撃波', startup:5, active:7, recovery:12, damage:9, kbBase:5, kbScale:0.09, kbAngle:-88, hx:0, hy:-55, hw:45, hh:55, color:'#AA66FF', effect:'upslash' },
+    side:   { name:'尻尾薙ぎ', startup:5, active:7, recovery:12, damage:10, kbBase:5, kbScale:0.09, kbAngle:-25, hx:20, hy:-32, hw:65, hh:40, color:'#9955DD', effect:'slash' },
+    downair:{ name:'念力メテオ', startup:5, active:8, recovery:14, damage:12, kbBase:6, kbScale:0.10, kbAngle:80, hx:0, hy:10, hw:45, hh:45, color:'#7733CC', effect:'meteor', specialType:'divekick', diveSpeed:13 },
+    dash:   { name:'サイコダッシュ', startup:4, active:5, recovery:10, damage:7, kbBase:3, kbScale:0.06, kbAngle:-20, hx:16, hy:-35, hw:50, hh:35, color:'#AA66FF', effect:'dash',
+              specialType:'slide', slideSpeed:12 },
+    throwDmg: 10,
   },
 };
 
@@ -6268,6 +6381,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
       18: ['#335577', '#FF8844', '#FFFFFF'], // Sen: navy/orange
       19: ['#9944CC', '#CC66FF', '#FF6600'], // Dosboss: purple/orange
       20: ['#3388FF', '#66BBFF', '#FF4400'], // Micro: blue/fire
+      21: ['#7733CC', '#AA66FF', '#440066'], // MrTwo: purple/dark
     };
     const colors = charColors[attacker.charIdx] || ['#FFFFFF'];
     const specialCount = 30 + Math.floor(kb * 1.5);
@@ -6411,6 +6525,10 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
     // マイクロ: 青白い小さなスパーク + 星
     hitEffects.push({ x: efx, y: efy, life: 12, maxLife: 12, color: '#66BBFF', size: 14, type: 'charSpark' });
     sparks.push({ x: efx, y: efy, vx:(Math.random()-0.5)*3, vy:-2-Math.random(), life:10, maxLife:10, color:'#FFD700', size:2, gravity:0.06, drag:0.97 });
+  } else if (ci === 21) {
+    // ミスターツー: 紫の念波パーティクル
+    hitEffects.push({ x: efx, y: efy, life: 14, maxLife: 14, color: '#AA66FF', size: 16, type: 'charGlow' });
+    for (let i = 0; i < 2; i++) sparks.push({ x: efx+(Math.random()-0.5)*10, y: efy+(Math.random()-0.5)*10, vx:(Math.random()-0.5)*3, vy:-1.5-Math.random()*1.5, life:12, maxLife:12, color:i%2?'#AA66FF':'#7733CC', size:2+Math.random(), gravity:-0.02, drag:0.97 });
   }
 
   // Floating damage number (larger for strong/special)
@@ -11799,6 +11917,19 @@ function triggerDSkill(p) {
       sparks.push({ x: p.x + Math.cos(a)*25, y: p.y-40+Math.sin(a)*25, vx:Math.cos(a)*4, vy:Math.sin(a)*4-1, life:20, maxLife:20, color:i%3===0?'#FFD700':(i%3===1?'#FFFFFF':'#FFEE88'), size:3+Math.random()*2, gravity:0.02, drag:0.96 });
     }
     cmdNameDisplay.push({ text: 'スター変身！', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#FFD700' });
+  } else if (ci === 21) {
+    // ミスターツー「メガシャドーボール」: 巨大紫黒弾 + 画面フラッシュ
+    const pr = { x: p.x + 30 * dir, y: p.y - 40, vx: 10 * dir, vy: 0, w: 50, h: 50,
+      damage: 25, kbBase: 12, kbScale: 0.16, kbAngle: -30, life: 80, ownerId: p.id,
+      color: '#330044', pcolor: '#7733CC', shape: 'star', ownerCharIdx: ci, time: 0 };
+    projectiles.push(pr);
+    hitFlash.alpha = 0.3; hitFlash.color = '#7733CC';
+    triggerScreenShake(8, 15);
+    hitEffects.push({ x: p.x, y: p.y - 40, life: 25, maxLife: 25, color: '#7733CC', size: 80, type: 'ring' });
+    hitEffects.push({ x: p.x, y: p.y - 40, life: 20, maxLife: 20, color: '#440066', size: 60, type: 'charGlow' });
+    hitEffects.push({ x: p.x + dir*40, y: p.y - 40, life: 18, maxLife: 18, color: '#AA66FF', size: 50, type: 'ring' });
+    for (let i = 0; i < 15; i++) sparks.push({ x: p.x+(Math.random()-0.5)*40, y: p.y-40+(Math.random()-0.5)*40, vx:(Math.random()-0.5)*5+dir*3, vy:-2-Math.random()*3, life:18, maxLife:18, color:i%3===0?'#7733CC':(i%3===1?'#AA66FF':'#440066'), size:3+Math.random()*2, gravity:-0.02, drag:0.96 });
+    cmdNameDisplay.push({ text: 'メガシャドーボール！', x: p.x, y: p.y - 100, life: 70, maxLife: 70, color: '#AA66FF' });
   }
   playHitSound('cmd');
 }
