@@ -2026,11 +2026,17 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.stroke(); ctx.lineWidth = 1;
     }
   } else if (charIndex === 26) {
-    // ぽよ - みんなの友達スライム
+    // ぽよ - みんなの友達スライム (1024x559 横長RGBA)
     if (poyoImg.complete && poyoImg.naturalWidth > 0) {
-      const imgW = 75 * s;
-      const imgH = 75 * s;
-      ctx.drawImage(poyoImg, -imgW / 2, -25 * s, imgW, imgH);
+      const nw = poyoImg.naturalWidth;
+      const nh = poyoImg.naturalHeight;
+      const cropX = nw * 0.15;
+      const cropY = nh * 0.05;
+      const cropW = nw * 0.65;
+      const cropH = nh * 0.88;
+      const imgW = 80 * s;
+      const imgH = imgW * (cropH / cropW);
+      ctx.drawImage(poyoImg, cropX, cropY, cropW, cropH, -imgW / 2, -22 * s, imgW, imgH);
     } else {
       // Canvas fallback: 丸いスライム
       // 影
@@ -2494,6 +2500,14 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
       sy = origH * 0.0;
       sw = origW * 0.55;
       sh = origH * 0.92;
+    }
+    if (charIndex === 26) {
+      // ぽよ: 横長画像の中央スライムをクロップ
+      const origW = img.naturalWidth, origH = img.naturalHeight;
+      sx = origW * 0.15;
+      sy = origH * 0.05;
+      sw = origW * 0.65;
+      sh = origH * 0.88;
     }
 
     // Damage flash: smooth 2-frame blink with fading intensity
