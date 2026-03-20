@@ -1883,11 +1883,17 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.lineWidth = 1;
     }
   } else if (charIndex === 24) {
-    // 怖 - 恐怖を喰らう亡霊
+    // 怖 - 恐怖を喰らう亡霊 (1024x559 横長RGBA)
     if (kowaiImg.complete && kowaiImg.naturalWidth > 0) {
-      const imgW = 75 * s;
-      const imgH = 95 * s;
-      ctx.drawImage(kowaiImg, -imgW / 2, -38 * s, imgW, imgH);
+      const nw = kowaiImg.naturalWidth;
+      const nh = kowaiImg.naturalHeight;
+      const cropX = nw * 0.25;
+      const cropY = nh * 0.0;
+      const cropW = nw * 0.45;
+      const cropH = nh * 0.95;
+      const imgW = 70 * s;
+      const imgH = imgW * (cropH / cropW);
+      ctx.drawImage(kowaiImg, cropX, cropY, cropW, cropH, -imgW / 2, -42 * s, imgW, imgH);
     } else {
       // Canvas fallback: ホラー系亡霊
       // 浮遊する裾
@@ -2324,6 +2330,14 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
       sh = origH * 0.85;
     }
     // charIndex === 22 (金金): 1024x1024 透過済み、クロップ不要
+    if (charIndex === 24) {
+      // 怖: 横長画像の中央キャラをクロップ
+      const origW = img.naturalWidth, origH = img.naturalHeight;
+      sx = origW * 0.25;
+      sy = origH * 0.0;
+      sw = origW * 0.45;
+      sh = origH * 0.95;
+    }
 
     // Damage flash: smooth 2-frame blink with fading intensity
     if (animData && animData.damageTint > 0) {
