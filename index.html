@@ -1664,11 +1664,17 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.beginPath(); ctx.arc(0, -18 * s, 3 * s, 0, Math.PI * 2); ctx.fill();
     }
   } else if (charIndex === 21) {
-    // ミスターツー - 超能力型（ミュウツー風）
+    // ミスターツー - 超能力型 (1536x1024 横長画像)
     if (mrtwoImg.complete && mrtwoImg.naturalWidth > 0) {
-      const imgW = 75 * s;
-      const imgH = 95 * s;
-      ctx.drawImage(mrtwoImg, -imgW / 2, -38 * s, imgW, imgH);
+      const nw = mrtwoImg.naturalWidth;
+      const nh = mrtwoImg.naturalHeight;
+      const cropX = nw * 0.12;
+      const cropY = nh * 0.05;
+      const cropW = nw * 0.76;
+      const cropH = nh * 0.85;
+      const imgW = 85 * s;
+      const imgH = imgW * (cropH / cropW);
+      ctx.drawImage(mrtwoImg, cropX, cropY, cropW, cropH, -imgW / 2, -38 * s, imgW, imgH);
     } else {
       // Canvas fallback: ミュウツー風
       // 尻尾
@@ -2038,7 +2044,7 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
   const tensaiIsDragon = animData && animData.dragonMode;
   const tensaiActiveImg = tensaiIsDragon ? tensaiDragonImg : tensaiHumanImg;
   const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg, bulletImg, shaudenImg, judgemanImg, tensaiActiveImg, catbusImg, tankImg, namiojiImg, tokkoImg, samImg, kingImg, onpaImg, senImg, dosbossImg, microImg, mrtwoImg];
-  const imgSizes = [[70, 90], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [168, 112], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [85, 85], [75, 100], [80, 100], [75, 95]];
+  const imgSizes = [[70, 90], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [168, 112], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [85, 85], [75, 100], [80, 100], [85, 95]];
   const img = imgs[charIndex];
   if (img && img.complete && img.naturalWidth > 0) {
     const imgW = imgSizes[charIndex][0] * s;
@@ -2066,6 +2072,14 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
       sy = origH * 0.02;
       sw = origW * 0.55;
       sh = origH * 0.88;
+    }
+    if (charIndex === 21) {
+      // ミスターツー: 横長画像のキャラ部分をクロップ
+      const origW = img.naturalWidth, origH = img.naturalHeight;
+      sx = origW * 0.12;
+      sy = origH * 0.05;
+      sw = origW * 0.76;
+      sh = origH * 0.85;
     }
 
     // Damage flash: smooth 2-frame blink with fading intensity
