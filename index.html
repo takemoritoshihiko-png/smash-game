@@ -413,6 +413,19 @@ const characters = [
     jumpPower: -12.94,
     weight: 1.0
   },
+  {
+    name: 'ぽよ',
+    type: '初心者型',
+    color: '#44CCEE',
+    accent: '#88EEFF',
+    dark: '#1A6688',
+    stats: { power: 3, speed: 3, tech: 2, defense: 3 },
+    desc: 'みんなの友達スライム',
+    bodyColors: { main: '#44CCEE', sub: '#88EEFF', skin: '#AAEEFF' },
+    moveSpeed: 7.56,
+    jumpPower: -13.5,
+    weight: 1.0
+  },
 ];
 
 // --- Audio unlock on first interaction ---
@@ -494,6 +507,8 @@ const kowaiImg = new Image();
 kowaiImg.src = 'images/kowai.png';
 const yahoImg = new Image();
 yahoImg.src = 'images/yaho.png?v=2';
+const poyoImg = new Image();
+poyoImg.src = 'images/poyo.png';
 const bgImg = new Image();
 bgImg.src = 'images/bg.png';
 
@@ -2010,6 +2025,48 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.arc(0, -16 * s, 6 * s, 0.1, Math.PI - 0.1);
       ctx.stroke(); ctx.lineWidth = 1;
     }
+  } else if (charIndex === 26) {
+    // ぽよ - みんなの友達スライム
+    if (poyoImg.complete && poyoImg.naturalWidth > 0) {
+      const imgW = 75 * s;
+      const imgH = 75 * s;
+      ctx.drawImage(poyoImg, -imgW / 2, -25 * s, imgW, imgH);
+    } else {
+      // Canvas fallback: 丸いスライム
+      // 影
+      ctx.fillStyle = 'rgba(0,0,0,0.15)';
+      ctx.beginPath(); ctx.ellipse(0, 40 * s, 18 * s, 5 * s, 0, 0, Math.PI * 2); ctx.fill();
+      // 体（丸いスライム）
+      const grad = ctx.createRadialGradient(-3 * s, -8 * s, 2 * s, 0, 5 * s, 22 * s);
+      grad.addColorStop(0, '#AAEEFF');
+      grad.addColorStop(0.6, '#44CCEE');
+      grad.addColorStop(1, '#1A9ABB');
+      ctx.fillStyle = grad;
+      ctx.beginPath(); ctx.ellipse(0, 5 * s, 20 * s, 22 * s, 0, 0, Math.PI * 2); ctx.fill();
+      // ハイライト
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.beginPath(); ctx.ellipse(-6 * s, -6 * s, 7 * s, 5 * s, -0.3, 0, Math.PI * 2); ctx.fill();
+      // 目（大きめ・かわいい）
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath(); ctx.ellipse(-6 * s, -2 * s, 5 * s, 6 * s, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(6 * s, -2 * s, 5 * s, 6 * s, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#111';
+      ctx.beginPath(); ctx.arc(-5 * s, 0, 2.5 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(7 * s, 0, 2.5 * s, 0, Math.PI * 2); ctx.fill();
+      // 瞳のハイライト
+      ctx.fillStyle = '#FFF';
+      ctx.beginPath(); ctx.arc(-4 * s, -1.5 * s, 1 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(8 * s, -1.5 * s, 1 * s, 0, Math.PI * 2); ctx.fill();
+      // 口（にっこり）
+      ctx.strokeStyle = '#1A6688';
+      ctx.lineWidth = 1.5 * s;
+      ctx.beginPath(); ctx.arc(0, 6 * s, 5 * s, 0.2, Math.PI - 0.2); ctx.stroke();
+      ctx.lineWidth = 1;
+      // ほっぺ
+      ctx.fillStyle = 'rgba(255,150,150,0.3)';
+      ctx.beginPath(); ctx.ellipse(-10 * s, 5 * s, 4 * s, 3 * s, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(10 * s, 5 * s, 4 * s, 3 * s, 0, 0, Math.PI * 2); ctx.fill();
+    }
   }
 
   ctx.restore();
@@ -2141,6 +2198,11 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
         bobY = Math.abs(Math.sin(t * 0.06)) * 5;
         scaleX = 1 + Math.sin(t * 0.06) * 0.02;
         scaleY = 1 - Math.sin(t * 0.06) * 0.02;
+      } else if (charIndex === 26) {
+        // Poyo: jiggly slime bounce
+        bobY = Math.sin(t * 0.05) * 3;
+        scaleX = 1 + Math.sin(t * 0.05) * 0.04;
+        scaleY = 1 - Math.sin(t * 0.05) * 0.04;
       }
     }
 
@@ -2291,6 +2353,13 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
         walkLean = Math.sin(phase) * 0.05;
         legAngle = Math.sin(phase * 1.2) * 0.35;
         armSwing = -Math.sin(phase) * 0.3;
+      } else if (charIndex === 26) {
+        // Poyo: bouncy squish move
+        bobY = Math.abs(Math.sin(phase * 1.3)) * 5;
+        scaleX = 1 + Math.sin(phase * 1.3) * 0.06;
+        scaleY = 1 - Math.sin(phase * 1.3) * 0.05;
+        walkLean = Math.sin(phase) * 0.02;
+        legAngle = 0; armSwing = 0;
       }
     }
 
@@ -2371,8 +2440,8 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
   // 天才 uses different images per mode
   const tensaiIsDragon = animData && animData.dragonMode;
   const tensaiActiveImg = tensaiIsDragon ? tensaiDragonImg : tensaiHumanImg;
-  const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg, bulletImg, shaudenImg, judgemanImg, tensaiActiveImg, catbusImg, tankImg, namiojiImg, tokkoImg, samImg, kingImg, onpaImg, senImg, dosbossImg, microImg, mrtwoImg, kingkingImg, satoruImg, kowaiImg, yahoImg];
-  const imgSizes = [[70, 90], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [168, 112], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [85, 85], [75, 100], [80, 100], [85, 95], [80, 95], [80, 95], [75, 95], [75, 90]];
+  const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg, bulletImg, shaudenImg, judgemanImg, tensaiActiveImg, catbusImg, tankImg, namiojiImg, tokkoImg, samImg, kingImg, onpaImg, senImg, dosbossImg, microImg, mrtwoImg, kingkingImg, satoruImg, kowaiImg, yahoImg, poyoImg];
+  const imgSizes = [[70, 90], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [168, 112], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [85, 85], [75, 100], [80, 100], [85, 95], [80, 95], [80, 95], [75, 95], [75, 90], [75, 75]];
   const img = imgs[charIndex];
   if (img && img.complete && img.naturalWidth > 0) {
     const imgW = imgSizes[charIndex][0] * s;
@@ -5402,6 +5471,7 @@ const CHAR_GRAB_FRAMES = [
   13, // 23:サトル (テクニック型→バランス)
   15, // 24:怖 (ホラー型→遠距離/特殊)
   13, // 25:ヤッホ (ふざけ型→バランス)
+  13, // 26:ぽよ (初心者型→バランス)
 ];
 function getGrabFrames(charIdx) {
   return CHAR_GRAB_FRAMES[charIdx] || THROW_GRAB_FRAMES;
@@ -5441,6 +5511,7 @@ const CHAR_THROW_TYPE = [
   'balance', // 23:サトル
   'ranged',  // 24:怖
   'balance', // 25:ヤッホ
+  'balance', // 26:ぽよ
 ];
 function getThrowDmg(charIdx) {
   return CHAR_THROW_DMG[CHAR_THROW_TYPE[charIdx] || 'balance'];
@@ -5760,6 +5831,17 @@ const commandDefs = {
     { name:'寝っ転がり攻撃', seq:['U','U','D','D'], cooldownKey:'cmd3',
       attack:{ startup:6, active:20, recovery:14, damage:10, kbBase:5, kbScale:0.08, kbAngle:-20, hx:16, hy:-25, hw:60, hh:40, color:'#FFCC44', effect:'dash',
         specialType:'shadowDash', dashSpeed:14 } },
+  ],
+  26: [ // ぽよ
+    { name:'バウンドアタック', seq:['F','F','D','D'], cooldownKey:'cmd1',
+      attack:{ startup:6, active:10, recovery:12, damage:10, kbBase:5, kbScale:0.08, kbAngle:-35, hx:16, hy:-35, hw:55, hh:50, color:'#44CCEE', effect:'punch',
+        specialType:'cmdCharge', chargeSpeed:12 } },
+    { name:'スライム砲', seq:['F','F','U','U'], cooldownKey:'cmd2',
+      attack:{ startup:5, active:5, recovery:12, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#88EEFF', effect:'none',
+        projectile:{ speed:10, damage:10, kbBase:4, kbScale:0.07, kbAngle:-20, w:22, h:18, life:40, color:'#44CCEE', pcolor:'#88EEFF' } } },
+    { name:'大ジャンプ潰し', seq:['U','U','D','D'], cooldownKey:'cmd3',
+      attack:{ startup:8, active:10, recovery:14, damage:14, kbBase:7, kbScale:0.11, kbAngle:-55, hx:0, hy:5, hw:80, hh:40, color:'#44CCEE', effect:'shockwave', centerHit:true,
+        specialType:'divekick', diveSpeed:15 } },
   ],
 };
 
@@ -6330,6 +6412,20 @@ const attackDefs = {
               specialType:'slide', slideSpeed:10 },
     throwDmg: 8,
   },
+  // ぽよ - Easy Type [初心者向け・スキ少なめ]
+  26: {
+    normal: { name:'ぽよパンチ', startup:3, active:5, recovery:7, damage:5, kbBase:2, kbScale:0.05, kbAngle:-15, hx:14, hy:-30, hw:45, hh:35, color:'#88EEFF', effect:'punch' },
+    strong: { name:'体当たり', startup:6, active:7, recovery:10, damage:10, kbBase:5, kbScale:0.08, kbAngle:-25, hx:16, hy:-30, hw:55, hh:45, color:'#44CCEE', effect:'punch' },
+    special:{ name:'スライム分裂', startup:6, active:8, recovery:10, damage:9, kbBase:4, kbScale:0.07, kbAngle:-35, hx:0, hy:-30, hw:80, hh:50, color:'#88EEFF', effect:'shockwave', centerHit:true },
+    aerial: { name:'空中ぽよ', startup:3, active:5, recovery:8, damage:6, kbBase:3, kbScale:0.06, kbAngle:-40, hx:10, hy:-30, hw:45, hh:40, color:'#88EEFF', effect:'airkick' },
+    down:   { name:'ぺたん', startup:4, active:6, recovery:8, damage:6, kbBase:3, kbScale:0.05, kbAngle:-45, hx:0, hy:5, hw:55, hh:25, color:'#44CCEE', effect:'shockwave', centerHit:true },
+    up:     { name:'にょーん', startup:4, active:6, recovery:8, damage:8, kbBase:4, kbScale:0.08, kbAngle:-85, hx:0, hy:-45, hw:40, hh:50, color:'#88EEFF', effect:'upslash' },
+    side:   { name:'びよーん', startup:4, active:6, recovery:8, damage:8, kbBase:4, kbScale:0.07, kbAngle:-25, hx:18, hy:-30, hw:60, hh:35, color:'#44CCEE', effect:'slash' },
+    downair:{ name:'急降下ぽよ', startup:4, active:8, recovery:10, damage:10, kbBase:5, kbScale:0.09, kbAngle:80, hx:0, hy:10, hw:45, hh:40, color:'#44CCEE', effect:'meteor', specialType:'divekick', diveSpeed:12 },
+    dash:   { name:'転がり', startup:3, active:6, recovery:8, damage:6, kbBase:3, kbScale:0.05, kbAngle:-20, hx:16, hy:-30, hw:50, hh:35, color:'#88EEFF', effect:'dash',
+              specialType:'slide', slideSpeed:10 },
+    throwDmg: 8,
+  },
 };
 
 // Dragon mode attack defs (separate object)
@@ -6713,6 +6809,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   if (attacker.dSkillBuff === 'microStar') finalDamage *= 1.3;  // マイクロ スター変身
   if (attacker.dSkillBuff === 'satoruHaki') finalDamage *= 1.3; // サトル 海王類の覇気
   if (attacker.dSkillBuff === 'kowaiStealth') finalDamage *= 1.5; // 怖 口裂け変身
+  if (attacker.dSkillBuff === 'poyoSuper') finalDamage *= 1.5;  // ぽよ スーパースライム
   // D技: メテオ 燃焼拳（1回消費）
   if (attacker.dSkillBuff === 'burnFist') { finalDamage += 5; attacker.dSkillActive = false; attacker.dSkillBuff = null; }
   // D技: 熊太郎 熊の怒り（投げ以外では消費しない→投げ側で処理）
@@ -6914,6 +7011,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
       23: ['#2266AA', '#44AAFF', '#88DDFF'], // Satoru: water blue
       24: ['#440022', '#CC0044', '#220011'], // Kowai: dark red
       25: ['#FF8800', '#FFCC44', '#88DDFF'], // Yaho: orange/yellow
+      26: ['#44CCEE', '#88EEFF', '#AAEEFF'], // Poyo: cyan
     };
     const colors = charColors[attacker.charIdx] || ['#FFFFFF'];
     const specialCount = 30 + Math.floor(kb * 1.5);
@@ -7076,6 +7174,10 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
     // ヤッホ: 水色しぶき + 黄色い星
     hitEffects.push({ x: efx, y: efy, life: 10, maxLife: 10, color: '#88DDFF', size: 14, type: 'ring' });
     for (let i = 0; i < 2; i++) sparks.push({ x: efx+(Math.random()-0.5)*10, y: efy+(Math.random()-0.5)*8, vx:(Math.random()-0.5)*4, vy:-2-Math.random()*2, life:10, maxLife:10, color:i%2?'#FFCC44':'#88DDFF', size:2+Math.random(), gravity:0.1, drag:0.96 });
+  } else if (ci === 26) {
+    // ぽよ: 水色のぷにぷにエフェクト
+    hitEffects.push({ x: efx, y: efy, life: 10, maxLife: 10, color: '#88EEFF', size: 14, type: 'charGlow' });
+    sparks.push({ x: efx, y: efy, vx:(Math.random()-0.5)*3, vy:-1.5-Math.random(), life:10, maxLife:10, color:'#44CCEE', size:2.5+Math.random(), gravity:0.08, drag:0.96 });
   }
 
   // Floating damage number (larger for strong/special)
@@ -7236,6 +7338,7 @@ function getPlayerHitbox(p) {
   if (ci === 23) return { x: p.x - 20, y: p.y - 68, w: 40, h: 68 }; // サトル: がっしり標準
   if (ci === 24) return { x: p.x - 16, y: p.y - 75, w: 32, h: 75 }; // 怖: 細長い亡霊
   if (ci === 25) return { x: p.x - 18, y: p.y - 68, w: 36, h: 68 }; // ヤッホ: 標準
+  if (ci === 26) return { x: p.x - 20, y: p.y - 50, w: 40, h: 50 }; // ぽよ: 丸い低め
   return { x: p.x - 18, y: p.y - 70, w: 36, h: 70 };
 }
 
@@ -12603,6 +12706,16 @@ function triggerDSkill(p) {
     hitEffects.push({ x: p.x + dir*60, y: p.y - 40, life: 16, maxLife: 16, color: '#FF44FF', size: 50, type: 'charSlash' });
     for (let i = 0; i < 10; i++) sparks.push({ x: p.x+dir*20, y: p.y-40, vx: dir*(4+Math.random()*4), vy:(Math.random()-0.5)*5, life:14, maxLife:14, color:rainbowCols[i%6], size:2.5+Math.random(), gravity:0.05, drag:0.96 });
     cmdNameDisplay.push({ text: 'なんじゃこりゃー！', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#FF8800' });
+  } else if (ci === 26) {
+    // ぽよ「スーパースライム」: 3秒間巨大化+攻撃範囲・ダメージ1.5倍
+    p.dSkillActive = true; p.dSkillTimer = 180; p.dSkillBuff = 'poyoSuper';
+    hitEffects.push({ x: p.x, y: p.y - 30, life: 25, maxLife: 25, color: '#88EEFF', size: 60, type: 'ring' });
+    hitEffects.push({ x: p.x, y: p.y - 30, life: 20, maxLife: 20, color: '#44CCEE', size: 40, type: 'charGlow' });
+    for (let i = 0; i < 10; i++) {
+      const a = (i / 10) * Math.PI * 2;
+      sparks.push({ x: p.x+Math.cos(a)*25, y: p.y-30+Math.sin(a)*20, vx:Math.cos(a)*3, vy:Math.sin(a)*3-1, life:16, maxLife:16, color:i%2?'#88EEFF':'#AAEEFF', size:3+Math.random()*2, gravity:0.03, drag:0.96 });
+    }
+    cmdNameDisplay.push({ text: 'スーパースライム！', x: p.x, y: p.y - 90, life: 60, maxLife: 60, color: '#44CCEE' });
   }
   playHitSound('cmd');
 }
@@ -12645,6 +12758,10 @@ function updateDSkill(p) {
     // マイクロ: 黄色い星パーティクル
     const a = Math.random() * Math.PI * 2;
     sparks.push({ x: p.x+Math.cos(a)*20, y: p.y-35+Math.sin(a)*15, vx:Math.cos(a)*1.5, vy:-1-Math.random()*0.5, life:12, maxLife:12, color:Math.random()>0.5?'#FFD700':'#FFEE88', size:2+Math.random()*1.5, gravity:0.02, drag:0.97 });
+  }
+  if (p.dSkillBuff === 'poyoSuper' && p.dSkillTimer % 8 === 0) {
+    // ぽよ: 水色の光パーティクル
+    sparks.push({ x: p.x+(Math.random()-0.5)*30, y: p.y-25+(Math.random()-0.5)*20, vx:(Math.random()-0.5)*1.5, vy:-0.5-Math.random()*0.5, life:10, maxLife:10, color:Math.random()>0.5?'#88EEFF':'#AAEEFF', size:2+Math.random()*1.5, gravity:-0.02, drag:0.97 });
   }
   if (p.dSkillBuff === 'kowaiStealth' && p.dSkillTimer % 8 === 0) {
     // 怖: 透明化中の黒い霧
