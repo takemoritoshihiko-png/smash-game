@@ -426,6 +426,19 @@ const characters = [
     jumpPower: -13.5,
     weight: 1.0
   },
+  {
+    name: 'プル',
+    type: '重力操作型',
+    color: '#6622AA',
+    accent: '#9944DD',
+    dark: '#330066',
+    stats: { power: 3, speed: 3, tech: 5, defense: 2 },
+    desc: '引力を操る者',
+    bodyColors: { main: '#6622AA', sub: '#9944DD', skin: '#DDBBEE' },
+    moveSpeed: 7.56,
+    jumpPower: -14.0,
+    weight: 1.0
+  },
 ];
 
 // --- Audio unlock on first interaction ---
@@ -509,6 +522,8 @@ const yahoImg = new Image();
 yahoImg.src = 'images/yaho.png?v=3';
 const poyoImg = new Image();
 poyoImg.src = 'images/poyo.png';
+const pullImg = new Image();
+pullImg.src = 'images/pull.png';
 const bgImg = new Image();
 bgImg.src = 'images/bg.png';
 
@@ -2073,6 +2088,43 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.beginPath(); ctx.ellipse(-10 * s, 5 * s, 4 * s, 3 * s, 0, 0, Math.PI * 2); ctx.fill();
       ctx.beginPath(); ctx.ellipse(10 * s, 5 * s, 4 * s, 3 * s, 0, 0, Math.PI * 2); ctx.fill();
     }
+  } else if (charIndex === 27) {
+    // プル - 引力を操る者
+    if (pullImg.complete && pullImg.naturalWidth > 0) {
+      const imgW = 75 * s; const imgH = 90 * s;
+      ctx.drawImage(pullImg, -imgW / 2, -35 * s, imgW, imgH);
+    } else {
+      // Canvas fallback: 重力操作者（フード付きローブ）
+      ctx.fillStyle = '#330066';
+      ctx.beginPath(); ctx.moveTo(-12*s, 10*s); ctx.lineTo(-14*s, 44*s); ctx.lineTo(14*s, 44*s); ctx.lineTo(12*s, 10*s); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#6622AA';
+      ctx.beginPath(); ctx.ellipse(0, 0, 13*s, 16*s, 0, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#9944DD';
+      ctx.beginPath(); ctx.ellipse(0, 3*s, 9*s, 10*s, 0, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#330066';
+      ctx.fillRect(-16*s, -6*s, 5*s, 18*s); ctx.fillRect(11*s, -6*s, 5*s, 18*s);
+      ctx.fillStyle = '#9944DD';
+      ctx.beginPath(); ctx.arc(-13*s, 14*s, 4*s, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(13*s, 14*s, 4*s, 0, Math.PI*2); ctx.fill();
+      // フード付き頭
+      ctx.fillStyle = '#6622AA';
+      ctx.beginPath(); ctx.arc(0, -20*s, 12*s, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#330066';
+      ctx.beginPath(); ctx.moveTo(-12*s, -22*s); ctx.quadraticCurveTo(0, -40*s, 12*s, -22*s);
+      ctx.lineTo(14*s, -15*s); ctx.lineTo(-14*s, -15*s); ctx.closePath(); ctx.fill();
+      // 目（紫に光る）
+      ctx.fillStyle = '#CC88FF';
+      ctx.beginPath(); ctx.arc(-4*s, -20*s, 2.5*s, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(4*s, -20*s, 2.5*s, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#FFF';
+      ctx.beginPath(); ctx.arc(-3.5*s, -21*s, 1*s, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(4.5*s, -21*s, 1*s, 0, Math.PI*2); ctx.fill();
+      // 胸の重力シンボル
+      ctx.strokeStyle = '#CC88FF'; ctx.lineWidth = 1.5*s;
+      ctx.beginPath(); ctx.arc(0, 2*s, 5*s, 0, Math.PI*2); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, -3*s); ctx.lineTo(0, 7*s); ctx.stroke();
+      ctx.lineWidth = 1;
+    }
   }
 
   ctx.restore();
@@ -2209,6 +2261,11 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
         bobY = Math.sin(t * 0.05) * 3;
         scaleX = 1 + Math.sin(t * 0.05) * 0.04;
         scaleY = 1 - Math.sin(t * 0.05) * 0.04;
+      } else if (charIndex === 27) {
+        // Pull: gravity float
+        bobY = Math.sin(t * 0.035) * 4 + Math.sin(t * 0.09) * 1.5;
+        scaleX = 1 + Math.sin(t * 0.04) * 0.012;
+        scaleY = 1 + Math.sin(t * 0.04 + 0.5) * 0.012;
       }
     }
 
@@ -2366,6 +2423,12 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
         scaleY = 1 - Math.sin(phase * 1.3) * 0.05;
         walkLean = Math.sin(phase) * 0.02;
         legAngle = 0; armSwing = 0;
+      } else if (charIndex === 27) {
+        // Pull: gliding hover
+        bobY = Math.sin(phase * 0.7) * 3;
+        walkLean = Math.sin(phase) * 0.02;
+        legAngle = Math.sin(phase) * 0.08;
+        armSwing = -Math.sin(phase * 0.6) * 0.12;
       }
     }
 
@@ -2446,8 +2509,8 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
   // 天才 uses different images per mode
   const tensaiIsDragon = animData && animData.dragonMode;
   const tensaiActiveImg = tensaiIsDragon ? tensaiDragonImg : tensaiHumanImg;
-  const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg, bulletImg, shaudenImg, judgemanImg, tensaiActiveImg, catbusImg, tankImg, namiojiImg, tokkoImg, samImg, kingImg, onpaImg, senImg, dosbossImg, microImg, mrtwoImg, kingkingImg, satoruImg, kowaiImg, yahoImg, poyoImg];
-  const imgSizes = [[70, 90], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [168, 112], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [85, 85], [75, 100], [80, 100], [85, 95], [80, 95], [80, 95], [75, 95], [75, 90], [75, 75]];
+  const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg, bulletImg, shaudenImg, judgemanImg, tensaiActiveImg, catbusImg, tankImg, namiojiImg, tokkoImg, samImg, kingImg, onpaImg, senImg, dosbossImg, microImg, mrtwoImg, kingkingImg, satoruImg, kowaiImg, yahoImg, poyoImg, pullImg];
+  const imgSizes = [[70, 90], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [168, 112], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [85, 85], [75, 100], [80, 100], [85, 95], [80, 95], [80, 95], [75, 95], [75, 90], [75, 75], [75, 90]];
   const img = imgs[charIndex];
   if (img && img.complete && img.naturalWidth > 0) {
     const imgW = imgSizes[charIndex][0] * s;
@@ -5493,6 +5556,7 @@ const CHAR_GRAB_FRAMES = [
   15, // 24:怖 (ホラー型→遠距離/特殊)
   13, // 25:ヤッホ (ふざけ型→バランス)
   13, // 26:ぽよ (初心者型→バランス)
+  15, // 27:プル (重力操作型→遠距離/特殊)
 ];
 function getGrabFrames(charIdx) {
   return CHAR_GRAB_FRAMES[charIdx] || THROW_GRAB_FRAMES;
@@ -5533,6 +5597,7 @@ const CHAR_THROW_TYPE = [
   'ranged',  // 24:怖
   'balance', // 25:ヤッホ
   'balance', // 26:ぽよ
+  'ranged',  // 27:プル
 ];
 function getThrowDmg(charIdx) {
   return CHAR_THROW_DMG[CHAR_THROW_TYPE[charIdx] || 'balance'];
@@ -5863,6 +5928,16 @@ const commandDefs = {
     { name:'大ジャンプ潰し', seq:['U','U','D','D'], cooldownKey:'cmd3',
       attack:{ startup:8, active:10, recovery:14, damage:14, kbBase:7, kbScale:0.11, kbAngle:-55, hx:0, hy:5, hw:80, hh:40, color:'#44CCEE', effect:'shockwave', centerHit:true,
         specialType:'divekick', diveSpeed:15 } },
+  ],
+  27: [ // プル
+    { name:'グラビティスラム', seq:['F','F','D','D'], cooldownKey:'cmd1',
+      attack:{ startup:10, active:10, recovery:18, damage:15, kbBase:7, kbScale:0.12, kbAngle:80, hx:15, hy:-40, hw:65, hh:55, color:'#9944DD', effect:'bigpunch',
+        pullEffect:true } },
+    { name:'重力反転', seq:['F','F','U','U'], cooldownKey:'cmd2',
+      attack:{ startup:8, active:8, recovery:16, damage:12, kbBase:8, kbScale:0.13, kbAngle:-88, hx:0, hy:-35, hw:80, hh:60, color:'#CC88FF', effect:'shockwave', centerHit:true } },
+    { name:'引力フィールド', seq:['U','U','D','D'], cooldownKey:'cmd3',
+      attack:{ startup:6, active:1, recovery:12, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#6622AA', effect:'none',
+        pullField:true } },
   ],
 };
 
@@ -6444,6 +6519,23 @@ const attackDefs = {
     side:   { name:'びよーん', startup:4, active:6, recovery:8, damage:8, kbBase:4, kbScale:0.07, kbAngle:-25, hx:18, hy:-30, hw:60, hh:35, color:'#44CCEE', effect:'slash' },
     downair:{ name:'急降下ぽよ', startup:4, active:8, recovery:10, damage:10, kbBase:5, kbScale:0.09, kbAngle:80, hx:0, hy:10, hw:45, hh:40, color:'#44CCEE', effect:'meteor', specialType:'divekick', diveSpeed:12 },
     dash:   { name:'転がり', startup:3, active:6, recovery:8, damage:6, kbBase:3, kbScale:0.05, kbAngle:-20, hx:16, hy:-30, hw:50, hh:35, color:'#88EEFF', effect:'dash',
+              specialType:'slide', slideSpeed:10 },
+    throwDmg: 8,
+  },
+  // プル - Gravity Type [重力操作型]
+  27: {
+    normal: { name:'重力パルス', startup:5, active:5, recovery:10, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#9944DD', effect:'none',
+              projectile:{ speed:8, damage:6, kbBase:3, kbScale:0.05, kbAngle:170, w:18, h:14, life:35, color:'#9944DD', pcolor:'#CC88FF' } },
+    strong: { name:'重力場展開', startup:10, active:18, recovery:14, damage:3, kbBase:1, kbScale:0.02, kbAngle:170, hx:20, hy:-35, hw:70, hh:50, color:'#6622AA', effect:'shockwave',
+              multiHit:true, hitInterval:6, finalDamage:8, finalKbBase:4, finalKbScale:0.07, finalKbAngle:170 },
+    special:{ name:'ブラックホール', startup:12, active:5, recovery:16, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#330066', effect:'none',
+              projectile:{ speed:5, damage:3, kbBase:1, kbScale:0.02, kbAngle:170, w:25, h:25, life:120, color:'#330066', pcolor:'#6622AA' } },
+    aerial: { name:'空中引力波', startup:4, active:6, recovery:10, damage:7, kbBase:3, kbScale:0.06, kbAngle:170, hx:12, hy:-35, hw:50, hh:45, color:'#9944DD', effect:'airkick' },
+    down:   { name:'重力爆発', startup:5, active:7, recovery:12, damage:8, kbBase:4, kbScale:0.07, kbAngle:170, hx:0, hy:5, hw:60, hh:35, color:'#6622AA', effect:'shockwave', centerHit:true },
+    up:     { name:'引力引き下ろし', startup:5, active:7, recovery:12, damage:8, kbBase:5, kbScale:0.08, kbAngle:-88, hx:0, hy:-55, hw:45, hh:55, color:'#9944DD', effect:'upslash' },
+    side:   { name:'引力ビーム', startup:5, active:6, recovery:10, damage:8, kbBase:4, kbScale:0.07, kbAngle:170, hx:20, hy:-35, hw:65, hh:35, color:'#CC88FF', effect:'slash' },
+    downair:{ name:'重力落下', startup:5, active:8, recovery:14, damage:11, kbBase:5, kbScale:0.09, kbAngle:80, hx:0, hy:10, hw:45, hh:45, color:'#6622AA', effect:'meteor', specialType:'divekick', diveSpeed:13 },
+    dash:   { name:'引力ダッシュ', startup:4, active:6, recovery:10, damage:6, kbBase:3, kbScale:0.05, kbAngle:170, hx:16, hy:-35, hw:50, hh:35, color:'#9944DD', effect:'dash',
               specialType:'slide', slideSpeed:10 },
     throwDmg: 8,
   },
@@ -7052,6 +7144,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
       24: ['#440022', '#CC0044', '#220011'], // Kowai: dark red
       25: ['#FF8800', '#FFCC44', '#88DDFF'], // Yaho: orange/yellow
       26: ['#44CCEE', '#88EEFF', '#AAEEFF'], // Poyo: cyan
+      27: ['#6622AA', '#9944DD', '#CC88FF'], // Pull: purple
     };
     const colors = charColors[attacker.charIdx] || ['#FFFFFF'];
     const specialCount = 30 + Math.floor(kb * 1.5);
@@ -7218,6 +7311,10 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
     // ぽよ: 水色のぷにぷにエフェクト
     hitEffects.push({ x: efx, y: efy, life: 10, maxLife: 10, color: '#88EEFF', size: 14, type: 'charGlow' });
     sparks.push({ x: efx, y: efy, vx:(Math.random()-0.5)*3, vy:-1.5-Math.random(), life:10, maxLife:10, color:'#44CCEE', size:2.5+Math.random(), gravity:0.08, drag:0.96 });
+  } else if (ci === 27) {
+    // プル: 紫の引力波紋（内向き）
+    hitEffects.push({ x: efx, y: efy, life: 14, maxLife: 14, color: '#9944DD', size: 20, type: 'ring' });
+    for (let i = 0; i < 2; i++) sparks.push({ x: efx+(Math.random()-0.5)*15, y: efy+(Math.random()-0.5)*10, vx:(Math.random()-0.5)*2, vy:(Math.random()-0.5)*2, life:12, maxLife:12, color:i%2?'#6622AA':'#CC88FF', size:2+Math.random(), gravity:-0.03, drag:0.97 });
   }
 
   // Floating damage number (larger for strong/special)
@@ -7379,6 +7476,7 @@ function getPlayerHitbox(p) {
   if (ci === 24) return { x: p.x - 16, y: p.y - 75, w: 32, h: 75 }; // 怖: 細長い亡霊
   if (ci === 25) return { x: p.x - 18, y: p.y - 68, w: 36, h: 68 }; // ヤッホ: 標準
   if (ci === 26) return { x: p.x - 20, y: p.y - 50, w: 40, h: 50 }; // ぽよ: 丸い低め
+  if (ci === 27) return { x: p.x - 18, y: p.y - 72, w: 36, h: 72 }; // プル: やや縦長
   return { x: p.x - 18, y: p.y - 70, w: 36, h: 70 };
 }
 
@@ -12858,6 +12956,26 @@ function triggerDSkill(p) {
       sparks.push({ x: p.x+Math.cos(a)*25, y: p.y-30+Math.sin(a)*20, vx:Math.cos(a)*3, vy:Math.sin(a)*3-1, life:16, maxLife:16, color:i%2?'#88EEFF':'#AAEEFF', size:3+Math.random()*2, gravity:0.03, drag:0.96 });
     }
     cmdNameDisplay.push({ text: 'スーパースライム！', x: p.x, y: p.y - 90, life: 60, maxLife: 60, color: '#44CCEE' });
+  } else if (ci === 27) {
+    // プル「超重力崩壊」: 全相手を引き寄せ→大爆発
+    for (const t2 of players) {
+      if (t2.id === p.id || !t2.alive || t2.invincibleTimer > 0) continue;
+      // 引き寄せ
+      const dx = p.x - t2.x, dy = (p.y - 35) - (t2.y - 35);
+      const dist = Math.sqrt(dx*dx + dy*dy) || 1;
+      t2.vx = (dx / dist) * 15;
+      t2.vy = (dy / dist) * 10;
+      t2.hitstun = 20;
+    }
+    // 1秒後に爆発（dSkillTimerで管理）
+    p.dSkillActive = true; p.dSkillTimer = 60; p.dSkillBuff = 'pullCollapse';
+    hitFlash.alpha = 0.25; hitFlash.color = '#6622AA';
+    triggerScreenShake(6, 12);
+    hitEffects.push({ x: p.x, y: p.y - 35, life: 25, maxLife: 25, color: '#6622AA', size: 100, type: 'ring' });
+    hitEffects.push({ x: p.x, y: p.y - 35, life: 20, maxLife: 20, color: '#330066', size: 70, type: 'charGlow' });
+    hitEffects.push({ x: p.x, y: p.y - 35, life: 18, maxLife: 18, color: '#CC88FF', size: 80, type: 'ring' });
+    for (let i = 0; i < 12; i++) sparks.push({ x: p.x+(Math.random()-0.5)*60, y: p.y-35+(Math.random()-0.5)*60, vx:(p.x-(p.x+(Math.random()-0.5)*120))*0.05, vy:(p.y-35-(p.y-35+(Math.random()-0.5)*80))*0.05, life:20, maxLife:20, color:i%2?'#9944DD':'#6622AA', size:3+Math.random()*2, gravity:-0.02, drag:0.96 });
+    cmdNameDisplay.push({ text: '超重力崩壊！', x: p.x, y: p.y - 100, life: 70, maxLife: 70, color: '#CC88FF' });
   }
   playHitSound('cmd');
 }
@@ -12900,6 +13018,28 @@ function updateDSkill(p) {
     // マイクロ: 黄色い星パーティクル
     const a = Math.random() * Math.PI * 2;
     sparks.push({ x: p.x+Math.cos(a)*20, y: p.y-35+Math.sin(a)*15, vx:Math.cos(a)*1.5, vy:-1-Math.random()*0.5, life:12, maxLife:12, color:Math.random()>0.5?'#FFD700':'#FFEE88', size:2+Math.random()*1.5, gravity:0.02, drag:0.97 });
+  }
+  // プル: 超重力崩壊の爆発
+  if (p.dSkillBuff === 'pullCollapse') {
+    // 持続引き寄せ
+    for (const t of players) {
+      if (t.id === p.id || !t.alive) continue;
+      const dx = p.x - t.x, dy = (p.y-35) - (t.y-35);
+      const dist = Math.max(Math.sqrt(dx*dx+dy*dy), 30);
+      t.vx += (dx/dist) * 0.8; t.vy += (dy/dist) * 0.5;
+    }
+    if (p.dSkillTimer <= 1) {
+      // 大爆発
+      const boom = { x: p.x - 60, y: p.y - 95, w: 120, h: 120 };
+      checkHitboxAgainstPlayers(p, boom, 20, 10, 0.14, -45, 'special');
+      p.hitTargets = [];
+      hitFlash.alpha = 0.4; hitFlash.color = '#330066';
+      triggerScreenShake(10, 18);
+      hitEffects.push({ x: p.x, y: p.y-35, life: 22, maxLife: 22, color: '#6622AA', size: 120, type: 'ring' });
+      hitEffects.push({ x: p.x, y: p.y-35, life: 18, maxLife: 18, color: '#CC88FF', size: 80 });
+      for (let i = 0; i < 15; i++) sparks.push({ x: p.x+(Math.random()-0.5)*80, y: p.y-35+(Math.random()-0.5)*60, vx:(Math.random()-0.5)*8, vy:-3-Math.random()*4, life:18, maxLife:18, color:i%3===0?'#6622AA':(i%3===1?'#9944DD':'#330066'), size:3+Math.random()*3, gravity:0.08, drag:0.95 });
+    }
+    if (p.dSkillTimer % 6 === 0) sparks.push({ x: p.x+(Math.random()-0.5)*50, y: p.y-35+(Math.random()-0.5)*40, vx:(p.x-(p.x+(Math.random()-0.5)*80))*0.03, vy:(p.y-35-(p.y+(Math.random()-0.5)*60))*0.03, life:12, maxLife:12, color:'#9944DD', size:2.5+Math.random(), gravity:-0.02, drag:0.97 });
   }
   if (p.dSkillBuff === 'poyoSuper' && p.dSkillTimer % 8 === 0) {
     // ぽよ: 水色の光パーティクル
