@@ -5861,8 +5861,8 @@ const attackDefs = {
               projectile:{ speed:9, damage:10, kbBase:4, kbScale:0.07, kbAngle:-20, w:20, h:16, life:40, color:'#9944FF', pcolor:'#CC88FF' } },
     strong: { name:'シャドーボール', startup:30, active:5, recovery:16, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#440066', effect:'none',
               projectile:{ speed:11, damage:18, kbBase:8, kbScale:0.13, kbAngle:-25, w:28, h:28, life:55, color:'#330044', pcolor:'#7733CC' } },
-    special:{ name:'テレポート', startup:4, active:1, recovery:14, damage:6, kbBase:3, kbScale:0.05, kbAngle:-30, hx:0, hy:-35, hw:50, hh:50, color:'#AA66FF', effect:'none',
-              specialType:'shadowDash', shadowSpeed:18 },
+    special:{ name:'テレポート', startup:4, active:3, recovery:14, damage:6, kbBase:3, kbScale:0.05, kbAngle:-30, hx:0, hy:-35, hw:50, hh:50, color:'#AA66FF', effect:'none',
+              specialType:'shadowDash', dashSpeed:9 },
     aerial: { name:'空中念波', startup:4, active:6, recovery:10, damage:9, kbBase:4, kbScale:0.08, kbAngle:-45, hx:10, hy:-35, hw:50, hh:45, color:'#AA66FF', effect:'airkick' },
     down:   { name:'念力叩きつけ', startup:6, active:8, recovery:14, damage:10, kbBase:5, kbScale:0.09, kbAngle:-50, hx:0, hy:5, hw:60, hh:35, color:'#7733CC', effect:'shockwave', centerHit:true },
     up:     { name:'念力衝撃波', startup:5, active:7, recovery:12, damage:9, kbBase:5, kbScale:0.09, kbAngle:-88, hx:0, hy:-55, hw:45, hh:55, color:'#AA66FF', effect:'upslash' },
@@ -8026,6 +8026,10 @@ function updateBattle(dt) {
         if (p.vy > MAX_FALL_SPEED) p.vy = MAX_FALL_SPEED;
         p.x += p.vx;
         p.y += p.vy;
+        // ステージ範囲内にクランプ（テレポート等の画面外防止）
+        if (p.x < BLAST_LEFT + 50) p.x = BLAST_LEFT + 50;
+        if (p.x > BLAST_RIGHT - 50) p.x = BLAST_RIGHT - 50;
+        if (p.y < BLAST_TOP + 50) p.y = BLAST_TOP + 50;
         landingCheck(p);
         blastCheck(p);
       } else if (atk.specialType !== 'jumpSlam') {
