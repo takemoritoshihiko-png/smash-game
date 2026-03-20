@@ -1742,11 +1742,17 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.beginPath(); ctx.arc(4 * s, -24 * s, 1 * s, 0, Math.PI * 2); ctx.fill();
     }
   } else if (charIndex === 22) {
-    // 金金 - 黄金の覇者
+    // 金金 - 黄金の覇者 (1536x1024 RGB、チェッカー背景)
     if (kingkingImg.complete && kingkingImg.naturalWidth > 0) {
+      const nw = kingkingImg.naturalWidth;
+      const nh = kingkingImg.naturalHeight;
+      const cropX = nw * 0.18;
+      const cropY = nh * 0.02;
+      const cropW = nw * 0.58;
+      const cropH = nh * 0.90;
       const imgW = 80 * s;
-      const imgH = 95 * s;
-      ctx.drawImage(kingkingImg, -imgW / 2, -38 * s, imgW, imgH);
+      const imgH = imgW * (cropH / cropW);
+      ctx.drawImage(kingkingImg, cropX, cropY, cropW, cropH, -imgW / 2, -42 * s, imgW, imgH);
     } else {
       // Canvas fallback: 金色の甲冑騎士
       // 脚
@@ -2166,6 +2172,14 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
       sy = origH * 0.05;
       sw = origW * 0.76;
       sh = origH * 0.85;
+    }
+    if (charIndex === 22) {
+      // 金金: 横長画像のキャラ部分をクロップ
+      const origW = img.naturalWidth, origH = img.naturalHeight;
+      sx = origW * 0.18;
+      sy = origH * 0.02;
+      sw = origW * 0.58;
+      sh = origH * 0.90;
     }
 
     // Damage flash: smooth 2-frame blink with fading intensity
