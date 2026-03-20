@@ -523,7 +523,7 @@ yahoImg.src = 'images/yaho.png?v=3';
 const poyoImg = new Image();
 poyoImg.src = 'images/poyo.png';
 const pullImg = new Image();
-pullImg.src = 'images/pull.png';
+pullImg.src = 'images/pull.png?v=2';
 const bgImg = new Image();
 bgImg.src = 'images/bg.png';
 
@@ -2089,16 +2089,13 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.beginPath(); ctx.ellipse(10 * s, 5 * s, 4 * s, 3 * s, 0, 0, Math.PI * 2); ctx.fill();
     }
   } else if (charIndex === 27) {
-    // プル - 引力を操る者 (2816x1536 RGBA, チェック柄背景)
+    // プル - 引力を操る者 (2816x1536 RGBA, 背景透過済み)
     if (pullImg.complete && pullImg.naturalWidth > 0) {
       const nw = pullImg.naturalWidth, nh = pullImg.naturalHeight;
       const cropX = nw * 0.2, cropY = nh * 0.05, cropW = nw * 0.55, cropH = nh * 0.85;
       const imgW = 85 * s;
       const imgH = imgW * (cropH / cropW);
-      ctx.save();
-      ctx.globalCompositeOperation = 'screen';
       ctx.drawImage(pullImg, cropX, cropY, cropW, cropH, -imgW / 2, -40 * s, imgW, imgH);
-      ctx.restore();
     } else {
       // Canvas fallback: 重力操作者（フード付きローブ）
       ctx.fillStyle = '#330066';
@@ -2583,7 +2580,7 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
       const origW = img.naturalWidth, origH = img.naturalHeight;
       sx = origW * 0.2; sy = origH * 0.05; sw = origW * 0.55; sh = origH * 0.85;
     }
-    const pullScreen = charIndex === 27;
+    // charIndex === 27 (プル): 背景透過済み、クロップのみ
 
     // Damage flash: smooth 2-frame blink with fading intensity
     if (animData && animData.damageTint > 0) {
@@ -2617,9 +2614,7 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
         ctx.globalAlpha = 1;
       }
     } else {
-      if (pullScreen) ctx.globalCompositeOperation = 'screen';
       ctx.drawImage(img, sx, sy, sw, sh, -imgW / 2 + tankOfsX, -35 * s + tankOfsY, imgW, imgH);
-      if (pullScreen) ctx.globalCompositeOperation = 'source-over';
     }
   } else if (charIndex === 4) {
     // Long: Canvas fallback for battle
