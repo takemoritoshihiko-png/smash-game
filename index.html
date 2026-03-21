@@ -5077,7 +5077,7 @@ function drawSelect(dt) {
       ctx.fillStyle = '#FF4444';
       ctx.font = 'bold 12px sans-serif';
       ctx.textAlign = 'right';
-      ctx.fillText(gameMode === 'cpu' ? 'CPU ▼' : '2P ▼', cx + cardW - 6, cy + 14);
+      ctx.fillText(gameMode === 'bossrush' ? 'BOSS ▼' : (gameMode === 'cpu' ? 'CPU ▼' : '2P ▼'), cx + cardW - 6, cy + 14);
       if (p2Confirmed) {
         ctx.fillStyle = '#44FF44';
         ctx.fillText('OK!', cx + cardW - 6, cy + 28);
@@ -5122,8 +5122,8 @@ function drawSelect(dt) {
   const detailY = gridStartY + rows * (cardH + gapY) + 4;
   const p1Label = '1P';
   drawSelectDetail(60, detailY, p1Select, p1Label, '#44AAFF', p1Confirmed);
-  const p2Label = gameMode === 'cpu' ? 'CPU' : '2P';
-  drawSelectDetail(500, detailY, p2Select, p2Label, '#FF4444', p2Confirmed);
+  const p2Label = gameMode === 'bossrush' ? 'BOSS' : (gameMode === 'cpu' ? 'CPU' : '2P');
+  drawSelectDetail(500, detailY, p2Select, p2Label, gameMode === 'bossrush' ? '#FF44CC' : '#FF4444', p2Confirmed);
 
   // Mode selection overlay (before char select starts)
   if (!modeSelected) {
@@ -8934,7 +8934,7 @@ function updateBattle(dt) {
       // Xキーリリースで発動
       let xHeld = false;
       if (p.id === 0) { xHeld = (onlineMode && !isHost) ? !!remoteKeys.x : !!(keys['x'] || keys['X']); }
-      else if (gameMode === 'cpu') { xHeld = false; } // CPU即発動
+      else if (gameMode === 'cpu' || bossRushMode) { xHeld = false; } // CPU即発動
       else if (onlineMode && isHost) { xHeld = !!remoteKeys.x; }
       else { xHeld = !!(keys['i'] || keys['I']); } // P2
       if (!xHeld || p.smashChargeTime >= SMASH_CHARGE_MAX) executeSmash(p);
@@ -8956,7 +8956,7 @@ function updateBattle(dt) {
     let dKeyHeld = false;
     if (p.id === 0) {
       dKeyHeld = (onlineMode && !isHost) ? !!remoteKeys.d : !!(keys['d'] || keys['D']);
-    } else if (gameMode === 'cpu') {
+    } else if (gameMode === 'cpu' || bossRushMode) {
       dKeyHeld = false;
     } else if (onlineMode && isHost) {
       dKeyHeld = !!remoteKeys.d;
@@ -9057,7 +9057,7 @@ function updateBattle(dt) {
               if (keys['ArrowLeft']) dx = -1; if (keys['ArrowRight']) dx = 1;
               if (keys['ArrowUp']) dy = -1; if (keys['ArrowDown']) dy = 1;
             }
-          } else if (gameMode === 'cpu') {
+          } else if (gameMode === 'cpu' || bossRushMode) {
             // CPU投げ方向: ランダム
             const r = Math.random();
             if (r < 0.3) dy = -1;       // 上投げ
@@ -9479,7 +9479,7 @@ function updateBattle(dt) {
     let wantsGuard = false;
     if (p.id === 0) {
       wantsGuard = (onlineMode && !isHost) ? !!remoteKeys.s : !!(keys['s'] || keys['S']);
-    } else if (p.id === 1 && gameMode === 'cpu') {
+    } else if (p.id === 1 && (gameMode === 'cpu' || bossRushMode)) {
       const cpuTarget = players[0];
       wantsGuard = getCpuGuard(p, cpuTarget);
     } else if (onlineMode && isHost) {
@@ -9570,7 +9570,7 @@ function updateBattle(dt) {
     let jumpPress = false;
 
     // CPU AI for player 2
-    if (p.id === 1 && gameMode === 'cpu') {
+    if (p.id === 1 && (gameMode === 'cpu' || bossRushMode)) {
       const ai = getCpuInput(p, players[0]);
       moveX = ai.moveX;
       jumpPress = ai.jump;
@@ -9626,7 +9626,7 @@ function updateBattle(dt) {
     let downPress = false;
     if (p.id === 0) {
       downPress = (onlineMode && !isHost) ? !!remoteKeys.down : !!keys['ArrowDown'];
-    } else if (gameMode === 'cpu') {
+    } else if (gameMode === 'cpu' || bossRushMode) {
       downPress = false;
     } else if (onlineMode && isHost) {
       downPress = !!remoteKeys.down;
@@ -11122,7 +11122,7 @@ function drawBattle(dt) {
     ctx.fillStyle = p.id === 0 ? '#44AAFF' : '#FF4444';
     ctx.font = 'bold 14px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(p.id === 0 ? '1P' : (gameMode === 'cpu' ? 'CPU' : '2P'), p.x, arrowY - 8);
+    ctx.fillText(p.id === 0 ? '1P' : (bossRushMode ? 'BOSS' : (gameMode === 'cpu' ? 'CPU' : '2P')), p.x, arrowY - 8);
     ctx.beginPath();
     ctx.moveTo(p.x, arrowY + 2);
     ctx.lineTo(p.x - 6, arrowY - 4);
@@ -12541,8 +12541,8 @@ function drawBattleHUD() {
   ctx.fillText(timeStr, 480, 40); ctx.shadowBlur = 0;
 
   drawPlayerHUD(120, 530, players[0], '1P', '#44AAFF');
-  const p2Label = gameMode === 'cpu' ? 'CPU' : '2P';
-  drawPlayerHUD(600, 530, players[1], p2Label, '#FF4444');
+  const p2HudLabel = bossRushMode ? '【BOSS】' : (gameMode === 'cpu' ? 'CPU' : '2P');
+  drawPlayerHUD(600, 530, players[1], p2HudLabel, bossRushMode ? '#FF44CC' : '#FF4444');
 }
 
 function drawPlayerHUD(x, y, player, label, color) {
@@ -13439,7 +13439,7 @@ function drawVsIntro(dt) {
     ctx.font = 'bold 14px sans-serif';
     ctx.fillStyle = '#6666FF';
     ctx.textAlign = 'left';
-    ctx.fillText(gameMode === 'cpu' ? 'CPU' : '2P', 650, 510);
+    ctx.fillText(bossRushMode ? '【BOSS】' : (gameMode === 'cpu' ? 'CPU' : '2P'), 650, 510);
     ctx.restore();
   }
 
@@ -14216,22 +14216,11 @@ function handleKeyDown(e) {
       }
       if (e.key === 'Enter') {
         if (gameMode === 'bossrush') {
-          // Start Boss Rush
+          // Boss Rush: proceed to character select (P1 only)
           bossRushMode = true;
-          bossRushPlayerChar = Math.floor(Math.random() * characters.length);
-          // Pick 3 unique random bosses (different from player)
-          bossRushBosses = [];
-          const pool = [];
-          for (let i = 0; i < characters.length; i++) { if (i !== bossRushPlayerChar) pool.push(i); }
-          for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
-          bossRushBosses = pool.slice(0, 3);
-          bossRushCurrent = 0;
-          bossRushPhase = 'intro';
-          bossRushTimer = 0;
-          p1Select = bossRushPlayerChar;
-          p2Select = bossRushBosses[0];
-          cpuDifficulty = 3; // extreme
-          startTransition('stageselect');
+          modeSelected = true;
+          p1Confirmed = false;
+          p2Confirmed = false;
           return;
         }
         modeSelected = true;
@@ -14246,7 +14235,31 @@ function handleKeyDown(e) {
     }
 
     // Character select phase
-    if (gameMode === 'cpu') {
+    if (gameMode === 'bossrush') {
+      // Boss Rush: P1 selects, bosses are random
+      if (!p1Confirmed) {
+        const n = characters.length + 1;
+        if (e.key === 'ArrowLeft') p1Select = (p1Select + n - 1) % n;
+        if (e.key === 'ArrowRight') p1Select = (p1Select + 1) % n;
+        if (e.key === 'Enter') {
+          if (p1Select >= characters.length) p1Select = Math.floor(Math.random() * characters.length);
+          bossRushPlayerChar = p1Select;
+          // Pick 3 unique random bosses
+          const pool = [];
+          for (let i = 0; i < characters.length; i++) { if (i !== p1Select) pool.push(i); }
+          for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+          bossRushBosses = pool.slice(0, 3);
+          bossRushCurrent = 0;
+          bossRushPhase = 'intro';
+          bossRushTimer = 0;
+          p2Select = bossRushBosses[0];
+          cpuDifficulty = 3;
+          p1Confirmed = true; p2Confirmed = true;
+        }
+      } else if (e.key === 'Enter' && p1Confirmed) {
+        startTransition('stageselect'); return;
+      }
+    } else if (gameMode === 'cpu') {
       // CPU mode: P1 selects, A/D changes CPU char
       if (!p1Confirmed) {
         const n = characters.length + 1; // +1 for random
@@ -14255,7 +14268,6 @@ function handleKeyDown(e) {
         if (e.key === 'a' || e.key === 'A') p2Select = (p2Select + n - 1) % n;
         if (e.key === 'd' || e.key === 'D') p2Select = (p2Select + 1) % n;
         if (e.key === 'Enter') {
-          // ランダム解決
           if (p1Select >= characters.length) p1Select = Math.floor(Math.random() * characters.length);
           if (p2Select >= characters.length) p2Select = Math.floor(Math.random() * characters.length);
           p1Confirmed = true; p2Confirmed = true;
@@ -14316,7 +14328,7 @@ function handleKeyDown(e) {
 
     if (e.key === 'Escape') {
       if (p1Confirmed || p2Confirmed) { p1Confirmed = false; p2Confirmed = false; }
-      else if (!onlineMode) { modeSelected = false; }
+      else if (!onlineMode) { modeSelected = false; bossRushMode = false; }
     }
   } else if (scene === 'difficulty') {
     if (e.key === 'ArrowLeft') difficultySelected = Math.max(0, difficultySelected - 1);
@@ -14336,7 +14348,8 @@ function handleKeyDown(e) {
       startTransition('vsintro');
     }
     if (e.key === 'Escape') {
-      if (gameMode === 'cpu') startTransition('difficulty');
+      if (bossRushMode) { startTransition('select'); }
+      else if (gameMode === 'cpu') startTransition('difficulty');
       else startTransition('select');
     }
   } else if (scene === 'vsintro') {
