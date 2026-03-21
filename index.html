@@ -2788,9 +2788,9 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
     const tankOfsY = charIndex === 12 ? -20 * s : 0;
     // 全キャラ source-over で描画（明るい背景対応）
 
-    // Source crop for landscape images (うる男)
+    // Source crop for landscape images (うる男 - 元画像のみ、スプライト時はスキップ)
     let sx = 0, sy = 0, sw = img.naturalWidth, sh = img.naturalHeight;
-    if (charIndex === 5) {
+    if (charIndex === 5 && img === uruoImg) {
       const cropW = sh * (imgSizes[5][0] / imgSizes[5][1]);
       sx = (sw - cropW) / 2;
       sw = cropW;
