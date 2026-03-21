@@ -29,7 +29,7 @@ resize();
 window.addEventListener('resize', resize);
 
 // --- State ---
-let scene = 'title'; // 'title' | 'select' | 'difficulty' | 'vsintro' | 'battle' | 'online'
+let scene = 'title'; // 'title' | 'select' | 'difficulty' | 'stageselect' | 'vsintro' | 'battle' | 'online'
 let titleAlpha = 0;
 let titleFadeIn = true;
 let pressAlpha = 0;
@@ -53,6 +53,26 @@ let modeSelected = false; // whether mode has been chosen on select screen
 let cpuDifficulty = 1; // 0=easy, 1=normal, 2=hard, 3=extreme
 let difficultyTime = 0;
 let difficultySelected = 0; // cursor on difficulty screen
+
+// Stage select
+const stages = [
+  {
+    id: 'sakura',
+    name: '桜ノ舞台',
+    desc: '日本の美を感じる戦場',
+    bgSrc: 'images/bg.png',
+    bgmSrc: 'sounds/bgm.mp3',
+  },
+  {
+    id: 'seijaku',
+    name: '静寂の間',
+    desc: '静けさの中で戦う',
+    bgSrc: 'images/bg2.png',
+    bgmSrc: 'sounds/bgm2.mp3',
+  },
+];
+let selectedStage = 0;
+let stageSelectTime = 0;
 
 // Online multiplayer
 let onlineMode = false;
@@ -541,6 +561,8 @@ const mussyImg = new Image();
 mussyImg.src = 'images/mussy.png';
 const bgImg = new Image();
 bgImg.src = 'images/bg.png';
+const bg2Img = new Image();
+bg2Img.src = 'images/bg2.png';
 
 // --- Particles ---
 function spawnTitleParticle() {
@@ -5135,6 +5157,143 @@ function drawDifficulty(dt) {
 }
 
 // ============================================================
+// STAGE SELECT SCREEN
+// ============================================================
+function drawStageSelect(dt) {
+  stageSelectTime += dt;
+
+  // Background
+  const grad = ctx.createLinearGradient(0, 0, 960, 640);
+  grad.addColorStop(0, '#0a0a20');
+  grad.addColorStop(1, '#1a0a20');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 960, 640);
+
+  // Title
+  ctx.font = 'bold 40px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#FFF';
+  ctx.shadowColor = '#44AAFF';
+  ctx.shadowBlur = 12;
+  ctx.fillText('STAGE SELECT', 480, 70);
+  ctx.shadowBlur = 0;
+
+  // Stage cards
+  const cardW = 340;
+  const cardH = 380;
+  const gap = 40;
+  const totalW = stages.length * cardW + (stages.length - 1) * gap;
+  const startX = (960 - totalW) / 2;
+
+  for (let i = 0; i < stages.length; i++) {
+    const s = stages[i];
+    const sel = selectedStage === i;
+    const cx = startX + i * (cardW + gap);
+    const cy = 110;
+    const bounce = sel ? Math.sin(stageSelectTime * 0.005) * 4 : 0;
+
+    ctx.save();
+    if (sel) { ctx.shadowColor = '#44AAFF'; ctx.shadowBlur = 20; }
+
+    // Card background
+    const cg = ctx.createLinearGradient(cx, cy, cx, cy + cardH);
+    cg.addColorStop(0, sel ? '#44AAFF22' : '#1a1a2e');
+    cg.addColorStop(1, '#0d0d1a');
+    ctx.fillStyle = cg;
+    roundRect(ctx, cx, cy + bounce, cardW, cardH, 14);
+    ctx.fill();
+
+    // Card border
+    ctx.strokeStyle = sel ? '#44AAFF' : '#444';
+    ctx.lineWidth = sel ? 3 : 1;
+    roundRect(ctx, cx, cy + bounce, cardW, cardH, 14);
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // Preview image area
+    const previewX = cx + 15;
+    const previewY = cy + 20 + bounce;
+    const previewW = cardW - 30;
+    const previewH = 200;
+
+    // Clip for rounded preview
+    ctx.save();
+    roundRect(ctx, previewX, previewY, previewW, previewH, 8);
+    ctx.clip();
+
+    // Draw stage preview
+    if (s.id === 'sakura') {
+      if (bgImg.complete && bgImg.naturalWidth > 0) {
+        ctx.drawImage(bgImg, previewX, previewY, previewW, previewH);
+      } else {
+        const skyGrad = ctx.createLinearGradient(previewX, previewY, previewX, previewY + previewH);
+        skyGrad.addColorStop(0, '#87CEEB');
+        skyGrad.addColorStop(1, '#E0A0A0');
+        ctx.fillStyle = skyGrad;
+        ctx.fillRect(previewX, previewY, previewW, previewH);
+      }
+    } else if (s.id === 'seijaku') {
+      if (bg2Img.complete && bg2Img.naturalWidth > 0) {
+        ctx.drawImage(bg2Img, previewX, previewY, previewW, previewH);
+      } else {
+        const darkGrad = ctx.createLinearGradient(previewX, previewY, previewX, previewY + previewH);
+        darkGrad.addColorStop(0, '#0a0a1a');
+        darkGrad.addColorStop(1, '#1a1a3a');
+        ctx.fillStyle = darkGrad;
+        ctx.fillRect(previewX, previewY, previewW, previewH);
+      }
+    }
+
+    // Draw mini platform preview
+    const platY = previewY + previewH - 40;
+    const platLX = previewX + 30;
+    const platRX = previewX + previewW - 30;
+    if (s.id === 'sakura') {
+      ctx.fillStyle = '#8B5A2B';
+      ctx.fillRect(platLX, platY, platRX - platLX, 8);
+      ctx.fillStyle = '#B8905A';
+      ctx.fillRect(platLX, platY, platRX - platLX, 3);
+    } else if (s.id === 'seijaku') {
+      ctx.fillStyle = '#2a2a2a';
+      ctx.fillRect(platLX, platY, platRX - platLX, 8);
+      ctx.fillStyle = '#4a4a4a';
+      ctx.fillRect(platLX, platY, platRX - platLX, 2);
+    }
+
+    ctx.restore(); // end clip
+
+    // Stage name
+    ctx.font = 'bold 28px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = sel ? '#FFF' : '#888';
+    ctx.fillText(s.name, cx + cardW / 2, cy + 260 + bounce);
+
+    // Description
+    ctx.font = '16px sans-serif';
+    ctx.fillStyle = sel ? '#AAA' : '#666';
+    ctx.fillText(s.desc, cx + cardW / 2, cy + 295 + bounce);
+
+    // Selection indicator
+    if (sel) {
+      ctx.font = 'bold 18px sans-serif';
+      ctx.fillStyle = '#44AAFF';
+      const indicatorAlpha = 0.5 + Math.sin(stageSelectTime * 0.008) * 0.3;
+      ctx.globalAlpha = indicatorAlpha;
+      ctx.fillText('▼', cx + cardW / 2, cy + bounce - 5);
+      ctx.globalAlpha = 1;
+    }
+
+    ctx.restore();
+  }
+
+  // Footer
+  ctx.font = '14px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#555';
+  ctx.fillText('← → で選択  |  Enter で決定  |  ESC で戻る', 480, 560);
+}
+
+// ============================================================
 // BATTLE SYSTEM
 // ============================================================
 // 旧値: GRAVITY=0.66, RISE=0.52, FALL=0.78, APEX=0.32, MAX_FALL=16.8
@@ -5488,19 +5647,25 @@ function playHitSound(type) {
 const bgmAudio = new Audio('sounds/bgm.mp3');
 bgmAudio.loop = true;
 bgmAudio.volume = 0.4;
+const bgm2Audio = new Audio('sounds/bgm2.mp3');
+bgm2Audio.loop = true;
+bgm2Audio.volume = 0.4;
 let bgmPlaying = false;
+let currentBgmAudio = bgmAudio;
 
 function startBGM() {
   if (bgmPlaying) return;
-  bgmAudio.currentTime = 0;
-  bgmAudio.play().catch(() => {});
+  const stage = stages[selectedStage];
+  currentBgmAudio = stage.bgmSrc === 'sounds/bgm2.mp3' ? bgm2Audio : bgmAudio;
+  currentBgmAudio.currentTime = 0;
+  currentBgmAudio.play().catch(() => {});
   bgmPlaying = true;
 }
 
 function stopBGM() {
   if (!bgmPlaying) return;
-  bgmAudio.pause();
-  bgmAudio.currentTime = 0;
+  currentBgmAudio.pause();
+  currentBgmAudio.currentTime = 0;
   bgmPlaying = false;
 }
 
@@ -9799,11 +9964,24 @@ function drawBattle(dt) {
   }
 
   // ===== 背景画像 =====
-  if (bgImg.complete && bgImg.naturalWidth > 0) {
-    ctx.drawImage(bgImg, 0, 0, 960, 640);
+  const curStage = stages[selectedStage];
+  if (curStage.id === 'seijaku') {
+    if (bg2Img.complete && bg2Img.naturalWidth > 0) {
+      ctx.drawImage(bg2Img, 0, 0, 960, 640);
+    } else {
+      const seiBg = ctx.createLinearGradient(0, 0, 0, 640);
+      seiBg.addColorStop(0, '#0a0a1a');
+      seiBg.addColorStop(1, '#1a1a3a');
+      ctx.fillStyle = seiBg;
+      ctx.fillRect(0, 0, 960, 640);
+    }
   } else {
-    ctx.fillStyle = '#87CEEB';
-    ctx.fillRect(0, 0, 960, 640);
+    if (bgImg.complete && bgImg.naturalWidth > 0) {
+      ctx.drawImage(bgImg, 0, 0, 960, 640);
+    } else {
+      ctx.fillStyle = '#87CEEB';
+      ctx.fillRect(0, 0, 960, 640);
+    }
   }
 
   // === Apply dynamic camera transform ===
@@ -9812,55 +9990,102 @@ function drawBattle(dt) {
   ctx.scale(cam.zoom, cam.zoom);
   ctx.translate(-cam.x, -cam.y);
 
-  // ===== 和風ステージ足場 =====
+  // ===== ステージ足場 =====
   const stageW = STAGE_RIGHT - STAGE_LEFT;
   const stageH = 18;
   const stageY = STAGE_GROUND_Y;
-  // Platform shadow
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
-  ctx.beginPath();
-  ctx.ellipse(STAGE_LEFT + stageW / 2, stageY + 30, stageW * 0.45, 10, 0, 0, Math.PI * 2);
-  ctx.fill();
-  // Platform body (木目風)
-  const platGrad = ctx.createLinearGradient(0, stageY - 4, 0, stageY + stageH + 20);
-  platGrad.addColorStop(0, '#8B5A2B');
-  platGrad.addColorStop(0.3, '#7A4A1E');
-  platGrad.addColorStop(1, '#4A2A0E');
-  ctx.fillStyle = platGrad;
-  ctx.beginPath();
-  ctx.moveTo(STAGE_LEFT, stageY);
-  ctx.lineTo(STAGE_RIGHT, stageY);
-  ctx.lineTo(STAGE_RIGHT + 10, stageY + stageH + 20);
-  ctx.lineTo(STAGE_LEFT - 10, stageY + stageH + 20);
-  ctx.closePath();
-  ctx.fill();
-  // Top surface (畳風ライン)
-  const topGrad = ctx.createLinearGradient(STAGE_LEFT, stageY - 4, STAGE_RIGHT, stageY - 4);
-  topGrad.addColorStop(0, '#A0784A');
-  topGrad.addColorStop(0.5, '#B8905A');
-  topGrad.addColorStop(1, '#A0784A');
-  ctx.fillStyle = topGrad;
-  ctx.fillRect(STAGE_LEFT, stageY - 4, stageW, 6);
-  // 畳 grid lines
-  ctx.strokeStyle = 'rgba(60, 40, 20, 0.4)';
-  ctx.lineWidth = 1;
-  for (let lx = STAGE_LEFT + 40; lx < STAGE_RIGHT; lx += 40) {
-    ctx.beginPath(); ctx.moveTo(lx, stageY - 4); ctx.lineTo(lx, stageY + 2); ctx.stroke();
+
+  if (curStage.id === 'seijaku') {
+    // 静寂の間: 石畳風プラットフォーム
+    // Platform shadow
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.beginPath();
+    ctx.ellipse(STAGE_LEFT + stageW / 2, stageY + 28, stageW * 0.42, 8, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Platform body (石畳風)
+    const stonePlatGrad = ctx.createLinearGradient(0, stageY - 4, 0, stageY + stageH + 20);
+    stonePlatGrad.addColorStop(0, '#2a2a2a');
+    stonePlatGrad.addColorStop(0.4, '#222222');
+    stonePlatGrad.addColorStop(1, '#1a1a1a');
+    ctx.fillStyle = stonePlatGrad;
+    ctx.beginPath();
+    ctx.moveTo(STAGE_LEFT, stageY);
+    ctx.lineTo(STAGE_RIGHT, stageY);
+    ctx.lineTo(STAGE_RIGHT + 8, stageY + stageH + 20);
+    ctx.lineTo(STAGE_LEFT - 8, stageY + stageH + 20);
+    ctx.closePath();
+    ctx.fill();
+    // Top surface (石畳ライン)
+    const stoneTopGrad = ctx.createLinearGradient(STAGE_LEFT, stageY - 4, STAGE_RIGHT, stageY - 4);
+    stoneTopGrad.addColorStop(0, '#3a3a3a');
+    stoneTopGrad.addColorStop(0.5, '#4a4a4a');
+    stoneTopGrad.addColorStop(1, '#3a3a3a');
+    ctx.fillStyle = stoneTopGrad;
+    ctx.fillRect(STAGE_LEFT, stageY - 4, stageW, 6);
+    // 石畳の目地ライン
+    ctx.strokeStyle = 'rgba(80, 80, 80, 0.3)';
+    ctx.lineWidth = 1;
+    for (let lx = STAGE_LEFT + 50; lx < STAGE_RIGHT; lx += 50) {
+      ctx.beginPath(); ctx.moveTo(lx, stageY - 4); ctx.lineTo(lx, stageY + 2); ctx.stroke();
+    }
+    // Edge accent (細い青白ライン)
+    ctx.shadowColor = '#445566';
+    ctx.shadowBlur = 4;
+    ctx.strokeStyle = '#556677';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(STAGE_LEFT, stageY - 1);
+    ctx.lineTo(STAGE_RIGHT, stageY - 1);
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+  } else {
+    // 桜ノ舞台: 和風プラットフォーム
+    // Platform shadow
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+    ctx.beginPath();
+    ctx.ellipse(STAGE_LEFT + stageW / 2, stageY + 30, stageW * 0.45, 10, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Platform body (木目風)
+    const platGrad = ctx.createLinearGradient(0, stageY - 4, 0, stageY + stageH + 20);
+    platGrad.addColorStop(0, '#8B5A2B');
+    platGrad.addColorStop(0.3, '#7A4A1E');
+    platGrad.addColorStop(1, '#4A2A0E');
+    ctx.fillStyle = platGrad;
+    ctx.beginPath();
+    ctx.moveTo(STAGE_LEFT, stageY);
+    ctx.lineTo(STAGE_RIGHT, stageY);
+    ctx.lineTo(STAGE_RIGHT + 10, stageY + stageH + 20);
+    ctx.lineTo(STAGE_LEFT - 10, stageY + stageH + 20);
+    ctx.closePath();
+    ctx.fill();
+    // Top surface (畳風ライン)
+    const topGrad = ctx.createLinearGradient(STAGE_LEFT, stageY - 4, STAGE_RIGHT, stageY - 4);
+    topGrad.addColorStop(0, '#A0784A');
+    topGrad.addColorStop(0.5, '#B8905A');
+    topGrad.addColorStop(1, '#A0784A');
+    ctx.fillStyle = topGrad;
+    ctx.fillRect(STAGE_LEFT, stageY - 4, stageW, 6);
+    // 畳 grid lines
+    ctx.strokeStyle = 'rgba(60, 40, 20, 0.4)';
+    ctx.lineWidth = 1;
+    for (let lx = STAGE_LEFT + 40; lx < STAGE_RIGHT; lx += 40) {
+      ctx.beginPath(); ctx.moveTo(lx, stageY - 4); ctx.lineTo(lx, stageY + 2); ctx.stroke();
+    }
+    // Center line
+    ctx.strokeStyle = 'rgba(80, 50, 25, 0.5)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(STAGE_LEFT, stageY - 1); ctx.lineTo(STAGE_RIGHT, stageY - 1); ctx.stroke();
+    // Edge accent
+    ctx.shadowColor = '#CC8844';
+    ctx.shadowBlur = 6;
+    ctx.strokeStyle = '#CC9955';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(STAGE_LEFT, stageY - 1);
+    ctx.lineTo(STAGE_RIGHT, stageY - 1);
+    ctx.stroke();
+    ctx.shadowBlur = 0;
   }
-  // Center line
-  ctx.strokeStyle = 'rgba(80, 50, 25, 0.5)';
-  ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.moveTo(STAGE_LEFT, stageY - 1); ctx.lineTo(STAGE_RIGHT, stageY - 1); ctx.stroke();
-  // Edge accent
-  ctx.shadowColor = '#CC8844';
-  ctx.shadowBlur = 6;
-  ctx.strokeStyle = '#CC9955';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(STAGE_LEFT, stageY - 1);
-  ctx.lineTo(STAGE_RIGHT, stageY - 1);
-  ctx.stroke();
-  ctx.shadowBlur = 0;
 
   // Blast zone
   ctx.strokeStyle = 'rgba(255, 50, 50, 0.12)';
@@ -11948,7 +12173,8 @@ function setupPeerConnection(conn) {
       if (isHost) { p2Select = data.charIdx; }
       else { p1Select = data.charIdx; }
       p1Confirmed = true; p2Confirmed = true;
-      if (scene === 'select') startTransition('vsintro');
+      if (typeof data.stageIdx === 'number') selectedStage = data.stageIdx;
+      if (scene === 'select' || scene === 'stageselect') startTransition('vsintro');
     } else if (data.type === 'input') {
       // Host receives guest input
       if (isHost) {
@@ -12792,6 +13018,7 @@ function drawTransition() {
       transitioning = false;
       if (scene === 'select') { p1Confirmed = false; p2Confirmed = false; modeSelected = false; }
       else if (scene === 'difficulty') { difficultyTime = 0; difficultySelected = 1; }
+      else if (scene === 'stageselect') { stageSelectTime = 0; }
       else if (scene === 'vsintro') { vsIntroTime = 0; playVsIntroFanfare(); }
       else if (scene === 'battle') { initBattle(); }
     }
@@ -13574,8 +13801,7 @@ function handleKeyDown(e) {
           }
         }
         if (p1Confirmed && p2Confirmed && e.key === 'Enter') {
-          if (peerConn) peerConn.send({ type: 'startBattle', charIdx: p1Select });
-          startTransition('vsintro'); return;
+          startTransition('stageselect'); return;
         }
       } else {
         // Guest controls P2
@@ -13600,7 +13826,7 @@ function handleKeyDown(e) {
           p1Confirmed = true;
         }
       } else if (e.key === 'Enter' && p1Confirmed && p2Confirmed) {
-        startTransition('vsintro'); return;
+        startTransition('stageselect'); return;
       }
       if (!p2Confirmed) {
         if (e.key === 'a' || e.key === 'A') p2Select = (p2Select + n - 1) % n;
@@ -13621,9 +13847,22 @@ function handleKeyDown(e) {
     if (e.key === 'ArrowRight') difficultySelected = Math.min(3, difficultySelected + 1);
     if (e.key === 'Enter') {
       cpuDifficulty = difficultySelected;
-      startTransition('vsintro');
+      startTransition('stageselect');
     }
     if (e.key === 'Escape') startTransition('select');
+  } else if (scene === 'stageselect') {
+    if (e.key === 'ArrowLeft') selectedStage = (selectedStage + stages.length - 1) % stages.length;
+    if (e.key === 'ArrowRight') selectedStage = (selectedStage + 1) % stages.length;
+    if (e.key === 'Enter') {
+      if (onlineMode && isHost && peerConn) {
+        peerConn.send({ type: 'startBattle', charIdx: p1Select, stageIdx: selectedStage });
+      }
+      startTransition('vsintro');
+    }
+    if (e.key === 'Escape') {
+      if (gameMode === 'cpu') startTransition('difficulty');
+      else startTransition('select');
+    }
   } else if (scene === 'vsintro') {
     if (e.key === 'Enter' || e.key === ' ') {
       stopVsIntroFanfare();
@@ -13915,6 +14154,8 @@ function gameLoop(timestamp) {
     drawSelect(FIXED_DT);
   } else if (scene === 'difficulty') {
     drawDifficulty(FIXED_DT);
+  } else if (scene === 'stageselect') {
+    drawStageSelect(FIXED_DT);
   } else if (scene === 'vsintro') {
     drawVsIntro(FIXED_DT);
   } else if (scene === 'battle') {
