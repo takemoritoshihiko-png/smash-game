@@ -714,7 +714,7 @@ const EMP = [
   { id:'exec', name:'役員', emoji:'🏛️', desc:'経営判断を下す重役', baseCost:5e6, baseIncome:10000, color:'#ef4444', unlockAt:3e6,
     headColor:'#f5d0a9', bodyColor:'#ef4444', acc:'💎', img:'images/characters/exec.png?v=1' },
   { id:'ceo', name:'カリスマCEO', emoji:'👑', desc:'伝説の経営者', baseCost:5e7, baseIncome:80000, color:'#ffd700', unlockAt:3e7,
-    headColor:'#f5d0a9', bodyColor:'#ffd700', acc:'👑' },
+    headColor:'#f5d0a9', bodyColor:'#ffd700', acc:'👑', img:'images/characters/ceo.png?v=1' },
 ];
 
 const UPGRADES = [
@@ -747,14 +747,14 @@ const MILESTONES = [
 const COMPANY_NAMES = ['株式会社ビギナーズ','有限会社グロース','株式会社ライズ','株式会社エクセル','株式会社フロンティア','GIC Holdings','株式会社インフィニティ','APEX Corporation'];
 
 const SPEECHES = {
-  part_time: ['がんばります！','時給上がらないかな…','いらっしゃいませ〜','眠い…'],
-  staff: ['契約更新されるかな','報告書できました','お先に失礼します','コーヒーブレイク♪'],
-  full_time: ['プロジェクト進めます','残業は程々に…','チームで乗り越えよう','有給取りたい'],
-  leader: ['進捗どうですか？','リーダーシップ！','みんなついてきて','会議始めます'],
-  manager: ['部下の育成が大事','予算が…','承認しました','経営層に報告'],
-  director: ['戦略を練る','来期の目標は…','取締役会で発表','ビジョンを示す'],
-  exec: ['株価が気になる','M&Aを検討','役員報酬…','経営判断だ'],
-  ceo: ['世界を変える！','イノベーション','上場だ！','伝説を作ろう'],
+  part_time: ['あ、あの…よろしくお願いします！','時給上がりますか…？','がんばります！'],
+  staff: ['契約更新、されますよね？','真面目にやってます！','正社員になりたいです'],
+  full_time: ['任せてください！','有給取っていいですか？','やりがいあります！'],
+  leader: ['チームで勝ちにいこう！','俺についてこい！','気合い入れていくぞ！'],
+  manager: ['報連相を徹底してください','数字で話してください','会議の資料は？'],
+  director: ['結果を出せ','言い訳はいらない','…（無言で腕組み）'],
+  exec: ['戦略的に考えなさい','中長期で見ています','ふふ、面白い'],
+  ceo: ['世界を変えよう','君たちを信じている','これが私のビジョンだ'],
 };
 
 const MAX_FLOORS = 10;
@@ -1075,8 +1075,9 @@ function renderRoom() {
       </div>`;
     }
 
+    const animDelay = (emp.uid * 0.37 % 1).toFixed(2);
     html+=`<div class="${charClass}" data-uid="${emp.uid}"
-      style="left:${cp.x}px;" onclick="event.stopPropagation();onCharTap(${emp.uid},${currentFloor})">
+      style="left:${cp.x}px;animation-delay:${animDelay}s;" onclick="event.stopPropagation();onCharTap(${emp.uid},${currentFloor})">
       <div class="char-speech-area" style="position:absolute;bottom:${speechBottom};left:50%;transform:translateX(-50%);pointer-events:none;z-index:10"></div>
       ${charInner}
     </div>`;
