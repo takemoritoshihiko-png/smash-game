@@ -62,7 +62,12 @@
       "Bash(git revert:*)",
       "Bash(mv meteo_jump.png meteo_tmp.png)",
       "Bash(mv meteo_special.png meteo_jump.png)",
-      "Bash(mv meteo_tmp.png meteo_special.png)"
+      "Bash(mv meteo_tmp.png meteo_special.png)",
+      "Bash(cp meteo_walk.png meteo_walk_old.png)",
+      "Bash(cp meteo_jump.png meteo_walk.png)",
+      "Bash(cp meteo_special.png meteo_jump.png)",
+      "Bash(cp meteo_attack_s2.png meteo_special.png)",
+      "Bash(rm meteo_walk_old.png)"
     ]
   }
 }
