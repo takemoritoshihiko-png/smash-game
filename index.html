@@ -531,11 +531,6 @@ const saisokuSprites = {};
 });
 const meteoImg = new Image();
 meteoImg.src = 'images/meteo.png';
-const meteoSprites = {};
-['idle','walk','jump','attack_n','attack_s','attack_s2','special','smash','ground_smash','damage','guard','knockout'].forEach(k => {
-  meteoSprites[k] = new Image();
-  meteoSprites[k].src = 'images/meteo/meteo_' + k + '.png';
-});
 const longImg = new Image();
 longImg.src = 'images/long.png';
 const uruoImg = new Image();
@@ -2704,24 +2699,6 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
     else if (animData.animState === 'jump' || animData.animState === 'fall') sKey = 'jump';
     const spr = saisokuSprites[sKey];
     if (spr && spr.complete && spr.naturalWidth > 0) img = spr;
-  }
-  // Meteo sprite animation: select sprite based on state
-  if (charIndex === 3 && animData) {
-    let mKey = 'idle';
-    if (!animData.alive) mKey = 'knockout';
-    else if (animData.dSkillActive && animData.dSkillTimer > 0) mKey = 'ground_smash';
-    else if (animData.guarding) mKey = 'guard';
-    else if (animData.hitstun > 0) mKey = 'damage';
-    else if (animData.attacking && animData.attackType) {
-      const at = animData.attackType;
-      if (at === 'special' || at === 'cmdSpecial') mKey = 'smash';
-      else if (at === 'upSmash' || at === 'sideSmash' || at === 'downSmash') mKey = 'ground_smash';
-      else if (at === 'strong') mKey = 'attack_s';
-      else mKey = 'attack_n';
-    } else if (animData.animState === 'walk') mKey = 'jump';
-    else if (animData.animState === 'jump' || animData.animState === 'fall') mKey = 'special';
-    const mSpr = meteoSprites[mKey];
-    if (mSpr && mSpr.complete && mSpr.naturalWidth > 0) img = mSpr;
   }
   if (img && img.complete && img.naturalWidth > 0) {
     const imgW = imgSizes[charIndex][0] * s;
