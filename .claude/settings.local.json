@@ -73,7 +73,10 @@
       "Bash(mv meteo_temp.png meteo_jump.png)",
       "Bash(unzip -o \"/Users/yutotakemori/Downloads/files.zip\" -d /tmp/long_extract/)",
       "Bash(mv /tmp/long_extract/*.png /Users/yutotakemori/new-game/smash-game/images/long/)",
-      "Bash(rm -rf /tmp/long_extract)"
+      "Bash(rm -rf /tmp/long_extract)",
+      "Bash(unzip -o \"/Users/yutotakemori/Downloads/files \\(1\\).zip\" -d /tmp/meteor_extract/)",
+      "Bash(mv /tmp/meteor_extract/*.png /Users/yutotakemori/new-game/smash-game/images/meteor/)",
+      "Bash(rm -rf /tmp/meteor_extract)"
     ]
   }
 }

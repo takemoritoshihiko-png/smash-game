@@ -531,6 +531,12 @@ const saisokuSprites = {};
 });
 const meteoImg = new Image();
 meteoImg.src = 'images/meteo.png';
+const meteoSprites = {};
+const meteoSpriteMap = { idle:'01_idle', walk:'02_idle2', jump:'03_kick', attack_n:'04_punch_fire', attack_side:'06_beam', attack_up:'07_spin', attack_down:'05_hook', attack_air:'03_kick', special:'09_aura_burst', damage:'08_power_up', win:'11_win', down:'12_down', projectile:'10_projectile' };
+Object.keys(meteoSpriteMap).forEach(k => {
+  meteoSprites[k] = new Image();
+  meteoSprites[k].src = 'images/meteor/' + meteoSpriteMap[k] + '.png';
+});
 const longImg = new Image();
 longImg.src = 'images/long.png';
 const longSprites = {};
@@ -2705,6 +2711,27 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
     else if (animData.animState === 'jump' || animData.animState === 'fall') sKey = 'jump';
     const spr = saisokuSprites[sKey];
     if (spr && spr.complete && spr.naturalWidth > 0) img = spr;
+  }
+  // Meteo sprite animation: select sprite based on state
+  if (charIndex === 3 && animData) {
+    let mKey = 'idle';
+    if (!animData.alive) mKey = 'down';
+    else if (animData.dSkillActive && animData.dSkillTimer > 0) mKey = 'special';
+    else if (animData.guarding) mKey = 'idle';
+    else if (animData.hitstun > 0) mKey = 'damage';
+    else if (animData.attacking && animData.attackType) {
+      const at = animData.attackType;
+      if (at === 'special' || at === 'cmdSpecial') mKey = 'special';
+      else if (at === 'sideSmash') mKey = 'attack_side';
+      else if (at === 'upSmash') mKey = 'attack_up';
+      else if (at === 'downSmash') mKey = 'attack_down';
+      else if (at === 'aerial' || at === 'downair') mKey = 'attack_air';
+      else if (at === 'strong') mKey = 'attack_side';
+      else mKey = 'attack_n';
+    } else if (animData.animState === 'walk') mKey = 'walk';
+    else if (animData.animState === 'jump' || animData.animState === 'fall') mKey = 'jump';
+    const mSpr = meteoSprites[mKey];
+    if (mSpr && mSpr.complete && mSpr.naturalWidth > 0) img = mSpr;
   }
   // Long sprite animation: select sprite based on state
   if (charIndex === 4 && animData) {
