@@ -277,14 +277,13 @@
 
   /* PNG character image */
   .char-img {
-    width: 60px; height: 80px;
+    width: 40px; height: 55px;
     object-fit: contain;
-    mix-blend-mode: multiply;
     image-rendering: auto;
     display: block;
   }
   .char-img-wrap {
-    width: 60px; height: 80px;
+    width: 40px; height: 55px;
     position: relative;
   }
 
@@ -1062,11 +1061,11 @@ function renderRoom() {
 
     const isImg = !!ed.img;
     const charClass = `pixel-char${isSel?' selected-emp':''}${isImg?' img-char':''}`;
-    const speechBottom = isImg ? '86px' : '38px';
+    const speechBottom = isImg ? '60px' : '38px';
 
     let charInner;
     if (isImg) {
-      charInner = `<div class="char-img-wrap"><img class="char-img" src="${ed.img}" alt="${ed.name}"></div>`;
+      charInner = `<div class="char-img-wrap"><canvas class="char-img" data-src="${ed.img}" width="40" height="55"></canvas></div>`;
     } else {
       charInner = `<div class="char-body">
         ${ed.acc?`<div class="char-acc">${ed.acc}</div>`:''}
@@ -1377,6 +1376,60 @@ document.getElementById('roomWrapper').addEventListener('touchend',e=>{
   const dx=e.changedTouches[0].clientX-touchStartX;
   if(Math.abs(dx)>50) { changeFloor(dx<0?1:-1); }
 },{passive:true});
+
+// ============================================================
+// WHITE BACKGROUND REMOVAL (canvas)
+// ============================================================
+const imgCache = {}; // src -> ImageData with transparency
+
+function removeWhiteBg(canvas) {
+  const src = canvas.dataset.src;
+  if (!src) return;
+
+  const w = canvas.width, h = canvas.height;
+  const ctx = canvas.getContext('2d');
+
+  // If already processed, draw from cache
+  if (imgCache[src]) {
+    ctx.putImageData(imgCache[src], 0, 0);
+    return;
+  }
+
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = function() {
+    ctx.clearRect(0, 0, w, h);
+    ctx.drawImage(img, 0, 0, w, h);
+    const imageData = ctx.getImageData(0, 0, w, h);
+    const d = imageData.data;
+    for (let i = 0; i < d.length; i += 4) {
+      const r = d[i], g = d[i+1], b = d[i+2];
+      // Threshold: if pixel is near-white, make transparent
+      if (r > 220 && g > 220 && b > 220) {
+        d[i+3] = 0; // fully transparent
+      } else if (r > 200 && g > 200 && b > 200) {
+        // Semi-transparent for near-white edge pixels (anti-aliasing)
+        const brightness = (r + g + b) / 3;
+        d[i+3] = Math.floor(255 * (1 - (brightness - 200) / 55));
+      }
+    }
+    ctx.putImageData(imageData, 0, 0);
+    imgCache[src] = imageData;
+  };
+  img.src = src;
+}
+
+// Process all char-img canvases after room render
+function processCharImages() {
+  document.querySelectorAll('canvas.char-img').forEach(removeWhiteBg);
+}
+
+// Patch renderRoom to call processCharImages after rendering
+const _origRenderRoom = renderRoom;
+renderRoom = function() {
+  _origRenderRoom();
+  processCharImages();
+};
 
 // ============================================================
 // INIT
