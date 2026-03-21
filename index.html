@@ -524,6 +524,11 @@ const donImg = new Image();
 donImg.src = 'images/don.png';
 const saisokuImg = new Image();
 saisokuImg.src = 'images/saisoku.png';
+const saisokuSprites = {};
+['idle','walk','jump','attack_n','attack_s','special','smash','damage','guard','knockout'].forEach(k => {
+  saisokuSprites[k] = new Image();
+  saisokuSprites[k].src = 'images/saisoku/saisoku_' + k + '.png';
+});
 const meteoImg = new Image();
 meteoImg.src = 'images/meteo.png';
 const longImg = new Image();
@@ -2677,6 +2682,23 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
     }
     const donSpr = donSprites[donKey];
     if (donSpr && donSpr.complete && donSpr.naturalWidth > 0) img = donSpr;
+  }
+  // Saisoku sprite animation: select sprite based on state
+  if (charIndex === 2 && animData) {
+    let sKey = 'idle';
+    if (!animData.alive) sKey = 'knockout';
+    else if (animData.guarding) sKey = 'guard';
+    else if (animData.hitstun > 0) sKey = 'damage';
+    else if (animData.attacking && animData.attackType) {
+      const at = animData.attackType;
+      if (at === 'special' || at === 'cmdSpecial') sKey = 'special';
+      else if (at === 'upSmash' || at === 'sideSmash' || at === 'downSmash') sKey = 'smash';
+      else if (at === 'strong') sKey = 'attack_s';
+      else sKey = 'attack_n';
+    } else if (animData.animState === 'walk') sKey = 'walk';
+    else if (animData.animState === 'jump' || animData.animState === 'fall') sKey = 'jump';
+    const spr = saisokuSprites[sKey];
+    if (spr && spr.complete && spr.naturalWidth > 0) img = spr;
   }
   if (img && img.complete && img.naturalWidth > 0) {
     const imgW = imgSizes[charIndex][0] * s;
