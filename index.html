@@ -5198,7 +5198,7 @@ let battleStarted = false;
 let gameOver = false;
 let winner = -1;
 let gameSetTimer = 0;     // GAME SET演出タイマー
-let gameSetPhase = 0;     // 0=inactive, 1=slowmo+flash, 2=GAME SET text, 3=winner display
+let gameSetPhase = 0;     // 0=inactive, 1=slowmo+flash, 2=GAME SET text, 3=GAME SET fadeout, 4=winner display
 
 // デバッグモード（F3キーで切り替え）
 let debugHitboxes = false;
@@ -10639,9 +10639,19 @@ function drawBattle(dt) {
     const wCh = characters[wP.charIdx];
     const winLabel = winner === 0 ? '1P' : (gameMode === 'cpu' ? 'CPU' : '2P');
 
+    // カメラを画面中央にリセット
+    cam.x = 480; cam.y = 320; cam.zoom = 1;
+    cam.targetX = 480; cam.targetY = 320; cam.targetZoom = 1;
+    screenShake.intensity = 0; screenShake.duration = 0; screenShake.x = 0; screenShake.y = 0;
+
     // フェーズ管理
-    if (gameSetPhase === 1 && gameSetTimer > 30) gameSetPhase = 2; // → GAME SET
-    if (gameSetPhase === 2 && gameSetTimer > 120) gameSetPhase = 3; // → 勝者表示
+    // Phase 1: スローモーション + 白フラッシュ (0-30)
+    // Phase 2: GAME SET!! テキスト表示 (30-90 = 1秒間)
+    // Phase 3: GAME SET!! フェードアウト (90-110)
+    // Phase 4: 勝者表示 (110-)
+    if (gameSetPhase === 1 && gameSetTimer > 30) gameSetPhase = 2;
+    if (gameSetPhase === 2 && gameSetTimer > 90) gameSetPhase = 3;
+    if (gameSetPhase === 3 && gameSetTimer > 110) gameSetPhase = 4;
 
     // Phase 1: スローモーション + 白フラッシュ
     if (gameSetPhase === 1) {
@@ -10650,14 +10660,14 @@ function drawBattle(dt) {
       ctx.fillRect(0, 0, 960, 640);
     }
 
-    // Phase 2: GAME SET!! テキスト
-    if (gameSetPhase >= 2) {
-      ctx.fillStyle = `rgba(0, 0, 0, ${Math.min(0.7, (gameSetTimer - 30) / 30)})`;
+    // Phase 2: GAME SET!! テキスト（1秒間表示）
+    if (gameSetPhase === 2) {
+      ctx.fillStyle = `rgba(0, 0, 0, ${Math.min(0.7, (gameSetTimer - 30) / 20)})`;
       ctx.fillRect(0, 0, 960, 640);
       const gsT = Math.min(1, (gameSetTimer - 30) / 20);
       const gsScale = 1 + (1 - gsT) * 2; // 3x → 1x に縮小
       ctx.save();
-      ctx.translate(480, 250);
+      ctx.translate(480, 300);
       ctx.scale(gsScale, gsScale);
       ctx.font = 'bold 60px sans-serif'; ctx.textAlign = 'center';
       ctx.strokeStyle = '#FFF'; ctx.lineWidth = 6;
@@ -10669,10 +10679,31 @@ function drawBattle(dt) {
       ctx.restore();
     }
 
-    // Phase 3: 勝者表示
-    if (gameSetPhase >= 3) {
-      const p3T = Math.min(1, (gameSetTimer - 120) / 30);
-      ctx.globalAlpha = p3T;
+    // Phase 3: GAME SET!! フェードアウト
+    if (gameSetPhase === 3) {
+      const fadeT = Math.max(0, 1 - (gameSetTimer - 90) / 20);
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+      ctx.fillRect(0, 0, 960, 640);
+      ctx.globalAlpha = fadeT;
+      ctx.save();
+      ctx.translate(480, 300);
+      ctx.font = 'bold 60px sans-serif'; ctx.textAlign = 'center';
+      ctx.strokeStyle = '#FFF'; ctx.lineWidth = 6;
+      ctx.strokeText('GAME SET!!', 0, 0);
+      ctx.fillStyle = '#FFD700';
+      ctx.shadowColor = '#FFD700'; ctx.shadowBlur = 15;
+      ctx.fillText('GAME SET!!', 0, 0);
+      ctx.shadowBlur = 0;
+      ctx.restore();
+      ctx.globalAlpha = 1;
+    }
+
+    // Phase 4: 勝者表示
+    if (gameSetPhase >= 4) {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+      ctx.fillRect(0, 0, 960, 640);
+      const p4T = Math.min(1, (gameSetTimer - 110) / 30);
+      ctx.globalAlpha = p4T;
       // スポットライト
       const spot = ctx.createRadialGradient(480, 320, 0, 480, 320, 250);
       spot.addColorStop(0, 'rgba(255,215,0,0.15)');
