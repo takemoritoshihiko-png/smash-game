@@ -70,6 +70,13 @@ const stages = [
     bgSrc: 'images/bg2.png',
     bgmSrc: 'sounds/bgm2.mp3',
   },
+  {
+    id: 'mahoujin',
+    name: '魔法陣の間',
+    desc: '魔法が渦巻く幻想の舞台',
+    bgSrc: 'images/bg3.png',
+    bgmSrc: 'sounds/bgm3.mp3',
+  },
 ];
 let selectedStage = 0;
 let stageSelectTime = 0;
@@ -563,6 +570,8 @@ const bgImg = new Image();
 bgImg.src = 'images/bg.png';
 const bg2Img = new Image();
 bg2Img.src = 'images/bg2.png';
+const bg3Img = new Image();
+bg3Img.src = 'images/bg3.png';
 
 // --- Particles ---
 function spawnTitleParticle() {
@@ -5179,9 +5188,9 @@ function drawStageSelect(dt) {
   ctx.shadowBlur = 0;
 
   // Stage cards
-  const cardW = 340;
-  const cardH = 380;
-  const gap = 40;
+  const cardW = stages.length <= 2 ? 340 : 270;
+  const cardH = stages.length <= 2 ? 380 : 380;
+  const gap = stages.length <= 2 ? 40 : 24;
   const totalW = stages.length * cardW + (stages.length - 1) * gap;
   const startX = (960 - totalW) / 2;
 
@@ -5236,6 +5245,26 @@ function drawStageSelect(dt) {
       if (bg2Img.complete && bg2Img.naturalWidth > 0) {
         ctx.drawImage(bg2Img, previewX, previewY, previewW, previewH);
       }
+    } else if (s.id === 'mahoujin') {
+      if (bg3Img.complete && bg3Img.naturalWidth > 0) {
+        ctx.drawImage(bg3Img, previewX, previewY, previewW, previewH);
+      } else {
+        // 代替: 紫グラデーション + 魔法陣
+        const mgBg = ctx.createLinearGradient(previewX, previewY, previewX, previewY + previewH);
+        mgBg.addColorStop(0, '#1a0030');
+        mgBg.addColorStop(1, '#0d001a');
+        ctx.fillStyle = mgBg;
+        ctx.fillRect(previewX, previewY, previewW, previewH);
+        // 魔法陣の円
+        ctx.strokeStyle = 'rgba(255, 215, 100, 0.15)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(previewX + previewW / 2, previewY + previewH / 2, 50, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(previewX + previewW / 2, previewY + previewH / 2, 35, 0, Math.PI * 2);
+        ctx.stroke();
+      }
     }
 
     // Draw mini platform preview
@@ -5252,6 +5281,21 @@ function drawStageSelect(dt) {
       ctx.fillRect(platLX, platY, platRX - platLX, 8);
       ctx.fillStyle = '#4a4a4a';
       ctx.fillRect(platLX, platY, platRX - platLX, 2);
+    } else if (s.id === 'mahoujin') {
+      // メイン足場
+      ctx.fillStyle = '#2a1a3a';
+      ctx.fillRect(platLX, platY, platRX - platLX, 6);
+      ctx.strokeStyle = 'rgba(170, 120, 255, 0.5)';
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(platLX, platY); ctx.lineTo(platRX, platY); ctx.stroke();
+      // 中段左右
+      const mw = (platRX - platLX) / 3;
+      ctx.fillStyle = '#3a2050';
+      ctx.fillRect(platLX + 10, platY - 28, mw, 4);
+      ctx.fillRect(platRX - mw - 10, platY - 28, mw, 4);
+      // 上段中央
+      const tw = (platRX - platLX) / 4;
+      ctx.fillRect(previewX + previewW / 2 - tw / 2, platY - 52, tw, 4);
     }
 
     ctx.restore(); // end clip
@@ -5644,13 +5688,17 @@ bgmAudio.volume = 0.4;
 const bgm2Audio = new Audio('sounds/bgm2.mp3');
 bgm2Audio.loop = true;
 bgm2Audio.volume = 0.4;
+const bgm3Audio = new Audio('sounds/bgm3.mp3');
+bgm3Audio.loop = true;
+bgm3Audio.volume = 0.4;
 let bgmPlaying = false;
 let currentBgmAudio = bgmAudio;
+const bgmMap = { 'sounds/bgm.mp3': bgmAudio, 'sounds/bgm2.mp3': bgm2Audio, 'sounds/bgm3.mp3': bgm3Audio };
 
 function startBGM() {
   if (bgmPlaying) return;
   const stage = stages[selectedStage];
-  currentBgmAudio = stage.bgmSrc === 'sounds/bgm2.mp3' ? bgm2Audio : bgmAudio;
+  currentBgmAudio = bgmMap[stage.bgmSrc] || bgmAudio;
   currentBgmAudio.currentTime = 0;
   currentBgmAudio.play().catch(() => {});
   bgmPlaying = true;
@@ -6998,6 +7046,17 @@ function createPlayer(id, charIdx, startX) {
 }
 
 function initBattle() {
+  // Setup platforms based on selected stage
+  platforms.length = 0;
+  if (stages[selectedStage].id === 'mahoujin') {
+    const sw = STAGE_RIGHT - STAGE_LEFT;
+    const midW = Math.floor(sw / 3);
+    const topW = Math.floor(sw / 4);
+    platforms.push({ x: STAGE_LEFT + 30, y: STAGE_GROUND_Y - 120, w: midW });          // 中段左
+    platforms.push({ x: STAGE_RIGHT - midW - 30, y: STAGE_GROUND_Y - 120, w: midW }); // 中段右
+    platforms.push({ x: 480 - topW / 2, y: STAGE_GROUND_Y - 230, w: topW });           // 上段中央
+  }
+
   battleTime = 0;
   battleCountdown = 180;
   battleStarted = false;
@@ -9959,7 +10018,49 @@ function drawBattle(dt) {
 
   // ===== 背景画像 =====
   const curStage = stages[selectedStage];
-  if (curStage.id === 'seijaku') {
+  if (curStage.id === 'mahoujin') {
+    if (bg3Img.complete && bg3Img.naturalWidth > 0) {
+      ctx.drawImage(bg3Img, 0, 0, 960, 640);
+    } else {
+      // 代替背景: 深い紫グラデーション + 魔法陣 + 光の粒子
+      const magicBg = ctx.createLinearGradient(0, 0, 0, 640);
+      magicBg.addColorStop(0, '#1a0030');
+      magicBg.addColorStop(1, '#0d001a');
+      ctx.fillStyle = magicBg;
+      ctx.fillRect(0, 0, 960, 640);
+      // 魔法陣の円
+      ctx.save();
+      ctx.translate(480, 300);
+      ctx.rotate(battleTime * 0.005);
+      ctx.strokeStyle = 'rgba(255, 215, 100, 0.12)';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(0, 0, 180, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(0, 0, 140, 0, Math.PI * 2); ctx.stroke();
+      // 六芒星
+      ctx.strokeStyle = 'rgba(255, 215, 100, 0.08)';
+      ctx.lineWidth = 1.5;
+      for (let s = 0; s < 2; s++) {
+        ctx.beginPath();
+        for (let j = 0; j < 3; j++) {
+          const a = (j * 2 + s) * Math.PI / 3 - Math.PI / 2;
+          const px = Math.cos(a) * 160, py = Math.sin(a) * 160;
+          j === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+        }
+        ctx.closePath(); ctx.stroke();
+      }
+      ctx.restore();
+      // 光の粒子
+      for (let i = 0; i < 20; i++) {
+        const seed = i * 137.5;
+        const px = 480 + Math.sin(seed + battleTime * 0.01) * (100 + i * 15);
+        const py = 300 + Math.cos(seed * 0.7 + battleTime * 0.008) * (80 + i * 10);
+        const alpha = 0.15 + Math.sin(battleTime * 0.03 + seed) * 0.1;
+        const sz = 1 + Math.sin(seed) * 0.5;
+        ctx.fillStyle = `rgba(200, 180, 255, ${Math.max(0, alpha)})`;
+        ctx.beginPath(); ctx.arc(px, py, sz, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+  } else if (curStage.id === 'seijaku') {
     ctx.drawImage(bg2Img, 0, 0, 960, 640);
   } else {
     if (bgImg.complete && bgImg.naturalWidth > 0) {
@@ -9981,8 +10082,92 @@ function drawBattle(dt) {
   const stageH = 18;
   const stageY = STAGE_GROUND_Y;
 
-  if (curStage.id === 'seijaku') {
-    // 静寂の間: 石畳風プラットフォーム
+  if (curStage.id === 'mahoujin') {
+    // 魔法陣の間: メインプラットフォーム（紫の魔法石床）
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.beginPath();
+    ctx.ellipse(STAGE_LEFT + stageW / 2, stageY + 28, stageW * 0.42, 8, 0, 0, Math.PI * 2);
+    ctx.fill();
+    const magicPlatGrad = ctx.createLinearGradient(0, stageY - 4, 0, stageY + stageH + 20);
+    magicPlatGrad.addColorStop(0, '#2a1a3a');
+    magicPlatGrad.addColorStop(0.4, '#1a0a2a');
+    magicPlatGrad.addColorStop(1, '#0d0518');
+    ctx.fillStyle = magicPlatGrad;
+    ctx.beginPath();
+    ctx.moveTo(STAGE_LEFT, stageY);
+    ctx.lineTo(STAGE_RIGHT, stageY);
+    ctx.lineTo(STAGE_RIGHT + 8, stageY + stageH + 20);
+    ctx.lineTo(STAGE_LEFT - 8, stageY + stageH + 20);
+    ctx.closePath();
+    ctx.fill();
+    // 魔法陣ライン（上面）
+    ctx.shadowColor = '#AA77FF';
+    ctx.shadowBlur = 6;
+    ctx.strokeStyle = 'rgba(170, 120, 255, 0.5)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(STAGE_LEFT, stageY - 1); ctx.lineTo(STAGE_RIGHT, stageY - 1); ctx.stroke();
+    ctx.shadowBlur = 0;
+    // 魔法の紋様ライン
+    ctx.strokeStyle = 'rgba(200, 170, 255, 0.2)';
+    ctx.lineWidth = 1;
+    for (let lx = STAGE_LEFT + 60; lx < STAGE_RIGHT; lx += 60) {
+      ctx.beginPath(); ctx.moveTo(lx, stageY - 3); ctx.lineTo(lx, stageY + 2); ctx.stroke();
+    }
+    // 薄い光のエフェクト（メイン足場上）
+    const mainGlow = ctx.createLinearGradient(STAGE_LEFT, stageY - 30, STAGE_LEFT, stageY);
+    mainGlow.addColorStop(0, 'rgba(170, 120, 255, 0)');
+    mainGlow.addColorStop(1, 'rgba(170, 120, 255, 0.06)');
+    ctx.fillStyle = mainGlow;
+    ctx.fillRect(STAGE_LEFT, stageY - 30, stageW, 30);
+
+    // 中段・上段プラットフォーム描画
+    for (const plat of platforms) {
+      // 浮遊の揺れ
+      const floatOfs = Math.sin(battleTime * 0.02 + plat.x * 0.01) * 2;
+      const py = plat.y + floatOfs;
+      // 影
+      ctx.fillStyle = 'rgba(100, 60, 180, 0.15)';
+      ctx.beginPath();
+      ctx.ellipse(plat.x + plat.w / 2, py + 15, plat.w * 0.35, 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // 石板本体
+      const subGrad = ctx.createLinearGradient(0, py - 3, 0, py + 12);
+      subGrad.addColorStop(0, '#3a2050');
+      subGrad.addColorStop(0.5, '#2a1040');
+      subGrad.addColorStop(1, '#1a0828');
+      ctx.fillStyle = subGrad;
+      ctx.beginPath();
+      ctx.moveTo(plat.x, py);
+      ctx.lineTo(plat.x + plat.w, py);
+      ctx.lineTo(plat.x + plat.w + 4, py + 12);
+      ctx.lineTo(plat.x - 4, py + 12);
+      ctx.closePath();
+      ctx.fill();
+      // 金色の縁ライン
+      ctx.shadowColor = '#DDAA44';
+      ctx.shadowBlur = 5;
+      ctx.strokeStyle = 'rgba(220, 170, 60, 0.6)';
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(plat.x, py); ctx.lineTo(plat.x + plat.w, py); ctx.stroke();
+      ctx.shadowBlur = 0;
+      // 薄い光のエフェクト（足場上）
+      const subGlow = ctx.createLinearGradient(plat.x, py - 20, plat.x, py);
+      subGlow.addColorStop(0, 'rgba(170, 120, 255, 0)');
+      subGlow.addColorStop(1, 'rgba(170, 120, 255, 0.05)');
+      ctx.fillStyle = subGlow;
+      ctx.fillRect(plat.x, py - 20, plat.w, 20);
+      // 端からのオーラ
+      for (let side = 0; side < 2; side++) {
+        const ex = side === 0 ? plat.x : plat.x + plat.w;
+        const auraAlpha = 0.15 + Math.sin(battleTime * 0.04 + side * 3 + plat.x * 0.02) * 0.08;
+        ctx.fillStyle = `rgba(170, 120, 255, ${auraAlpha})`;
+        ctx.beginPath();
+        ctx.arc(ex, py - 3, 6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  } else if (curStage.id === 'seijaku') {
+    // 夜のパリ: 石畳風プラットフォーム
     // Platform shadow
     ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
     ctx.beginPath();
