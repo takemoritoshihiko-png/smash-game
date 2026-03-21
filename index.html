@@ -65,8 +65,8 @@ const stages = [
   },
   {
     id: 'seijaku',
-    name: '静寂の間',
-    desc: '静けさの中で戦う',
+    name: '夜のパリ',
+    desc: '静かな夜の石畳で戦う',
     bgSrc: 'images/bg2.png',
     bgmSrc: 'sounds/bgm2.mp3',
   },
@@ -5235,12 +5235,6 @@ function drawStageSelect(dt) {
     } else if (s.id === 'seijaku') {
       if (bg2Img.complete && bg2Img.naturalWidth > 0) {
         ctx.drawImage(bg2Img, previewX, previewY, previewW, previewH);
-      } else {
-        const darkGrad = ctx.createLinearGradient(previewX, previewY, previewX, previewY + previewH);
-        darkGrad.addColorStop(0, '#0a0a1a');
-        darkGrad.addColorStop(1, '#1a1a3a');
-        ctx.fillStyle = darkGrad;
-        ctx.fillRect(previewX, previewY, previewW, previewH);
       }
     }
 
@@ -9966,15 +9960,7 @@ function drawBattle(dt) {
   // ===== 背景画像 =====
   const curStage = stages[selectedStage];
   if (curStage.id === 'seijaku') {
-    if (bg2Img.complete && bg2Img.naturalWidth > 0) {
-      ctx.drawImage(bg2Img, 0, 0, 960, 640);
-    } else {
-      const seiBg = ctx.createLinearGradient(0, 0, 0, 640);
-      seiBg.addColorStop(0, '#0a0a1a');
-      seiBg.addColorStop(1, '#1a1a3a');
-      ctx.fillStyle = seiBg;
-      ctx.fillRect(0, 0, 960, 640);
-    }
+    ctx.drawImage(bg2Img, 0, 0, 960, 640);
   } else {
     if (bgImg.complete && bgImg.naturalWidth > 0) {
       ctx.drawImage(bgImg, 0, 0, 960, 640);
