@@ -547,6 +547,12 @@ Object.keys(longSpriteMap).forEach(k => {
 });
 const uruoImg = new Image();
 uruoImg.src = 'images/uruo.png';
+const uruoSprites = {};
+const uruoSpriteMap = { idle:'01_idle', walk:'02_walk', jump:'03_jump', attack_n:'04_attack_side', attack_side:'06_beam', attack_up:'07_spin', attack_down:'05_attack_down', attack_air:'03_jump', special:'09_special', damage:'08_damage', win:'11_win', down:'12_down', projectile:'10_projectile' };
+Object.keys(uruoSpriteMap).forEach(k => {
+  uruoSprites[k] = new Image();
+  uruoSprites[k].src = 'images/uruo/' + uruoSpriteMap[k] + '.png';
+});
 const kumataroImg = new Image();
 kumataroImg.src = 'images/kumataro.png';
 const bulletImg = new Image();
@@ -2753,6 +2759,27 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
     else if (animData.animState === 'jump' || animData.animState === 'fall') lKey = 'jump';
     const lSpr = longSprites[lKey];
     if (lSpr && lSpr.complete && lSpr.naturalWidth > 0) img = lSpr;
+  }
+  // Uruo sprite animation: select sprite based on state
+  if (charIndex === 5 && animData) {
+    let uKey = 'idle';
+    if (!animData.alive) uKey = 'down';
+    else if (animData.dSkillActive && animData.dSkillTimer > 0) uKey = 'special';
+    else if (animData.guarding) uKey = 'idle';
+    else if (animData.hitstun > 0) uKey = 'damage';
+    else if (animData.attacking && animData.attackType) {
+      const at = animData.attackType;
+      if (at === 'special' || at === 'cmdSpecial') uKey = 'special';
+      else if (at === 'sideSmash') uKey = 'attack_side';
+      else if (at === 'upSmash') uKey = 'attack_up';
+      else if (at === 'downSmash') uKey = 'attack_down';
+      else if (at === 'aerial' || at === 'downair') uKey = 'attack_air';
+      else if (at === 'strong') uKey = 'attack_side';
+      else uKey = 'attack_n';
+    } else if (animData.animState === 'walk') uKey = 'walk';
+    else if (animData.animState === 'jump' || animData.animState === 'fall') uKey = 'jump';
+    const uSpr = uruoSprites[uKey];
+    if (uSpr && uSpr.complete && uSpr.naturalWidth > 0) img = uSpr;
   }
   if (img && img.complete && img.naturalWidth > 0) {
     const imgW = imgSizes[charIndex][0] * s;
