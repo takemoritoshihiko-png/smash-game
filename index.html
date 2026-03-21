@@ -514,6 +514,12 @@ const zenSprites = {};
   zenSprites[k] = new Image();
   zenSprites[k].src = 'images/zen/zen_' + k + '.png';
 });
+// Don sprite animation images
+const donSprites = {};
+['idle','walk','jump','attack_n','attack_s','attack_s2','special','smash','damage','guard','knockout','rage'].forEach(k => {
+  donSprites[k] = new Image();
+  donSprites[k].src = 'images/don/don_' + k + '.png';
+});
 const donImg = new Image();
 donImg.src = 'images/don.png';
 const saisokuImg = new Image();
@@ -2646,6 +2652,31 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
     }
     const zenSpr = zenSprites[zenKey];
     if (zenSpr && zenSpr.complete && zenSpr.naturalWidth > 0) img = zenSpr;
+  }
+  // Don sprite animation: select sprite based on state
+  if (charIndex === 1 && animData) {
+    let donKey = 'idle';
+    if (!animData.alive) {
+      donKey = 'knockout';
+    } else if (animData.dSkillActive && animData.dSkillTimer > 0) {
+      donKey = 'rage';
+    } else if (animData.guarding) {
+      donKey = 'guard';
+    } else if (animData.hitstun > 0) {
+      donKey = 'damage';
+    } else if (animData.attacking && animData.attackType) {
+      const at = animData.attackType;
+      if (at === 'special' || at === 'cmdSpecial') donKey = 'special';
+      else if (at === 'upSmash' || at === 'sideSmash' || at === 'downSmash') donKey = 'smash';
+      else if (at === 'strong') donKey = 'attack_s';
+      else donKey = 'attack_n';
+    } else if (animData.animState === 'walk') {
+      donKey = 'walk';
+    } else if (animData.animState === 'jump' || animData.animState === 'fall') {
+      donKey = 'jump';
+    }
+    const donSpr = donSprites[donKey];
+    if (donSpr && donSpr.complete && donSpr.naturalWidth > 0) img = donSpr;
   }
   if (img && img.complete && img.naturalWidth > 0) {
     const imgW = imgSizes[charIndex][0] * s;

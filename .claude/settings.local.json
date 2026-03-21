@@ -55,7 +55,10 @@
       "Bash(unzip -o \"/Users/yutotakemori/Downloads/zen_sprites_v2.zip\" -d /tmp/zen_v2/)",
       "Read(//tmp/**)",
       "Bash(mv /tmp/zen_v2/mnt/user-data/outputs/zen_sprites_v2/*.png /Users/yutotakemori/new-game/smash-game/images/zen/)",
-      "Bash(rm -rf /tmp/zen_v2)"
+      "Bash(rm -rf /tmp/zen_v2)",
+      "Bash(unzip -o \"/Users/yutotakemori/Downloads/don_sprites.zip\" -d /tmp/don_extract/)",
+      "Bash(mv /tmp/don_extract/mnt/user-data/outputs/don_sprites/*.png /Users/yutotakemori/new-game/smash-game/images/don/)",
+      "Bash(rm -rf /tmp/don_extract)"
     ]
   }
 }
