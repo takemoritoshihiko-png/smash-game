@@ -18,994 +18,660 @@
     --text: #e2e8f0;
     --text-dim: #64748b;
     --red: #ff4757;
+    --pixel: 'DotGothic16', monospace;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
   body {
     background: var(--bg);
     color: var(--text);
     font-family: 'M PLUS 1p', sans-serif;
     min-height: 100vh;
+    min-height: 100dvh;
     overflow-x: hidden;
     position: relative;
-  }
-
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-    z-index: 0;
+    user-select: none;
+    -webkit-user-select: none;
   }
 
   .app {
     position: relative;
-    z-index: 1;
     max-width: 480px;
     margin: 0 auto;
     min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
     flex-direction: column;
   }
 
-  /* HEADER */
+  /* ── HEADER ── */
   .header {
-    background: linear-gradient(135deg, #0d1b2e 0%, #1a2d4a 100%);
-    border-bottom: 1px solid var(--border);
-    padding: 12px 16px;
-    position: sticky;
-    top: 0;
+    background: linear-gradient(180deg, #0d1b2e, #111827);
+    border-bottom: 2px solid var(--border);
+    padding: 10px 16px 8px;
+    position: relative;
     z-index: 100;
   }
-
+  .header-top { display: flex; justify-content: space-between; align-items: center; }
   .company-name {
-    font-size: 10px;
-    color: var(--accent);
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    font-family: 'DotGothic16', monospace;
-    margin-bottom: 2px;
+    font-size: 10px; color: var(--accent); letter-spacing: 3px;
+    font-family: var(--pixel); margin-bottom: 2px;
   }
-
-  .money-display {
-    display: flex;
-    align-items: baseline;
-    gap: 6px;
-  }
-
-  .money-icon { font-size: 18px; }
-
+  .money-row { display: flex; align-items: baseline; gap: 6px; }
   .money-amount {
-    font-size: 32px;
-    font-weight: 900;
-    color: var(--gold);
-    font-family: 'DotGothic16', monospace;
-    line-height: 1;
-    transition: transform 0.1s;
+    font-size: 28px; font-weight: 900; color: var(--gold);
+    font-family: var(--pixel); line-height: 1; transition: transform .1s;
   }
-
-  .money-amount.bump {
-    transform: scale(1.05);
-    color: #ffe566;
-  }
-
-  .money-unit {
-    font-size: 13px;
-    color: var(--text-dim);
-  }
-
+  .money-amount.bump { transform: scale(1.06); color: #ffe566; }
+  .money-unit { font-size: 12px; color: var(--text-dim); }
   .income-rate {
-    font-size: 12px;
-    color: var(--accent3);
-    font-family: 'DotGothic16', monospace;
-    margin-top: 2px;
+    font-size: 11px; color: var(--accent3);
+    font-family: var(--pixel); margin-top: 1px;
   }
-
-  /* BUILDING VIEW - HTML based */
-  .building-section {
-    padding: 8px 16px;
+  .live-dot {
+    width: 5px; height: 5px; background: var(--accent3);
+    border-radius: 50%; display: inline-block; margin-right: 3px;
+    animation: pulse 2s infinite;
   }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
 
-  .building-container {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    overflow: hidden;
-    filter: drop-shadow(0 0 15px rgba(0, 212, 255, 0.15));
+  .sound-toggle {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 3px 7px; color: var(--text-dim);
+    font-size: 15px; cursor: pointer; -webkit-tap-highlight-color: transparent;
   }
+  .sound-toggle.on { color: var(--accent); border-color: var(--accent); }
 
-  .building-roof {
-    background: linear-gradient(135deg, #1a3a5c, #0d2040);
-    padding: 6px 12px;
-    text-align: center;
-    font-size: 10px;
-    color: var(--accent);
-    font-family: 'DotGothic16', monospace;
-    letter-spacing: 2px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .building-floors {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .building-floor {
-    min-height: 56px;
-    border-bottom: 1px solid rgba(30, 58, 95, 0.4);
-    padding: 6px 10px;
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    background: #0a1218;
-    transition: background 0.5s, border-color 0.3s;
-    cursor: pointer;
+  /* ── ROOM VIEW ── */
+  .room-section {
     position: relative;
-    -webkit-tap-highlight-color: transparent;
+    flex-shrink: 0;
   }
 
-  .building-floor:last-child { border-bottom: none; }
-
-  .building-floor.lit {
-    background: #0d1a2a;
+  .floor-nav {
+    display: flex; align-items: center; justify-content: center;
+    gap: 12px; padding: 8px 16px 4px;
+    font-family: var(--pixel);
   }
-
-  .building-floor.selected {
-    background: #132840;
-    border-color: var(--accent);
-    box-shadow: inset 0 0 20px rgba(0, 212, 255, 0.08);
+  .floor-nav-btn {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 6px; width: 36px; height: 36px; font-size: 18px;
+    color: var(--text); cursor: pointer; display: flex;
+    align-items: center; justify-content: center;
+    -webkit-tap-highlight-color: transparent; transition: all .15s;
   }
-
+  .floor-nav-btn:active { transform: scale(.9); }
+  .floor-nav-btn:disabled { opacity: .25; pointer-events: none; }
   .floor-label {
-    font-size: 9px;
-    color: #1e3a5f;
-    font-family: 'DotGothic16', monospace;
-    min-width: 50px;
-    flex-shrink: 0;
-    padding-top: 4px;
-    transition: color 0.3s;
+    font-size: 18px; font-weight: 900; color: var(--accent);
+    min-width: 60px; text-align: center;
+  }
+  .floor-status {
+    font-size: 10px; color: var(--text-dim); text-align: center;
+    font-family: var(--pixel); margin-bottom: 2px;
   }
 
-  .building-floor.lit .floor-label {
-    color: #4a7a9b;
-  }
-
-  .floor-employees {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2px;
-    flex: 1;
-    min-height: 28px;
-    align-items: center;
-  }
-
-  .floor-emp {
-    font-size: 20px;
-    cursor: pointer;
-    transition: transform 0.15s;
-    position: relative;
-    line-height: 1;
-    padding: 2px;
-    border-radius: 4px;
-  }
-
-  .floor-emp:hover {
-    transform: scale(1.2);
-  }
-
-  .floor-emp.selected-emp {
-    background: rgba(0, 212, 255, 0.2);
-    outline: 1px solid var(--accent);
-    border-radius: 4px;
-  }
-
-  .floor-count {
-    font-size: 9px;
-    color: var(--text-dim);
-    font-family: 'DotGothic16', monospace;
-    flex-shrink: 0;
-    padding-top: 4px;
-  }
-
-  .floor-full-badge {
-    font-size: 8px;
-    background: var(--accent2);
-    color: #fff;
-    padding: 1px 4px;
-    border-radius: 4px;
-    font-weight: 700;
-  }
-
-  .floor-empty-hint {
-    font-size: 10px;
-    color: #1e3a5f;
-    font-family: 'DotGothic16', monospace;
-  }
-
-  /* FLOOR UNLOCK ANIMATION */
-  @keyframes floorUnlock {
-    0% { max-height: 0; opacity: 0; padding: 0 10px; }
-    50% { max-height: 60px; opacity: 0.5; }
-    100% { max-height: 80px; opacity: 1; padding: 6px 10px; }
-  }
-
-  .building-floor.new-floor {
-    animation: floorUnlock 0.8s ease forwards;
+  /* The room canvas */
+  .room-wrapper {
+    margin: 0 12px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
     overflow: hidden;
-    border-color: var(--accent);
-    box-shadow: inset 0 0 30px rgba(0, 212, 255, 0.15);
+    position: relative;
+    height: 250px;
+    background: #080c14;
+    image-rendering: pixelated;
   }
 
-  /* WAITING LIST */
-  .waiting-section {
-    padding: 0 16px 8px;
+  /* Pixel room background layers */
+  .room-bg {
+    position: absolute; inset: 0;
+    transition: opacity .5s;
   }
 
-  .waiting-bar {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 8px 10px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    overflow-x: auto;
-    min-height: 42px;
+  /* Dark empty room */
+  .room-bg.dark {
+    background:
+      linear-gradient(180deg, #0a0e16 0%, #0d1220 60%, #10141e 100%);
   }
 
-  .waiting-label {
-    font-size: 9px;
-    color: var(--text-dim);
-    font-family: 'DotGothic16', monospace;
-    flex-shrink: 0;
-    letter-spacing: 1px;
+  /* Lit room */
+  .room-bg.lit {
+    background:
+      linear-gradient(180deg, #1a2844 0%, #1e3050 40%, #243a58 100%);
   }
 
-  .waiting-emp {
-    font-size: 22px;
-    cursor: pointer;
-    transition: transform 0.15s;
-    padding: 2px;
-    border-radius: 4px;
-    flex-shrink: 0;
+  /* Floor */
+  .room-floor {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 40px;
+    transition: background .5s;
+  }
+  .room-floor.dark { background: linear-gradient(180deg, #12161e, #0e1118); }
+  .room-floor.lit {
+    background: linear-gradient(180deg, #2a1f14, #1e1610);
+    box-shadow: inset 0 1px 0 #3d2e1f;
+  }
+
+  /* Pixel floor tiles */
+  .room-floor.lit::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(
+      90deg,
+      transparent 0px, transparent 39px,
+      rgba(0,0,0,.15) 39px, rgba(0,0,0,.15) 40px
+    );
+  }
+
+  /* Pixel wall */
+  .room-wall-line {
+    position: absolute; top: 0; left: 0; right: 0; height: 4px;
+    transition: background .5s;
+  }
+  .room-wall-line.dark { background: #141a26; }
+  .room-wall-line.lit { background: #2a3a5a; }
+
+  /* Window (pixel) */
+  .room-window {
+    position: absolute; width: 44px; height: 36px;
+    border: 3px solid #1a2840; background: #060a14;
+    top: 30px; transition: all .5s;
+  }
+  .room-window.lit {
+    border-color: #3a5070;
+    background: linear-gradient(180deg, #1a3060 0%, #0d1a36 100%);
+    box-shadow: 0 0 12px rgba(0,180,255,.15);
+  }
+  .room-window::after {
+    content: ''; position: absolute; inset: 0;
+    background:
+      linear-gradient(90deg, transparent 48%, rgba(255,255,255,.06) 48%, rgba(255,255,255,.06) 52%, transparent 52%),
+      linear-gradient(180deg, transparent 48%, rgba(255,255,255,.06) 48%, rgba(255,255,255,.06) 52%, transparent 52%);
+  }
+  .room-window.w1 { left: 40px; }
+  .room-window.w2 { right: 40px; }
+
+  /* Furniture (pixel decorations) */
+  .room-furniture {
+    position: absolute;
+    image-rendering: pixelated;
+    transition: opacity .5s;
+  }
+
+  /* Desk */
+  .px-desk {
+    bottom: 40px; width: 48px; height: 24px;
+    background: #5c3d1e;
+    border-top: 3px solid #7a5230;
+    border-left: 2px solid #4a3018;
+    border-right: 2px solid #4a3018;
+  }
+  .px-desk::after {
+    content: ''; position: absolute;
+    bottom: -8px; left: 4px; width: 6px; height: 8px;
+    background: #4a3018;
+    box-shadow: 32px 0 0 #4a3018;
+  }
+
+  /* Plant */
+  .px-plant {
+    bottom: 40px; width: 16px; height: 28px;
+  }
+  .px-plant::before {
+    content: ''; position: absolute;
+    bottom: 0; left: 3px; width: 10px; height: 10px;
+    background: #6b3a20; border-radius: 2px;
+  }
+  .px-plant::after {
+    content: '🌿'; position: absolute;
+    bottom: 8px; left: -2px; font-size: 18px;
+  }
+
+  /* Characters */
+  .room-chars {
+    position: absolute; bottom: 40px; left: 0; right: 0;
+    height: 100px; pointer-events: none;
+  }
+
+  .pixel-char {
+    position: absolute; bottom: 0;
+    cursor: pointer; pointer-events: auto;
     -webkit-tap-highlight-color: transparent;
+    transition: left 2s ease-in-out, bottom .3s;
+    will-change: left;
   }
 
-  .waiting-emp:hover { transform: scale(1.2); }
-
-  .waiting-emp.selected-waiting {
-    background: rgba(255, 107, 53, 0.3);
-    outline: 1px solid var(--accent2);
+  .char-body {
+    width: 28px; height: 32px; position: relative;
+    image-rendering: pixelated;
   }
 
-  .waiting-empty {
-    font-size: 10px;
-    color: #1e3a5f;
-    font-family: 'DotGothic16', monospace;
+  /* Pixel character parts */
+  .char-head {
+    width: 14px; height: 14px;
+    border-radius: 3px;
+    position: absolute; top: 0; left: 7px;
+    border: 2px solid rgba(0,0,0,.2);
+  }
+  .char-body-rect {
+    width: 18px; height: 12px;
+    position: absolute; top: 13px; left: 5px;
+    border-radius: 2px;
+  }
+  .char-legs {
+    position: absolute; top: 24px; left: 7px;
+    width: 14px; height: 8px;
+    display: flex; gap: 2px;
+  }
+  .char-leg {
+    width: 5px; height: 8px; background: #2a2040;
+    border-radius: 0 0 2px 2px;
   }
 
-  /* ACTION BAR - shows when employee selected */
-  .action-bar {
-    position: fixed;
-    bottom: 0;
-    left: 50%;
+  /* Char accessory */
+  .char-acc {
+    position: absolute; top: -6px; left: 50%;
     transform: translateX(-50%);
-    max-width: 480px;
-    width: 100%;
-    background: linear-gradient(0deg, #0d1b2e 0%, rgba(13,27,46,0.95) 100%);
-    border-top: 1px solid var(--accent);
-    padding: 10px 16px;
-    display: none;
-    gap: 8px;
-    align-items: center;
-    z-index: 200;
-    animation: slideUp 0.2s ease;
+    font-size: 10px; line-height: 1;
   }
 
-  .action-bar.show { display: flex; }
+  /* Idle animation */
+  @keyframes charBob {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+  }
+  .pixel-char { animation: charBob 2s ease-in-out infinite; }
+  .pixel-char:nth-child(2n) { animation-delay: .4s; }
+  .pixel-char:nth-child(3n) { animation-delay: .8s; }
+  .pixel-char:nth-child(4n) { animation-delay: 1.2s; }
 
-  @keyframes slideUp {
-    from { transform: translateX(-50%) translateY(100%); }
-    to { transform: translateX(-50%) translateY(0); }
+  /* Walk animation on legs */
+  @keyframes legWalk {
+    0%,100% { transform: skewX(0); }
+    25% { transform: skewX(8deg); }
+    75% { transform: skewX(-8deg); }
+  }
+  .pixel-char .char-leg:first-child {
+    animation: legWalk 1s ease-in-out infinite;
+  }
+  .pixel-char .char-leg:last-child {
+    animation: legWalk 1s ease-in-out infinite .5s;
   }
 
-  .action-info {
-    flex: 1;
-    font-size: 12px;
-    font-family: 'DotGothic16', monospace;
-    color: var(--text);
+  /* Speech bubble */
+  .char-speech {
+    position: absolute; bottom: 38px; left: 50%;
+    transform: translateX(-50%);
+    background: #fff; color: #111; padding: 3px 8px;
+    border-radius: 6px; font-size: 10px; font-family: var(--pixel);
+    white-space: nowrap; pointer-events: none;
+    animation: speechPop .3s ease, speechFade .3s ease 1.5s forwards;
+    box-shadow: 0 2px 8px rgba(0,0,0,.3);
   }
+  .char-speech::after {
+    content: ''; position: absolute;
+    bottom: -5px; left: 50%; transform: translateX(-50%);
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid #fff;
+  }
+  @keyframes speechPop { from { transform: translateX(-50%) scale(.7); opacity:0; } to { transform: translateX(-50%) scale(1); opacity:1; } }
+  @keyframes speechFade { to { opacity: 0; transform: translateX(-50%) translateY(-5px); } }
 
-  .action-info .action-emoji { font-size: 20px; margin-right: 6px; }
+  /* Locked floor overlay */
+  .room-locked {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 6px;
+    background: rgba(5,8,14,.85);
+    font-family: var(--pixel);
+  }
+  .room-locked-icon { font-size: 36px; }
+  .room-locked-text { font-size: 12px; color: var(--text-dim); }
 
-  .action-btn {
-    background: var(--accent);
-    border: none;
-    border-radius: 6px;
-    padding: 8px 14px;
-    color: #000;
-    font-weight: 700;
-    font-size: 12px;
-    cursor: pointer;
-    font-family: 'M PLUS 1p', sans-serif;
-    -webkit-tap-highlight-color: transparent;
+  /* ── LOBBY (WAITING AREA) ── */
+  .lobby-section {
+    padding: 6px 12px;
     flex-shrink: 0;
   }
-
-  .action-btn.cancel {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--text-dim);
+  .lobby-bar {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 6px 10px;
+    display: flex; align-items: center; gap: 6px;
+    overflow-x: auto; min-height: 40px;
+  }
+  .lobby-label {
+    font-size: 9px; color: var(--text-dim);
+    font-family: var(--pixel); flex-shrink: 0; letter-spacing: 1px;
+  }
+  .lobby-emp {
+    font-size: 22px; cursor: pointer; padding: 2px;
+    border-radius: 4px; flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent; transition: transform .15s;
+  }
+  .lobby-emp:hover { transform: scale(1.15); }
+  .lobby-emp.selected { background: rgba(255,107,53,.3); outline: 1px solid var(--accent2); }
+  .lobby-empty { font-size: 10px; color: #1e3a5f; font-family: var(--pixel); }
+  .lobby-count {
+    font-size: 9px; color: var(--text-dim); font-family: var(--pixel);
+    margin-left: auto; flex-shrink: 0;
   }
 
-  .action-btn.move {
-    background: var(--accent2);
-  }
+  /* ── BOTTOM TABS ── */
+  .bottom-area { flex: 1; display: flex; flex-direction: column; }
 
-  /* STATS ROW */
-  .stats-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 8px;
-    padding: 8px 16px;
-  }
-
-  .stat-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 8px;
-    text-align: center;
-  }
-
-  .stat-label {
-    font-size: 9px;
-    color: var(--text-dim);
-    letter-spacing: 1px;
-    display: block;
-    margin-bottom: 3px;
-  }
-
-  .stat-value {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--accent);
-    font-family: 'DotGothic16', monospace;
-  }
-
-  /* TABS */
   .tabs {
-    display: flex;
-    border-bottom: 1px solid var(--border);
-    background: var(--surface);
-    position: sticky;
-    top: 85px;
-    z-index: 99;
+    display: flex; border-bottom: 1px solid var(--border);
+    background: var(--surface); position: sticky; top: 0; z-index: 50;
   }
-
   .tab-btn {
-    flex: 1;
-    padding: 10px 4px;
-    background: none;
-    border: none;
-    color: var(--text-dim);
-    font-size: 11px;
-    font-family: 'M PLUS 1p', sans-serif;
-    font-weight: 700;
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    transition: all 0.2s;
+    flex: 1; padding: 9px 2px; background: none; border: none;
+    color: var(--text-dim); font-size: 11px; font-weight: 700;
+    font-family: 'M PLUS 1p', sans-serif; cursor: pointer;
+    border-bottom: 2px solid transparent; transition: all .2s;
   }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
 
-  .tab-btn.active {
-    color: var(--accent);
-    border-bottom-color: var(--accent);
-  }
-
-  /* CONTENT */
-  .content {
-    flex: 1;
-    padding: 12px 16px;
-    padding-bottom: 60px;
-  }
-
+  .content { flex: 1; padding: 10px 14px 80px; overflow-y: auto; }
   .tab-panel { display: none; }
   .tab-panel.active { display: block; }
 
-  /* EMPLOYEE CARDS */
   .section-title {
-    font-size: 10px;
-    color: var(--text-dim);
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    margin-bottom: 10px;
-    font-family: 'DotGothic16', monospace;
+    font-size: 10px; color: var(--text-dim); letter-spacing: 3px;
+    margin-bottom: 8px; font-family: var(--pixel);
   }
 
+  /* ── EMPLOYEE CARDS ── */
   .employee-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px;
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    transition: all 0.2s;
-    position: relative;
-    overflow: hidden;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 12px; margin-bottom: 7px;
+    display: flex; align-items: center; gap: 10px;
+    transition: all .2s; position: relative; overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
   }
-
   .employee-card::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 0; bottom: 0;
-    width: 3px;
-    background: var(--card-color, var(--accent));
+    content: ''; position: absolute; left:0;top:0;bottom:0;
+    width: 3px; background: var(--card-color, var(--accent));
   }
-
-  .employee-card.can-afford {
-    border-color: var(--card-color, var(--accent));
-    box-shadow: 0 0 10px rgba(0, 212, 255, 0.1);
-  }
-
-  .employee-card.cant-afford { opacity: 0.5; }
-
-  .emp-emoji {
-    font-size: 32px;
-    flex-shrink: 0;
-    width: 44px;
-    text-align: center;
-  }
-
-  .emp-info {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .emp-name {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--text);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
+  .employee-card.can-afford { border-color: var(--card-color, var(--accent)); box-shadow: 0 0 8px rgba(0,212,255,.08); }
+  .employee-card.cant-afford { opacity: .5; }
+  .emp-emoji { font-size: 28px; flex-shrink:0; width:38px; text-align:center; }
+  .emp-info { flex:1; min-width:0; }
+  .emp-name { font-size:12px; font-weight:700; display:flex; align-items:center; gap:5px; }
   .emp-count-badge {
-    background: var(--card-color, var(--accent));
-    color: #000;
-    font-size: 10px;
-    font-weight: 900;
-    padding: 1px 5px;
-    border-radius: 999px;
-    font-family: 'DotGothic16', monospace;
+    background: var(--card-color, var(--accent)); color:#000;
+    font-size:9px; font-weight:900; padding:1px 5px; border-radius:99px;
+    font-family: var(--pixel);
   }
-
-  .emp-income {
-    font-size: 11px;
-    color: var(--accent3);
-    font-family: 'DotGothic16', monospace;
-    margin-top: 2px;
-  }
-
-  .emp-desc {
-    font-size: 10px;
-    color: var(--text-dim);
-    margin-top: 1px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
+  .emp-income { font-size:10px; color:var(--accent3); font-family:var(--pixel); margin-top:1px; }
+  .emp-desc { font-size:9px; color:var(--text-dim); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .hire-btn {
-    background: var(--surface2);
-    border: 1px solid var(--card-color, var(--accent));
-    border-radius: 8px;
-    padding: 8px 10px;
-    cursor: pointer;
-    text-align: center;
-    min-width: 72px;
-    flex-shrink: 0;
-    transition: all 0.15s;
-    -webkit-tap-highlight-color: transparent;
+    background: var(--surface2); border: 1px solid var(--card-color, var(--accent));
+    border-radius: 8px; padding: 6px 8px; cursor: pointer;
+    text-align: center; min-width: 66px; flex-shrink:0;
+    -webkit-tap-highlight-color: transparent; transition: all .15s;
   }
-
-  .hire-btn:active { transform: scale(0.95); }
-
+  .hire-btn:active { transform: scale(.95); }
   .hire-btn.can-afford { background: var(--card-color, var(--accent)); }
-  .hire-btn.can-afford .hire-label { color: #000; }
-  .hire-btn.can-afford .hire-cost { color: rgba(0,0,0,0.7); }
+  .hire-btn.can-afford .hire-label { color:#000; }
+  .hire-btn.can-afford .hire-cost { color:rgba(0,0,0,.7); }
+  .hire-label { font-size:10px; font-weight:700; color:var(--text-dim); display:block; }
+  .hire-cost { font-size:10px; font-family:var(--pixel); color:var(--text-dim); display:block; }
 
-  .hire-label {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--text-dim);
-    display: block;
-  }
-
-  .hire-cost {
-    font-size: 11px;
-    font-family: 'DotGothic16', monospace;
-    color: var(--text-dim);
-    display: block;
-    margin-top: 1px;
-  }
-
-  /* UPGRADE CARDS */
+  /* ── UPGRADE CARDS ── */
   .upgrade-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px;
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-    transition: all 0.2s;
-    -webkit-tap-highlight-color: transparent;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 12px; margin-bottom: 7px;
+    display: flex; align-items: center; gap: 10px; cursor: pointer;
+    transition: all .2s; -webkit-tap-highlight-color: transparent;
   }
+  .upgrade-card.purchased { opacity:.4; pointer-events:none; }
+  .upgrade-card.can-afford { border-color:var(--gold); box-shadow: 0 0 10px rgba(255,215,0,.12); }
+  .upgrade-card:active:not(.purchased) { transform: scale(.98); }
+  .upg-icon { font-size:24px; flex-shrink:0; }
+  .upg-info { flex:1; }
+  .upg-name { font-size:12px; font-weight:700; }
+  .upg-desc { font-size:9px; color:var(--text-dim); margin-top:2px; }
+  .upg-cost { font-size:11px; font-family:var(--pixel); color:var(--gold); font-weight:700; flex-shrink:0; }
+  .upg-done { font-size:16px; }
 
-  .upgrade-card.purchased { opacity: 0.4; pointer-events: none; }
-
-  .upgrade-card.can-afford {
-    border-color: var(--gold);
-    box-shadow: 0 0 12px rgba(255, 215, 0, 0.15);
-  }
-
-  .upgrade-card:active:not(.purchased) { transform: scale(0.98); }
-
-  .upg-icon { font-size: 28px; flex-shrink: 0; }
-  .upg-info { flex: 1; }
-  .upg-name { font-size: 13px; font-weight: 700; }
-  .upg-desc { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
-
-  .upg-cost {
-    font-size: 12px;
-    font-family: 'DotGothic16', monospace;
-    color: var(--gold);
-    font-weight: 700;
-    flex-shrink: 0;
-  }
-
-  .upg-done { font-size: 18px; }
-
-  /* MILESTONES */
+  /* ── MILESTONES ── */
   .milestone-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px;
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 12px; margin-bottom: 7px;
+    display: flex; align-items: center; gap: 10px;
   }
+  .milestone-card.achieved { border-color: var(--gold); background: linear-gradient(135deg,var(--surface),rgba(255,215,0,.04)); }
+  .ms-icon { font-size:22px; flex-shrink:0; }
+  .ms-info { flex:1; }
+  .ms-name { font-size:12px; font-weight:700; }
+  .ms-desc { font-size:9px; color:var(--text-dim); margin-top:2px; }
+  .ms-status { font-size:16px; flex-shrink:0; }
 
-  .milestone-card.achieved {
-    border-color: var(--gold);
-    background: linear-gradient(135deg, var(--surface) 0%, rgba(255,215,0,0.05) 100%);
-  }
-
-  .ms-icon { font-size: 24px; flex-shrink: 0; }
-  .ms-info { flex: 1; }
-  .ms-name { font-size: 13px; font-weight: 700; }
-  .ms-desc { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
-  .ms-status { font-size: 18px; flex-shrink: 0; }
-
-  /* PRESTIGE */
+  /* ── PRESTIGE ── */
   .prestige-section {
-    background: linear-gradient(135deg, #1a0a2e, #2d1060);
-    border: 1px solid #7c3aed;
-    border-radius: 12px;
-    padding: 16px;
-    text-align: center;
-    margin-bottom: 16px;
+    background: linear-gradient(135deg,#1a0a2e,#2d1060);
+    border: 1px solid #7c3aed; border-radius: 12px;
+    padding: 14px; text-align: center; margin-bottom: 14px;
   }
-
-  .prestige-title {
-    font-size: 18px;
-    font-weight: 900;
-    color: #c084fc;
-    font-family: 'DotGothic16', monospace;
-    margin-bottom: 6px;
-  }
-
-  .prestige-desc { font-size: 11px; color: #a78bfa; margin-bottom: 12px; }
-
+  .prestige-title { font-size:16px; font-weight:900; color:#c084fc; font-family:var(--pixel); margin-bottom:4px; }
+  .prestige-desc { font-size:10px; color:#a78bfa; margin-bottom:10px; }
   .prestige-btn {
-    background: linear-gradient(135deg, #7c3aed, #c084fc);
-    border: none;
-    border-radius: 8px;
-    padding: 10px 20px;
-    color: white;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: 'M PLUS 1p', sans-serif;
-    -webkit-tap-highlight-color: transparent;
+    background: linear-gradient(135deg,#7c3aed,#c084fc);
+    border:none; border-radius:8px; padding:9px 18px; color:#fff;
+    font-size:13px; font-weight:700; cursor:pointer;
+    font-family:'M PLUS 1p',sans-serif; -webkit-tap-highlight-color:transparent;
   }
+  .prestige-btn:disabled { opacity:.4; cursor:not-allowed; }
 
-  .prestige-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  /* ── QUEST ── */
+  .quest-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:10px; padding:10px 12px; margin-bottom:7px;
+    position:relative; overflow:hidden;
+  }
+  .quest-card.active { border-color:var(--accent2); }
+  .quest-card.completed { border-color:var(--accent3); opacity:.6; }
+  .quest-header { display:flex; align-items:center; gap:8px; margin-bottom:4px; }
+  .quest-icon { font-size:20px; }
+  .quest-title { font-size:12px; font-weight:700; }
+  .quest-desc { font-size:9px; color:var(--text-dim); margin-bottom:6px; }
+  .quest-progress-bar { width:100%; height:5px; background:var(--surface2); border-radius:3px; overflow:hidden; margin-bottom:3px; }
+  .quest-progress-fill { height:100%; background:linear-gradient(90deg,var(--accent2),var(--accent)); border-radius:3px; transition:width .3s; }
+  .quest-progress-text { font-size:9px; color:var(--text-dim); font-family:var(--pixel); display:flex; justify-content:space-between; }
+  .quest-reward { font-size:10px; color:var(--gold); font-family:var(--pixel); margin-top:3px; }
+  .quest-claim-btn {
+    background:linear-gradient(135deg,var(--accent2),#ff8f5a);
+    border:none; border-radius:6px; padding:5px 10px; color:#fff;
+    font-weight:700; font-size:10px; cursor:pointer; margin-top:5px;
+    font-family:'M PLUS 1p',sans-serif;
+  }
+  .quest-timer { font-size:9px; color:var(--accent2); font-family:var(--pixel); position:absolute; top:10px; right:10px; }
 
-  /* TOAST */
+  /* ── RANKING ── */
+  .ranking-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:10px; padding:10px 12px; margin-bottom:7px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .ranking-card.rank-1 { border-color:var(--gold); background:linear-gradient(135deg,var(--surface),rgba(255,215,0,.06)); }
+  .ranking-card.rank-2 { border-color:#c0c0c0; }
+  .ranking-card.rank-3 { border-color:#cd7f32; }
+  .rank-num { font-size:18px; font-weight:900; font-family:var(--pixel); min-width:30px; text-align:center; }
+  .rank-1 .rank-num { color:var(--gold); }
+  .rank-2 .rank-num { color:#c0c0c0; }
+  .rank-3 .rank-num { color:#cd7f32; }
+  .rank-info { flex:1; }
+  .rank-name { font-size:12px; font-weight:700; display:flex; align-items:center; gap:6px; }
+  .rank-income { font-size:10px; color:var(--accent3); font-family:var(--pixel); margin-top:1px; }
+  .rank-bar { width:100%; height:3px; background:var(--surface2); border-radius:2px; margin-top:3px; overflow:hidden; }
+  .rank-bar-fill { height:100%; border-radius:2px; transition:width .3s; }
+  .rank-share { font-size:9px; color:var(--text-dim); font-family:var(--pixel); }
+
+  /* ── TOAST ── */
   .toast-container {
-    position: fixed;
-    top: 100px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 999;
-    pointer-events: none;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    width: 300px;
+    position:fixed; top:70px; left:50%; transform:translateX(-50%);
+    z-index:999; pointer-events:none; display:flex; flex-direction:column;
+    align-items:center; gap:5px; width:300px;
   }
-
   .toast {
-    background: var(--surface2);
-    border: 1px solid var(--accent);
-    border-radius: 8px;
-    padding: 8px 14px;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--accent);
-    animation: toastIn 0.3s ease, toastOut 0.4s ease 1.8s forwards;
-    white-space: nowrap;
-    font-family: 'DotGothic16', monospace;
+    background:var(--surface2); border:1px solid var(--accent);
+    border-radius:8px; padding:6px 12px; font-size:12px; font-weight:700;
+    color:var(--accent); animation: toastIn .3s ease, toastOut .4s ease 1.6s forwards;
+    white-space:nowrap; font-family:var(--pixel);
   }
+  .toast.gold { border-color:var(--gold); color:var(--gold); }
+  .toast.purple { border-color:#c084fc; color:#c084fc; }
+  @keyframes toastIn { from{opacity:0;transform:translateY(-8px) scale(.9)} to{opacity:1;transform:translateY(0) scale(1)} }
+  @keyframes toastOut { from{opacity:1} to{opacity:0;transform:translateY(-8px)} }
 
-  .toast.gold { border-color: var(--gold); color: var(--gold); }
-  .toast.purple { border-color: #c084fc; color: #c084fc; }
-
-  @keyframes toastIn {
-    from { opacity: 0; transform: translateY(-10px) scale(0.9); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
+  /* ── ACTION BAR ── */
+  .action-bar {
+    position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+    max-width:480px; width:100%;
+    background:linear-gradient(0deg,#0d1b2eee,#0d1b2ecc);
+    border-top:1px solid var(--accent); padding:10px 16px;
+    display:none; gap:8px; align-items:center; z-index:200;
+    animation:slideUp .2s ease;
   }
-
-  @keyframes toastOut {
-    from { opacity: 1; }
-    to { opacity: 0; transform: translateY(-10px); }
+  .action-bar.show { display:flex; }
+  @keyframes slideUp { from{transform:translateX(-50%) translateY(100%)} to{transform:translateX(-50%) translateY(0)} }
+  .action-info { flex:1; font-size:11px; font-family:var(--pixel); }
+  .action-info .action-emoji { font-size:18px; margin-right:5px; }
+  .action-btn {
+    background:var(--accent); border:none; border-radius:6px;
+    padding:7px 12px; color:#000; font-weight:700; font-size:11px;
+    cursor:pointer; font-family:'M PLUS 1p',sans-serif;
+    -webkit-tap-highlight-color:transparent; flex-shrink:0;
   }
-
-  .prestige-stars { display: flex; gap: 4px; margin-top: 4px; }
-  .star { font-size: 10px; }
-
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-  .live-dot {
-    width: 6px; height: 6px;
-    background: var(--accent3);
-    border-radius: 50%;
-    display: inline-block;
-    margin-right: 4px;
-    animation: pulse 2s infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
+  .action-btn.cancel { background:var(--surface2); border:1px solid var(--border); color:var(--text-dim); }
+  .action-btn.move { background:var(--accent2); color:#fff; }
 
   .offline-banner {
-    background: linear-gradient(135deg, #1a2d1a, #0d1f0d);
-    border: 1px solid #22c55e;
-    border-radius: 8px;
-    padding: 10px 14px;
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
+    background:linear-gradient(135deg,#1a2d1a,#0d1f0d);
+    border:1px solid #22c55e; border-radius:8px; padding:8px 12px;
+    margin-bottom:10px; display:flex; align-items:center; gap:8px;
+    cursor:pointer; -webkit-tap-highlight-color:transparent;
   }
+  .offline-icon { font-size:18px; }
+  .offline-text { flex:1; font-size:10px; color:#86efac; }
+  .offline-amount { font-size:13px; font-weight:900; color:#22c55e; font-family:var(--pixel); }
+  .collect-btn { background:#22c55e; border:none; border-radius:6px; padding:5px 8px; color:#000; font-weight:700; font-size:10px; cursor:pointer; flex-shrink:0; }
 
-  .offline-icon { font-size: 20px; }
-  .offline-text { flex: 1; font-size: 11px; color: #86efac; }
-
-  .offline-amount {
-    font-size: 14px;
-    font-weight: 900;
-    color: #22c55e;
-    font-family: 'DotGothic16', monospace;
-  }
-
-  .collect-btn {
-    background: #22c55e;
-    border: none;
-    border-radius: 6px;
-    padding: 6px 10px;
-    color: #000;
-    font-weight: 700;
-    font-size: 11px;
-    cursor: pointer;
-    font-family: 'M PLUS 1p', sans-serif;
-    flex-shrink: 0;
-  }
-
-  .bottom-safe { height: 60px; }
-
-  .sound-toggle {
-    position: absolute;
-    right: 16px;
-    top: 12px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 4px 8px;
-    color: var(--text-dim);
-    font-size: 16px;
-    cursor: pointer;
-    z-index: 101;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  .sound-toggle.on { color: var(--accent); border-color: var(--accent); }
-
-  /* QUEST CARDS */
-  .quest-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px;
-    margin-bottom: 8px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .quest-card.active { border-color: var(--accent2); }
-  .quest-card.completed { border-color: var(--accent3); opacity: 0.6; }
-
-  .quest-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-  .quest-icon { font-size: 24px; }
-  .quest-title { font-size: 13px; font-weight: 700; color: var(--text); }
-  .quest-desc { font-size: 10px; color: var(--text-dim); margin-bottom: 8px; }
-
-  .quest-progress-bar {
-    width: 100%;
-    height: 6px;
-    background: var(--surface2);
-    border-radius: 3px;
-    overflow: hidden;
-    margin-bottom: 4px;
-  }
-
-  .quest-progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--accent2), var(--accent));
-    border-radius: 3px;
-    transition: width 0.3s;
-  }
-
-  .quest-progress-text {
-    font-size: 10px;
-    color: var(--text-dim);
-    font-family: 'DotGothic16', monospace;
-    display: flex;
-    justify-content: space-between;
-  }
-
-  .quest-reward {
-    font-size: 11px;
-    color: var(--gold);
-    font-family: 'DotGothic16', monospace;
-    margin-top: 4px;
-  }
-
-  .quest-claim-btn {
-    background: linear-gradient(135deg, var(--accent2), #ff8f5a);
-    border: none;
-    border-radius: 6px;
-    padding: 6px 12px;
-    color: #fff;
-    font-weight: 700;
-    font-size: 11px;
-    cursor: pointer;
-    margin-top: 6px;
-    font-family: 'M PLUS 1p', sans-serif;
-  }
-
-  .quest-timer {
-    font-size: 10px;
-    color: var(--accent2);
-    font-family: 'DotGothic16', monospace;
-    position: absolute;
-    top: 12px;
-    right: 12px;
-  }
-
-  /* RANKING */
-  .ranking-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px;
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .ranking-card.rank-1 { border-color: var(--gold); background: linear-gradient(135deg, var(--surface), rgba(255,215,0,0.08)); }
-  .ranking-card.rank-2 { border-color: #c0c0c0; }
-  .ranking-card.rank-3 { border-color: #cd7f32; }
-
-  .rank-num {
-    font-size: 20px;
-    font-weight: 900;
-    font-family: 'DotGothic16', monospace;
-    min-width: 32px;
-    text-align: center;
-  }
-
-  .rank-1 .rank-num { color: var(--gold); }
-  .rank-2 .rank-num { color: #c0c0c0; }
-  .rank-3 .rank-num { color: #cd7f32; }
-
-  .rank-info { flex: 1; }
-
-  .rank-name {
-    font-size: 13px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .rank-income {
-    font-size: 11px;
-    color: var(--accent3);
-    font-family: 'DotGothic16', monospace;
-    margin-top: 2px;
-  }
-
-  .rank-share {
-    font-size: 11px;
-    color: var(--text-dim);
-    font-family: 'DotGothic16', monospace;
-  }
-
-  .rank-bar {
-    width: 100%;
-    height: 4px;
-    background: var(--surface2);
-    border-radius: 2px;
-    margin-top: 4px;
-    overflow: hidden;
-  }
-
-  .rank-bar-fill {
-    height: 100%;
-    border-radius: 2px;
-    transition: width 0.3s;
-  }
+  ::-webkit-scrollbar { width:3px; }
+  ::-webkit-scrollbar-track { background:var(--bg); }
+  ::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
 </style>
 </head>
 <body>
 
 <div class="app">
-  <!-- HEADER -->
   <div class="header">
-    <button class="sound-toggle" id="soundToggle" onclick="toggleSound()">🔇</button>
-    <div class="company-name" id="companyNameDisplay">★ 株式会社ビギナーズ</div>
-    <div class="money-display">
-      <span class="money-icon">💴</span>
-      <span class="money-amount" id="moneyDisplay">0</span>
-      <span class="money-unit">円</span>
-    </div>
-    <div class="income-rate">
-      <span class="live-dot"></span>
-      <span id="incomeRate">+0円/秒</span>
-    </div>
-  </div>
-
-  <!-- BUILDING -->
-  <div class="building-section">
-    <div class="building-container">
-      <div class="building-roof" id="buildingRoof">KAISHA-DO BUILDING</div>
-      <div class="building-floors" id="buildingFloors"></div>
-    </div>
-  </div>
-
-  <!-- WAITING LIST -->
-  <div class="waiting-section">
-    <div class="waiting-bar" id="waitingBar">
-      <span class="waiting-label">待機:</span>
-      <span class="waiting-empty">社員を採用しよう</span>
-    </div>
-  </div>
-
-  <!-- STATS ROW -->
-  <div class="stats-row">
-    <div class="stat-card">
-      <span class="stat-label">総従業員</span>
-      <span class="stat-value" id="totalEmployees">0名</span>
-    </div>
-    <div class="stat-card">
-      <span class="stat-label">累計売上</span>
-      <span class="stat-value" id="totalEarned">¥0</span>
-    </div>
-    <div class="stat-card">
-      <span class="stat-label">プレステージ</span>
-      <span class="stat-value" id="prestigeDisplay">★0</span>
-    </div>
-  </div>
-
-  <!-- TABS -->
-  <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('hire')">👥 採用</button>
-    <button class="tab-btn" onclick="switchTab('upgrade')">⚡ 強化</button>
-    <button class="tab-btn" onclick="switchTab('quest')">📋 任務</button>
-    <button class="tab-btn" onclick="switchTab('ranking')">📊 番付</button>
-    <button class="tab-btn" onclick="switchTab('milestone')">🏆 実績</button>
-    <button class="tab-btn" onclick="switchTab('prestige')">★ 転生</button>
-  </div>
-
-  <!-- CONTENT -->
-  <div class="content">
-    <div id="offlineBanner" class="offline-banner" style="display:none;" onclick="collectOffline()">
-      <span class="offline-icon">💤</span>
-      <span class="offline-text">オフライン収益！</span>
-      <span class="offline-amount" id="offlineAmount">¥0</span>
-      <button class="collect-btn">回収！</button>
-    </div>
-
-    <div class="tab-panel active" id="tab-hire">
-      <div class="section-title">▶ 社員採用</div>
-      <div id="employeeList"></div>
-    </div>
-
-    <div class="tab-panel" id="tab-upgrade">
-      <div class="section-title">▶ 経営強化</div>
-      <div id="upgradeList"></div>
-    </div>
-
-    <div class="tab-panel" id="tab-quest">
-      <div class="section-title">▶ ミッション</div>
-      <div id="questList"></div>
-    </div>
-
-    <div class="tab-panel" id="tab-ranking">
-      <div class="section-title">▶ 社員番付</div>
-      <div id="rankingList"></div>
-    </div>
-
-    <div class="tab-panel" id="tab-milestone">
-      <div class="section-title">▶ 実績</div>
-      <div id="milestoneList"></div>
-    </div>
-
-    <div class="tab-panel" id="tab-prestige">
-      <div class="section-title">▶ 会社転生</div>
-      <div class="prestige-section">
-        <div class="prestige-title">★ 会社転生</div>
-        <div class="prestige-desc" id="prestigeDesc">
-          転生すると全てリセットされますが<br>
-          永続的な収益ボーナスを獲得できます！
+    <div class="header-top">
+      <div>
+        <div class="company-name" id="companyNameDisplay">★ 株式会社ビギナーズ</div>
+        <div class="money-row">
+          <span style="font-size:16px">💴</span>
+          <span class="money-amount" id="moneyDisplay">0</span>
+          <span class="money-unit">円</span>
         </div>
-        <div style="font-size:13px; color:#c084fc; margin-bottom:12px; font-family:'DotGothic16',monospace;" id="prestigeBonus"></div>
-        <button class="prestige-btn" id="prestigeBtn" onclick="doPrestige()">転生する（要：¥1,000,000,000）</button>
+        <div class="income-rate"><span class="live-dot"></span><span id="incomeRate">+1円/秒</span></div>
       </div>
-      <div class="section-title">▶ 転生履歴</div>
-      <div id="prestigeHistory"></div>
+      <button class="sound-toggle" id="soundToggle" onclick="toggleSound()">🔇</button>
     </div>
   </div>
 
-  <div class="bottom-safe"></div>
+  <!-- ROOM VIEW -->
+  <div class="room-section">
+    <div class="floor-nav">
+      <button class="floor-nav-btn" id="floorPrev" onclick="changeFloor(-1)">◀</button>
+      <span class="floor-label" id="floorLabel">1F</span>
+      <button class="floor-nav-btn" id="floorNext" onclick="changeFloor(1)">▶</button>
+    </div>
+    <div class="floor-status" id="floorStatus">0 / 8人</div>
+    <div class="room-wrapper" id="roomWrapper" onclick="onRoomClick(event)">
+      <div class="room-bg dark" id="roomBg"></div>
+      <div class="room-wall-line dark" id="roomWall"></div>
+      <div class="room-window w1" id="roomWin1"></div>
+      <div class="room-window w2" id="roomWin2"></div>
+      <!-- Furniture -->
+      <div class="room-furniture px-desk" id="roomDesk1" style="left:60px;opacity:0"></div>
+      <div class="room-furniture px-desk" id="roomDesk2" style="right:60px;opacity:0"></div>
+      <div class="room-furniture px-plant" id="roomPlant1" style="left:16px;opacity:0"></div>
+      <div class="room-furniture px-plant" id="roomPlant2" style="right:16px;opacity:0"></div>
+      <div class="room-floor dark" id="roomFloor"></div>
+      <div class="room-chars" id="roomChars"></div>
+      <!-- Locked overlay -->
+      <div class="room-locked" id="roomLocked" style="display:none">
+        <div class="room-locked-icon">🔒</div>
+        <div class="room-locked-text" id="lockedText">社員5名で解放</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOBBY -->
+  <div class="lobby-section">
+    <div class="lobby-bar" id="lobbyBar">
+      <span class="lobby-label">ロビー:</span>
+      <span class="lobby-empty">社員を採用しよう</span>
+    </div>
+  </div>
+
+  <!-- BOTTOM TABS -->
+  <div class="bottom-area">
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('hire')">👥 採用</button>
+      <button class="tab-btn" onclick="switchTab('upgrade')">⚡ 強化</button>
+      <button class="tab-btn" onclick="switchTab('quest')">📋 任務</button>
+      <button class="tab-btn" onclick="switchTab('ranking')">📊 番付</button>
+      <button class="tab-btn" onclick="switchTab('milestone')">🏆 実績</button>
+      <button class="tab-btn" onclick="switchTab('prestige')">★ 転生</button>
+    </div>
+
+    <div class="content">
+      <div id="offlineBanner" class="offline-banner" style="display:none" onclick="collectOffline()">
+        <span class="offline-icon">💤</span>
+        <span class="offline-text">オフライン収益！</span>
+        <span class="offline-amount" id="offlineAmount">¥0</span>
+        <button class="collect-btn">回収！</button>
+      </div>
+
+      <div class="tab-panel active" id="tab-hire">
+        <div class="section-title">▶ 社員採用</div>
+        <div id="employeeList"></div>
+      </div>
+      <div class="tab-panel" id="tab-upgrade">
+        <div class="section-title">▶ 経営強化</div>
+        <div id="upgradeList"></div>
+      </div>
+      <div class="tab-panel" id="tab-quest">
+        <div class="section-title">▶ ミッション</div>
+        <div id="questList"></div>
+      </div>
+      <div class="tab-panel" id="tab-ranking">
+        <div class="section-title">▶ 社員番付</div>
+        <div id="rankingList"></div>
+      </div>
+      <div class="tab-panel" id="tab-milestone">
+        <div class="section-title">▶ 実績</div>
+        <div id="milestoneList"></div>
+      </div>
+      <div class="tab-panel" id="tab-prestige">
+        <div class="section-title">▶ 会社転生</div>
+        <div class="prestige-section">
+          <div class="prestige-title">★ 会社転生</div>
+          <div class="prestige-desc" id="prestigeDesc">転生すると全てリセットされますが<br>永続的な収益ボーナスを獲得</div>
+          <div style="font-size:12px;color:#c084fc;margin-bottom:10px;font-family:var(--pixel)" id="prestigeBonus"></div>
+          <button class="prestige-btn" id="prestigeBtn" onclick="doPrestige()">転生する（要：¥10億）</button>
+        </div>
+        <div class="section-title">▶ 転生履歴</div>
+        <div id="prestigeHistory"></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="toast-container" id="toastContainer"></div>
-
-<!-- ACTION BAR for placement/movement -->
 <div class="action-bar" id="actionBar">
   <div class="action-info" id="actionInfo"></div>
   <button class="action-btn cancel" onclick="cancelSelection()">キャンセル</button>
@@ -1013,1054 +679,680 @@
 
 <script>
 // ============================================================
-// GAME DATA
+// DATA
 // ============================================================
-
-const EMPLOYEES = [
-  { id: 'part_time', name: 'アルバイト', emoji: '🧑‍💼', desc: '時給制。コンビニ並みの稼ぎ', baseCost: 15, baseIncome: 0.1, color: '#64748b', unlockAt: 0 },
-  { id: 'staff', name: '契約社員', emoji: '💼', desc: '安定した戦力。少し稼ぐ', baseCost: 120, baseIncome: 0.7, color: '#22c55e', unlockAt: 100 },
-  { id: 'full_time', name: '正社員', emoji: '👔', desc: '会社の屋台骨。信頼できる', baseCost: 1300, baseIncome: 6, color: '#3b82f6', unlockAt: 1000 },
-  { id: 'leader', name: 'リーダー', emoji: '🦺', desc: '現場を仕切るプロフェッショナル', baseCost: 10000, baseIncome: 40, color: '#06b6d4', unlockAt: 8000 },
-  { id: 'manager', name: '課長', emoji: '🧑‍🏫', desc: 'チームを率いて成果を出す', baseCost: 80000, baseIncome: 250, color: '#8b5cf6', unlockAt: 50000 },
-  { id: 'director', name: '部長', emoji: '🎩', desc: '部門の戦略立案と実行を担う', baseCost: 600000, baseIncome: 1500, color: '#f59e0b', unlockAt: 400000 },
-  { id: 'exec', name: '役員', emoji: '🏛️', desc: '経営判断を下す重役', baseCost: 5000000, baseIncome: 10000, color: '#ef4444', unlockAt: 3000000 },
-  { id: 'ceo', name: 'カリスマCEO', emoji: '👑', desc: '会社を次のステージへ導く伝説', baseCost: 50000000, baseIncome: 80000, color: '#ffd700', unlockAt: 30000000 },
+const EMP = [
+  { id:'part_time', name:'アルバイト', emoji:'🧑‍💼', desc:'時給制。コンビニ並み', baseCost:15, baseIncome:.1, color:'#64748b', unlockAt:0,
+    headColor:'#f5d0a9', bodyColor:'#6b7280', acc:'' },
+  { id:'staff', name:'契約社員', emoji:'💼', desc:'安定した戦力', baseCost:120, baseIncome:.7, color:'#22c55e', unlockAt:100,
+    headColor:'#f5d0a9', bodyColor:'#22c55e', acc:'' },
+  { id:'full_time', name:'正社員', emoji:'👔', desc:'会社の屋台骨', baseCost:1300, baseIncome:6, color:'#3b82f6', unlockAt:1000,
+    headColor:'#f5d0a9', bodyColor:'#3b82f6', acc:'👔' },
+  { id:'leader', name:'リーダー', emoji:'🦺', desc:'現場を仕切るプロ', baseCost:10000, baseIncome:40, color:'#06b6d4', unlockAt:8000,
+    headColor:'#f5d0a9', bodyColor:'#06b6d4', acc:'🦺' },
+  { id:'manager', name:'課長', emoji:'🧑‍🏫', desc:'チームを率いる', baseCost:80000, baseIncome:250, color:'#8b5cf6', unlockAt:50000,
+    headColor:'#f5d0a9', bodyColor:'#8b5cf6', acc:'📋' },
+  { id:'director', name:'部長', emoji:'🎩', desc:'部門の戦略立案', baseCost:600000, baseIncome:1500, color:'#f59e0b', unlockAt:400000,
+    headColor:'#f5d0a9', bodyColor:'#f59e0b', acc:'🎩' },
+  { id:'exec', name:'役員', emoji:'🏛️', desc:'経営判断を下す重役', baseCost:5e6, baseIncome:10000, color:'#ef4444', unlockAt:3e6,
+    headColor:'#f5d0a9', bodyColor:'#ef4444', acc:'💎' },
+  { id:'ceo', name:'カリスマCEO', emoji:'👑', desc:'伝説の経営者', baseCost:5e7, baseIncome:80000, color:'#ffd700', unlockAt:3e7,
+    headColor:'#f5d0a9', bodyColor:'#ffd700', acc:'👑' },
 ];
 
 const UPGRADES = [
-  { id: 'coffee', name: 'コーヒーメーカー導入', desc: 'バイトの生産性2倍', emoji: '☕', cost: 500, target: 'part_time', multiplier: 2 },
-  { id: 'pc', name: 'PCをアップグレード', desc: '契約社員の生産性2倍', emoji: '💻', cost: 3000, target: 'staff', multiplier: 2 },
-  { id: 'training', name: '研修制度整備', desc: '正社員の生産性2倍', emoji: '📚', cost: 25000, target: 'full_time', multiplier: 2 },
-  { id: 'bonus', name: 'インセンティブ制度', desc: 'リーダーの生産性2倍', emoji: '💰', cost: 200000, target: 'leader', multiplier: 2 },
-  { id: 'ipo_prep', name: 'IPO準備室設立', desc: '課長の生産性2倍', emoji: '📈', cost: 1500000, target: 'manager', multiplier: 2 },
-  { id: 'strategy', name: '中期経営計画策定', desc: '部長の生産性2倍', emoji: '📋', cost: 10000000, target: 'director', multiplier: 2 },
-  { id: 'mna', name: 'M&A戦略部門', desc: '役員の生産性2倍', emoji: '🤝', cost: 80000000, target: 'exec', multiplier: 2 },
-  { id: 'legend', name: '伝説の経営チーム', desc: 'CEO生産性2倍', emoji: '🌟', cost: 500000000, target: 'ceo', multiplier: 2 },
-  { id: 'global', name: 'グローバル展開', desc: '全社員の収益1.5倍', emoji: '🌍', cost: 200000000, target: '_all', multiplier: 1.5 },
+  { id:'coffee', name:'コーヒーメーカー', desc:'バイトの生産性2倍', emoji:'☕', cost:500, target:'part_time', multiplier:2 },
+  { id:'pc', name:'PCアップグレード', desc:'契約社員の生産性2倍', emoji:'💻', cost:3000, target:'staff', multiplier:2 },
+  { id:'training', name:'研修制度整備', desc:'正社員の生産性2倍', emoji:'📚', cost:25000, target:'full_time', multiplier:2 },
+  { id:'bonus', name:'インセンティブ制度', desc:'リーダーの生産性2倍', emoji:'💰', cost:200000, target:'leader', multiplier:2 },
+  { id:'ipo_prep', name:'IPO準備室', desc:'課長の生産性2倍', emoji:'📈', cost:1500000, target:'manager', multiplier:2 },
+  { id:'strategy', name:'中期経営計画', desc:'部長の生産性2倍', emoji:'📋', cost:1e7, target:'director', multiplier:2 },
+  { id:'mna', name:'M&A戦略部門', desc:'役員の生産性2倍', emoji:'🤝', cost:8e7, target:'exec', multiplier:2 },
+  { id:'legend', name:'伝説の経営チーム', desc:'CEO生産性2倍', emoji:'🌟', cost:5e8, target:'ceo', multiplier:2 },
+  { id:'global', name:'グローバル展開', desc:'全社員の収益1.5倍', emoji:'🌍', cost:2e8, target:'_all', multiplier:1.5 },
 ];
 
 const MILESTONES = [
-  { id: 'ms1', name: '初めての売上', desc: '初めて¥100を稼ぐ', emoji: '🌱', check: (g) => g.totalEarned >= 100 },
-  { id: 'ms2', name: '最初の社員', desc: '誰かを採用する', emoji: '🤝', check: (g) => g.totalEmployees >= 1 },
-  { id: 'ms3', name: '中小企業', desc: '社員10名を達成', emoji: '🏢', check: (g) => g.totalEmployees >= 10 },
-  { id: 'ms4', name: '安定経営', desc: '¥10,000を稼ぐ', emoji: '📊', check: (g) => g.totalEarned >= 10000 },
-  { id: 'ms5', name: '課長昇格', desc: '課長を採用する', emoji: '🎖️', check: (g) => (g.employees['manager'] || 0) >= 1 },
-  { id: 'ms6', name: '成長企業', desc: '社員50名を達成', emoji: '🚀', check: (g) => g.totalEmployees >= 50 },
-  { id: 'ms7', name: '億り人', desc: '¥100,000,000を稼ぐ', emoji: '💎', check: (g) => g.totalEarned >= 100000000 },
-  { id: 'ms8', name: '上場企業', desc: '役員を採用する', emoji: '🏛️', check: (g) => (g.employees['exec'] || 0) >= 1 },
-  { id: 'ms9', name: '1000億企業', desc: '¥100,000,000,000を稼ぐ', emoji: '🌠', check: (g) => g.totalEarned >= 100000000000 },
-  { id: 'ms10', name: '初転生', desc: '初めて転生する', emoji: '⭐', check: (g) => g.prestigeCount >= 1 },
-  { id: 'ms11', name: '増築成功', desc: '3フロア以上に拡張', emoji: '🏗️', check: (g) => getUnlockedFloorCount() >= 3 },
-  { id: 'ms12', name: '本社ビル完成', desc: '最大フロアに到達', emoji: '🏙️', check: (g) => getUnlockedFloorCount() >= MAX_FLOORS },
+  { id:'ms1', name:'初めての売上', desc:'¥100を稼ぐ', emoji:'🌱', check:g=>g.totalEarned>=100 },
+  { id:'ms2', name:'最初の社員', desc:'誰かを採用', emoji:'🤝', check:g=>g.totalEmployees>=1 },
+  { id:'ms3', name:'中小企業', desc:'社員10名', emoji:'🏢', check:g=>g.totalEmployees>=10 },
+  { id:'ms4', name:'安定経営', desc:'¥10,000を稼ぐ', emoji:'📊', check:g=>g.totalEarned>=10000 },
+  { id:'ms5', name:'課長昇格', desc:'課長を採用', emoji:'🎖️', check:g=>(g.employees.manager||0)>=1 },
+  { id:'ms6', name:'成長企業', desc:'社員50名', emoji:'🚀', check:g=>g.totalEmployees>=50 },
+  { id:'ms7', name:'億り人', desc:'¥1億を稼ぐ', emoji:'💎', check:g=>g.totalEarned>=1e8 },
+  { id:'ms8', name:'上場企業', desc:'役員を採用', emoji:'🏛️', check:g=>(g.employees.exec||0)>=1 },
+  { id:'ms9', name:'1000億企業', desc:'¥1000億', emoji:'🌠', check:g=>g.totalEarned>=1e11 },
+  { id:'ms10', name:'初転生', desc:'転生する', emoji:'⭐', check:g=>g.prestigeCount>=1 },
+  { id:'ms11', name:'増築3F', desc:'3フロアに拡張', emoji:'🏗️', check:()=>getFloorCount()>=3 },
+  { id:'ms12', name:'本社完成', desc:'最大フロアに到達', emoji:'🏙️', check:()=>getFloorCount()>=MAX_FLOORS },
 ];
 
-const COMPANY_NAMES = [
-  '株式会社ビギナーズ', '有限会社グロース', '株式会社ライズ',
-  '株式会社エクセル', '株式会社フロンティア', 'GIC Holdings',
-  '株式会社インフィニティ', 'APEX Corporation'
-];
+const COMPANY_NAMES = ['株式会社ビギナーズ','有限会社グロース','株式会社ライズ','株式会社エクセル','株式会社フロンティア','GIC Holdings','株式会社インフィニティ','APEX Corporation'];
 
-// Floor system constants
-const MAX_FLOORS = 8;
-const FLOOR_CAPACITY = 8;
-const FLOOR_UNLOCK_THRESHOLDS = [0, 5, 15, 30, 50, 80, 120, 170]; // total employees needed
-
-// ============================================================
-// GAME STATE
-// ============================================================
-
-let game = {
-  money: 0,
-  totalEarned: 0,
-  employees: {},        // { part_time: 3, staff: 2, ... } counts for income
-  upgrades: [],
-  milestones: [],
-  prestigeCount: 0,
-  prestigeMultiplier: 1,
-  totalEmployees: 0,
-  lastSave: Date.now(),
-  companyLevel: 0,
-  // New: placement system
-  nextUid: 1,
-  floorData: {},        // { 1: [{uid:1, empId:'part_time'}, ...], 2: [...] }
-  waitingList: [],      // [{uid:2, empId:'staff'}, ...]
-  prevFloorCount: 1,    // for detecting new floor unlocks
+const SPEECHES = {
+  part_time: ['がんばります！','時給上がらないかな…','いらっしゃいませ〜','眠い…'],
+  staff: ['契約更新されるかな','報告書できました','お先に失礼します','コーヒーブレイク♪'],
+  full_time: ['プロジェクト進めます','残業は程々に…','チームで乗り越えよう','有給取りたい'],
+  leader: ['進捗どうですか？','リーダーシップ！','みんなついてきて','会議始めます'],
+  manager: ['部下の育成が大事','予算が…','承認しました','経営層に報告'],
+  director: ['戦略を練る','来期の目標は…','取締役会で発表','ビジョンを示す'],
+  exec: ['株価が気になる','M&Aを検討','役員報酬…','経営判断だ'],
+  ceo: ['世界を変える！','イノベーション','上場だ！','伝説を作ろう'],
 };
 
-// Selection state (not saved)
-let selectedWaiting = null;  // uid of selected waiting employee
-let selectedFloorEmp = null; // {uid, floor} of selected floor employee
-let movingEmp = null;        // {uid, empId, fromFloor} during move mode
+const MAX_FLOORS = 10;
+const FLOOR_CAP = 8;
+const FLOOR_THRESHOLDS = [0,5,15,25,35,50,70,90,120,160];
 
+// ============================================================
+// STATE
+// ============================================================
+let game = {
+  money:0, totalEarned:0, employees:{}, upgrades:[], milestones:[],
+  prestigeCount:0, prestigeMultiplier:1, totalEmployees:0,
+  lastSave:Date.now(), companyLevel:0,
+  nextUid:1, floorData:{}, waitingList:[], prevFloorCount:1,
+};
+
+let currentFloor = 1;
+let selectedWaiting = null;
+let selectedFloorEmp = null;
+let movingEmp = null;
+let charPositions = {}; // uid -> {x, targetX, timer}
+
+// ============================================================
+// SAVE / LOAD
+// ============================================================
 function loadGame() {
   try {
-    const saved = localStorage.getItem('kaishaDoSave');
-    if (saved) {
-      const data = JSON.parse(saved);
-      game = { ...game, ...data };
-    }
-  } catch(e) {}
+    const s = localStorage.getItem('kaishaDoSave');
+    if (s) game = { ...game, ...JSON.parse(s) };
+  } catch(e){}
+  if (!game.floorData || typeof game.floorData!=='object') game.floorData={};
+  if (!game.waitingList) game.waitingList=[];
+  if (!game.nextUid) game.nextUid=1;
+  if (!game.prevFloorCount) game.prevFloorCount=1;
+  if (!game.floorData[1]) game.floorData[1]=[];
 
-  // Migration: if old save has no floorData, initialize
-  if (!game.floorData || typeof game.floorData !== 'object') game.floorData = {};
-  if (!game.waitingList) game.waitingList = [];
-  if (!game.nextUid) game.nextUid = 1;
-  if (!game.prevFloorCount) game.prevFloorCount = 1;
-
-  // Ensure floor 1 exists
-  if (!game.floorData[1]) game.floorData[1] = [];
-
-  // Migration: convert old employees to waiting list if floorData is empty
-  if (game.totalEmployees > 0 && game.waitingList.length === 0) {
-    let hasAnyOnFloor = false;
-    for (const f in game.floorData) {
-      if (game.floorData[f].length > 0) hasAnyOnFloor = true;
-    }
-    if (!hasAnyOnFloor) {
-      for (const emp of EMPLOYEES) {
-        const count = game.employees[emp.id] || 0;
-        for (let i = 0; i < count; i++) {
-          game.waitingList.push({ uid: game.nextUid++, empId: emp.id });
-        }
+  // Migrate old saves
+  if (game.totalEmployees>0 && game.waitingList.length===0) {
+    let any=false;
+    for (const f in game.floorData) if (game.floorData[f].length) any=true;
+    if (!any) {
+      for (const e of EMP) {
+        const c=game.employees[e.id]||0;
+        for (let i=0;i<c;i++) game.waitingList.push({uid:game.nextUid++,empId:e.id});
       }
     }
   }
-
-  // Check offline earnings
-  const now = Date.now();
-  const elapsed = (now - (game.lastSave || now)) / 1000;
-  if (elapsed > 10) {
-    const offlineIncome = getIncomePerSecond() * Math.min(elapsed, 3600 * 4);
-    if (offlineIncome > 0) {
-      showOfflineBanner(offlineIncome);
-    }
+  const now=Date.now(), elapsed=(now-(game.lastSave||now))/1000;
+  if (elapsed>10) {
+    const off=getIncomePerSecond()*Math.min(elapsed,14400);
+    if (off>0) showOfflineBanner(off);
   }
-  game.lastSave = now;
+  game.lastSave=now;
 }
-
-function saveGame() {
-  game.lastSave = Date.now();
-  localStorage.setItem('kaishaDoSave', JSON.stringify(game));
-}
+function saveGame() { game.lastSave=Date.now(); localStorage.setItem('kaishaDoSave',JSON.stringify(game)); }
 
 // ============================================================
 // FLOOR SYSTEM
 // ============================================================
-
-function getUnlockedFloorCount() {
-  let count = 1; // always have floor 1
-  for (let i = 1; i < FLOOR_UNLOCK_THRESHOLDS.length && i < MAX_FLOORS; i++) {
-    if (game.totalEmployees >= FLOOR_UNLOCK_THRESHOLDS[i]) {
-      count = i + 1;
-    }
-  }
-  return count;
+function getFloorCount() {
+  let c=1;
+  for (let i=1;i<FLOOR_THRESHOLDS.length&&i<MAX_FLOORS;i++)
+    if (game.totalEmployees>=FLOOR_THRESHOLDS[i]) c=i+1;
+  return c;
 }
-
-function getFloorEmployees(floorNum) {
-  return game.floorData[floorNum] || [];
-}
-
-function isFloorFull(floorNum) {
-  return getFloorEmployees(floorNum).length >= FLOOR_CAPACITY;
-}
-
+function getFloorEmps(f) { return game.floorData[f]||[]; }
+function isFloorFull(f) { return getFloorEmps(f).length>=FLOOR_CAP; }
 function checkFloorUnlocks() {
-  const newCount = getUnlockedFloorCount();
-  if (newCount > game.prevFloorCount) {
-    for (let f = game.prevFloorCount + 1; f <= newCount; f++) {
-      if (!game.floorData[f]) game.floorData[f] = [];
-      showToast(`🏗️ ${f}Fが増築されました！`, 'gold');
+  const n=getFloorCount();
+  if (n>game.prevFloorCount) {
+    for (let f=game.prevFloorCount+1;f<=n;f++) {
+      if (!game.floorData[f]) game.floorData[f]=[];
+      showToast(`🏗️ ${f}Fが増築されました！`,'gold');
       playSE('milestone');
     }
-    game.prevFloorCount = newCount;
+    game.prevFloorCount=n;
   }
 }
 
 // ============================================================
 // CALCULATIONS
 // ============================================================
-
-function getEmployeeCost(empId, count) {
-  const emp = EMPLOYEES.find(e => e.id === empId);
-  if (!emp) return 0;
-  return Math.floor(emp.baseCost * Math.pow(1.15, count));
-}
-
+function getEmpCost(id,count) { const e=EMP.find(x=>x.id===id); return e?Math.floor(e.baseCost*Math.pow(1.15,count)):0; }
 function getIncomePerSecond() {
-  let total = 1; // Base 1 yen/sec
-  const globalMult = game.upgrades.includes('global') ? 1.5 : 1;
-
-  for (const emp of EMPLOYEES) {
-    const count = game.employees[emp.id] || 0;
-    if (count === 0) continue;
-    let income = emp.baseIncome * count;
-    const empUpgrades = UPGRADES.filter(u => u.target === emp.id && game.upgrades.includes(u.id));
-    for (const upg of empUpgrades) {
-      income *= upg.multiplier;
-    }
-    income *= globalMult;
-    total += income;
+  let t=1;
+  const gm=game.upgrades.includes('global')?1.5:1;
+  for (const e of EMP) {
+    const c=game.employees[e.id]||0; if(!c) continue;
+    let inc=e.baseIncome*c;
+    for (const u of UPGRADES) if(u.target===e.id&&game.upgrades.includes(u.id)) inc*=u.multiplier;
+    t+=inc*gm;
   }
-  return total * game.prestigeMultiplier;
+  return t*game.prestigeMultiplier;
 }
-
-function getTotalEmployees() {
-  return Object.values(game.employees).reduce((a, b) => a + b, 0);
-}
+function getTotalEmp() { return Object.values(game.employees).reduce((a,b)=>a+b,0); }
 
 // ============================================================
 // ACTIONS
 // ============================================================
-
-function hireEmployee(empId) {
-  const emp = EMPLOYEES.find(e => e.id === empId);
-  if (!emp) return;
-
-  const count = game.employees[empId] || 0;
-  const cost = getEmployeeCost(empId, count);
-
-  if (game.money < cost) return;
-
-  game.money -= cost;
-  game.employees[empId] = count + 1;
-  game.totalEmployees = getTotalEmployees();
-
-  // Add to waiting list
-  const uid = game.nextUid++;
-  game.waitingList.push({ uid, empId });
-
-  playSE('hire');
-  updateQuestProgress('hire');
-  showToast(`${emp.emoji} ${emp.name}を採用！待機リストに追加`);
-  checkFloorUnlocks();
-  updateAll();
-  saveGame();
+function hireEmployee(id) {
+  const e=EMP.find(x=>x.id===id); if(!e) return;
+  const c=game.employees[id]||0, cost=getEmpCost(id,c);
+  if (game.money<cost) return;
+  game.money-=cost; game.employees[id]=c+1; game.totalEmployees=getTotalEmp();
+  game.waitingList.push({uid:game.nextUid++,empId:id});
+  playSE('hire'); updateQuestProgress('hire');
+  showToast(`${e.emoji} ${e.name}を採用！ロビーへ`);
+  checkFloorUnlocks(); updateAll(); saveGame();
 }
 
-function assignToFloor(uid, floorNum) {
-  // Find in waiting list
-  const idx = game.waitingList.findIndex(w => w.uid === uid);
-  if (idx === -1) return;
-  if (isFloorFull(floorNum)) {
-    showToast('このフロアは満員です！', '');
-    return;
-  }
-
-  const emp = game.waitingList.splice(idx, 1)[0];
-  if (!game.floorData[floorNum]) game.floorData[floorNum] = [];
-  game.floorData[floorNum].push(emp);
-
-  const empData = EMPLOYEES.find(e => e.id === emp.empId);
-  playSE('hire');
-  showToast(`${empData.emoji} ${floorNum}Fに配置！`);
-  cancelSelection();
-  updateAll();
-  saveGame();
+function assignToFloor(uid,floor) {
+  const idx=game.waitingList.findIndex(w=>w.uid===uid);
+  if (idx===-1) return;
+  if (isFloorFull(floor)) { showToast('満員です！'); return; }
+  const emp=game.waitingList.splice(idx,1)[0];
+  if (!game.floorData[floor]) game.floorData[floor]=[];
+  game.floorData[floor].push(emp);
+  const ed=EMP.find(e=>e.id===emp.empId);
+  playSE('hire'); showToast(`${ed.emoji} ${floor}Fに配置！`);
+  cancelSelection(); updateAll(); saveGame();
 }
 
-function startMoveEmployee(uid, fromFloor) {
-  const floorEmps = game.floorData[fromFloor] || [];
-  const emp = floorEmps.find(e => e.uid === uid);
-  if (!emp) return;
-
-  movingEmp = { uid, empId: emp.empId, fromFloor };
-  selectedFloorEmp = null;
-  selectedWaiting = null;
-
-  const empData = EMPLOYEES.find(e => e.id === emp.empId);
-  const bar = document.getElementById('actionBar');
-  const info = document.getElementById('actionInfo');
-  info.innerHTML = `<span class="action-emoji">${empData.emoji}</span>${empData.name}の移動先フロアを選択`;
-  bar.classList.add('show');
-  renderBuilding();
+function startMove(uid,fromFloor) {
+  const fe=game.floorData[fromFloor]||[];
+  const emp=fe.find(e=>e.uid===uid); if(!emp) return;
+  movingEmp={uid,empId:emp.empId,fromFloor};
+  selectedFloorEmp=null; selectedWaiting=null;
+  const ed=EMP.find(e=>e.id===emp.empId);
+  showActionBar(`<span class="action-emoji">${ed.emoji}</span>${ed.name}の移動先フロアを選択`);
+  renderRoom();
 }
 
 function moveToFloor(toFloor) {
   if (!movingEmp) return;
-  if (movingEmp.fromFloor === toFloor) {
-    cancelSelection();
-    return;
-  }
-  if (isFloorFull(toFloor)) {
-    showToast('移動先フロアは満員です！', '');
-    return;
-  }
-
-  // Remove from old floor
-  const oldFloor = game.floorData[movingEmp.fromFloor] || [];
-  const idx = oldFloor.findIndex(e => e.uid === movingEmp.uid);
-  if (idx === -1) { cancelSelection(); return; }
-  const emp = oldFloor.splice(idx, 1)[0];
-
-  // Add to new floor
-  if (!game.floorData[toFloor]) game.floorData[toFloor] = [];
+  if (movingEmp.fromFloor===toFloor) { cancelSelection(); return; }
+  if (isFloorFull(toFloor)) { showToast('移動先は満員です！'); return; }
+  const old=game.floorData[movingEmp.fromFloor]||[];
+  const idx=old.findIndex(e=>e.uid===movingEmp.uid);
+  if (idx===-1) { cancelSelection(); return; }
+  const emp=old.splice(idx,1)[0];
+  if (!game.floorData[toFloor]) game.floorData[toFloor]=[];
   game.floorData[toFloor].push(emp);
+  const ed=EMP.find(e=>e.id===emp.empId);
+  playSE('upgrade'); showToast(`${ed.emoji} ${toFloor}Fに移動！`);
+  cancelSelection(); updateAll(); saveGame();
+}
 
-  const empData = EMPLOYEES.find(e => e.id === emp.empId);
-  playSE('upgrade');
-  showToast(`${empData.emoji} ${toFloor}Fに移動！`);
-  cancelSelection();
-  updateAll();
-  saveGame();
+function returnToLobby(uid,floor) {
+  const fe=game.floorData[floor]||[];
+  const idx=fe.findIndex(e=>e.uid===uid);
+  if (idx===-1) return;
+  const emp=fe.splice(idx,1)[0];
+  game.waitingList.push(emp);
+  const ed=EMP.find(e=>e.id===emp.empId);
+  showToast(`${ed.emoji} ロビーに戻しました`);
+  cancelSelection(); updateAll(); saveGame();
 }
 
 function cancelSelection() {
-  selectedWaiting = null;
-  selectedFloorEmp = null;
-  movingEmp = null;
+  selectedWaiting=null; selectedFloorEmp=null; movingEmp=null;
   document.getElementById('actionBar').classList.remove('show');
-  renderBuilding();
-  renderWaitingList();
+  renderRoom(); renderLobby();
 }
 
-function selectWaitingEmployee(uid) {
-  if (selectedWaiting === uid) {
-    cancelSelection();
-    return;
-  }
-  cancelSelection();
-  selectedWaiting = uid;
-
-  const emp = game.waitingList.find(w => w.uid === uid);
-  if (!emp) return;
-  const empData = EMPLOYEES.find(e => e.id === emp.empId);
-
-  const bar = document.getElementById('actionBar');
-  const info = document.getElementById('actionInfo');
-  info.innerHTML = `<span class="action-emoji">${empData.emoji}</span>${empData.name}を配置するフロアを選択`;
+function showActionBar(html) {
+  const bar=document.getElementById('actionBar');
+  document.getElementById('actionInfo').innerHTML=html;
   bar.classList.add('show');
-  renderBuilding();
-  renderWaitingList();
 }
 
-function selectFloorEmployee(uid, floorNum) {
-  if (movingEmp) {
-    // If in move mode, ignore floor emp clicks
-    return;
-  }
-  if (selectedFloorEmp && selectedFloorEmp.uid === uid) {
-    cancelSelection();
-    return;
-  }
-  cancelSelection();
-  selectedFloorEmp = { uid, floor: floorNum };
-
-  const floorEmps = game.floorData[floorNum] || [];
-  const emp = floorEmps.find(e => e.uid === uid);
+function selectWaiting(uid) {
+  if (selectedWaiting===uid) { cancelSelection(); return; }
+  cancelSelection(); selectedWaiting=uid;
+  const emp=game.waitingList.find(w=>w.uid===uid);
   if (!emp) return;
-  const empData = EMPLOYEES.find(e => e.id === emp.empId);
-
-  const bar = document.getElementById('actionBar');
-  const info = document.getElementById('actionInfo');
-  info.innerHTML = `<span class="action-emoji">${empData.emoji}</span>${empData.name}(${floorNum}F)` +
-    `<button class="action-btn move" onclick="startMoveEmployee(${uid},${floorNum})" style="margin-left:8px;padding:4px 10px;">移動</button>`;
-  bar.classList.add('show');
-  renderBuilding();
+  const ed=EMP.find(e=>e.id===emp.empId);
+  showActionBar(`<span class="action-emoji">${ed.emoji}</span>${ed.name}を配置するフロアへ移動して部屋をタップ`);
+  renderLobby(); renderRoom();
 }
 
-function onFloorClick(floorNum) {
-  if (selectedWaiting !== null) {
-    assignToFloor(selectedWaiting, floorNum);
+function onCharTap(uid,floor) {
+  if (movingEmp) return;
+  if (selectedFloorEmp&&selectedFloorEmp.uid===uid) { cancelSelection(); return; }
+  cancelSelection(); selectedFloorEmp={uid,floor};
+  const fe=game.floorData[floor]||[];
+  const emp=fe.find(e=>e.uid===uid);
+  if (!emp) return;
+  const ed=EMP.find(e=>e.id===emp.empId);
+  // Show speech
+  showSpeech(uid,ed.id);
+  showActionBar(
+    `<span class="action-emoji">${ed.emoji}</span>${ed.name}(${floor}F)`+
+    `<button class="action-btn move" onclick="startMove(${uid},${floor})" style="margin-left:6px;padding:4px 10px;font-size:10px">移動</button>`+
+    `<button class="action-btn cancel" onclick="returnToLobby(${uid},${floor})" style="padding:4px 10px;font-size:10px;color:var(--red);border-color:var(--red)">ロビーへ</button>`
+  );
+  renderRoom();
+}
+
+function showSpeech(uid,empId) {
+  const el=document.querySelector(`.pixel-char[data-uid="${uid}"] .char-speech-area`);
+  if (!el) return;
+  const lines=SPEECHES[empId]||['...'];
+  const line=lines[Math.floor(Math.random()*lines.length)];
+  el.innerHTML=`<div class="char-speech">${line}</div>`;
+}
+
+function onRoomClick(e) {
+  if (e.target.closest('.pixel-char')) return;
+  const fc=getFloorCount();
+  if (currentFloor>fc) return; // locked
+  if (selectedWaiting!==null) {
+    assignToFloor(selectedWaiting,currentFloor);
   } else if (movingEmp) {
-    moveToFloor(floorNum);
+    moveToFloor(currentFloor);
   }
 }
 
-function buyUpgrade(upgradeId) {
-  if (game.upgrades.includes(upgradeId)) return;
-  const upg = UPGRADES.find(u => u.id === upgradeId);
-  if (!upg || game.money < upg.cost) return;
-
-  game.money -= upg.cost;
-  game.upgrades.push(upgradeId);
-
-  playSE('upgrade');
-  updateQuestProgress('upgrade');
-  showToast(`⚡ ${upg.name}を導入！`, 'gold');
-  updateAll();
-  saveGame();
+function changeFloor(dir) {
+  const maxF=Math.min(getFloorCount()+1, MAX_FLOORS); // can see next locked one
+  currentFloor=Math.max(1,Math.min(currentFloor+dir,maxF));
+  renderRoom(); updateFloorNav();
 }
 
-function doPrestige() {
-  if (game.money < 1000000000) return;
-
-  game.prestigeCount++;
-  game.prestigeMultiplier = 1 + (game.prestigeCount * 0.5);
-
-  game.money = 0;
-  game.totalEarned = 0;
-  game.employees = {};
-  game.upgrades = [];
-  game.totalEmployees = 0;
-  game.companyLevel = Math.min(game.prestigeCount, COMPANY_NAMES.length - 1);
-  game.floorData = { 1: [] };
-  game.waitingList = [];
-  game.prevFloorCount = 1;
-
-  playSE('prestige');
-  showToast('★ 転生完了！ボーナスGET！', 'purple');
-  quests = [];
-  generateQuests();
-  cancelSelection();
-  updateAll();
-  saveGame();
-}
-
-function collectOffline() {
-  const banner = document.getElementById('offlineBanner');
-  const amount = parseFloat(banner.dataset.amount || 0);
-  game.money += amount;
-  game.totalEarned += amount;
-  banner.style.display = 'none';
-  showToast(`💤 オフライン収益 ¥${formatMoney(amount)} 回収！`);
-  updateMoneyDisplay();
+function updateFloorNav() {
+  const fc=getFloorCount();
+  const maxF=Math.min(fc+1,MAX_FLOORS);
+  document.getElementById('floorPrev').disabled=currentFloor<=1;
+  document.getElementById('floorNext').disabled=currentFloor>=maxF;
+  document.getElementById('floorLabel').textContent=currentFloor+'F';
+  const emps=getFloorEmps(currentFloor);
+  if (currentFloor>fc) {
+    document.getElementById('floorStatus').textContent='🔒 未解放';
+  } else {
+    document.getElementById('floorStatus').textContent=`${emps.length} / ${FLOOR_CAP}人`;
+  }
 }
 
 // ============================================================
-// DISPLAY
+// ROOM RENDERING
 // ============================================================
+function renderRoom() {
+  const fc=getFloorCount();
+  const locked=currentFloor>fc;
+  const emps=getFloorEmps(currentFloor);
+  const hasEmps=emps.length>0;
+  const lit=hasEmps&&!locked;
+  const isPlacing=selectedWaiting!==null;
+  const isMoving=movingEmp!==null;
 
-function formatMoney(n) {
-  if (n >= 1e12) return (n / 1e12).toFixed(1) + '兆';
-  if (n >= 1e8) return (n / 1e8).toFixed(1) + '億';
-  if (n >= 1e4) return (n / 1e4).toFixed(1) + '万';
-  return Math.floor(n).toLocaleString();
-}
+  // Background
+  const bg=document.getElementById('roomBg');
+  bg.className='room-bg '+(lit?'lit':'dark');
+  document.getElementById('roomWall').className='room-wall-line '+(lit?'lit':'dark');
+  document.getElementById('roomFloor').className='room-floor '+(lit?'lit':'dark');
+  document.getElementById('roomWin1').className='room-window w1'+(lit?' lit':'');
+  document.getElementById('roomWin2').className='room-window w2'+(lit?' lit':'');
 
-function updateMoneyDisplay(bump = false) {
-  const el = document.getElementById('moneyDisplay');
-  el.textContent = formatMoney(game.money);
-  if (bump) {
-    el.classList.remove('bump');
-    void el.offsetWidth;
-    el.classList.add('bump');
-    setTimeout(() => el.classList.remove('bump'), 100);
+  // Furniture
+  const furnOpacity=lit?1:0;
+  document.getElementById('roomDesk1').style.opacity=furnOpacity;
+  document.getElementById('roomDesk2').style.opacity=furnOpacity;
+  document.getElementById('roomPlant1').style.opacity=furnOpacity;
+  document.getElementById('roomPlant2').style.opacity=furnOpacity;
+
+  // Locked
+  const lockedEl=document.getElementById('roomLocked');
+  if (locked) {
+    lockedEl.style.display='flex';
+    const next=FLOOR_THRESHOLDS[currentFloor-1]||999;
+    document.getElementById('lockedText').textContent=`社員${next}名で解放`;
+  } else {
+    lockedEl.style.display='none';
   }
 
-  document.getElementById('incomeRate').textContent = `+${formatMoney(getIncomePerSecond())}円/秒`;
-  document.getElementById('totalEmployees').textContent = game.totalEmployees + '名';
-  document.getElementById('totalEarned').textContent = '¥' + formatMoney(game.totalEarned);
-  document.getElementById('prestigeDisplay').textContent = '★' + game.prestigeCount;
-  document.getElementById('companyNameDisplay').textContent = '★ ' + COMPANY_NAMES[game.companyLevel || 0];
-}
+  // Placement highlight
+  const wrapper=document.getElementById('roomWrapper');
+  if ((isPlacing||isMoving)&&!locked&&!isFloorFull(currentFloor)) {
+    wrapper.style.outline='2px solid var(--accent)';
+    wrapper.style.outlineOffset='-2px';
+  } else {
+    wrapper.style.outline='none';
+  }
 
-function renderBuilding() {
-  const container = document.getElementById('buildingFloors');
-  const floorCount = getUnlockedFloorCount();
-  const isPlacing = selectedWaiting !== null;
-  const isMoving = movingEmp !== null;
+  // Characters
+  const charsEl=document.getElementById('roomChars');
+  if (locked||emps.length===0) { charsEl.innerHTML=''; updateFloorNav(); return; }
 
-  let html = '';
+  let html='';
+  const roomW=wrapper.offsetWidth||440;
+  const margin=30;
+  const usable=roomW-margin*2-28;
 
-  // Render floors top-down
-  for (let f = floorCount; f >= 1; f--) {
-    const emps = getFloorEmployees(f);
-    const hasEmps = emps.length > 0;
-    const full = emps.length >= FLOOR_CAPACITY;
-    const isNew = f > (game.prevFloorCount || 1) - 1 && f === floorCount && document.querySelector(`.building-floor[data-floor="${f}"]`) === null;
-    const selectable = (isPlacing || isMoving) && !full;
+  for (let i=0;i<emps.length;i++) {
+    const emp=emps[i];
+    const ed=EMP.find(e=>e.id===emp.empId);
+    if (!ed) continue;
 
-    let classes = 'building-floor';
-    if (hasEmps) classes += ' lit';
-    if (selectable) classes += ' selected';
-
-    let empHtml = '';
-    if (emps.length > 0) {
-      for (const emp of emps) {
-        const empData = EMPLOYEES.find(e => e.id === emp.empId);
-        const isSelected = selectedFloorEmp && selectedFloorEmp.uid === emp.uid;
-        empHtml += `<span class="floor-emp${isSelected ? ' selected-emp' : ''}" onclick="event.stopPropagation();selectFloorEmployee(${emp.uid},${f})" title="${empData.name}">${empData.emoji}</span>`;
-      }
-    } else {
-      if (isPlacing || isMoving) {
-        empHtml = `<span class="floor-empty-hint">ここに配置</span>`;
-      } else {
-        empHtml = `<span class="floor-empty-hint">空室</span>`;
-      }
+    // Position: spread evenly or wander
+    if (!charPositions[emp.uid]) {
+      charPositions[emp.uid]={ x: margin + Math.random()*usable };
     }
+    const cp=charPositions[emp.uid];
+    const isSel=selectedFloorEmp&&selectedFloorEmp.uid===emp.uid;
 
-    const countInfo = full
-      ? `<span class="floor-full-badge">満員</span>`
-      : `<span class="floor-count">${emps.length}/${FLOOR_CAPACITY}</span>`;
-
-    html += `<div class="${classes}" data-floor="${f}" onclick="onFloorClick(${f})">
-      <span class="floor-label">${f}F</span>
-      <div class="floor-employees">${empHtml}</div>
-      ${countInfo}
+    html+=`<div class="pixel-char${isSel?' selected-emp':''}" data-uid="${emp.uid}"
+      style="left:${cp.x}px;" onclick="event.stopPropagation();onCharTap(${emp.uid},${currentFloor})">
+      <div class="char-speech-area" style="position:absolute;bottom:38px;left:50%;transform:translateX(-50%);pointer-events:none;z-index:10"></div>
+      <div class="char-body">
+        ${ed.acc?`<div class="char-acc">${ed.acc}</div>`:''}
+        <div class="char-head" style="background:${ed.headColor}"></div>
+        <div class="char-body-rect" style="background:${ed.bodyColor}"></div>
+        <div class="char-legs"><div class="char-leg"></div><div class="char-leg"></div></div>
+      </div>
     </div>`;
   }
-
-  // Show next floor unlock hint
-  if (floorCount < MAX_FLOORS) {
-    const nextThreshold = FLOOR_UNLOCK_THRESHOLDS[floorCount];
-    html = `<div class="building-floor" style="min-height:32px;justify-content:center;opacity:0.4;">
-      <span class="floor-empty-hint">🔒 ${floorCount + 1}F 解放: 社員${nextThreshold}名</span>
-    </div>` + html;
-  }
-
-  container.innerHTML = html;
-
-  // Update roof label
-  document.getElementById('buildingRoof').textContent = `KAISHA-DO BUILDING ─ ${floorCount}F`;
+  charsEl.innerHTML=html;
+  updateFloorNav();
 }
 
-function renderWaitingList() {
-  const bar = document.getElementById('waitingBar');
-  let html = '<span class="waiting-label">待機:</span>';
+// Wander characters periodically
+function wanderChars() {
+  const fc=getFloorCount();
+  if (currentFloor>fc) return;
+  const emps=getFloorEmps(currentFloor);
+  const wrapper=document.getElementById('roomWrapper');
+  const roomW=wrapper.offsetWidth||440;
+  const margin=30, usable=roomW-margin*2-28;
 
-  if (game.waitingList.length === 0) {
-    html += '<span class="waiting-empty">待機社員なし</span>';
+  for (const emp of emps) {
+    if (!charPositions[emp.uid]) charPositions[emp.uid]={x:margin+Math.random()*usable};
+    const cp=charPositions[emp.uid];
+    // Random new target
+    cp.x=margin+Math.random()*usable;
+    // Update DOM
+    const el=document.querySelector(`.pixel-char[data-uid="${emp.uid}"]`);
+    if (el) el.style.left=cp.x+'px';
+  }
+}
+setInterval(wanderChars,3000);
+
+function renderLobby() {
+  const bar=document.getElementById('lobbyBar');
+  let h='<span class="lobby-label">ロビー:</span>';
+  if (!game.waitingList.length) {
+    h+='<span class="lobby-empty">待機社員なし</span>';
   } else {
     for (const emp of game.waitingList) {
-      const empData = EMPLOYEES.find(e => e.id === emp.empId);
-      const isSelected = selectedWaiting === emp.uid;
-      html += `<span class="waiting-emp${isSelected ? ' selected-waiting' : ''}" onclick="selectWaitingEmployee(${emp.uid})" title="${empData.name}">${empData.emoji}</span>`;
+      const ed=EMP.find(e=>e.id===emp.empId);
+      const sel=selectedWaiting===emp.uid;
+      h+=`<span class="lobby-emp${sel?' selected':''}" onclick="selectWaiting(${emp.uid})" title="${ed.name}">${ed.emoji}</span>`;
     }
-    html += `<span class="waiting-label" style="margin-left:auto;">${game.waitingList.length}名</span>`;
+    h+=`<span class="lobby-count">${game.waitingList.length}名</span>`;
   }
+  bar.innerHTML=h;
+}
 
-  bar.innerHTML = html;
+// ============================================================
+// STANDARD RENDERS
+// ============================================================
+function fmt(n) { if(n>=1e12) return (n/1e12).toFixed(1)+'兆'; if(n>=1e8) return (n/1e8).toFixed(1)+'億'; if(n>=1e4) return (n/1e4).toFixed(1)+'万'; return Math.floor(n).toLocaleString(); }
+
+function updateMoneyDisplay(bump) {
+  const el=document.getElementById('moneyDisplay');
+  el.textContent=fmt(game.money);
+  if (bump) { el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); setTimeout(()=>el.classList.remove('bump'),100); }
+  document.getElementById('incomeRate').textContent=`+${fmt(getIncomePerSecond())}円/秒`;
+  document.getElementById('companyNameDisplay').textContent='★ '+COMPANY_NAMES[game.companyLevel||0];
 }
 
 function renderEmployees() {
-  const list = document.getElementById('employeeList');
-  let html = '';
-
-  for (const emp of EMPLOYEES) {
-    const count = game.employees[emp.id] || 0;
-    const cost = getEmployeeCost(emp.id, count);
-    const canAfford = game.money >= cost;
-    const isUnlocked = game.totalEarned >= emp.unlockAt || game.money >= emp.unlockAt || count > 0;
-
-    if (!isUnlocked) {
-      html += `
-        <div class="employee-card cant-afford" style="--card-color:${emp.color}">
-          <div class="emp-emoji">🔒</div>
-          <div class="emp-info">
-            <div class="emp-name">???</div>
-            <div class="emp-desc">¥${formatMoney(emp.unlockAt)}以上稼ぐと解放</div>
-          </div>
-        </div>`;
-      continue;
-    }
-
-    let empIncome = emp.baseIncome;
-    const empUpgrades = UPGRADES.filter(u => u.target === emp.id && game.upgrades.includes(u.id));
-    for (const upg of empUpgrades) empIncome *= upg.multiplier;
-    if (game.upgrades.includes('global')) empIncome *= 1.5;
-    empIncome *= game.prestigeMultiplier;
-
-    html += `
-      <div class="employee-card ${canAfford ? 'can-afford' : 'cant-afford'}" style="--card-color:${emp.color}" onclick="hireEmployee('${emp.id}')">
-        <div class="emp-emoji">${emp.emoji}</div>
-        <div class="emp-info">
-          <div class="emp-name">
-            ${emp.name}
-            ${count > 0 ? `<span class="emp-count-badge" style="background:${emp.color}">${count}名</span>` : ''}
-          </div>
-          <div class="emp-income">+${formatMoney(empIncome)}円/秒 × ${count}名</div>
-          <div class="emp-desc">${emp.desc}</div>
-        </div>
-        <div class="hire-btn ${canAfford ? 'can-afford' : ''}" style="--card-color:${emp.color}">
-          <span class="hire-label">採用</span>
-          <span class="hire-cost">¥${formatMoney(cost)}</span>
-        </div>
-      </div>`;
+  const list=document.getElementById('employeeList'); let h='';
+  for (const e of EMP) {
+    const c=game.employees[e.id]||0, cost=getEmpCost(e.id,c);
+    const can=game.money>=cost;
+    const unlocked=game.totalEarned>=e.unlockAt||game.money>=e.unlockAt||c>0;
+    if (!unlocked) { h+=`<div class="employee-card cant-afford" style="--card-color:${e.color}"><div class="emp-emoji">🔒</div><div class="emp-info"><div class="emp-name">???</div><div class="emp-desc">¥${fmt(e.unlockAt)}以上で解放</div></div></div>`; continue; }
+    let inc=e.baseIncome;
+    for (const u of UPGRADES) if(u.target===e.id&&game.upgrades.includes(u.id)) inc*=u.multiplier;
+    if (game.upgrades.includes('global')) inc*=1.5;
+    inc*=game.prestigeMultiplier;
+    h+=`<div class="employee-card ${can?'can-afford':'cant-afford'}" style="--card-color:${e.color}" onclick="hireEmployee('${e.id}')">
+      <div class="emp-emoji">${e.emoji}</div><div class="emp-info">
+      <div class="emp-name">${e.name}${c?`<span class="emp-count-badge" style="background:${e.color}">${c}名</span>`:''}</div>
+      <div class="emp-income">+${fmt(inc)}円/秒 ×${c}名</div>
+      <div class="emp-desc">${e.desc}</div></div>
+      <div class="hire-btn ${can?'can-afford':''}" style="--card-color:${e.color}"><span class="hire-label">採用</span><span class="hire-cost">¥${fmt(cost)}</span></div></div>`;
   }
-
-  list.innerHTML = html;
+  list.innerHTML=h;
 }
 
 function renderUpgrades() {
-  const list = document.getElementById('upgradeList');
-  let html = '';
-
-  for (const upg of UPGRADES) {
-    const purchased = game.upgrades.includes(upg.id);
-    const canAfford = game.money >= upg.cost;
-    html += `
-      <div class="upgrade-card ${purchased ? 'purchased' : canAfford ? 'can-afford' : ''}" onclick="buyUpgrade('${upg.id}')">
-        <div class="upg-icon">${upg.emoji}</div>
-        <div class="upg-info">
-          <div class="upg-name">${upg.name}</div>
-          <div class="upg-desc">${upg.desc}</div>
-        </div>
-        ${purchased
-          ? `<div class="upg-done">✅</div>`
-          : `<div class="upg-cost">¥${formatMoney(upg.cost)}</div>`
-        }
-      </div>`;
+  const list=document.getElementById('upgradeList'); let h='';
+  for (const u of UPGRADES) {
+    const p=game.upgrades.includes(u.id), can=game.money>=u.cost;
+    h+=`<div class="upgrade-card ${p?'purchased':can?'can-afford':''}" onclick="buyUpgrade('${u.id}')">
+      <div class="upg-icon">${u.emoji}</div><div class="upg-info"><div class="upg-name">${u.name}</div><div class="upg-desc">${u.desc}</div></div>
+      ${p?'<div class="upg-done">✅</div>':`<div class="upg-cost">¥${fmt(u.cost)}</div>`}</div>`;
   }
+  list.innerHTML=h;
+}
 
-  list.innerHTML = html;
+function buyUpgrade(id) {
+  if (game.upgrades.includes(id)) return;
+  const u=UPGRADES.find(x=>x.id===id); if(!u||game.money<u.cost) return;
+  game.money-=u.cost; game.upgrades.push(id);
+  playSE('upgrade'); updateQuestProgress('upgrade');
+  showToast(`⚡ ${u.name}を導入！`,'gold'); updateAll(); saveGame();
 }
 
 function renderMilestones() {
-  const list = document.getElementById('milestoneList');
-  let html = '';
-
+  const list=document.getElementById('milestoneList'); let h='';
   for (const ms of MILESTONES) {
-    const achieved = ms.check(game);
-    if (achieved && !game.milestones.includes(ms.id)) {
-      game.milestones.push(ms.id);
-    }
-    const done = game.milestones.includes(ms.id) || achieved;
-    html += `
-      <div class="milestone-card ${done ? 'achieved' : ''}">
-        <div class="ms-icon">${ms.emoji}</div>
-        <div class="ms-info">
-          <div class="ms-name">${ms.name}</div>
-          <div class="ms-desc">${ms.desc}</div>
-        </div>
-        <div class="ms-status">${done ? '🏆' : '⬜'}</div>
-      </div>`;
+    const a=ms.check(game); if(a&&!game.milestones.includes(ms.id)) game.milestones.push(ms.id);
+    const d=game.milestones.includes(ms.id)||a;
+    h+=`<div class="milestone-card ${d?'achieved':''}"><div class="ms-icon">${ms.emoji}</div><div class="ms-info"><div class="ms-name">${ms.name}</div><div class="ms-desc">${ms.desc}</div></div><div class="ms-status">${d?'🏆':'⬜'}</div></div>`;
   }
-
-  list.innerHTML = html;
+  list.innerHTML=h;
 }
 
 function renderPrestige() {
-  const btn = document.getElementById('prestigeBtn');
-  const bonus = document.getElementById('prestigeBonus');
-  const history = document.getElementById('prestigeHistory');
+  const btn=document.getElementById('prestigeBtn');
+  btn.disabled=game.money<1e9;
+  document.getElementById('prestigeBonus').textContent=`転生後ボーナス: ×${(1+((game.prestigeCount+1)*.5)).toFixed(1)}`;
+  const hist=document.getElementById('prestigeHistory');
+  hist.innerHTML=game.prestigeCount>0
+    ?`<div class="milestone-card achieved"><div class="ms-icon">⭐</div><div class="ms-info"><div class="ms-name">${game.prestigeCount}回転生済み</div><div class="ms-desc">収益ボーナス: ×${game.prestigeMultiplier.toFixed(1)}</div></div><div class="ms-status">✨</div></div>`
+    :'<div style="text-align:center;color:var(--text-dim);font-size:11px;padding:16px">まだ転生していません</div>';
+}
 
-  const canPrestige = game.money >= 1000000000;
-  btn.disabled = !canPrestige;
+function doPrestige() {
+  if (game.money<1e9) return;
+  game.prestigeCount++; game.prestigeMultiplier=1+game.prestigeCount*.5;
+  game.money=0; game.totalEarned=0; game.employees={}; game.upgrades=[];
+  game.totalEmployees=0; game.companyLevel=Math.min(game.prestigeCount,COMPANY_NAMES.length-1);
+  game.floorData={1:[]}; game.waitingList=[]; game.prevFloorCount=1;
+  currentFloor=1; charPositions={};
+  playSE('prestige'); showToast('★ 転生完了！ボーナスGET！','purple');
+  quests=[]; generateQuests(); cancelSelection(); updateAll(); saveGame();
+}
 
-  const nextMult = 1 + ((game.prestigeCount + 1) * 0.5);
-  bonus.textContent = `転生後の収益ボーナス: ×${nextMult.toFixed(1)}`;
+function collectOffline() {
+  const b=document.getElementById('offlineBanner');
+  const a=parseFloat(b.dataset.amount||0);
+  game.money+=a; game.totalEarned+=a; b.style.display='none';
+  showToast(`💤 オフライン収益 ¥${fmt(a)} 回収！`); updateMoneyDisplay();
+}
 
-  if (game.prestigeCount > 0) {
-    history.innerHTML = `<div class="milestone-card achieved">
-      <div class="ms-icon">⭐</div>
-      <div class="ms-info">
-        <div class="ms-name">${game.prestigeCount}回転生済み</div>
-        <div class="ms-desc">現在の収益ボーナス: ×${game.prestigeMultiplier.toFixed(1)}</div>
-      </div>
-      <div class="ms-status">✨</div>
-    </div>`;
-  } else {
-    history.innerHTML = `<div style="text-align:center;color:var(--text-dim);font-size:12px;padding:20px;">まだ転生していません</div>`;
+function renderRanking() {
+  const list=document.getElementById('rankingList'); if(!list) return;
+  const rd=[], ti=getIncomePerSecond(), gm=game.upgrades.includes('global')?1.5:1;
+  for (const e of EMP) {
+    const c=game.employees[e.id]||0; if(!c) continue;
+    let inc=e.baseIncome*c;
+    for (const u of UPGRADES) if(u.target===e.id&&game.upgrades.includes(u.id)) inc*=u.multiplier;
+    inc*=gm*game.prestigeMultiplier;
+    rd.push({name:e.name,emoji:e.emoji,count:c,income:inc,color:e.color,share:ti>0?inc/ti*100:0});
   }
+  rd.sort((a,b)=>b.income-a.income);
+  let h='';
+  if (!rd.length) { h='<div style="text-align:center;color:var(--text-dim);font-size:11px;padding:16px">社員を採用すると表示されます</div>'; }
+  else {
+    h+=`<div class="ranking-card" style="border-color:var(--accent);margin-bottom:12px"><div style="font-size:22px">🏢</div><div class="rank-info"><div class="rank-name">全社合計</div><div class="rank-income">+${fmt(ti)}円/秒</div></div><div style="font-size:12px;color:var(--accent);font-family:var(--pixel)">${game.totalEmployees}名</div></div>`;
+    const medals=['🥇','🥈','🥉'];
+    rd.forEach((e,i)=>{
+      const r=i+1, rc=r<=3?`rank-${r}`:'';
+      h+=`<div class="ranking-card ${rc}"><div class="rank-num">${r<=3?medals[r-1]:'#'+r}</div><div style="font-size:24px;flex-shrink:0">${e.emoji}</div><div class="rank-info"><div class="rank-name">${e.name} <span style="font-size:9px;color:var(--text-dim)">(${e.count}名)</span></div><div class="rank-income">+${fmt(e.income)}円/秒</div><div class="rank-bar"><div class="rank-bar-fill" style="width:${e.share}%;background:${e.color}"></div></div><div class="rank-share">シェア: ${e.share.toFixed(1)}%</div></div></div>`;
+    });
+  }
+  list.innerHTML=h;
 }
 
 function updateAll() {
-  updateMoneyDisplay();
-  renderBuilding();
-  renderWaitingList();
-  renderEmployees();
-  renderUpgrades();
-  renderQuests();
-  renderRanking();
-  renderMilestones();
-  renderPrestige();
+  updateMoneyDisplay(); renderRoom(); renderLobby();
+  renderEmployees(); renderUpgrades(); renderQuests();
+  renderRanking(); renderMilestones(); renderPrestige(); updateFloorNav();
 }
 
 // ============================================================
-// UI HELPERS
+// UI
 // ============================================================
-
 function switchTab(tab) {
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById(`tab-${tab}`).classList.add('active');
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
   event.target.classList.add('active');
 }
-
-function showToast(msg, type = '') {
-  const container = document.getElementById('toastContainer');
-  const toast = document.createElement('div');
-  toast.className = `toast ${type}`;
-  toast.textContent = msg;
-  container.appendChild(toast);
-  setTimeout(() => toast.remove(), 2300);
+function showToast(msg,type='') {
+  const c=document.getElementById('toastContainer'), t=document.createElement('div');
+  t.className='toast '+(type||''); t.textContent=msg; c.appendChild(t);
+  setTimeout(()=>t.remove(),2200);
 }
-
 function showOfflineBanner(amount) {
-  const banner = document.getElementById('offlineBanner');
-  banner.dataset.amount = amount;
-  banner.querySelector('.offline-amount').textContent = '¥' + formatMoney(amount);
-  banner.style.display = 'flex';
+  const b=document.getElementById('offlineBanner');
+  b.dataset.amount=amount; b.querySelector('.offline-amount').textContent='¥'+fmt(amount);
+  b.style.display='flex';
 }
 
 // ============================================================
 // GAME LOOP
 // ============================================================
-
-let lastTick = Date.now();
-
+let lastTick=Date.now();
 function gameLoop() {
-  const now = Date.now();
-  const delta = (now - lastTick) / 1000;
-  lastTick = now;
-
-  const income = getIncomePerSecond() * delta;
-  if (income > 0) {
-    game.money += income;
-    game.totalEarned += income;
-  }
-
+  const now=Date.now(), delta=(now-lastTick)/1000; lastTick=now;
+  const inc=getIncomePerSecond()*delta;
+  if (inc>0) { game.money+=inc; game.totalEarned+=inc; }
   updateMoneyDisplay();
   requestAnimationFrame(gameLoop);
 }
 
-setInterval(() => {
-  renderEmployees();
-  renderUpgrades();
-  renderQuests();
-  renderRanking();
-  renderBuilding();
-  renderWaitingList();
-
-  updateQuestProgress('earn', getIncomePerSecond() * 2);
+setInterval(()=>{
+  renderEmployees(); renderUpgrades(); renderQuests();
+  renderRanking(); renderRoom(); renderLobby();
+  updateQuestProgress('earn',getIncomePerSecond()*2);
   checkFloorUnlocks();
-
-  let newMilestone = false;
   for (const ms of MILESTONES) {
-    if (!game.milestones.includes(ms.id) && ms.check(game)) {
-      game.milestones.push(ms.id);
-      playSE('milestone');
-      showToast(`🏆 実績解除: ${ms.name}！`, 'gold');
-      newMilestone = true;
+    if (!game.milestones.includes(ms.id)&&ms.check(game)) {
+      game.milestones.push(ms.id); playSE('milestone');
+      showToast(`🏆 実績解除: ${ms.name}！`,'gold');
     }
   }
-
   saveGame();
-}, 2000);
+},2000);
 
 // ============================================================
-// SOUND SYSTEM (Web Audio API)
+// SOUND
 // ============================================================
-
-let audioCtx = null;
-let soundEnabled = false;
-let bgmGain = null;
-let bgmStarted = false;
-
-function initAudio() {
-  if (audioCtx) return;
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  bgmGain = audioCtx.createGain();
-  bgmGain.gain.value = 0.15;
-  bgmGain.connect(audioCtx.destination);
-}
-
+let audioCtx=null, soundEnabled=false, bgmGain=null, bgmStarted=false;
+function initAudio() { if(audioCtx) return; audioCtx=new(window.AudioContext||window.webkitAudioContext)(); bgmGain=audioCtx.createGain(); bgmGain.gain.value=.15; bgmGain.connect(audioCtx.destination); }
 function toggleSound() {
-  initAudio();
-  soundEnabled = !soundEnabled;
-  const btn = document.getElementById('soundToggle');
-  btn.textContent = soundEnabled ? '🔊' : '🔇';
-  btn.classList.toggle('on', soundEnabled);
-  if (soundEnabled) {
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    if (!bgmStarted) startBGM();
-    bgmGain.gain.value = 0.15;
-  } else {
-    bgmGain.gain.value = 0;
-  }
+  initAudio(); soundEnabled=!soundEnabled;
+  const b=document.getElementById('soundToggle');
+  b.textContent=soundEnabled?'🔊':'🔇'; b.classList.toggle('on',soundEnabled);
+  if(soundEnabled){if(audioCtx.state==='suspended')audioCtx.resume();if(!bgmStarted)startBGM();bgmGain.gain.value=.15;}else{bgmGain.gain.value=0;}
 }
-
 function playSE(type) {
-  if (!soundEnabled || !audioCtx) return;
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-
+  if(!soundEnabled||!audioCtx) return;
+  const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+  o.connect(g); g.connect(audioCtx.destination);
+  const t=audioCtx.currentTime;
   switch(type) {
-    case 'hire':
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(523, audioCtx.currentTime);
-      gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
-      osc.start(); osc.stop(audioCtx.currentTime + 0.15);
-      setTimeout(() => {
-        if (!audioCtx) return;
-        const osc2 = audioCtx.createOscillator();
-        const g2 = audioCtx.createGain();
-        osc2.connect(g2); g2.connect(audioCtx.destination);
-        osc2.type = 'triangle';
-        osc2.frequency.value = 659;
-        g2.gain.setValueAtTime(0.12, audioCtx.currentTime);
-        g2.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
-        osc2.start(); osc2.stop(audioCtx.currentTime + 0.15);
-      }, 80);
-      break;
-    case 'upgrade':
-      osc.type = 'square';
-      osc.frequency.setValueAtTime(440, audioCtx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15);
-      gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
-      osc.start(); osc.stop(audioCtx.currentTime + 0.2);
-      break;
-    case 'milestone':
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(523, audioCtx.currentTime);
-      gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
-      osc.start(); osc.stop(audioCtx.currentTime + 0.5);
-      [659, 784, 1047].forEach((freq, i) => {
-        setTimeout(() => {
-          if (!audioCtx) return;
-          const o = audioCtx.createOscillator();
-          const g = audioCtx.createGain();
-          o.connect(g); g.connect(audioCtx.destination);
-          o.type = 'sine'; o.frequency.value = freq;
-          g.gain.setValueAtTime(0.12, audioCtx.currentTime);
-          g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
-          o.start(); o.stop(audioCtx.currentTime + 0.3);
-        }, (i + 1) * 120);
-      });
-      break;
-    case 'quest':
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(660, audioCtx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(1320, audioCtx.currentTime + 0.2);
-      gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
-      osc.start(); osc.stop(audioCtx.currentTime + 0.3);
-      break;
-    case 'prestige':
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(262, audioCtx.currentTime);
-      gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
-      osc.start(); osc.stop(audioCtx.currentTime + 0.8);
-      [330, 392, 523, 659, 784].forEach((freq, i) => {
-        setTimeout(() => {
-          if (!audioCtx) return;
-          const o = audioCtx.createOscillator();
-          const g = audioCtx.createGain();
-          o.connect(g); g.connect(audioCtx.destination);
-          o.type = 'sine'; o.frequency.value = freq;
-          g.gain.setValueAtTime(0.12, audioCtx.currentTime);
-          g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
-          o.start(); o.stop(audioCtx.currentTime + 0.4);
-        }, (i + 1) * 150);
-      });
-      break;
+    case 'hire': o.type='triangle'; o.frequency.setValueAtTime(523,t); g.gain.setValueAtTime(.12,t); g.gain.exponentialRampToValueAtTime(.001,t+.15); o.start(); o.stop(t+.15);
+      setTimeout(()=>{if(!audioCtx)return;const o2=audioCtx.createOscillator(),g2=audioCtx.createGain();o2.connect(g2);g2.connect(audioCtx.destination);o2.type='triangle';o2.frequency.value=659;g2.gain.setValueAtTime(.12,audioCtx.currentTime);g2.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+.15);o2.start();o2.stop(audioCtx.currentTime+.15)},80); break;
+    case 'upgrade': o.type='square'; o.frequency.setValueAtTime(440,t); o.frequency.exponentialRampToValueAtTime(880,t+.15); g.gain.setValueAtTime(.08,t); g.gain.exponentialRampToValueAtTime(.001,t+.2); o.start(); o.stop(t+.2); break;
+    case 'milestone': o.type='sine'; o.frequency.setValueAtTime(523,t); g.gain.setValueAtTime(.12,t); g.gain.exponentialRampToValueAtTime(.001,t+.5); o.start(); o.stop(t+.5);
+      [659,784,1047].forEach((f,i)=>setTimeout(()=>{if(!audioCtx)return;const x=audioCtx.createOscillator(),y=audioCtx.createGain();x.connect(y);y.connect(audioCtx.destination);x.type='sine';x.frequency.value=f;y.gain.setValueAtTime(.12,audioCtx.currentTime);y.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+.3);x.start();x.stop(audioCtx.currentTime+.3)},(i+1)*120)); break;
+    case 'quest': o.type='sine'; o.frequency.setValueAtTime(660,t); o.frequency.exponentialRampToValueAtTime(1320,t+.2); g.gain.setValueAtTime(.15,t); g.gain.exponentialRampToValueAtTime(.001,t+.3); o.start(); o.stop(t+.3); break;
+    case 'prestige': o.type='sine'; o.frequency.setValueAtTime(262,t); g.gain.setValueAtTime(.15,t); g.gain.exponentialRampToValueAtTime(.001,t+.8); o.start(); o.stop(t+.8);
+      [330,392,523,659,784].forEach((f,i)=>setTimeout(()=>{if(!audioCtx)return;const x=audioCtx.createOscillator(),y=audioCtx.createGain();x.connect(y);y.connect(audioCtx.destination);x.type='sine';x.frequency.value=f;y.gain.setValueAtTime(.12,audioCtx.currentTime);y.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+.4);x.start();x.stop(audioCtx.currentTime+.4)},(i+1)*150)); break;
   }
 }
-
 function startBGM() {
-  if (!audioCtx || bgmStarted) return;
-  bgmStarted = true;
-  const notes = [262, 294, 330, 349, 392, 349, 330, 294];
-  let noteIndex = 0;
-
-  function playBGMNote() {
-    if (!soundEnabled) { setTimeout(playBGMNote, 500); return; }
-    const osc = audioCtx.createOscillator();
-    const g = audioCtx.createGain();
-    osc.connect(g);
-    g.connect(bgmGain);
-    osc.type = 'sine';
-    osc.frequency.value = notes[noteIndex] * 0.5;
-    g.gain.setValueAtTime(0.3, audioCtx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
-    osc.start();
-    osc.stop(audioCtx.currentTime + 0.8);
-    noteIndex = (noteIndex + 1) % notes.length;
-    setTimeout(playBGMNote, 800);
-  }
-  playBGMNote();
+  if(!audioCtx||bgmStarted) return; bgmStarted=true;
+  const notes=[262,294,330,349,392,349,330,294]; let ni=0;
+  function play(){if(!soundEnabled){setTimeout(play,500);return;}const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(bgmGain);o.type='sine';o.frequency.value=notes[ni]*.5;g.gain.setValueAtTime(.3,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+.8);o.start();o.stop(audioCtx.currentTime+.8);ni=(ni+1)%notes.length;setTimeout(play,800);}
+  play();
 }
 
 // ============================================================
-// QUEST / MISSION SYSTEM
+// QUEST
 // ============================================================
-
-const QUEST_TEMPLATES = [
-  { id: 'q_hire', name: '採用キャンペーン', desc: '{target}人採用しよう', icon: '👥', type: 'hire', targets: [3, 5, 10, 20], rewardMult: 500 },
-  { id: 'q_earn', name: '売上目標', desc: '¥{target}を稼ごう', icon: '💰', type: 'earn', targets: [1000, 10000, 100000, 1000000], rewardMult: 0.3 },
-  { id: 'q_upgrade', name: '設備投資', desc: '{target}個の強化を購入しよう', icon: '⚡', type: 'upgrade', targets: [1, 2, 3, 5], rewardMult: 2000 },
+const QUEST_TEMPLATES=[
+  {id:'q_hire',name:'採用キャンペーン',desc:'{target}人採用しよう',icon:'👥',type:'hire',targets:[3,5,10,20],rewardMult:500},
+  {id:'q_earn',name:'売上目標',desc:'¥{target}を稼ごう',icon:'💰',type:'earn',targets:[1000,10000,100000,1000000],rewardMult:.3},
+  {id:'q_upgrade',name:'設備投資',desc:'{target}個の強化を購入しよう',icon:'⚡',type:'upgrade',targets:[1,2,3,5],rewardMult:2000},
 ];
-
-let quests = [];
-let questProgress = { hire: 0, earn: 0, upgrade: 0 };
-let questLastGenerated = 0;
-
+let quests=[], questLastGen=0;
 function generateQuests() {
-  const now = Date.now();
-  if (quests.length >= 3 && now - questLastGenerated < 300000) return;
-
-  quests = quests.filter(q => !q.claimed);
-
-  while (quests.length < 3) {
-    const template = QUEST_TEMPLATES[Math.floor(Math.random() * QUEST_TEMPLATES.length)];
-    const difficulty = Math.min(Math.floor(game.prestigeCount + game.totalEmployees / 20), template.targets.length - 1);
-    const target = template.targets[Math.max(0, difficulty)];
-    const reward = Math.floor(target * template.rewardMult * (1 + game.prestigeCount * 0.2));
-
-    const quest = {
-      id: template.id + '_' + now + '_' + quests.length,
-      name: template.name,
-      desc: template.desc.replace('{target}', template.type === 'earn' ? formatMoney(target) : target),
-      icon: template.icon,
-      type: template.type,
-      target: target,
-      progress: 0,
-      reward: reward,
-      completed: false,
-      claimed: false,
-      createdAt: now,
-      expiresAt: now + 600000,
-    };
-    quests.push(quest);
+  const now=Date.now(); if(quests.length>=3&&now-questLastGen<300000) return;
+  quests=quests.filter(q=>!q.claimed);
+  while(quests.length<3){
+    const tp=QUEST_TEMPLATES[Math.floor(Math.random()*QUEST_TEMPLATES.length)];
+    const d=Math.min(Math.floor(game.prestigeCount+game.totalEmployees/20),tp.targets.length-1);
+    const tgt=tp.targets[Math.max(0,d)];
+    const rew=Math.floor(tgt*tp.rewardMult*(1+game.prestigeCount*.2));
+    quests.push({id:tp.id+'_'+now+'_'+quests.length,name:tp.name,desc:tp.desc.replace('{target}',tp.type==='earn'?fmt(tgt):tgt),icon:tp.icon,type:tp.type,target:tgt,progress:0,reward:rew,completed:false,claimed:false,createdAt:now,expiresAt:now+600000});
   }
-  questLastGenerated = now;
-  questProgress = { hire: 0, earn: 0, upgrade: 0 };
+  questLastGen=now;
 }
-
-function updateQuestProgress(type, amount = 1) {
-  for (const quest of quests) {
-    if (quest.claimed || quest.type !== type) continue;
-    quest.progress += amount;
-    if (quest.progress >= quest.target && !quest.completed) {
-      quest.completed = true;
-      showToast(`📋 任務達成: ${quest.name}！`, 'gold');
-      playSE('quest');
-    }
-  }
+function updateQuestProgress(type,amount=1) {
+  for(const q of quests){if(q.claimed||q.type!==type) continue; q.progress+=amount; if(q.progress>=q.target&&!q.completed){q.completed=true;showToast(`📋 任務達成: ${q.name}！`,'gold');playSE('quest');}}
 }
-
-function claimQuest(questId) {
-  const quest = quests.find(q => q.id === questId);
-  if (!quest || !quest.completed || quest.claimed) return;
-  quest.claimed = true;
-  game.money += quest.reward;
-  game.totalEarned += quest.reward;
-  showToast(`📋 報酬 ¥${formatMoney(quest.reward)} 獲得！`, 'gold');
-  playSE('milestone');
-  generateQuests();
-  renderQuests();
-  updateMoneyDisplay(true);
-  saveGame();
+function claimQuest(id) {
+  const q=quests.find(x=>x.id===id); if(!q||!q.completed||q.claimed) return;
+  q.claimed=true; game.money+=q.reward; game.totalEarned+=q.reward;
+  showToast(`📋 報酬 ¥${fmt(q.reward)} 獲得！`,'gold'); playSE('milestone');
+  generateQuests(); renderQuests(); updateMoneyDisplay(true); saveGame();
 }
-
 function renderQuests() {
-  const list = document.getElementById('questList');
-  if (!list) return;
-  let html = '';
-
-  const now = Date.now();
-  quests = quests.filter(q => q.claimed || now < q.expiresAt);
-  generateQuests();
-
-  for (const quest of quests) {
-    if (quest.claimed) continue;
-    const progress = Math.min(quest.progress, quest.target);
-    const pct = Math.floor((progress / quest.target) * 100);
-    const remaining = Math.max(0, quest.expiresAt - now);
-    const mins = Math.floor(remaining / 60000);
-    const secs = Math.floor((remaining % 60000) / 1000);
-
-    html += `
-      <div class="quest-card ${quest.completed ? 'completed' : 'active'}">
-        <div class="quest-timer">${mins}:${String(secs).padStart(2, '0')}</div>
-        <div class="quest-header">
-          <span class="quest-icon">${quest.icon}</span>
-          <span class="quest-title">${quest.name}</span>
-        </div>
-        <div class="quest-desc">${quest.desc}</div>
-        <div class="quest-progress-bar">
-          <div class="quest-progress-fill" style="width:${pct}%"></div>
-        </div>
-        <div class="quest-progress-text">
-          <span>${quest.type === 'earn' ? formatMoney(progress) : progress} / ${quest.type === 'earn' ? formatMoney(quest.target) : quest.target}</span>
-          <span>${pct}%</span>
-        </div>
-        <div class="quest-reward">報酬: ¥${formatMoney(quest.reward)}</div>
-        ${quest.completed ? `<button class="quest-claim-btn" onclick="claimQuest('${quest.id}')">報酬を受け取る！</button>` : ''}
-      </div>`;
+  const list=document.getElementById('questList'); if(!list) return;
+  const now=Date.now(); quests=quests.filter(q=>q.claimed||now<q.expiresAt); generateQuests();
+  let h='';
+  for(const q of quests){
+    if(q.claimed) continue;
+    const p=Math.min(q.progress,q.target), pct=Math.floor(p/q.target*100);
+    const rem=Math.max(0,q.expiresAt-now), m=Math.floor(rem/60000), s=Math.floor(rem%60000/1000);
+    h+=`<div class="quest-card ${q.completed?'completed':'active'}"><div class="quest-timer">${m}:${String(s).padStart(2,'0')}</div><div class="quest-header"><span class="quest-icon">${q.icon}</span><span class="quest-title">${q.name}</span></div><div class="quest-desc">${q.desc}</div><div class="quest-progress-bar"><div class="quest-progress-fill" style="width:${pct}%"></div></div><div class="quest-progress-text"><span>${q.type==='earn'?fmt(p):p} / ${q.type==='earn'?fmt(q.target):q.target}</span><span>${pct}%</span></div><div class="quest-reward">報酬: ¥${fmt(q.reward)}</div>${q.completed?`<button class="quest-claim-btn" onclick="claimQuest('${q.id}')">報酬を受け取る！</button>`:''}</div>`;
   }
-
-  if (!html) {
-    html = `<div style="text-align:center;color:var(--text-dim);font-size:12px;padding:20px;">新しい任務を準備中...</div>`;
-  }
-
-  list.innerHTML = html;
+  if(!h) h='<div style="text-align:center;color:var(--text-dim);font-size:11px;padding:16px">準備中...</div>';
+  list.innerHTML=h;
 }
 
 // ============================================================
-// RANKING SYSTEM
+// SWIPE SUPPORT
 // ============================================================
-
-function renderRanking() {
-  const list = document.getElementById('rankingList');
-  if (!list) return;
-
-  const rankData = [];
-  const totalIncome = getIncomePerSecond();
-  const globalMult = game.upgrades.includes('global') ? 1.5 : 1;
-
-  for (const emp of EMPLOYEES) {
-    const count = game.employees[emp.id] || 0;
-    if (count === 0) continue;
-
-    let empIncome = emp.baseIncome * count;
-    const empUpgrades = UPGRADES.filter(u => u.target === emp.id && game.upgrades.includes(u.id));
-    for (const upg of empUpgrades) empIncome *= upg.multiplier;
-    empIncome *= globalMult * game.prestigeMultiplier;
-
-    rankData.push({
-      name: emp.name,
-      emoji: emp.emoji,
-      count: count,
-      income: empIncome,
-      color: emp.color,
-      share: totalIncome > 0 ? (empIncome / totalIncome * 100) : 0,
-    });
-  }
-
-  rankData.sort((a, b) => b.income - a.income);
-
-  let html = '';
-  if (rankData.length === 0) {
-    html = `<div style="text-align:center;color:var(--text-dim);font-size:12px;padding:20px;">社員を採用すると番付が表示されます</div>`;
-  } else {
-    html += `<div class="ranking-card" style="border-color:var(--accent);margin-bottom:16px;">
-      <div style="font-size:24px;">🏢</div>
-      <div class="rank-info">
-        <div class="rank-name">全社合計</div>
-        <div class="rank-income">+${formatMoney(totalIncome)}円/秒</div>
-      </div>
-      <div style="font-size:13px;color:var(--accent);font-family:'DotGothic16',monospace;">${game.totalEmployees}名</div>
-    </div>`;
-
-    rankData.forEach((emp, i) => {
-      const rank = i + 1;
-      const rankClass = rank <= 3 ? `rank-${rank}` : '';
-      const medals = ['🥇', '🥈', '🥉'];
-      html += `
-        <div class="ranking-card ${rankClass}">
-          <div class="rank-num">${rank <= 3 ? medals[rank-1] : '#' + rank}</div>
-          <div style="font-size:28px;flex-shrink:0;">${emp.emoji}</div>
-          <div class="rank-info">
-            <div class="rank-name">${emp.name} <span style="font-size:10px;color:var(--text-dim);">(${emp.count}名)</span></div>
-            <div class="rank-income">+${formatMoney(emp.income)}円/秒</div>
-            <div class="rank-bar">
-              <div class="rank-bar-fill" style="width:${emp.share}%;background:${emp.color};"></div>
-            </div>
-            <div class="rank-share">収益シェア: ${emp.share.toFixed(1)}%</div>
-          </div>
-        </div>`;
-    });
-  }
-
-  list.innerHTML = html;
-}
+let touchStartX=0;
+document.getElementById('roomWrapper').addEventListener('touchstart',e=>{touchStartX=e.touches[0].clientX;},{passive:true});
+document.getElementById('roomWrapper').addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-touchStartX;
+  if(Math.abs(dx)>50) { changeFloor(dx<0?1:-1); }
+},{passive:true});
 
 // ============================================================
 // INIT
 // ============================================================
-loadGame();
-generateQuests();
-updateAll();
-requestAnimationFrame(gameLoop);
+loadGame(); generateQuests(); updateAll(); requestAnimationFrame(gameLoop);
 </script>
-
 </body>
 </html>
