@@ -10524,7 +10524,7 @@ function drawBattle(dt) {
 
     // アイドルモーション: 待機中にわずかに上下に揺れる（描画のみ）
     const isIdle = p.grounded && !p.attacking && Math.abs(p.vx) < 0.5 && p.hitstun <= 0 && !p.grabbing && !p.grabbed && !p.guarding && p.guardBreakStun <= 0;
-    const idleOfs = isIdle ? Math.sin(battleTime * (Math.PI * 2 / 120)) * 1 : 0;
+    const idleOfs = isIdle ? Math.sin(battleTime * (Math.PI * 2 / 180)) * 0.3 : 0;
     const drawY = p.y - 55 + idleOfs;
 
     // ⑤ コマンド技スケールエフェクト & ドラゴンモード拡大
