@@ -36,13 +36,15 @@
 
   .app {
     position: relative;
-    max-width: 480px;
+    max-width: 100vw;
     margin: 0 auto;
     min-height: 100vh;
     min-height: 100dvh;
     display: flex;
     flex-direction: column;
   }
+  .app > .bottom-area { max-width: 480px; width: 100%; margin: 0 auto; }
+  .app > .lobby-section { max-width: 480px; width: 100%; margin: 0 auto; }
 
   /* ── HEADER (compact status bar) ── */
   .header {
@@ -449,8 +451,10 @@
   .lobby-bar {
     background: var(--surface); border: 1px solid var(--border);
     border-radius: 8px; padding: 6px 10px;
-    display: flex; align-items: center; gap: 6px;
+    display: flex; align-items: center; gap: 8px;
     overflow-x: auto; min-height: 40px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
   }
   .lobby-label {
     font-size: 9px; color: var(--text-dim);
@@ -640,7 +644,7 @@
   /* ── ACTION BAR ── */
   .action-bar {
     position:fixed; bottom:0; left:50%; transform:translateX(-50%);
-    max-width:480px; width:100%;
+    max-width:100vw; width:100%;
     background:linear-gradient(0deg,#0d1b2eee,#0d1b2ecc);
     border-top:1px solid var(--accent); padding:10px 16px;
     display:none; gap:8px; align-items:center; z-index:200;
@@ -1208,18 +1212,34 @@ function renderRoom() {
   if (locked||emps.length===0) { charsEl.innerHTML=''; updateFloorNav(); return; }
 
   let html='';
-  const roomW=wrapper.offsetWidth||440;
-  const margin=30;
-  const usable=roomW-margin*2-28;
+  const roomW=wrapper.offsetWidth||window.innerWidth;
+  const padding=50;
+  const charW=60;
+  const total=emps.length;
+  // Calculate even slot positions
+  const usable=roomW-padding*2-charW;
+  const slots=[];
+  if (total===1) {
+    slots.push(roomW/2-charW/2);
+  } else {
+    for (let i=0;i<total;i++) {
+      slots.push(padding + (usable/(total-1))*i);
+    }
+  }
 
   for (let i=0;i<emps.length;i++) {
     const emp=emps[i];
     const ed=EMP.find(e=>e.id===emp.empId);
     if (!ed) continue;
 
-    // Position: spread evenly or wander
+    // Position: use slot with small random offset for natural feel
+    const slotX=slots[i];
+    const jitter=(Math.sin(emp.uid*7.3)*12);
     if (!charPositions[emp.uid]) {
-      charPositions[emp.uid]={ x: margin + Math.random()*usable };
+      charPositions[emp.uid]={ x: slotX+jitter, slot: i };
+    } else {
+      charPositions[emp.uid].x = slotX+jitter;
+      charPositions[emp.uid].slot = i;
     }
     const cp=charPositions[emp.uid];
     const isSel=selectedFloorEmp&&selectedFloorEmp.uid===emp.uid;
@@ -1257,15 +1277,21 @@ function wanderChars() {
   if (currentFloor>fc) return;
   const emps=getFloorEmps(currentFloor);
   const wrapper=document.getElementById('roomWrapper');
-  const roomW=wrapper.offsetWidth||440;
-  const margin=30, usable=roomW-margin*2-28;
+  const roomW=wrapper.offsetWidth||window.innerWidth;
+  const padding=50, charW=60;
+  const total=emps.length;
+  const usable=roomW-padding*2-charW;
 
-  for (const emp of emps) {
-    if (!charPositions[emp.uid]) charPositions[emp.uid]={x:margin+Math.random()*usable};
+  for (let i=0;i<emps.length;i++) {
+    const emp=emps[i];
+    if (!charPositions[emp.uid]) charPositions[emp.uid]={x:roomW/2,slot:i};
     const cp=charPositions[emp.uid];
-    // Random new target
-    cp.x=margin+Math.random()*usable;
-    // Update DOM
+    // Calculate slot base position
+    let slotX;
+    if (total===1) { slotX=roomW/2-charW/2; }
+    else { slotX=padding+(usable/(total-1))*i; }
+    // Wander within ±20px of slot
+    cp.x=slotX+(Math.random()-0.5)*40;
     const el=document.querySelector(`.pixel-char[data-uid="${emp.uid}"]`);
     if (el) el.style.left=cp.x+'px';
   }
