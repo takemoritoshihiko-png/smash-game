@@ -108,10 +108,10 @@
     border-bottom: 2px solid var(--border);
     overflow: hidden;
     position: relative;
-    height: 60vh;
-    height: 60dvh;
-    min-height: 280px;
-    max-height: 460px;
+    height: 70vh;
+    height: 70dvh;
+    min-height: 350px;
+    max-height: 550px;
     background: #080c14;
     image-rendering: pixelated;
   }
@@ -175,13 +175,13 @@
   /* Dark empty room */
   .room-bg.dark {
     background:
-      linear-gradient(180deg, #0a0e16 0%, #0d1220 60%, #10141e 100%);
+      linear-gradient(180deg, #0c0a18 0%, #100e20 60%, #0e0c1a 100%);
   }
 
-  /* Lit room - warm interior */
+  /* Lit room - warm navy-purple interior */
   .room-bg.lit {
     background:
-      linear-gradient(180deg, #1a2844 0%, #1e3050 30%, #243a58 70%, #1e3050 100%);
+      linear-gradient(180deg, #1e2248 0%, #242854 30%, #2a2e5a 60%, #222650 100%);
   }
 
   /* Light beams from windows */
@@ -246,9 +246,20 @@
     z-index: 1;
   }
   .room-window.lit {
-    border-color: #4a6080;
-    background: linear-gradient(180deg, #4a7ab0 0%, #2a5080 40%, #1a3060 100%);
-    box-shadow: 0 0 20px rgba(100,180,255,.2), inset 0 0 15px rgba(255,255,255,.05);
+    border-color: #4a5070;
+    background: linear-gradient(180deg, #0a0e2a 0%, #0d1230 60%, #1a1830 80%, #2a2020 100%);
+    box-shadow: 0 0 16px rgba(180,150,100,.15), inset 0 0 10px rgba(255,200,100,.03);
+  }
+  /* City lights dots in window */
+  .room-window.lit .win-lights {
+    position: absolute; inset: 4px; z-index: 0;
+    background:
+      radial-gradient(1px 1px at 20% 30%, #ffd700, transparent),
+      radial-gradient(1px 1px at 60% 50%, #ff6b35, transparent),
+      radial-gradient(1px 1px at 40% 70%, #00d4ff, transparent),
+      radial-gradient(1px 1px at 80% 20%, #ffd700, transparent),
+      radial-gradient(1px 1px at 15% 60%, #ff4757, transparent),
+      radial-gradient(1px 1px at 70% 80%, #7fffb2, transparent);
   }
   /* Window cross frame */
   .room-window::after {
@@ -659,6 +670,41 @@
   .offline-amount { font-size:13px; font-weight:900; color:#22c55e; font-family:var(--pixel); }
   .collect-btn { background:#22c55e; border:none; border-radius:6px; padding:5px 8px; color:#000; font-weight:700; font-size:10px; cursor:pointer; flex-shrink:0; }
 
+  /* Placed furniture in room */
+  .placed-furn {
+    position: absolute;
+    bottom: 60px;
+    font-size: 28px;
+    cursor: pointer;
+    transition: left .3s;
+    -webkit-tap-highlight-color: transparent;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,.3));
+    z-index: 5;
+  }
+  .placed-furn.selected-furn {
+    filter: drop-shadow(0 0 8px var(--accent));
+  }
+  .placed-furn.aircon {
+    bottom: auto;
+    top: 10px;
+  }
+
+  /* Furniture shop cards */
+  .furn-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 12px; margin-bottom: 7px;
+    display: flex; align-items: center; gap: 10px;
+    cursor: pointer; transition: all .2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .furn-card.can-afford { border-color: var(--accent2); box-shadow: 0 0 8px rgba(255,107,53,.1); }
+  .furn-card:active { transform: scale(.98); }
+  .furn-emoji { font-size: 28px; flex-shrink: 0; }
+  .furn-info { flex: 1; }
+  .furn-name { font-size: 12px; font-weight: 700; }
+  .furn-cost { font-size: 11px; font-family: var(--pixel); color: var(--gold); font-weight: 700; flex-shrink: 0; }
+  .furn-owned { font-size: 9px; color: var(--accent3); font-family: var(--pixel); }
+
   ::-webkit-scrollbar { width:3px; }
   ::-webkit-scrollbar-track { background:var(--bg); }
   ::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
@@ -696,17 +742,18 @@
       <div class="room-wall-line dark" id="roomWall"></div>
       <div class="room-light-beam left" id="roomBeamL"></div>
       <div class="room-light-beam right" id="roomBeamR"></div>
-      <div class="room-window w1" id="roomWin1"></div>
-      <div class="room-window w2" id="roomWin2"></div>
+      <div class="room-window w1" id="roomWin1"><div class="win-lights"></div></div>
+      <div class="room-window w2" id="roomWin2"><div class="win-lights"></div></div>
       <!-- Furniture -->
       <div class="room-furniture px-desk" id="roomDesk1" style="left:80px;opacity:0"></div>
       <div class="room-furniture px-desk" id="roomDesk2" style="right:80px;opacity:0"></div>
       <div class="room-furniture px-plant" id="roomPlant1" style="left:20px;opacity:0"></div>
       <div class="room-furniture px-plant" id="roomPlant2" style="right:20px;opacity:0"></div>
       <div class="room-floor dark" id="roomFloor"></div>
+      <div id="roomFurniture"></div>
       <div class="room-chars" id="roomChars"></div>
       <!-- Floor indicator overlay -->
-      <div class="room-floor-indicator" id="roomFloorIndicator">1F<span class="room-floor-count">0/8</span></div>
+      <div class="room-floor-indicator" id="roomFloorIndicator">1F<span class="room-floor-count">0/5</span></div>
       <!-- Nav arrows on room -->
       <button class="room-nav-btn left" id="roomPrev" onclick="event.stopPropagation();changeFloor(-1)">◀</button>
       <button class="room-nav-btn right" id="roomNext" onclick="event.stopPropagation();changeFloor(1)">▶</button>
@@ -731,10 +778,8 @@
     <div class="tabs">
       <button class="tab-btn active" onclick="switchTab('hire')">👥 採用</button>
       <button class="tab-btn" onclick="switchTab('upgrade')">⚡ 強化</button>
-      <button class="tab-btn" onclick="switchTab('quest')">📋 任務</button>
-      <button class="tab-btn" onclick="switchTab('ranking')">📊 番付</button>
+      <button class="tab-btn" onclick="switchTab('interior')">🛋️ インテリア</button>
       <button class="tab-btn" onclick="switchTab('milestone')">🏆 実績</button>
-      <button class="tab-btn" onclick="switchTab('prestige')">★ 転生</button>
     </div>
 
     <div class="content">
@@ -753,13 +798,9 @@
         <div class="section-title">▶ 経営強化</div>
         <div id="upgradeList"></div>
       </div>
-      <div class="tab-panel" id="tab-quest">
-        <div class="section-title">▶ ミッション</div>
-        <div id="questList"></div>
-      </div>
-      <div class="tab-panel" id="tab-ranking">
-        <div class="section-title">▶ 社員番付</div>
-        <div id="rankingList"></div>
+      <div class="tab-panel" id="tab-interior">
+        <div class="section-title">▶ 家具ショップ</div>
+        <div id="furnitureShop"></div>
       </div>
       <div class="tab-panel" id="tab-milestone">
         <div class="section-title">▶ 実績</div>
@@ -850,8 +891,22 @@ const SPEECHES = {
 };
 
 const MAX_FLOORS = 10;
-const FLOOR_CAP = 8;
+const FLOOR_CAP = 5;
 const FLOOR_THRESHOLDS = [0,5,15,25,35,50,70,90,120,160];
+
+// FURNITURE SHOP
+const FURNITURE_ITEMS = [
+  { id:'plant', name:'観葉植物', emoji:'🌿', cost:500, w:30, h:40 },
+  { id:'sofa', name:'ソファ', emoji:'🛋️', cost:2000, w:50, h:30 },
+  { id:'tv', name:'テレビ', emoji:'📺', cost:3000, w:36, h:30 },
+  { id:'bookshelf', name:'本棚', emoji:'📚', cost:1500, w:34, h:44 },
+  { id:'coffee_machine', name:'コーヒーメーカー', emoji:'☕', cost:1000, w:24, h:28 },
+  { id:'aquarium', name:'水槽', emoji:'🐠', cost:5000, w:40, h:32 },
+  { id:'aircon', name:'エアコン', emoji:'❄️', cost:4000, w:44, h:18 },
+  { id:'whiteboard', name:'ホワイトボード', emoji:'📋', cost:2500, w:40, h:44 },
+  { id:'trophy', name:'トロフィー棚', emoji:'🏆', cost:8000, w:36, h:40 },
+  { id:'ceo_desk', name:'社長デスク', emoji:'🪑', cost:10000, w:56, h:36 },
+];
 
 // ============================================================
 // STATE
@@ -861,6 +916,9 @@ let game = {
   prestigeCount:0, prestigeMultiplier:1, totalEmployees:0,
   lastSave:Date.now(), companyLevel:0,
   nextUid:1, floorData:{}, waitingList:[], prevFloorCount:1,
+  furnitureOwned:[], // [{id:'sofa', fid:1}, ...]
+  furniturePlaced:{}, // { 1: [{fid:1, id:'sofa', x:100}], 2: [...] }
+  nextFid:1,
 };
 
 let currentFloor = 1;
@@ -882,6 +940,9 @@ function loadGame() {
   if (!game.nextUid) game.nextUid=1;
   if (!game.prevFloorCount) game.prevFloorCount=1;
   if (!game.floorData[1]) game.floorData[1]=[];
+  if (!game.furnitureOwned) game.furnitureOwned=[];
+  if (!game.furniturePlaced) game.furniturePlaced={};
+  if (!game.nextFid) game.nextFid=1;
 
   // Migrate old saves
   if (game.totalEmployees>0 && game.waitingList.length===0) {
@@ -1306,7 +1367,8 @@ function doPrestige() {
   game.money=0; game.totalEarned=0; game.employees={}; game.upgrades=[];
   game.totalEmployees=0; game.companyLevel=Math.min(game.prestigeCount,COMPANY_NAMES.length-1);
   game.floorData={1:[]}; game.waitingList=[]; game.prevFloorCount=1;
-  currentFloor=1; charPositions={};
+  game.furniturePlaced={}; game.furnitureOwned=[];
+  currentFloor=1; charPositions={}; selectedFurn=null;
   playSE('prestige'); showToast('★ 転生完了！ボーナスGET！','purple');
   quests=[]; generateQuests(); cancelSelection(); updateAll(); saveGame();
 }
@@ -1342,10 +1404,123 @@ function renderRanking() {
   list.innerHTML=h;
 }
 
+// ============================================================
+// FURNITURE SYSTEM
+// ============================================================
+let selectedFurn = null; // {fid, floor}
+
+function buyFurniture(id) {
+  const item = FURNITURE_ITEMS.find(f=>f.id===id);
+  if (!item || game.money < item.cost) return;
+  game.money -= item.cost;
+  const fid = game.nextFid++;
+  // Auto-place on current floor
+  const fc = getFloorCount();
+  const floor = currentFloor <= fc ? currentFloor : 1;
+  if (!game.furniturePlaced[floor]) game.furniturePlaced[floor] = [];
+  const wrapper = document.getElementById('roomWrapper');
+  const roomW = wrapper.offsetWidth || 440;
+  const x = 60 + Math.random() * (roomW - 160);
+  game.furniturePlaced[floor].push({ fid, id: item.id, x: Math.floor(x) });
+  playSE('upgrade');
+  showToast(`${item.emoji} ${item.name}を${floor}Fに配置！`, 'gold');
+  updateAll(); saveGame();
+}
+
+function onFurnTap(fid, floor) {
+  if (selectedFurn && selectedFurn.fid === fid) {
+    selectedFurn = null;
+  } else {
+    selectedFurn = { fid, floor };
+  }
+  renderRoom();
+  renderFurnitureInRoom();
+  if (selectedFurn) {
+    const fp = (game.furniturePlaced[floor]||[]).find(f=>f.fid===fid);
+    if (!fp) return;
+    const item = FURNITURE_ITEMS.find(f=>f.id===fp.id);
+    showActionBar(
+      `<span class="action-emoji">${item.emoji}</span>${item.name} ` +
+      `<button class="action-btn" onclick="moveFurn(-30)" style="padding:3px 8px;font-size:10px">◀</button>` +
+      `<button class="action-btn" onclick="moveFurn(30)" style="padding:3px 8px;font-size:10px">▶</button>` +
+      `<button class="action-btn cancel" onclick="removeFurn()" style="padding:3px 8px;font-size:10px;color:var(--red);border-color:var(--red)">撤去</button>`
+    );
+  } else {
+    document.getElementById('actionBar').classList.remove('show');
+  }
+}
+
+function moveFurn(dx) {
+  if (!selectedFurn) return;
+  const arr = game.furniturePlaced[selectedFurn.floor] || [];
+  const fp = arr.find(f=>f.fid===selectedFurn.fid);
+  if (!fp) return;
+  const wrapper = document.getElementById('roomWrapper');
+  const roomW = wrapper.offsetWidth || 440;
+  fp.x = Math.max(20, Math.min(fp.x + dx, roomW - 60));
+  renderFurnitureInRoom(); saveGame();
+}
+
+function removeFurn() {
+  if (!selectedFurn) return;
+  const arr = game.furniturePlaced[selectedFurn.floor] || [];
+  const idx = arr.findIndex(f=>f.fid===selectedFurn.fid);
+  if (idx !== -1) {
+    const item = FURNITURE_ITEMS.find(f=>f.id===arr[idx].id);
+    arr.splice(idx, 1);
+    showToast(`${item.emoji} ${item.name}を撤去しました`);
+  }
+  selectedFurn = null;
+  document.getElementById('actionBar').classList.remove('show');
+  renderFurnitureInRoom(); saveGame();
+}
+
+function renderFurnitureInRoom() {
+  const el = document.getElementById('roomFurniture');
+  if (!el) return;
+  const fc = getFloorCount();
+  if (currentFloor > fc) { el.innerHTML = ''; return; }
+  const arr = game.furniturePlaced[currentFloor] || [];
+  let h = '';
+  for (const fp of arr) {
+    const item = FURNITURE_ITEMS.find(f=>f.id===fp.id);
+    if (!item) continue;
+    const isSel = selectedFurn && selectedFurn.fid === fp.fid;
+    const isAircon = fp.id === 'aircon';
+    h += `<div class="placed-furn${isSel?' selected-furn':''}${isAircon?' aircon':''}"
+      style="left:${fp.x}px;font-size:${Math.max(item.w*.7,20)}px;"
+      onclick="event.stopPropagation();onFurnTap(${fp.fid},${currentFloor})">${item.emoji}</div>`;
+  }
+  el.innerHTML = h;
+}
+
+function renderFurnitureShop() {
+  const list = document.getElementById('furnitureShop');
+  if (!list) return;
+  let h = '';
+  for (const item of FURNITURE_ITEMS) {
+    const can = game.money >= item.cost;
+    // Count owned on all floors
+    let count = 0;
+    for (const f in game.furniturePlaced) {
+      count += (game.furniturePlaced[f]||[]).filter(fp=>fp.id===item.id).length;
+    }
+    h += `<div class="furn-card${can?' can-afford':''}" onclick="buyFurniture('${item.id}')">
+      <div class="furn-emoji">${item.emoji}</div>
+      <div class="furn-info">
+        <div class="furn-name">${item.name}</div>
+        ${count>0?`<div class="furn-owned">所持: ${count}個</div>`:''}
+      </div>
+      <div class="furn-cost">¥${fmt(item.cost)}</div>
+    </div>`;
+  }
+  list.innerHTML = h;
+}
+
 function updateAll() {
-  updateMoneyDisplay(); renderRoom(); renderLobby();
-  renderEmployees(); renderUpgrades(); renderQuests();
-  renderRanking(); renderMilestones(); renderPrestige(); updateFloorNav();
+  updateMoneyDisplay(); renderRoom(); renderLobby(); renderFurnitureInRoom();
+  renderEmployees(); renderUpgrades(); renderFurnitureShop();
+  renderMilestones(); renderPrestige(); updateFloorNav();
 }
 
 // ============================================================
@@ -1381,8 +1556,8 @@ function gameLoop() {
 }
 
 setInterval(()=>{
-  renderEmployees(); renderUpgrades(); renderQuests();
-  renderRanking(); renderRoom(); renderLobby();
+  renderEmployees(); renderUpgrades(); renderFurnitureShop();
+  renderRoom(); renderLobby(); renderFurnitureInRoom();
   updateQuestProgress('earn',getIncomePerSecond()*2);
   checkFloorUnlocks();
   for (const ms of MILESTONES) {
