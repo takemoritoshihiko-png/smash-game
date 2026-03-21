@@ -50,7 +50,12 @@
       "Bash(~/bin/gh repo:*)",
       "Bash(pip install:*)",
       "Bash(md5:*)",
-      "Bash(unzip -o \"/Users/yutotakemori/Downloads/zen_sprites.zip\" -d /Users/yutotakemori/new-game/smash-game/images/zen/)"
+      "Bash(unzip -o \"/Users/yutotakemori/Downloads/zen_sprites.zip\" -d /Users/yutotakemori/new-game/smash-game/images/zen/)",
+      "Bash(rm -rf /Users/yutotakemori/new-game/smash-game/images/zen/*)",
+      "Bash(unzip -o \"/Users/yutotakemori/Downloads/zen_sprites_v2.zip\" -d /tmp/zen_v2/)",
+      "Read(//tmp/**)",
+      "Bash(mv /tmp/zen_v2/mnt/user-data/outputs/zen_sprites_v2/*.png /Users/yutotakemori/new-game/smash-game/images/zen/)",
+      "Bash(rm -rf /tmp/zen_v2)"
     ]
   }
 }
