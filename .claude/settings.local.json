@@ -67,7 +67,10 @@
       "Bash(cp meteo_jump.png meteo_walk.png)",
       "Bash(cp meteo_special.png meteo_jump.png)",
       "Bash(cp meteo_attack_s2.png meteo_special.png)",
-      "Bash(rm meteo_walk_old.png)"
+      "Bash(rm meteo_walk_old.png)",
+      "Bash(mv meteo_walk.png meteo_temp.png)",
+      "Bash(mv meteo_jump.png meteo_walk.png)",
+      "Bash(mv meteo_temp.png meteo_jump.png)"
     ]
   }
 }
