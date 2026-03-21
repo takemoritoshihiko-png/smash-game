@@ -72,8 +72,8 @@ const stages = [
   },
   {
     id: 'mahoujin',
-    name: '魔法陣の間',
-    desc: '魔法が渦巻く幻想の舞台',
+    name: '精霊の聖域',
+    desc: '神秘の光が満ちる森の奥地',
     bgSrc: 'images/bg3.png',
     bgmSrc: 'sounds/bgm3.mp3',
   },
@@ -5248,22 +5248,6 @@ function drawStageSelect(dt) {
     } else if (s.id === 'mahoujin') {
       if (bg3Img.complete && bg3Img.naturalWidth > 0) {
         ctx.drawImage(bg3Img, previewX, previewY, previewW, previewH);
-      } else {
-        // 代替: 紫グラデーション + 魔法陣
-        const mgBg = ctx.createLinearGradient(previewX, previewY, previewX, previewY + previewH);
-        mgBg.addColorStop(0, '#1a0030');
-        mgBg.addColorStop(1, '#0d001a');
-        ctx.fillStyle = mgBg;
-        ctx.fillRect(previewX, previewY, previewW, previewH);
-        // 魔法陣の円
-        ctx.strokeStyle = 'rgba(255, 215, 100, 0.15)';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.arc(previewX + previewW / 2, previewY + previewH / 2, 50, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.arc(previewX + previewW / 2, previewY + previewH / 2, 35, 0, Math.PI * 2);
-        ctx.stroke();
       }
     }
 
@@ -10019,47 +10003,7 @@ function drawBattle(dt) {
   // ===== 背景画像 =====
   const curStage = stages[selectedStage];
   if (curStage.id === 'mahoujin') {
-    if (bg3Img.complete && bg3Img.naturalWidth > 0) {
-      ctx.drawImage(bg3Img, 0, 0, 960, 640);
-    } else {
-      // 代替背景: 深い紫グラデーション + 魔法陣 + 光の粒子
-      const magicBg = ctx.createLinearGradient(0, 0, 0, 640);
-      magicBg.addColorStop(0, '#1a0030');
-      magicBg.addColorStop(1, '#0d001a');
-      ctx.fillStyle = magicBg;
-      ctx.fillRect(0, 0, 960, 640);
-      // 魔法陣の円
-      ctx.save();
-      ctx.translate(480, 300);
-      ctx.rotate(battleTime * 0.005);
-      ctx.strokeStyle = 'rgba(255, 215, 100, 0.12)';
-      ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.arc(0, 0, 180, 0, Math.PI * 2); ctx.stroke();
-      ctx.beginPath(); ctx.arc(0, 0, 140, 0, Math.PI * 2); ctx.stroke();
-      // 六芒星
-      ctx.strokeStyle = 'rgba(255, 215, 100, 0.08)';
-      ctx.lineWidth = 1.5;
-      for (let s = 0; s < 2; s++) {
-        ctx.beginPath();
-        for (let j = 0; j < 3; j++) {
-          const a = (j * 2 + s) * Math.PI / 3 - Math.PI / 2;
-          const px = Math.cos(a) * 160, py = Math.sin(a) * 160;
-          j === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
-        }
-        ctx.closePath(); ctx.stroke();
-      }
-      ctx.restore();
-      // 光の粒子
-      for (let i = 0; i < 20; i++) {
-        const seed = i * 137.5;
-        const px = 480 + Math.sin(seed + battleTime * 0.01) * (100 + i * 15);
-        const py = 300 + Math.cos(seed * 0.7 + battleTime * 0.008) * (80 + i * 10);
-        const alpha = 0.15 + Math.sin(battleTime * 0.03 + seed) * 0.1;
-        const sz = 1 + Math.sin(seed) * 0.5;
-        ctx.fillStyle = `rgba(200, 180, 255, ${Math.max(0, alpha)})`;
-        ctx.beginPath(); ctx.arc(px, py, sz, 0, Math.PI * 2); ctx.fill();
-      }
-    }
+    ctx.drawImage(bg3Img, 0, 0, 960, 640);
   } else if (curStage.id === 'seijaku') {
     ctx.drawImage(bg2Img, 0, 0, 960, 640);
   } else {
