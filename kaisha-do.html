@@ -239,18 +239,22 @@
 
   /* Idle animation */
   @keyframes charBob {
-    0%,100% { transform: translateY(0); }
-    50% { transform: translateY(-2px); }
+    0%,100% { margin-top: 0; }
+    50% { margin-top: -2px; }
   }
   @keyframes charBobImg {
-    0%,100% { transform: translateY(0); }
-    50% { transform: translateY(-2px); }
+    0%,100% { margin-top: 0; }
+    50% { margin-top: -2px; }
   }
-  .pixel-char { animation: charBob 2s ease-in-out infinite; }
-  .pixel-char.img-char { animation: charBobImg 1.5s ease-in-out infinite; }
-  .pixel-char:nth-child(2n) { animation-delay: .4s; }
-  .pixel-char:nth-child(3n) { animation-delay: .8s; }
-  .pixel-char:nth-child(4n) { animation-delay: 1.2s; }
+  .pixel-char .char-bob {
+    animation: charBob 2s ease-in-out infinite;
+  }
+  .pixel-char.img-char .char-bob {
+    animation: charBobImg 1.5s ease-in-out infinite;
+  }
+  .pixel-char:nth-child(2n) .char-bob { animation-delay: .4s; }
+  .pixel-char:nth-child(3n) .char-bob { animation-delay: .8s; }
+  .pixel-char:nth-child(4n) .char-bob { animation-delay: 1.2s; }
 
   /* Walk animation on legs */
   @keyframes legWalk {
@@ -1204,14 +1208,13 @@ function renderRoom() {
       </div>`;
     }
 
-    const animDelay = (emp.uid * 0.37 % 1).toFixed(2);
     const charScale = cp.scale || 1;
-    const zIdx = Math.floor(cp.y || 0); // further back = lower z
+    const zIdx = Math.floor(cp.y || 0);
     const shadowSize = isBack ? 6 : 10;
     html+=`<div class="${charClass}" data-uid="${emp.uid}"
-      style="left:${cp.x}px;top:${cp.y}px;transform:scale(${charScale});z-index:${zIdx};animation-delay:${animDelay}s;filter:drop-shadow(0 ${shadowSize}px ${shadowSize}px rgba(0,0,0,.4));" onclick="event.stopPropagation();onCharTap(${emp.uid},${currentFloor})">
+      style="left:${cp.x}px;top:${cp.y}px;transform:scale(${charScale});z-index:${zIdx};filter:drop-shadow(0 ${shadowSize}px ${shadowSize}px rgba(0,0,0,.4));" onclick="event.stopPropagation();onCharTap(${emp.uid},${currentFloor})">
       <div class="char-speech-area" style="position:absolute;bottom:${speechBottom};left:50%;transform:translateX(-50%) scale(${1/charScale});pointer-events:none;z-index:999"></div>
-      ${charInner}
+      <div class="char-bob">${charInner}</div>
     </div>`;
   }
   charsEl.innerHTML=html;
