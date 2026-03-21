@@ -1,0 +1,1906 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>会社道 KAISHA-DO</title>
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=M+PLUS+1p:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2335;
+    --border: #1e3a5f;
+    --accent: #00d4ff;
+    --accent2: #ff6b35;
+    --accent3: #7fffb2;
+    --gold: #ffd700;
+    --text: #e2e8f0;
+    --text-dim: #64748b;
+    --red: #ff4757;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'M PLUS 1p', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Animated background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app {
+    position: relative;
+    z-index: 1;
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #0d1b2e 0%, #1a2d4a 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .company-name {
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    font-family: 'DotGothic16', monospace;
+    margin-bottom: 2px;
+  }
+
+  .money-display {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+
+  .money-icon { font-size: 18px; }
+
+  .money-amount {
+    font-size: 32px;
+    font-weight: 900;
+    color: var(--gold);
+    font-family: 'DotGothic16', monospace;
+    line-height: 1;
+    transition: transform 0.1s;
+  }
+
+  .money-amount.bump {
+    transform: scale(1.05);
+    color: #ffe566;
+  }
+
+  .money-unit {
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+
+  .income-rate {
+    font-size: 12px;
+    color: var(--accent3);
+    font-family: 'DotGothic16', monospace;
+    margin-top: 2px;
+  }
+
+  /* TAP BUTTON */
+  .tap-section {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .building-container {
+    position: relative;
+    width: 200px;
+    height: 200px;
+  }
+
+  .tap-btn {
+    width: 200px;
+    height: 200px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    position: relative;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .building-svg {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 0 20px rgba(0, 212, 255, 0.3));
+    transition: transform 0.1s;
+  }
+
+  .tap-btn:active .building-svg {
+    transform: scale(0.95);
+    filter: drop-shadow(0 0 30px rgba(0, 212, 255, 0.6));
+  }
+
+  .tap-hint {
+    font-size: 11px;
+    color: var(--text-dim);
+    font-family: 'DotGothic16', monospace;
+    letter-spacing: 2px;
+  }
+
+  /* STATS ROW */
+  .stats-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    padding: 0 16px 16px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px;
+    text-align: center;
+  }
+
+  .stat-label {
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    display: block;
+    margin-bottom: 3px;
+  }
+
+  .stat-value {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent);
+    font-family: 'DotGothic16', monospace;
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    position: sticky;
+    top: 85px;
+    z-index: 99;
+  }
+
+  .tab-btn {
+    flex: 1;
+    padding: 10px 4px;
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 11px;
+    font-family: 'M PLUS 1p', sans-serif;
+    font-weight: 700;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+  }
+
+  .tab-btn.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  /* CONTENT */
+  .content {
+    flex: 1;
+    padding: 12px 16px;
+  }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* EMPLOYEE CARDS */
+  .section-title {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    font-family: 'DotGothic16', monospace;
+  }
+
+  .employee-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .employee-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--card-color, var(--accent));
+  }
+
+  .employee-card.can-afford {
+    border-color: var(--card-color, var(--accent));
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.1);
+  }
+
+  .employee-card.cant-afford {
+    opacity: 0.5;
+  }
+
+  .emp-emoji {
+    font-size: 32px;
+    flex-shrink: 0;
+    width: 44px;
+    text-align: center;
+  }
+
+  .emp-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .emp-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .emp-count-badge {
+    background: var(--card-color, var(--accent));
+    color: #000;
+    font-size: 10px;
+    font-weight: 900;
+    padding: 1px 5px;
+    border-radius: 999px;
+    font-family: 'DotGothic16', monospace;
+  }
+
+  .emp-income {
+    font-size: 11px;
+    color: var(--accent3);
+    font-family: 'DotGothic16', monospace;
+    margin-top: 2px;
+  }
+
+  .emp-desc {
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-top: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .hire-btn {
+    background: var(--surface2);
+    border: 1px solid var(--card-color, var(--accent));
+    border-radius: 8px;
+    padding: 8px 10px;
+    cursor: pointer;
+    text-align: center;
+    min-width: 72px;
+    flex-shrink: 0;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .hire-btn:active {
+    transform: scale(0.95);
+  }
+
+  .hire-btn.can-afford {
+    background: var(--card-color, var(--accent));
+  }
+
+  .hire-btn.can-afford .hire-label {
+    color: #000;
+  }
+
+  .hire-btn.can-afford .hire-cost {
+    color: rgba(0,0,0,0.7);
+  }
+
+  .hire-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-dim);
+    display: block;
+  }
+
+  .hire-cost {
+    font-size: 11px;
+    font-family: 'DotGothic16', monospace;
+    color: var(--text-dim);
+    display: block;
+    margin-top: 1px;
+  }
+
+  /* UPGRADE CARDS */
+  .upgrade-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .upgrade-card.purchased {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  .upgrade-card.can-afford {
+    border-color: var(--gold);
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.15);
+  }
+
+  .upgrade-card:active:not(.purchased) {
+    transform: scale(0.98);
+  }
+
+  .upg-icon { font-size: 28px; flex-shrink: 0; }
+
+  .upg-info { flex: 1; }
+
+  .upg-name {
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .upg-desc {
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+
+  .upg-cost {
+    font-size: 12px;
+    font-family: 'DotGothic16', monospace;
+    color: var(--gold);
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .upg-done {
+    font-size: 18px;
+  }
+
+  /* MILESTONES */
+  .milestone-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .milestone-card.achieved {
+    border-color: var(--gold);
+    background: linear-gradient(135deg, var(--surface) 0%, rgba(255,215,0,0.05) 100%);
+  }
+
+  .ms-icon { font-size: 24px; flex-shrink: 0; }
+  .ms-info { flex: 1; }
+  .ms-name { font-size: 13px; font-weight: 700; }
+  .ms-desc { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+  .ms-status { font-size: 18px; flex-shrink: 0; }
+
+  /* PRESTIGE */
+  .prestige-section {
+    background: linear-gradient(135deg, #1a0a2e, #2d1060);
+    border: 1px solid #7c3aed;
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  .prestige-title {
+    font-size: 18px;
+    font-weight: 900;
+    color: #c084fc;
+    font-family: 'DotGothic16', monospace;
+    margin-bottom: 6px;
+  }
+
+  .prestige-desc {
+    font-size: 11px;
+    color: #a78bfa;
+    margin-bottom: 12px;
+  }
+
+  .prestige-btn {
+    background: linear-gradient(135deg, #7c3aed, #c084fc);
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'M PLUS 1p', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .prestige-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  /* TOAST NOTIFICATIONS */
+  .toast-container {
+    position: fixed;
+    top: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 999;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    width: 300px;
+  }
+
+  .toast {
+    background: var(--surface2);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    animation: toastIn 0.3s ease, toastOut 0.4s ease 1.8s forwards;
+    white-space: nowrap;
+    font-family: 'DotGothic16', monospace;
+  }
+
+  .toast.gold { border-color: var(--gold); color: var(--gold); }
+  .toast.purple { border-color: #c084fc; color: #c084fc; }
+
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateY(-10px) scale(0.9); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  @keyframes toastOut {
+    from { opacity: 1; }
+    to { opacity: 0; transform: translateY(-10px); }
+  }
+
+  /* FLOATING +¥ NUMBERS */
+  .float-num {
+    position: fixed;
+    font-size: 16px;
+    font-weight: 900;
+    color: var(--gold);
+    font-family: 'DotGothic16', monospace;
+    pointer-events: none;
+    z-index: 998;
+    animation: floatUp 0.8s ease forwards;
+  }
+
+  @keyframes floatUp {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-60px); }
+  }
+
+  /* PRESTIGE STAR INDICATOR */
+  .prestige-stars {
+    display: flex;
+    gap: 4px;
+    margin-top: 4px;
+  }
+
+  .star { font-size: 10px; }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* OFFICE HOURS PULSE */
+  .live-dot {
+    width: 6px; height: 6px;
+    background: var(--accent3);
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 4px;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .offline-banner {
+    background: linear-gradient(135deg, #1a2d1a, #0d1f0d);
+    border: 1px solid #22c55e;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .offline-icon { font-size: 20px; }
+
+  .offline-text { flex: 1; font-size: 11px; color: #86efac; }
+
+  .offline-amount {
+    font-size: 14px;
+    font-weight: 900;
+    color: #22c55e;
+    font-family: 'DotGothic16', monospace;
+  }
+
+  .collect-btn {
+    background: #22c55e;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 10px;
+    color: #000;
+    font-weight: 700;
+    font-size: 11px;
+    cursor: pointer;
+    font-family: 'M PLUS 1p', sans-serif;
+    flex-shrink: 0;
+  }
+
+  .bottom-safe { height: 24px; }
+
+  /* SOUND TOGGLE */
+  .sound-toggle {
+    position: absolute;
+    right: 16px;
+    top: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 8px;
+    color: var(--text-dim);
+    font-size: 16px;
+    cursor: pointer;
+    z-index: 101;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .sound-toggle.on { color: var(--accent); border-color: var(--accent); }
+
+  /* QUEST CARDS */
+  .quest-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .quest-card.active { border-color: var(--accent2); }
+  .quest-card.completed { border-color: var(--accent3); opacity: 0.6; }
+
+  .quest-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+
+  .quest-icon { font-size: 24px; }
+
+  .quest-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .quest-desc {
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+
+  .quest-progress-bar {
+    width: 100%;
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 4px;
+  }
+
+  .quest-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    border-radius: 3px;
+    transition: width 0.3s;
+  }
+
+  .quest-progress-text {
+    font-size: 10px;
+    color: var(--text-dim);
+    font-family: 'DotGothic16', monospace;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .quest-reward {
+    font-size: 11px;
+    color: var(--gold);
+    font-family: 'DotGothic16', monospace;
+    margin-top: 4px;
+  }
+
+  .quest-claim-btn {
+    background: linear-gradient(135deg, var(--accent2), #ff8f5a);
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    color: #fff;
+    font-weight: 700;
+    font-size: 11px;
+    cursor: pointer;
+    margin-top: 6px;
+    font-family: 'M PLUS 1p', sans-serif;
+  }
+
+  .quest-timer {
+    font-size: 10px;
+    color: var(--accent2);
+    font-family: 'DotGothic16', monospace;
+    position: absolute;
+    top: 12px;
+    right: 12px;
+  }
+
+  /* RANKING */
+  .ranking-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .ranking-card.rank-1 { border-color: var(--gold); background: linear-gradient(135deg, var(--surface), rgba(255,215,0,0.08)); }
+  .ranking-card.rank-2 { border-color: #c0c0c0; }
+  .ranking-card.rank-3 { border-color: #cd7f32; }
+
+  .rank-num {
+    font-size: 20px;
+    font-weight: 900;
+    font-family: 'DotGothic16', monospace;
+    min-width: 32px;
+    text-align: center;
+  }
+
+  .rank-1 .rank-num { color: var(--gold); }
+  .rank-2 .rank-num { color: #c0c0c0; }
+  .rank-3 .rank-num { color: #cd7f32; }
+
+  .rank-info { flex: 1; }
+
+  .rank-name {
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .rank-income {
+    font-size: 11px;
+    color: var(--accent3);
+    font-family: 'DotGothic16', monospace;
+    margin-top: 2px;
+  }
+
+  .rank-share {
+    font-size: 11px;
+    color: var(--text-dim);
+    font-family: 'DotGothic16', monospace;
+  }
+
+  .rank-bar {
+    width: 100%;
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 2px;
+    margin-top: 4px;
+    overflow: hidden;
+  }
+
+  .rank-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.3s;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- HEADER -->
+  <div class="header">
+    <button class="sound-toggle" id="soundToggle" onclick="toggleSound()">🔇</button>
+    <div class="company-name" id="companyNameDisplay">★ 株式会社ビギナーズ</div>
+    <div class="money-display">
+      <span class="money-icon">💴</span>
+      <span class="money-amount" id="moneyDisplay">0</span>
+      <span class="money-unit">円</span>
+    </div>
+    <div class="income-rate">
+      <span class="live-dot"></span>
+      <span id="incomeRate">+0円/秒</span>
+    </div>
+  </div>
+
+  <!-- TAP AREA -->
+  <div class="tap-section">
+    <div class="building-container">
+      <button class="tap-btn" id="tapBtn" onclick="tapIncome(event)">
+        <svg class="building-svg" id="buildingSvg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <!-- Sky gradient -->
+          <defs>
+            <linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style="stop-color:#060d1a"/>
+              <stop offset="100%" style="stop-color:#0d1b2e"/>
+            </linearGradient>
+            <linearGradient id="buildGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style="stop-color:#1a3a5c"/>
+              <stop offset="100%" style="stop-color:#0d2040"/>
+            </linearGradient>
+            <linearGradient id="windowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#00d4ff" stop-opacity="0.9"/>
+              <stop offset="100%" style="stop-color:#0077aa"/>
+            </linearGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="1.5" result="blur"/>
+              <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+            </filter>
+          </defs>
+          
+          <!-- Background -->
+          <rect width="200" height="200" fill="url(#skyGrad)"/>
+          
+          <!-- Ground -->
+          <rect x="0" y="175" width="200" height="25" fill="#0a1520"/>
+          <rect x="0" y="173" width="200" height="3" fill="#1e3a5f"/>
+          
+          <!-- Side buildings -->
+          <rect x="10" y="130" width="28" height="45" fill="#0d2040" rx="1"/>
+          <rect x="162" y="140" width="28" height="35" fill="#0d2040" rx="1"/>
+          
+          <!-- Small windows side buildings -->
+          <rect x="15" y="135" width="5" height="5" fill="#00d4ff" opacity="0.4" rx="1"/>
+          <rect x="25" y="135" width="5" height="5" fill="#00d4ff" opacity="0.6" rx="1"/>
+          <rect x="15" y="145" width="5" height="5" fill="#00d4ff" opacity="0.5" rx="1"/>
+          <rect x="25" y="145" width="5" height="5" fill="#ffd700" opacity="0.5" rx="1"/>
+          <rect x="167" y="147" width="5" height="5" fill="#00d4ff" opacity="0.4" rx="1"/>
+          <rect x="177" y="147" width="5" height="5" fill="#00d4ff" opacity="0.6" rx="1"/>
+          
+          <!-- Main building -->
+          <rect x="55" y="50" width="90" height="125" fill="url(#buildGrad)" rx="2"/>
+          
+          <!-- Building edge highlights -->
+          <rect x="55" y="50" width="2" height="125" fill="#1e3a5f" opacity="0.5"/>
+          <rect x="143" y="50" width="2" height="125" fill="#000" opacity="0.5"/>
+          
+          <!-- Roof detail -->
+          <rect x="60" y="44" width="80" height="8" fill="#1a3a5c" rx="1"/>
+          <rect x="75" y="36" width="50" height="10" fill="#1a3a5c" rx="1"/>
+          <rect x="90" y="28" width="20" height="10" fill="#1a3a5c" rx="1"/>
+          
+          <!-- Antenna -->
+          <rect x="99" y="10" width="2" height="20" fill="#00d4ff" opacity="0.8"/>
+          <circle cx="100" cy="10" r="3" fill="#00d4ff" filter="url(#glow)">
+            <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
+          </circle>
+          
+          <!-- Windows - will be dynamically updated -->
+          <g id="windows">
+            <!-- Floor 5 -->
+            <rect x="63" y="58" width="12" height="9" fill="#00d4ff" opacity="0.15" rx="1"/>
+            <rect x="80" y="58" width="12" height="9" fill="#00d4ff" opacity="0.15" rx="1"/>
+            <rect x="97" y="58" width="12" height="9" fill="#00d4ff" opacity="0.15" rx="1"/>
+            <rect x="114" y="58" width="12" height="9" fill="#00d4ff" opacity="0.15" rx="1"/>
+            <rect x="131" y="58" width="12" height="9" fill="#00d4ff" opacity="0.15" rx="1"/>
+            <!-- Floor 4 -->
+            <rect x="63" y="73" width="12" height="9" fill="#00d4ff" opacity="0.15" rx="1"/>
+            <rect x="80" y="73" width="12" height="9" fill="#00d4ff" opacity="0.15" rx="1"/>
+            <rect x="97" y="73" width="12" height="9" fill="#00d4ff" opacity="0.15" rx="1"/>
+            <rect x="114" y="73" width="12" height="9" fill="#00d4ff" opacity="0.15" rx="1"/>
+            <rect x="131" y="73" width="12" height="9" fill="#00d4ff" opacity="0.15" rx="1"/>
+            <!-- Floor 3 -->
+            <rect x="63" y="88" width="12" height="9" fill="#00d4ff" opacity="0.15" rx="1"/>
+            <rect x="80" y="88" width="12" height="9" fill="#00d4ff" opacity="0.15" rx="1"/>
+            <rect x="97" y="88" width="12" height="9" fill="#00d4ff" opacity="0.15" rx="1"/>
+            <rect x="114" y="88" width="12" height="9" fill="#00d4ff" opacity="0.15" rx="1"/>
+            <rect x="131" y="88" width="12" height="9" fill="#00d4ff" opacity="0.15" rx="1"/>
+            <!-- Floor 2 -->
+            <rect x="63" y="103" width="12" height="9" fill="#00d4ff" opacity="0.15" rx="1"/>
+            <rect x="80" y="103" width="12" height="9" fill="#00d4ff" opacity="0.15" rx="1"/>
+            <rect x="97" y="103" width="12" height="9" fill="#00d4ff" opacity="0.15" rx="1"/>
+            <rect x="114" y="103" width="12" height="9" fill="#00d4ff" opacity="0.15" rx="1"/>
+            <rect x="131" y="103" width="12" height="9" fill="#00d4ff" opacity="0.15" rx="1"/>
+            <!-- Floor 1 -->
+            <rect x="63" y="118" width="12" height="9" fill="#00d4ff" opacity="0.15" rx="1"/>
+            <rect x="80" y="118" width="12" height="9" fill="#00d4ff" opacity="0.15" rx="1"/>
+            <rect x="97" y="118" width="12" height="9" fill="#00d4ff" opacity="0.15" rx="1"/>
+            <rect x="114" y="118" width="12" height="9" fill="#00d4ff" opacity="0.15" rx="1"/>
+            <rect x="131" y="118" width="12" height="9" fill="#00d4ff" opacity="0.15" rx="1"/>
+          </g>
+          
+          <!-- Ground floor / entrance -->
+          <rect x="55" y="155" width="90" height="20" fill="#0a1e38" rx="0"/>
+          <rect x="82" y="158" width="36" height="17" fill="#1a3a5c" rx="1"/>
+          <rect x="82" y="158" width="16" height="17" fill="#0d2a45" rx="1"/>
+          
+          <!-- Company sign -->
+          <rect x="62" y="163" width="18" height="8" fill="#00d4ff" opacity="0.15" rx="1"/>
+          <rect x="120" y="163" width="18" height="8" fill="#00d4ff" opacity="0.15" rx="1"/>
+          
+          <!-- Ground reflection -->
+          <rect x="55" y="175" width="90" height="4" fill="#00d4ff" opacity="0.05"/>
+        </svg>
+      </button>
+    </div>
+    <div class="tap-hint">タップで収益GET！</div>
+  </div>
+
+  <!-- STATS ROW -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <span class="stat-label">総従業員</span>
+      <span class="stat-value" id="totalEmployees">0名</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">累計売上</span>
+      <span class="stat-value" id="totalEarned">¥0</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">プレステージ</span>
+      <span class="stat-value" id="prestigeDisplay">★0</span>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('hire')">👥 採用</button>
+    <button class="tab-btn" onclick="switchTab('upgrade')">⚡ 強化</button>
+    <button class="tab-btn" onclick="switchTab('quest')">📋 任務</button>
+    <button class="tab-btn" onclick="switchTab('ranking')">📊 番付</button>
+    <button class="tab-btn" onclick="switchTab('milestone')">🏆 実績</button>
+    <button class="tab-btn" onclick="switchTab('prestige')">★ 転生</button>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+    <div id="offlineBanner" class="offline-banner" style="display:none;" onclick="collectOffline()">
+      <span class="offline-icon">💤</span>
+      <span class="offline-text">オフライン収益！</span>
+      <span class="offline-amount" id="offlineAmount">¥0</span>
+      <button class="collect-btn">回収！</button>
+    </div>
+
+    <!-- HIRE TAB -->
+    <div class="tab-panel active" id="tab-hire">
+      <div class="section-title">▶ 社員採用</div>
+      <div id="employeeList"></div>
+    </div>
+
+    <!-- UPGRADE TAB -->
+    <div class="tab-panel" id="tab-upgrade">
+      <div class="section-title">▶ 経営強化</div>
+      <div id="upgradeList"></div>
+    </div>
+
+    <!-- QUEST TAB -->
+    <div class="tab-panel" id="tab-quest">
+      <div class="section-title">▶ ミッション</div>
+      <div id="questList"></div>
+    </div>
+
+    <!-- RANKING TAB -->
+    <div class="tab-panel" id="tab-ranking">
+      <div class="section-title">▶ 社員番付</div>
+      <div id="rankingList"></div>
+    </div>
+
+    <!-- MILESTONE TAB -->
+    <div class="tab-panel" id="tab-milestone">
+      <div class="section-title">▶ 実績</div>
+      <div id="milestoneList"></div>
+    </div>
+
+    <!-- PRESTIGE TAB -->
+    <div class="tab-panel" id="tab-prestige">
+      <div class="section-title">▶ 会社転生</div>
+      <div class="prestige-section">
+        <div class="prestige-title">★ 会社転生</div>
+        <div class="prestige-desc" id="prestigeDesc">
+          転生すると全てリセットされますが<br>
+          永続的な収益ボーナスを獲得できます！
+        </div>
+        <div style="font-size:13px; color:#c084fc; margin-bottom:12px; font-family:'DotGothic16',monospace;" id="prestigeBonus"></div>
+        <button class="prestige-btn" id="prestigeBtn" onclick="doPrestige()">転生する（要：¥1,000,000,000）</button>
+      </div>
+      <div class="section-title">▶ 転生履歴</div>
+      <div id="prestigeHistory"></div>
+    </div>
+  </div>
+
+  <div class="bottom-safe"></div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ============================================================
+// GAME DATA
+// ============================================================
+
+const EMPLOYEES = [
+  {
+    id: 'part_time',
+    name: 'アルバイト',
+    emoji: '🧑‍💼',
+    desc: '時給制。コンビニ並みの稼ぎ',
+    baseCost: 15,
+    baseIncome: 0.1,
+    color: '#64748b',
+    unlockAt: 0
+  },
+  {
+    id: 'staff',
+    name: '契約社員',
+    emoji: '💼',
+    desc: '安定した戦力。少し稼ぐ',
+    baseCost: 120,
+    baseIncome: 0.7,
+    color: '#22c55e',
+    unlockAt: 100
+  },
+  {
+    id: 'full_time',
+    name: '正社員',
+    emoji: '👔',
+    desc: '会社の屋台骨。信頼できる',
+    baseCost: 1300,
+    baseIncome: 6,
+    color: '#3b82f6',
+    unlockAt: 1000
+  },
+  {
+    id: 'leader',
+    name: 'リーダー',
+    emoji: '🦺',
+    desc: '現場を仕切るプロフェッショナル',
+    baseCost: 10000,
+    baseIncome: 40,
+    color: '#06b6d4',
+    unlockAt: 8000
+  },
+  {
+    id: 'manager',
+    name: '課長',
+    emoji: '🧑‍🏫',
+    desc: 'チームを率いて成果を出す',
+    baseCost: 80000,
+    baseIncome: 250,
+    color: '#8b5cf6',
+    unlockAt: 50000
+  },
+  {
+    id: 'director',
+    name: '部長',
+    emoji: '🎩',
+    desc: '部門の戦略立案と実行を担う',
+    baseCost: 600000,
+    baseIncome: 1500,
+    color: '#f59e0b',
+    unlockAt: 400000
+  },
+  {
+    id: 'exec',
+    name: '役員',
+    emoji: '🏛️',
+    desc: '経営判断を下す重役',
+    baseCost: 5000000,
+    baseIncome: 10000,
+    color: '#ef4444',
+    unlockAt: 3000000
+  },
+  {
+    id: 'ceo',
+    name: 'カリスマCEO',
+    emoji: '👑',
+    desc: '会社を次のステージへ導く伝説',
+    baseCost: 50000000,
+    baseIncome: 80000,
+    color: '#ffd700',
+    unlockAt: 30000000
+  }
+];
+
+const UPGRADES = [
+  { id: 'coffee', name: 'コーヒーメーカー導入', desc: 'バイトの生産性2倍', emoji: '☕', cost: 500, target: 'part_time', multiplier: 2 },
+  { id: 'pc', name: 'PCをアップグレード', desc: '契約社員の生産性2倍', emoji: '💻', cost: 3000, target: 'staff', multiplier: 2 },
+  { id: 'training', name: '研修制度整備', desc: '正社員の生産性2倍', emoji: '📚', cost: 25000, target: 'full_time', multiplier: 2 },
+  { id: 'bonus', name: 'インセンティブ制度', desc: 'リーダーの生産性2倍', emoji: '💰', cost: 200000, target: 'leader', multiplier: 2 },
+  { id: 'ipo_prep', name: 'IPO準備室設立', desc: '課長の生産性2倍', emoji: '📈', cost: 1500000, target: 'manager', multiplier: 2 },
+  { id: 'strategy', name: '中期経営計画策定', desc: '部長の生産性2倍', emoji: '📋', cost: 10000000, target: 'director', multiplier: 2 },
+  { id: 'mna', name: 'M&A戦略部門', desc: '役員の生産性2倍', emoji: '🤝', cost: 80000000, target: 'exec', multiplier: 2 },
+  { id: 'legend', name: '伝説の経営チーム', desc: 'CEO生産性2倍', emoji: '🌟', cost: 500000000, target: 'ceo', multiplier: 2 },
+  { id: 'tap2', name: 'タップ効果2倍', desc: 'タップ収益が2倍に', emoji: '👆', cost: 2000, target: '_tap', multiplier: 2 },
+  { id: 'tap3', name: 'タップ効果4倍', desc: 'タップ収益がさらに2倍', emoji: '👆', cost: 50000, target: '_tap', multiplier: 2 },
+  { id: 'tap4', name: 'タップ効果8倍', desc: 'タップ収益がさらに2倍', emoji: '👆', cost: 1000000, target: '_tap', multiplier: 2 },
+  { id: 'global', name: 'グローバル展開', desc: '全社員の収益1.5倍', emoji: '🌍', cost: 200000000, target: '_all', multiplier: 1.5 },
+];
+
+const MILESTONES = [
+  { id: 'ms1', name: '初めての売上', desc: '初めて¥100を稼ぐ', emoji: '🌱', check: (g) => g.totalEarned >= 100 },
+  { id: 'ms2', name: '最初の社員', desc: '誰かを採用する', emoji: '🤝', check: (g) => g.totalEmployees >= 1 },
+  { id: 'ms3', name: '中小企業', desc: '社員10名を達成', emoji: '🏢', check: (g) => g.totalEmployees >= 10 },
+  { id: 'ms4', name: '安定経営', desc: '¥10,000を稼ぐ', emoji: '📊', check: (g) => g.totalEarned >= 10000 },
+  { id: 'ms5', name: '課長昇格', desc: '課長を採用する', emoji: '🎖️', check: (g) => (g.employees['manager'] || 0) >= 1 },
+  { id: 'ms6', name: '成長企業', desc: '社員50名を達成', emoji: '🚀', check: (g) => g.totalEmployees >= 50 },
+  { id: 'ms7', name: '億り人', desc: '¥100,000,000を稼ぐ', emoji: '💎', check: (g) => g.totalEarned >= 100000000 },
+  { id: 'ms8', name: '上場企業', desc: '役員を採用する', emoji: '🏛️', check: (g) => (g.employees['exec'] || 0) >= 1 },
+  { id: 'ms9', name: '1000億企業', desc: '¥100,000,000,000を稼ぐ', emoji: '🌠', check: (g) => g.totalEarned >= 100000000000 },
+  { id: 'ms10', name: '初転生', desc: '初めて転生する', emoji: '⭐', check: (g) => g.prestigeCount >= 1 },
+];
+
+const COMPANY_NAMES = [
+  '株式会社ビギナーズ', '有限会社グロース', '株式会社ライズ',
+  '株式会社エクセル', '株式会社フロンティア', 'GIC Holdings',
+  '株式会社インフィニティ', 'APEX Corporation'
+];
+
+// ============================================================
+// GAME STATE
+// ============================================================
+
+let game = {
+  money: 0,
+  totalEarned: 0,
+  employees: {},
+  upgrades: [],
+  milestones: [],
+  prestigeCount: 0,
+  prestigeMultiplier: 1,
+  totalEmployees: 0,
+  tapMultiplier: 1,
+  lastSave: Date.now(),
+  companyLevel: 0,
+};
+
+function loadGame() {
+  try {
+    const saved = localStorage.getItem('kaishaDoSave');
+    if (saved) {
+      const data = JSON.parse(saved);
+      game = { ...game, ...data };
+    }
+  } catch(e) {}
+  
+  // Check offline earnings
+  const now = Date.now();
+  const elapsed = (now - (game.lastSave || now)) / 1000;
+  if (elapsed > 10) {
+    const offlineIncome = getIncomePerSecond() * Math.min(elapsed, 3600 * 4); // max 4hr
+    if (offlineIncome > 0) {
+      showOfflineBanner(offlineIncome);
+    }
+  }
+  game.lastSave = now;
+}
+
+function saveGame() {
+  game.lastSave = Date.now();
+  localStorage.setItem('kaishaDoSave', JSON.stringify(game));
+}
+
+// ============================================================
+// CALCULATIONS
+// ============================================================
+
+function getEmployeeCost(empId, count) {
+  const emp = EMPLOYEES.find(e => e.id === empId);
+  if (!emp) return 0;
+  return Math.floor(emp.baseCost * Math.pow(1.15, count));
+}
+
+function getIncomePerSecond() {
+  let total = 0;
+  const globalMult = game.upgrades.includes('global') ? 1.5 : 1;
+  
+  for (const emp of EMPLOYEES) {
+    const count = game.employees[emp.id] || 0;
+    if (count === 0) continue;
+    let income = emp.baseIncome * count;
+    if (game.upgrades.includes(emp.id.replace('_', '') + 'upgrade')) {
+      // find matching upgrade
+    }
+    // Apply specific upgrades
+    const empUpgrades = UPGRADES.filter(u => u.target === emp.id && game.upgrades.includes(u.id));
+    for (const upg of empUpgrades) {
+      income *= upg.multiplier;
+    }
+    income *= globalMult;
+    total += income;
+  }
+  return total * game.prestigeMultiplier;
+}
+
+function getTotalEmployees() {
+  return Object.values(game.employees).reduce((a, b) => a + b, 0);
+}
+
+// ============================================================
+// ACTIONS
+// ============================================================
+
+function tapIncome(event) {
+  const tapVal = Math.max(1, Math.floor(getIncomePerSecond() * 0.1 + 1));
+  const actualTap = tapVal * game.tapMultiplier * game.prestigeMultiplier;
+  
+  game.money += actualTap;
+  game.totalEarned += actualTap;
+
+  // Float number
+  if (event) {
+    showFloatNum(event.clientX, event.clientY, actualTap);
+  }
+
+  playSE('tap');
+  updateQuestProgress('tap');
+  updateQuestProgress('earn', actualTap);
+  updateMoneyDisplay(true);
+}
+
+function hireEmployee(empId) {
+  const emp = EMPLOYEES.find(e => e.id === empId);
+  if (!emp) return;
+  
+  const count = game.employees[empId] || 0;
+  const cost = getEmployeeCost(empId, count);
+  
+  if (game.money < cost) return;
+  
+  game.money -= cost;
+  game.employees[empId] = count + 1;
+  game.totalEmployees = getTotalEmployees();
+
+  playSE('hire');
+  updateQuestProgress('hire');
+  showToast(`${emp.emoji} ${emp.name}を採用！`);
+  updateAll();
+  saveGame();
+}
+
+function buyUpgrade(upgradeId) {
+  if (game.upgrades.includes(upgradeId)) return;
+  
+  const upg = UPGRADES.find(u => u.id === upgradeId);
+  if (!upg) return;
+  
+  if (game.money < upg.cost) return;
+  
+  game.money -= upg.cost;
+  game.upgrades.push(upgradeId);
+  
+  // Apply tap multiplier upgrades
+  if (upg.target === '_tap') {
+    game.tapMultiplier *= upg.multiplier;
+  }
+
+  playSE('upgrade');
+  updateQuestProgress('upgrade');
+  showToast(`⚡ ${upg.name}を導入！`, 'gold');
+  updateAll();
+  saveGame();
+}
+
+function doPrestige() {
+  if (game.money < 1000000000) return;
+  
+  game.prestigeCount++;
+  game.prestigeMultiplier = 1 + (game.prestigeCount * 0.5);
+  
+  // Reset but keep prestige data
+  game.money = 0;
+  game.totalEarned = 0;
+  game.employees = {};
+  game.upgrades = [];
+  game.tapMultiplier = 1;
+  game.totalEmployees = 0;
+  game.companyLevel = Math.min(game.prestigeCount, COMPANY_NAMES.length - 1);
+  
+  playSE('prestige');
+  showToast('★ 転生完了！ボーナスGET！', 'purple');
+  quests = [];
+  generateQuests();
+  updateAll();
+  saveGame();
+}
+
+function collectOffline() {
+  const banner = document.getElementById('offlineBanner');
+  const amount = parseFloat(banner.dataset.amount || 0);
+  game.money += amount;
+  game.totalEarned += amount;
+  banner.style.display = 'none';
+  showToast(`💤 オフライン収益 ¥${formatMoney(amount)} 回収！`);
+  updateMoneyDisplay();
+}
+
+// ============================================================
+// DISPLAY
+// ============================================================
+
+function formatMoney(n) {
+  if (n >= 1e12) return (n / 1e12).toFixed(1) + '兆';
+  if (n >= 1e8) return (n / 1e8).toFixed(1) + '億';
+  if (n >= 1e4) return (n / 1e4).toFixed(1) + '万';
+  return Math.floor(n).toLocaleString();
+}
+
+function updateMoneyDisplay(bump = false) {
+  const el = document.getElementById('moneyDisplay');
+  el.textContent = formatMoney(game.money);
+  if (bump) {
+    el.classList.remove('bump');
+    void el.offsetWidth;
+    el.classList.add('bump');
+    setTimeout(() => el.classList.remove('bump'), 100);
+  }
+  
+  document.getElementById('incomeRate').textContent = `+${formatMoney(getIncomePerSecond())}円/秒`;
+  document.getElementById('totalEmployees').textContent = game.totalEmployees + '名';
+  document.getElementById('totalEarned').textContent = '¥' + formatMoney(game.totalEarned);
+  document.getElementById('prestigeDisplay').textContent = '★' + game.prestigeCount;
+  document.getElementById('companyNameDisplay').textContent = '★ ' + COMPANY_NAMES[game.companyLevel || 0];
+}
+
+function renderEmployees() {
+  const list = document.getElementById('employeeList');
+  let html = '';
+  
+  for (const emp of EMPLOYEES) {
+    const count = game.employees[emp.id] || 0;
+    const cost = getEmployeeCost(emp.id, count);
+    const canAfford = game.money >= cost;
+    const isUnlocked = game.totalEarned >= emp.unlockAt || game.money >= emp.unlockAt || count > 0;
+    
+    if (!isUnlocked) {
+      html += `
+        <div class="employee-card cant-afford" style="--card-color:${emp.color}">
+          <div class="emp-emoji">🔒</div>
+          <div class="emp-info">
+            <div class="emp-name">???</div>
+            <div class="emp-desc">¥${formatMoney(emp.unlockAt)}以上稼ぐと解放</div>
+          </div>
+        </div>`;
+      continue;
+    }
+    
+    // Per employee income with upgrades
+    let empIncome = emp.baseIncome;
+    const empUpgrades = UPGRADES.filter(u => u.target === emp.id && game.upgrades.includes(u.id));
+    for (const upg of empUpgrades) empIncome *= upg.multiplier;
+    if (game.upgrades.includes('global')) empIncome *= 1.5;
+    empIncome *= game.prestigeMultiplier;
+    
+    html += `
+      <div class="employee-card ${canAfford ? 'can-afford' : 'cant-afford'}" style="--card-color:${emp.color}" onclick="hireEmployee('${emp.id}')">
+        <div class="emp-emoji">${emp.emoji}</div>
+        <div class="emp-info">
+          <div class="emp-name">
+            ${emp.name}
+            ${count > 0 ? `<span class="emp-count-badge" style="background:${emp.color}">${count}名</span>` : ''}
+          </div>
+          <div class="emp-income">+${formatMoney(empIncome)}円/秒 × ${count}名</div>
+          <div class="emp-desc">${emp.desc}</div>
+        </div>
+        <div class="hire-btn ${canAfford ? 'can-afford' : ''}" style="--card-color:${emp.color}">
+          <span class="hire-label">採用</span>
+          <span class="hire-cost">¥${formatMoney(cost)}</span>
+        </div>
+      </div>`;
+  }
+  
+  list.innerHTML = html;
+}
+
+function renderUpgrades() {
+  const list = document.getElementById('upgradeList');
+  let html = '';
+  
+  for (const upg of UPGRADES) {
+    const purchased = game.upgrades.includes(upg.id);
+    const canAfford = game.money >= upg.cost;
+    html += `
+      <div class="upgrade-card ${purchased ? 'purchased' : canAfford ? 'can-afford' : ''}" onclick="buyUpgrade('${upg.id}')">
+        <div class="upg-icon">${upg.emoji}</div>
+        <div class="upg-info">
+          <div class="upg-name">${upg.name}</div>
+          <div class="upg-desc">${upg.desc}</div>
+        </div>
+        ${purchased
+          ? `<div class="upg-done">✅</div>`
+          : `<div class="upg-cost">¥${formatMoney(upg.cost)}</div>`
+        }
+      </div>`;
+  }
+  
+  list.innerHTML = html;
+}
+
+function renderMilestones() {
+  const list = document.getElementById('milestoneList');
+  let html = '';
+  
+  for (const ms of MILESTONES) {
+    const achieved = ms.check(game);
+    if (achieved && !game.milestones.includes(ms.id)) {
+      game.milestones.push(ms.id);
+    }
+    const done = game.milestones.includes(ms.id) || achieved;
+    html += `
+      <div class="milestone-card ${done ? 'achieved' : ''}">
+        <div class="ms-icon">${ms.emoji}</div>
+        <div class="ms-info">
+          <div class="ms-name">${ms.name}</div>
+          <div class="ms-desc">${ms.desc}</div>
+        </div>
+        <div class="ms-status">${done ? '🏆' : '⬜'}</div>
+      </div>`;
+  }
+  
+  list.innerHTML = html;
+}
+
+function renderPrestige() {
+  const btn = document.getElementById('prestigeBtn');
+  const bonus = document.getElementById('prestigeBonus');
+  const history = document.getElementById('prestigeHistory');
+  
+  const canPrestige = game.money >= 1000000000;
+  btn.disabled = !canPrestige;
+  
+  const nextMult = 1 + ((game.prestigeCount + 1) * 0.5);
+  bonus.textContent = `転生後の収益ボーナス: ×${nextMult.toFixed(1)}`;
+  
+  if (game.prestigeCount > 0) {
+    history.innerHTML = `<div class="milestone-card achieved">
+      <div class="ms-icon">⭐</div>
+      <div class="ms-info">
+        <div class="ms-name">${game.prestigeCount}回転生済み</div>
+        <div class="ms-desc">現在の収益ボーナス: ×${game.prestigeMultiplier.toFixed(1)}</div>
+      </div>
+      <div class="ms-status">✨</div>
+    </div>`;
+  } else {
+    history.innerHTML = `<div style="text-align:center;color:var(--text-dim);font-size:12px;padding:20px;">まだ転生していません</div>`;
+  }
+}
+
+function updateAll() {
+  updateMoneyDisplay();
+  renderEmployees();
+  renderUpgrades();
+  renderQuests();
+  renderRanking();
+  renderMilestones();
+  renderPrestige();
+  updateBuilding();
+}
+
+function updateBuilding() {
+  const total = game.totalEmployees;
+  const windows = document.querySelectorAll('#windows rect');
+  windows.forEach((w, i) => {
+    const threshold = i * 2;
+    if (total > threshold) {
+      const colors = ['#00d4ff', '#ffd700', '#7fffb2', '#ff6b35'];
+      w.setAttribute('fill', colors[i % colors.length]);
+      w.setAttribute('opacity', '0.85');
+    } else {
+      w.setAttribute('fill', '#00d4ff');
+      w.setAttribute('opacity', '0.15');
+    }
+  });
+}
+
+// ============================================================
+// UI HELPERS
+// ============================================================
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`tab-${tab}`).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function showToast(msg, type = '') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = msg;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 2300);
+}
+
+function showFloatNum(x, y, amount) {
+  const el = document.createElement('div');
+  el.className = 'float-num';
+  el.textContent = '+¥' + formatMoney(amount);
+  el.style.left = (x - 20) + 'px';
+  el.style.top = (y - 20) + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 800);
+}
+
+function showOfflineBanner(amount) {
+  const banner = document.getElementById('offlineBanner');
+  banner.dataset.amount = amount;
+  banner.querySelector('.offline-amount').textContent = '¥' + formatMoney(amount);
+  banner.style.display = 'flex';
+}
+
+// ============================================================
+// GAME LOOP
+// ============================================================
+
+let lastTick = Date.now();
+
+function gameLoop() {
+  const now = Date.now();
+  const delta = (now - lastTick) / 1000;
+  lastTick = now;
+  
+  const income = getIncomePerSecond() * delta;
+  if (income > 0) {
+    game.money += income;
+    game.totalEarned += income;
+  }
+  
+  updateMoneyDisplay();
+  
+  requestAnimationFrame(gameLoop);
+}
+
+// Update cards every 2 seconds (less expensive)
+setInterval(() => {
+  renderEmployees();
+  renderUpgrades();
+  renderQuests();
+  renderRanking();
+  updateBuilding();
+
+  // Track passive income for quests
+  updateQuestProgress('earn', getIncomePerSecond() * 2);
+
+  // Check milestones
+  let newMilestone = false;
+  for (const ms of MILESTONES) {
+    if (!game.milestones.includes(ms.id) && ms.check(game)) {
+      game.milestones.push(ms.id);
+      playSE('milestone');
+      showToast(`🏆 実績解除: ${ms.name}！`, 'gold');
+      newMilestone = true;
+    }
+  }
+  
+  saveGame();
+}, 2000);
+
+// ============================================================
+// SOUND SYSTEM (Web Audio API)
+// ============================================================
+
+let audioCtx = null;
+let soundEnabled = false;
+let bgmGain = null;
+let bgmStarted = false;
+
+function initAudio() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  bgmGain = audioCtx.createGain();
+  bgmGain.gain.value = 0.15;
+  bgmGain.connect(audioCtx.destination);
+}
+
+function toggleSound() {
+  initAudio();
+  soundEnabled = !soundEnabled;
+  const btn = document.getElementById('soundToggle');
+  btn.textContent = soundEnabled ? '🔊' : '🔇';
+  btn.classList.toggle('on', soundEnabled);
+  if (soundEnabled) {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    if (!bgmStarted) startBGM();
+    bgmGain.gain.value = 0.15;
+  } else {
+    bgmGain.gain.value = 0;
+  }
+}
+
+function playSE(type) {
+  if (!soundEnabled || !audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  switch(type) {
+    case 'tap':
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.05);
+      gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+      break;
+    case 'hire':
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(523, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.15);
+      setTimeout(() => {
+        const osc2 = audioCtx.createOscillator();
+        const g2 = audioCtx.createGain();
+        osc2.connect(g2); g2.connect(audioCtx.destination);
+        osc2.type = 'triangle';
+        osc2.frequency.value = 659;
+        g2.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        g2.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+        osc2.start(); osc2.stop(audioCtx.currentTime + 0.15);
+      }, 80);
+      break;
+    case 'upgrade':
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15);
+      gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+      break;
+    case 'milestone':
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(523, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.5);
+      [659, 784, 1047].forEach((freq, i) => {
+        setTimeout(() => {
+          const o = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
+          o.connect(g); g.connect(audioCtx.destination);
+          o.type = 'sine'; o.frequency.value = freq;
+          g.gain.setValueAtTime(0.12, audioCtx.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+          o.start(); o.stop(audioCtx.currentTime + 0.3);
+        }, (i + 1) * 120);
+      });
+      break;
+    case 'quest':
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(660, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(1320, audioCtx.currentTime + 0.2);
+      gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+      break;
+    case 'prestige':
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(262, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.8);
+      [330, 392, 523, 659, 784].forEach((freq, i) => {
+        setTimeout(() => {
+          const o = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
+          o.connect(g); g.connect(audioCtx.destination);
+          o.type = 'sine'; o.frequency.value = freq;
+          g.gain.setValueAtTime(0.12, audioCtx.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+          o.start(); o.stop(audioCtx.currentTime + 0.4);
+        }, (i + 1) * 150);
+      });
+      break;
+  }
+}
+
+function startBGM() {
+  if (!audioCtx || bgmStarted) return;
+  bgmStarted = true;
+
+  // Simple lo-fi BGM loop using oscillators
+  const notes = [262, 294, 330, 349, 392, 349, 330, 294];
+  let noteIndex = 0;
+
+  function playBGMNote() {
+    if (!soundEnabled) { setTimeout(playBGMNote, 500); return; }
+    const osc = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    osc.connect(g);
+    g.connect(bgmGain);
+    osc.type = 'sine';
+    osc.frequency.value = notes[noteIndex] * 0.5;
+    g.gain.setValueAtTime(0.3, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.8);
+    noteIndex = (noteIndex + 1) % notes.length;
+    setTimeout(playBGMNote, 800);
+  }
+  playBGMNote();
+}
+
+// ============================================================
+// QUEST / MISSION SYSTEM
+// ============================================================
+
+const QUEST_TEMPLATES = [
+  { id: 'q_tap', name: 'タップマスター', desc: '{target}回タップしよう', icon: '👆', type: 'tap', targets: [10, 30, 50, 100], rewardMult: 50 },
+  { id: 'q_hire', name: '採用キャンペーン', desc: '{target}人採用しよう', icon: '👥', type: 'hire', targets: [3, 5, 10, 20], rewardMult: 500 },
+  { id: 'q_earn', name: '売上目標', desc: '¥{target}を稼ごう', icon: '💰', type: 'earn', targets: [1000, 10000, 100000, 1000000], rewardMult: 0.3 },
+  { id: 'q_upgrade', name: '設備投資', desc: '{target}個の強化を購入しよう', icon: '⚡', type: 'upgrade', targets: [1, 2, 3, 5], rewardMult: 2000 },
+];
+
+let quests = [];
+let questProgress = { tap: 0, hire: 0, earn: 0, upgrade: 0 };
+let questLastGenerated = 0;
+
+function generateQuests() {
+  const now = Date.now();
+  // Generate new quests every 5 minutes or on first load
+  if (quests.length >= 3 && now - questLastGenerated < 300000) return;
+
+  // Remove completed & claimed quests
+  quests = quests.filter(q => !q.claimed);
+
+  while (quests.length < 3) {
+    const template = QUEST_TEMPLATES[Math.floor(Math.random() * QUEST_TEMPLATES.length)];
+    const difficulty = Math.min(Math.floor(game.prestigeCount + game.totalEmployees / 20), template.targets.length - 1);
+    const target = template.targets[Math.max(0, difficulty)];
+    const reward = Math.floor(target * template.rewardMult * (1 + game.prestigeCount * 0.2));
+
+    const quest = {
+      id: template.id + '_' + now + '_' + quests.length,
+      name: template.name,
+      desc: template.desc.replace('{target}', template.type === 'earn' ? formatMoney(target) : target),
+      icon: template.icon,
+      type: template.type,
+      target: target,
+      progress: 0,
+      reward: reward,
+      completed: false,
+      claimed: false,
+      createdAt: now,
+      expiresAt: now + 600000, // 10 min
+    };
+    quests.push(quest);
+  }
+  questLastGenerated = now;
+  questProgress = { tap: 0, hire: 0, earn: 0, upgrade: 0 };
+}
+
+function updateQuestProgress(type, amount = 1) {
+  for (const quest of quests) {
+    if (quest.claimed || quest.type !== type) continue;
+    quest.progress += amount;
+    if (quest.progress >= quest.target && !quest.completed) {
+      quest.completed = true;
+      showToast(`📋 任務達成: ${quest.name}！`, 'gold');
+      playSE('quest');
+    }
+  }
+}
+
+function claimQuest(questId) {
+  const quest = quests.find(q => q.id === questId);
+  if (!quest || !quest.completed || quest.claimed) return;
+  quest.claimed = true;
+  game.money += quest.reward;
+  game.totalEarned += quest.reward;
+  showToast(`📋 報酬 ¥${formatMoney(quest.reward)} 獲得！`, 'gold');
+  playSE('milestone');
+  generateQuests();
+  renderQuests();
+  updateMoneyDisplay(true);
+  saveGame();
+}
+
+function renderQuests() {
+  const list = document.getElementById('questList');
+  if (!list) return;
+  let html = '';
+
+  // Remove expired quests
+  const now = Date.now();
+  quests = quests.filter(q => q.claimed || now < q.expiresAt);
+  generateQuests();
+
+  for (const quest of quests) {
+    if (quest.claimed) continue;
+    const progress = Math.min(quest.progress, quest.target);
+    const pct = Math.floor((progress / quest.target) * 100);
+    const remaining = Math.max(0, quest.expiresAt - now);
+    const mins = Math.floor(remaining / 60000);
+    const secs = Math.floor((remaining % 60000) / 1000);
+
+    html += `
+      <div class="quest-card ${quest.completed ? 'completed' : 'active'}">
+        <div class="quest-timer">${mins}:${String(secs).padStart(2, '0')}</div>
+        <div class="quest-header">
+          <span class="quest-icon">${quest.icon}</span>
+          <span class="quest-title">${quest.name}</span>
+        </div>
+        <div class="quest-desc">${quest.desc}</div>
+        <div class="quest-progress-bar">
+          <div class="quest-progress-fill" style="width:${pct}%"></div>
+        </div>
+        <div class="quest-progress-text">
+          <span>${quest.type === 'earn' ? formatMoney(progress) : progress} / ${quest.type === 'earn' ? formatMoney(quest.target) : quest.target}</span>
+          <span>${pct}%</span>
+        </div>
+        <div class="quest-reward">報酬: ¥${formatMoney(quest.reward)}</div>
+        ${quest.completed ? `<button class="quest-claim-btn" onclick="claimQuest('${quest.id}')">報酬を受け取る！</button>` : ''}
+      </div>`;
+  }
+
+  if (!html) {
+    html = `<div style="text-align:center;color:var(--text-dim);font-size:12px;padding:20px;">新しい任務を準備中...</div>`;
+  }
+
+  list.innerHTML = html;
+}
+
+// ============================================================
+// RANKING SYSTEM
+// ============================================================
+
+function renderRanking() {
+  const list = document.getElementById('rankingList');
+  if (!list) return;
+
+  // Build ranking data
+  const rankData = [];
+  const totalIncome = getIncomePerSecond();
+  const globalMult = game.upgrades.includes('global') ? 1.5 : 1;
+
+  for (const emp of EMPLOYEES) {
+    const count = game.employees[emp.id] || 0;
+    if (count === 0) continue;
+
+    let empIncome = emp.baseIncome * count;
+    const empUpgrades = UPGRADES.filter(u => u.target === emp.id && game.upgrades.includes(u.id));
+    for (const upg of empUpgrades) empIncome *= upg.multiplier;
+    empIncome *= globalMult * game.prestigeMultiplier;
+
+    rankData.push({
+      name: emp.name,
+      emoji: emp.emoji,
+      count: count,
+      income: empIncome,
+      color: emp.color,
+      share: totalIncome > 0 ? (empIncome / totalIncome * 100) : 0,
+    });
+  }
+
+  // Sort by income descending
+  rankData.sort((a, b) => b.income - a.income);
+
+  let html = '';
+  if (rankData.length === 0) {
+    html = `<div style="text-align:center;color:var(--text-dim);font-size:12px;padding:20px;">社員を採用すると番付が表示されます</div>`;
+  } else {
+    // Total summary
+    html += `<div class="ranking-card" style="border-color:var(--accent);margin-bottom:16px;">
+      <div style="font-size:24px;">🏢</div>
+      <div class="rank-info">
+        <div class="rank-name">全社合計</div>
+        <div class="rank-income">+${formatMoney(totalIncome)}円/秒</div>
+      </div>
+      <div style="font-size:13px;color:var(--accent);font-family:'DotGothic16',monospace;">${game.totalEmployees}名</div>
+    </div>`;
+
+    rankData.forEach((emp, i) => {
+      const rank = i + 1;
+      const rankClass = rank <= 3 ? `rank-${rank}` : '';
+      const medals = ['🥇', '🥈', '🥉'];
+      html += `
+        <div class="ranking-card ${rankClass}">
+          <div class="rank-num">${rank <= 3 ? medals[rank-1] : '#' + rank}</div>
+          <div style="font-size:28px;flex-shrink:0;">${emp.emoji}</div>
+          <div class="rank-info">
+            <div class="rank-name">${emp.name} <span style="font-size:10px;color:var(--text-dim);">(${emp.count}名)</span></div>
+            <div class="rank-income">+${formatMoney(emp.income)}円/秒</div>
+            <div class="rank-bar">
+              <div class="rank-bar-fill" style="width:${emp.share}%;background:${emp.color};"></div>
+            </div>
+            <div class="rank-share">収益シェア: ${emp.share.toFixed(1)}%</div>
+          </div>
+        </div>`;
+    });
+  }
+
+  list.innerHTML = html;
+}
+
+// ============================================================
+// INIT
+// ============================================================
+loadGame();
+generateQuests();
+updateAll();
+renderQuests();
+renderRanking();
+requestAnimationFrame(gameLoop);
+</script>
+
+</body>
+</html>
