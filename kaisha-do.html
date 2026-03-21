@@ -275,12 +275,30 @@
     font-size: 10px; line-height: 1;
   }
 
+  /* PNG character image */
+  .char-img {
+    width: 60px; height: 80px;
+    object-fit: contain;
+    mix-blend-mode: multiply;
+    image-rendering: auto;
+    display: block;
+  }
+  .char-img-wrap {
+    width: 60px; height: 80px;
+    position: relative;
+  }
+
   /* Idle animation */
   @keyframes charBob {
     0%,100% { transform: translateY(0); }
-    50% { transform: translateY(-3px); }
+    50% { transform: translateY(-2px); }
+  }
+  @keyframes charBobImg {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
   }
   .pixel-char { animation: charBob 2s ease-in-out infinite; }
+  .pixel-char.img-char { animation: charBobImg 1.5s ease-in-out infinite; }
   .pixel-char:nth-child(2n) { animation-delay: .4s; }
   .pixel-char:nth-child(3n) { animation-delay: .8s; }
   .pixel-char:nth-child(4n) { animation-delay: 1.2s; }
@@ -683,7 +701,7 @@
 // ============================================================
 const EMP = [
   { id:'part_time', name:'アルバイト', emoji:'🧑‍💼', desc:'時給制。コンビニ並み', baseCost:15, baseIncome:.1, color:'#64748b', unlockAt:0,
-    headColor:'#f5d0a9', bodyColor:'#6b7280', acc:'' },
+    headColor:'#f5d0a9', bodyColor:'#6b7280', acc:'', img:'images/characters/part_time.png' },
   { id:'staff', name:'契約社員', emoji:'💼', desc:'安定した戦力', baseCost:120, baseIncome:.7, color:'#22c55e', unlockAt:100,
     headColor:'#f5d0a9', bodyColor:'#22c55e', acc:'' },
   { id:'full_time', name:'正社員', emoji:'👔', desc:'会社の屋台骨', baseCost:1300, baseIncome:6, color:'#3b82f6', unlockAt:1000,
@@ -1042,15 +1060,26 @@ function renderRoom() {
     const cp=charPositions[emp.uid];
     const isSel=selectedFloorEmp&&selectedFloorEmp.uid===emp.uid;
 
-    html+=`<div class="pixel-char${isSel?' selected-emp':''}" data-uid="${emp.uid}"
-      style="left:${cp.x}px;" onclick="event.stopPropagation();onCharTap(${emp.uid},${currentFloor})">
-      <div class="char-speech-area" style="position:absolute;bottom:38px;left:50%;transform:translateX(-50%);pointer-events:none;z-index:10"></div>
-      <div class="char-body">
+    const isImg = !!ed.img;
+    const charClass = `pixel-char${isSel?' selected-emp':''}${isImg?' img-char':''}`;
+    const speechBottom = isImg ? '86px' : '38px';
+
+    let charInner;
+    if (isImg) {
+      charInner = `<div class="char-img-wrap"><img class="char-img" src="${ed.img}" alt="${ed.name}"></div>`;
+    } else {
+      charInner = `<div class="char-body">
         ${ed.acc?`<div class="char-acc">${ed.acc}</div>`:''}
         <div class="char-head" style="background:${ed.headColor}"></div>
         <div class="char-body-rect" style="background:${ed.bodyColor}"></div>
         <div class="char-legs"><div class="char-leg"></div><div class="char-leg"></div></div>
-      </div>
+      </div>`;
+    }
+
+    html+=`<div class="${charClass}" data-uid="${emp.uid}"
+      style="left:${cp.x}px;" onclick="event.stopPropagation();onCharTap(${emp.uid},${currentFloor})">
+      <div class="char-speech-area" style="position:absolute;bottom:${speechBottom};left:50%;transform:translateX(-50%);pointer-events:none;z-index:10"></div>
+      ${charInner}
     </div>`;
   }
   charsEl.innerHTML=html;
