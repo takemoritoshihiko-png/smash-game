@@ -2714,12 +2714,12 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
     else if (animData.hitstun > 0) mKey = 'damage';
     else if (animData.attacking && animData.attackType) {
       const at = animData.attackType;
-      if (at === 'special' || at === 'cmdSpecial') mKey = 'special';
-      else if (at === 'upSmash' || at === 'sideSmash' || at === 'downSmash') mKey = 'smash';
+      if (at === 'special' || at === 'cmdSpecial') mKey = 'smash';
+      else if (at === 'upSmash' || at === 'sideSmash' || at === 'downSmash') mKey = 'ground_smash';
       else if (at === 'strong') mKey = 'attack_s';
       else mKey = 'attack_n';
-    } else if (animData.animState === 'walk') mKey = 'walk';
-    else if (animData.animState === 'jump' || animData.animState === 'fall') mKey = 'jump';
+    } else if (animData.animState === 'walk') mKey = 'jump';
+    else if (animData.animState === 'jump' || animData.animState === 'fall') mKey = 'special';
     const mSpr = meteoSprites[mKey];
     if (mSpr && mSpr.complete && mSpr.naturalWidth > 0) img = mSpr;
   }
