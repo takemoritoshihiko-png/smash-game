@@ -533,6 +533,12 @@ const meteoImg = new Image();
 meteoImg.src = 'images/meteo.png';
 const longImg = new Image();
 longImg.src = 'images/long.png';
+const longSprites = {};
+const longSpriteMap = { idle:'01_idle', walk:'01_idle', jump:'03_jump', attack_n:'02_attack_side', attack_side:'06_attack_water', attack_up:'07_spin', attack_down:'04_attack_wide', attack_air:'05_attack_thrust', special:'09_special', damage:'08_damage', win:'11_win', down:'12_down', projectile:'10_projectile' };
+Object.keys(longSpriteMap).forEach(k => {
+  longSprites[k] = new Image();
+  longSprites[k].src = 'images/long/' + longSpriteMap[k] + '.png';
+});
 const uruoImg = new Image();
 uruoImg.src = 'images/uruo.png';
 const kumataroImg = new Image();
@@ -2699,6 +2705,27 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
     else if (animData.animState === 'jump' || animData.animState === 'fall') sKey = 'jump';
     const spr = saisokuSprites[sKey];
     if (spr && spr.complete && spr.naturalWidth > 0) img = spr;
+  }
+  // Long sprite animation: select sprite based on state
+  if (charIndex === 4 && animData) {
+    let lKey = 'idle';
+    if (!animData.alive) lKey = 'down';
+    else if (animData.dSkillActive && animData.dSkillTimer > 0) lKey = 'special';
+    else if (animData.guarding) lKey = 'idle';
+    else if (animData.hitstun > 0) lKey = 'damage';
+    else if (animData.attacking && animData.attackType) {
+      const at = animData.attackType;
+      if (at === 'special' || at === 'cmdSpecial') lKey = 'special';
+      else if (at === 'sideSmash') lKey = 'attack_side';
+      else if (at === 'upSmash') lKey = 'attack_up';
+      else if (at === 'downSmash') lKey = 'attack_down';
+      else if (at === 'aerial' || at === 'downair') lKey = 'attack_air';
+      else if (at === 'strong') lKey = 'attack_side';
+      else lKey = 'attack_n';
+    } else if (animData.animState === 'walk') lKey = 'walk';
+    else if (animData.animState === 'jump' || animData.animState === 'fall') lKey = 'jump';
+    const lSpr = longSprites[lKey];
+    if (lSpr && lSpr.complete && lSpr.naturalWidth > 0) img = lSpr;
   }
   if (img && img.complete && img.naturalWidth > 0) {
     const imgW = imgSizes[charIndex][0] * s;
