@@ -186,7 +186,7 @@
     position: absolute;
     cursor: pointer; pointer-events: auto;
     -webkit-tap-highlight-color: transparent;
-    transition: left 2s ease-in-out, top 2s ease-in-out, transform .3s;
+    transition: transform .3s;
     will-change: left, top, transform;
     transform-origin: bottom center;
   }
@@ -565,6 +565,84 @@
   .furn-cost { font-size: 11px; font-family: var(--pixel); color: var(--gold); font-weight: 700; flex-shrink: 0; }
   .furn-owned { font-size: 9px; color: var(--accent3); font-family: var(--pixel); }
 
+  /* ── DIAMOND EMPLOYEE ── */
+  .pixel-char.diamond {
+    filter: drop-shadow(0 0 12px rgba(100,180,255,.6)) drop-shadow(0 0 24px rgba(100,150,255,.3)) !important;
+  }
+  .diamond-icon {
+    position: absolute; top: -18px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 14px; z-index: 10;
+    animation: diamondFloat 1.5s ease-in-out infinite;
+  }
+  @keyframes diamondFloat {
+    0%,100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-4px); }
+  }
+  @keyframes diamondSparkle {
+    0%,100% { opacity: .4; }
+    50% { opacity: 1; }
+  }
+  .diamond-sparkle {
+    position: absolute; inset: -8px; pointer-events: none; z-index: 9;
+    overflow: hidden;
+  }
+  .diamond-sparkle::before, .diamond-sparkle::after {
+    content: '✦'; position: absolute; color: rgba(150,200,255,.7);
+    font-size: 8px; animation: diamondSparkle 1.2s ease-in-out infinite;
+  }
+  .diamond-sparkle::before { top: 10%; left: 5%; animation-delay: 0s; }
+  .diamond-sparkle::after { top: 30%; right: 5%; animation-delay: .6s; }
+
+  .lobby-emp.diamond-lobby {
+    position: relative;
+  }
+  .lobby-emp.diamond-lobby::after {
+    content: '💎'; position: absolute; top: -6px; right: -6px;
+    font-size: 10px;
+  }
+
+  /* ── CONFETTI ── */
+  .confetti-container {
+    position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+    overflow: hidden;
+  }
+  .confetti-piece {
+    position: absolute; width: 8px; height: 8px;
+    top: -10px;
+    animation: confettiFall 2.5s ease-in forwards;
+  }
+  @keyframes confettiFall {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* ── BIG ANNOUNCEMENT ── */
+  .big-announce {
+    position: fixed; top: 30%; left: 50%; transform: translate(-50%,-50%);
+    z-index: 9998; font-size: 20px; font-weight: 900;
+    font-family: var(--pixel); color: #fff;
+    text-shadow: 0 0 20px rgba(100,180,255,.8), 0 0 40px rgba(100,150,255,.4);
+    animation: announceIn .5s ease, announceOut .5s ease 2s forwards;
+    white-space: nowrap; pointer-events: none;
+  }
+  @keyframes announceIn { from { transform: translate(-50%,-50%) scale(0.3); opacity:0; } to { transform: translate(-50%,-50%) scale(1); opacity:1; } }
+  @keyframes announceOut { to { transform: translate(-50%,-50%) scale(1.2); opacity:0; } }
+
+  /* ── WALKING DIRECTION ── */
+  .pixel-char.face-left .char-bob {
+    transform: scaleX(-1);
+  }
+
+  /* Walk bounce */
+  @keyframes walkBounce {
+    0%,100% { margin-top: 0; }
+    50% { margin-top: -1px; }
+  }
+  .pixel-char.walking .char-bob {
+    animation: walkBounce .3s ease-in-out infinite !important;
+  }
+
   ::-webkit-scrollbar { width:3px; }
   ::-webkit-scrollbar-track { background:var(--bg); }
   ::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
@@ -901,7 +979,11 @@ function getFloorCount() {
   return c;
 }
 function getFloorEmps(f) { return game.floorData[f]||[]; }
-function isFloorFull(f) { return getFloorEmps(f).length>=FLOOR_CAP; }
+function isFloorFull(f) {
+  const emps = getFloorEmps(f);
+  const normalCount = emps.filter(e => !e.diamond).length;
+  return normalCount >= FLOOR_CAP;
+}
 function checkFloorUnlocks() {
   const n=getFloorCount();
   if (n>game.prevFloorCount) {
@@ -927,6 +1009,17 @@ function getIncomePerSecond() {
     for (const u of UPGRADES) if(u.target===e.id&&game.upgrades.includes(u.id)) inc*=u.multiplier;
     t+=inc*gm;
   }
+  // Diamond employee bonus: each diamond emp adds 99x their base (100x total)
+  const allEmps = [...game.waitingList];
+  for (const f in game.floorData) allEmps.push(...(game.floorData[f]||[]));
+  for (const emp of allEmps) {
+    if (!emp.diamond) continue;
+    const ed = EMP.find(e=>e.id===emp.empId);
+    if (!ed) continue;
+    let dinc = ed.baseIncome * 99;
+    for (const u of UPGRADES) if(u.target===ed.id&&game.upgrades.includes(u.id)) dinc*=u.multiplier;
+    t += dinc * gm;
+  }
   return t*game.prestigeMultiplier;
 }
 function getTotalEmp() { return Object.values(game.employees).reduce((a,b)=>a+b,0); }
@@ -939,10 +1032,54 @@ function hireEmployee(id) {
   const c=game.employees[id]||0, cost=getEmpCost(id,c);
   if (game.money<cost) return;
   game.money-=cost; game.employees[id]=c+1; game.totalEmployees=getTotalEmp();
-  game.waitingList.push({uid:game.nextUid++,empId:id});
-  playSE('hire'); updateQuestProgress('hire');
-  showToast(`${e.emoji} ${e.name}を採用！ロビーへ`);
+
+  // Diamond roll: 0.05% chance
+  const isDiamond = Math.random() < 0.0005;
+  const uid = game.nextUid++;
+  game.waitingList.push({ uid, empId: id, diamond: isDiamond });
+
+  if (isDiamond) {
+    if (!game.diamondCount) game.diamondCount = 0;
+    game.diamondCount++;
+    playSE('diamond');
+    showDiamondCelebration(e);
+  } else {
+    playSE('hire');
+    showToast(`${e.emoji} ${e.name}を採用！ロビーへ`);
+  }
+
+  updateQuestProgress('hire');
   checkFloorUnlocks(); updateAll(); saveGame();
+}
+
+function showDiamondCelebration(emp) {
+  // Big announcement
+  const ann = document.createElement('div');
+  ann.className = 'big-announce';
+  ann.textContent = `💎 ダイヤモンド${emp.name}が誕生！`;
+  document.body.appendChild(ann);
+  setTimeout(() => ann.remove(), 2600);
+
+  // Confetti
+  const container = document.createElement('div');
+  container.className = 'confetti-container';
+  document.body.appendChild(container);
+  const colors = ['#00d4ff','#ffd700','#ff6b35','#7fffb2','#c084fc','#ff4757','#ffffff'];
+  for (let i = 0; i < 60; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + '%';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.animationDelay = (Math.random() * 1) + 's';
+    piece.style.animationDuration = (1.5 + Math.random() * 1.5) + 's';
+    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+    piece.style.width = (4 + Math.random() * 6) + 'px';
+    piece.style.height = (4 + Math.random() * 6) + 'px';
+    container.appendChild(piece);
+  }
+  setTimeout(() => container.remove(), 4000);
+
+  showToast(`💎 ダイヤモンド${emp.name}が誕生！ 収益100倍！`, 'gold');
 }
 
 function assignToFloor(uid,floor) {
@@ -1023,6 +1160,13 @@ function onCharTap(uid,floor) {
   const emp=fe.find(e=>e.uid===uid);
   if (!emp) return;
   const ed=EMP.find(e=>e.id===emp.empId);
+  // Pause walking
+  if (walkStates[uid]) {
+    walkStates[uid].paused = true;
+    walkStates[uid].pauseUntil = Date.now() + 5000;
+    const el = document.querySelector(`.pixel-char[data-uid="${uid}"]`);
+    if (el) el.classList.remove('walking');
+  }
   // Show speech
   showSpeech(uid,ed.id);
   showActionBar(
@@ -1191,9 +1335,10 @@ function renderRoom() {
     }
     const cp = charPositions[emp.uid];
     const isSel=selectedFloorEmp&&selectedFloorEmp.uid===emp.uid;
+    const isDiamond = !!emp.diamond;
 
     const isImg = !!ed.img;
-    const charClass = `pixel-char${isSel?' selected-emp':''}${isImg?' img-char':''}`;
+    let charClass = `pixel-char${isSel?' selected-emp':''}${isImg?' img-char':''}${isDiamond?' diamond':''}`;
     const speechBottom = isImg ? '86px' : '38px';
 
     let charInner;
@@ -1208,11 +1353,13 @@ function renderRoom() {
       </div>`;
     }
 
+    const diamondDeco = isDiamond ? `<div class="diamond-icon">💎</div><div class="diamond-sparkle"></div>` : '';
     const charScale = cp.scale || 1;
     const zIdx = Math.floor(cp.y || 0);
     const shadowSize = isBack ? 6 : 10;
     html+=`<div class="${charClass}" data-uid="${emp.uid}"
       style="left:${cp.x}px;top:${cp.y}px;transform:scale(${charScale});z-index:${zIdx};filter:drop-shadow(0 ${shadowSize}px ${shadowSize}px rgba(0,0,0,.4));" onclick="event.stopPropagation();onCharTap(${emp.uid},${currentFloor})">
+      ${diamondDeco}
       <div class="char-speech-area" style="position:absolute;bottom:${speechBottom};left:50%;transform:translateX(-50%) scale(${1/charScale});pointer-events:none;z-index:999"></div>
       <div class="char-bob">${charInner}</div>
     </div>`;
@@ -1221,24 +1368,81 @@ function renderRoom() {
   updateFloorNav();
 }
 
-// Wander characters periodically
-function wanderChars() {
-  const fc=getFloorCount();
-  if (currentFloor>fc) return;
-  const emps=getFloorEmps(currentFloor);
+// Smooth walking system
+let walkStates = {}; // uid -> { targetX, direction, paused, pauseUntil, speed }
+
+function initWalkState(uid, startX, row) {
+  const speed = (row === 'back') ? (1.5 + Math.random() * 1) : (2 + Math.random() * 1.5); // px per frame tick
+  walkStates[uid] = {
+    targetX: startX,
+    direction: Math.random() > 0.5 ? 1 : -1,
+    paused: false,
+    pauseUntil: 0,
+    speed: speed,
+    lastMove: Date.now(),
+  };
+}
+
+function walkTick() {
+  const fc = getFloorCount();
+  if (currentFloor > fc) return;
+  const emps = getFloorEmps(currentFloor);
+  const wrapper = document.getElementById('roomWrapper');
+  const roomW = wrapper.offsetWidth || window.innerWidth;
+  const now = Date.now();
 
   for (const emp of emps) {
-    const cp=charPositions[emp.uid];
+    const cp = charPositions[emp.uid];
     if (!cp) continue;
-    // Small wander within ±15px of current position
-    const dx = (Math.random() - 0.5) * 30;
-    const newX = cp.x + dx;
+    if (!walkStates[emp.uid]) initWalkState(emp.uid, cp.x, cp.row);
+    const ws = walkStates[emp.uid];
+
+    // Paused (rest)?
+    if (ws.paused) {
+      if (now < ws.pauseUntil) continue;
+      ws.paused = false;
+      ws.direction = Math.random() > 0.5 ? 1 : -1;
+    }
+
+    const el = document.querySelector(`.pixel-char[data-uid="${emp.uid}"]`);
+    if (!el) continue;
+
+    // Calculate boundaries based on row
+    const isBack = cp.row === 'back';
+    const minX = isBack ? 100 : 60;
+    const maxX = roomW - (isBack ? 140 : 100);
+
+    // Move
+    const delta = (now - ws.lastMove) / 16; // normalize to ~60fps
+    ws.lastMove = now;
+    let newX = cp.x + ws.direction * ws.speed * delta * 0.3;
+
+    // Bounce off walls
+    if (newX <= minX) { newX = minX; ws.direction = 1; }
+    if (newX >= maxX) { newX = maxX; ws.direction = -1; }
+
     cp.x = newX;
-    const el=document.querySelector(`.pixel-char[data-uid="${emp.uid}"]`);
-    if (el) el.style.left=cp.x+'px';
+    el.style.left = newX + 'px';
+
+    // Direction visual
+    if (ws.direction < 0) {
+      el.classList.add('face-left');
+    } else {
+      el.classList.remove('face-left');
+    }
+    el.classList.add('walking');
+
+    // Random pause (roughly every 30s)
+    if (Math.random() < 0.001) {
+      ws.paused = true;
+      ws.pauseUntil = now + 2000 + Math.random() * 3000;
+      el.classList.remove('walking');
+    }
   }
 }
-setInterval(wanderChars,3000);
+
+// Run walk tick at ~30fps
+setInterval(walkTick, 33);
 
 function renderLobby() {
   const bar=document.getElementById('lobbyBar');
@@ -1249,7 +1453,8 @@ function renderLobby() {
     for (const emp of game.waitingList) {
       const ed=EMP.find(e=>e.id===emp.empId);
       const sel=selectedWaiting===emp.uid;
-      h+=`<span class="lobby-emp${sel?' selected':''}" onclick="selectWaiting(${emp.uid})" title="${ed.name}">${ed.emoji}</span>`;
+      const dClass=emp.diamond?' diamond-lobby':'';
+      h+=`<span class="lobby-emp${sel?' selected':''}${dClass}" onclick="selectWaiting(${emp.uid})" title="${ed.name}${emp.diamond?' 💎ダイヤモンド':''}">${ed.emoji}</span>`;
     }
     h+=`<span class="lobby-count">${game.waitingList.length}名</span>`;
   }
@@ -1564,6 +1769,8 @@ function playSE(type) {
     case 'quest': o.type='sine'; o.frequency.setValueAtTime(660,t); o.frequency.exponentialRampToValueAtTime(1320,t+.2); g.gain.setValueAtTime(.15,t); g.gain.exponentialRampToValueAtTime(.001,t+.3); o.start(); o.stop(t+.3); break;
     case 'prestige': o.type='sine'; o.frequency.setValueAtTime(262,t); g.gain.setValueAtTime(.15,t); g.gain.exponentialRampToValueAtTime(.001,t+.8); o.start(); o.stop(t+.8);
       [330,392,523,659,784].forEach((f,i)=>setTimeout(()=>{if(!audioCtx)return;const x=audioCtx.createOscillator(),y=audioCtx.createGain();x.connect(y);y.connect(audioCtx.destination);x.type='sine';x.frequency.value=f;y.gain.setValueAtTime(.12,audioCtx.currentTime);y.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+.4);x.start();x.stop(audioCtx.currentTime+.4)},(i+1)*150)); break;
+    case 'diamond': o.type='sine'; o.frequency.setValueAtTime(1047,t); g.gain.setValueAtTime(.15,t); g.gain.exponentialRampToValueAtTime(.001,t+.6); o.start(); o.stop(t+.6);
+      [1319,1568,2093,1568,2093].forEach((f,i)=>setTimeout(()=>{if(!audioCtx)return;const x=audioCtx.createOscillator(),y=audioCtx.createGain();x.connect(y);y.connect(audioCtx.destination);x.type='sine';x.frequency.value=f;y.gain.setValueAtTime(.12,audioCtx.currentTime);y.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+.3);x.start();x.stop(audioCtx.currentTime+.3)},(i+1)*100)); break;
   }
 }
 function startBGM() {
