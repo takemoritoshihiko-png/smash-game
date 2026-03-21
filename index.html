@@ -555,6 +555,12 @@ Object.keys(uruoSpriteMap).forEach(k => {
 });
 const kumataroImg = new Image();
 kumataroImg.src = 'images/kumataro.png';
+const kumatarouSprites = {};
+const kumatarouSpriteMap = { idle:'01_idle', walk:'02_walk', jump:'03_jump', attack_n:'04_attack_n', attack_side:'05_attack_side', attack_up:'11_projectile2', attack_down:'04_attack_n', attack_air:'08_attack_air', special:'06_special', damage:'07_damage', win:'09_win', down:'12_down', projectile:'10_projectile1' };
+Object.keys(kumatarouSpriteMap).forEach(k => {
+  kumatarouSprites[k] = new Image();
+  kumatarouSprites[k].src = 'images/kumatarou/' + kumatarouSpriteMap[k] + '.png';
+});
 const bulletImg = new Image();
 bulletImg.src = 'images/bullet.png';
 const shaudenImg = new Image();
@@ -2780,6 +2786,27 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
     else if (animData.animState === 'jump' || animData.animState === 'fall') uKey = 'jump';
     const uSpr = uruoSprites[uKey];
     if (uSpr && uSpr.complete && uSpr.naturalWidth > 0) img = uSpr;
+  }
+  // Kumatarou sprite animation: select sprite based on state
+  if (charIndex === 6 && animData) {
+    let kKey = 'idle';
+    if (!animData.alive) kKey = 'down';
+    else if (animData.dSkillActive && animData.dSkillTimer > 0) kKey = 'special';
+    else if (animData.guarding) kKey = 'idle';
+    else if (animData.hitstun > 0) kKey = 'damage';
+    else if (animData.attacking && animData.attackType) {
+      const at = animData.attackType;
+      if (at === 'special' || at === 'cmdSpecial') kKey = 'special';
+      else if (at === 'sideSmash') kKey = 'attack_side';
+      else if (at === 'upSmash') kKey = 'attack_up';
+      else if (at === 'downSmash') kKey = 'attack_down';
+      else if (at === 'aerial' || at === 'downair') kKey = 'attack_air';
+      else if (at === 'strong') kKey = 'attack_side';
+      else kKey = 'attack_n';
+    } else if (animData.animState === 'walk') kKey = 'walk';
+    else if (animData.animState === 'jump' || animData.animState === 'fall') kKey = 'jump';
+    const kSpr = kumatarouSprites[kKey];
+    if (kSpr && kSpr.complete && kSpr.naturalWidth > 0) img = kSpr;
   }
   if (img && img.complete && img.naturalWidth > 0) {
     const imgW = imgSizes[charIndex][0] * s;
