@@ -7100,7 +7100,7 @@ function createPlayer(id, charIdx, startX) {
     // Attack state
     attacking: false, attackType: null, attackFrame: 0, attackData: null,
     hitTargets: [], lastHitFrame: -99,
-    hitstun: 0,
+    hitstun: 0, diFrame: 0, diBaseVx: 0, diBaseVy: 0, diShown: false,
     // Special attack states
     specialState: null,
     // Grab/throw state
@@ -7517,6 +7517,10 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   const dir = attacker.x < target.x ? 1 : -1;
   target.vx = Math.cos(rad) * weightedKb * dir;
   target.vy = Math.sin(rad) * weightedKb;
+  // ベク変用: 吹っ飛び初速を記録
+  target.diFrame = 0;
+  target.diBaseVx = target.vx;
+  target.diBaseVy = target.vy;
   // コンボ継続中はヒットストップ追加（追撃しやすくする）
   const comboBonus = (attacker.comboWindow > 0) ? 4 : 0;
   target.hitstun = Math.floor(8 + target.damage * 0.12) + comboBonus;
@@ -9077,6 +9081,42 @@ function updateBattle(dt) {
       p.hitstun--;
       p.guarding = false;
       p.animState = 'hitstun';
+
+      // ベク変（DI）: 最初の10フレームのみ方向変更可能
+      p.diFrame++;
+      if (p.diFrame <= 10) {
+        let diX = 0, diY = 0;
+        if (p.id === 0) {
+          if (onlineMode && !isHost) { diX = remoteKeys.right ? 1 : remoteKeys.left ? -1 : 0; diY = remoteKeys.up ? -1 : remoteKeys.down ? 1 : 0; }
+          else { diX = keys['ArrowRight'] ? 1 : keys['ArrowLeft'] ? -1 : 0; diY = keys['ArrowUp'] ? -1 : keys['ArrowDown'] ? 1 : 0; }
+        } else if (p.id === 1) {
+          if (onlineMode && isHost) { diX = remoteKeys.right ? 1 : remoteKeys.left ? -1 : 0; diY = remoteKeys.up ? -1 : remoteKeys.down ? 1 : 0; }
+          else if (gameMode === 'cpu' || bossRushMode) { /* CPU: no DI */ }
+          else if (onlineMode && !isHost) { diX = keys['ArrowRight'] ? 1 : keys['ArrowLeft'] ? -1 : 0; diY = keys['ArrowUp'] ? -1 : keys['ArrowDown'] ? 1 : 0; }
+          else { diX = (keys['d']||keys['D']) ? 1 : (keys['a']||keys['A']) ? -1 : 0; diY = (keys['w']||keys['W']) ? -1 : (keys['s']||keys['S']) ? 1 : 0; }
+        }
+        if (diX !== 0 || diY !== 0) {
+          const diStrengthX = 0.15, diStrengthY = 0.20;
+          const smoothFactor = 0.15; // なめらかに反映
+          p.vx += diX * Math.abs(p.diBaseVx) * diStrengthX * smoothFactor;
+          p.vy += diY * Math.abs(p.diBaseVy) * diStrengthY * smoothFactor;
+          // 最大変更量を制限
+          const maxVx = Math.abs(p.diBaseVx) * 1.3;
+          const maxVy = Math.abs(p.diBaseVy) * 1.3;
+          if (maxVx > 0.5) p.vx = Math.sign(p.vx) * Math.min(Math.abs(p.vx), maxVx);
+          if (maxVy > 0.5) p.vy = Math.sign(p.vy) * Math.min(Math.abs(p.vy), maxVy);
+          // 白い軌跡エフェクト
+          if (p.diFrame % 2 === 0) {
+            sparks.push({ x: p.x, y: p.y - 30, vx: -p.vx * 0.1, vy: -p.vy * 0.1, life: 8, maxLife: 8, color: '#FFFFFF', size: 2, gravity: 0, drag: 0.9 });
+          }
+          // 初回ベク変チュートリアル
+          if (!p.diShown) {
+            p.diShown = true;
+            cmdNameDisplay.push({ text: '方向キーで軌道変更！', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#FFFFFF' });
+          }
+        }
+      }
+
       // 速度に応じた回転（大きく吹っ飛んだ時だけ少し回転）
       const kbSpeed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
       if (kbSpeed > 10) {
@@ -11131,6 +11171,22 @@ function drawBattle(dt) {
     ctx.closePath(); ctx.fill();
   }
 
+  // DI hint arrows (ベク変ヒント)
+  for (const p of players) {
+    if (!p.alive || p.hitstun <= 0 || p.diFrame > 15) continue;
+    const kbSpd = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+    if (kbSpd < 5) continue;
+    const diAlpha = p.diFrame <= 10 ? 0.5 : Math.max(0, 0.5 - (p.diFrame - 10) * 0.1);
+    ctx.globalAlpha = diAlpha;
+    ctx.font = 'bold 16px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillText('↑', p.x, p.y - 65);
+    ctx.fillText('↓', p.x, p.y - 5);
+    ctx.fillText('←', p.x - 25, p.y - 35);
+    ctx.fillText('→', p.x + 25, p.y - 35);
+    ctx.globalAlpha = 1;
+  }
+
   // Command name display (⑤ コミック風フォント)
   for (const cn of cmdNameDisplay) {
     const t = cn.life / cn.maxLife;
@@ -12752,7 +12808,7 @@ function serializePlayer(p) {
     senBuffTimer: p.senBuffTimer, kingkingArmorTimer: p.kingkingArmorTimer, fearGauge: p.fearGauge, fearTimer: p.fearTimer, poisonTimer: p.poisonTimer,
     dosbossRandomPattern: p.dosbossRandomPattern, gravityDebuffTimer: p.gravityDebuffTimer,
     cancelWindow: p.cancelWindow, comboWindow: p.comboWindow, airComboTimer: p.airComboTimer,
-    airDodging: p.airDodging, airDodgeTimer: p.airDodgeTimer, airDodgeUsed: p.airDodgeUsed, airDodgeEndlag: p.airDodgeEndlag,
+    airDodging: p.airDodging, airDodgeTimer: p.airDodgeTimer, airDodgeUsed: p.airDodgeUsed, airDodgeEndlag: p.airDodgeEndlag, diFrame: p.diFrame,
     dashing: p.dashing, fastFalling: p.fastFalling, landLag: p.landLag, guardPenalty: p.guardPenalty,
     smashCharging: p.smashCharging, smashChargeTime: p.smashChargeTime, smashType: p.smashType,
     dSkillCooldown: p.dSkillCooldown, dSkillActive: p.dSkillActive, dSkillTimer: p.dSkillTimer, dSkillBuff: p.dSkillBuff,
