@@ -2679,197 +2679,63 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
   const tensaiActiveImg = tensaiIsDragon ? tensaiDragonImg : tensaiHumanImg;
   const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg, bulletImg, shaudenImg, judgemanImg, tensaiActiveImg, catbusImg, tankImg, namiojiImg, tokkoImg, samImg, kingImg, onpaImg, senImg, dosbossImg, microImg, mrtwoImg, kingkingImg, satoruImg, kowaiImg, yahoImg, poyoImg, pullImg, mussyImg];
   const imgSizes = [[70, 90], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [168, 112], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [85, 85], [75, 100], [80, 100], [85, 95], [80, 95], [80, 95], [75, 95], [75, 90], [75, 75], [75, 90], [75, 90]];
-  // Zen sprite animation: select sprite based on state
+  // --- Sprite animation: common state→key resolver ---
+  function getSpriteKey(ad) {
+    if (!ad.alive) return 'down';
+    if (ad.dSkillActive && ad.dSkillTimer > 0) return 'special';
+    if (ad.guarding) return 'guard';
+    if (ad.hitstun > 0) return 'damage';
+    if (ad.attacking && ad.attackType) {
+      const at = ad.attackType;
+      if (at === 'special' || at === 'cmdSpecial' || at === 'command') return 'special';
+      if (at === 'aerial' || at === 'downair') return 'attack_air';
+      if (at === 'upSmash') return 'attack_up';
+      if (at === 'sideSmash') return 'attack_side';
+      if (at === 'downSmash') return 'attack_down';
+      if (at === 'strong') return 'attack_s';
+      if (at === 'up') return 'attack_up';
+      if (at === 'side' || at === 'dash') return 'attack_side';
+      if (at === 'down') return 'attack_down';
+      return 'attack_n'; // normal
+    }
+    if (ad.animState === 'walk') return 'walk';
+    if (ad.animState === 'jump' || ad.animState === 'fall') return 'jump';
+    return 'idle';
+  }
+  function pickSprite(sprites, key) {
+    // Try exact key, then fallbacks
+    let spr = sprites[key];
+    if (spr && spr.complete && spr.naturalWidth > 0) return spr;
+    // Fallback mappings: attack variants → attack_n, guard → idle, knockout/down → damage
+    const fallbacks = {
+      attack_s: 'attack_n', attack_side: 'attack_n', attack_up: 'attack_n',
+      attack_down: 'attack_n', attack_air: 'jump', guard: 'idle',
+      down: 'damage', knockout: 'damage', win: 'idle', rage: 'special',
+    };
+    if (fallbacks[key]) {
+      spr = sprites[fallbacks[key]];
+      if (spr && spr.complete && spr.naturalWidth > 0) return spr;
+    }
+    spr = sprites['idle'];
+    if (spr && spr.complete && spr.naturalWidth > 0) return spr;
+    return null;
+  }
+
   let img = imgs[charIndex];
-  if (charIndex === 0 && animData) {
-    let zenKey = 'idle';
-    if (!animData.alive) {
-      zenKey = 'knockout';
-    } else if (animData.guarding) {
-      zenKey = 'guard';
-    } else if (animData.hitstun > 0) {
-      zenKey = 'damage';
-    } else if (animData.attacking && animData.attackType) {
-      const at = animData.attackType;
-      if (at === 'special' || at === 'cmdSpecial') zenKey = 'special';
-      else if (at === 'upSmash' || at === 'sideSmash' || at === 'downSmash') zenKey = 'smash';
-      else if (at === 'strong') zenKey = 'attack_s';
-      else zenKey = 'attack_n';
-    } else if (animData.animState === 'walk') {
-      zenKey = 'walk';
-    } else if (animData.animState === 'jump' || animData.animState === 'fall') {
-      zenKey = 'jump';
-    }
-    const zenSpr = zenSprites[zenKey];
-    if (zenSpr && zenSpr.complete && zenSpr.naturalWidth > 0) img = zenSpr;
-  }
-  // Don sprite animation: select sprite based on state
-  if (charIndex === 1 && animData) {
-    let donKey = 'idle';
-    if (!animData.alive) {
-      donKey = 'knockout';
-    } else if (animData.dSkillActive && animData.dSkillTimer > 0) {
-      donKey = 'rage';
-    } else if (animData.guarding) {
-      donKey = 'guard';
-    } else if (animData.hitstun > 0) {
-      donKey = 'damage';
-    } else if (animData.attacking && animData.attackType) {
-      const at = animData.attackType;
-      if (at === 'special' || at === 'cmdSpecial') donKey = 'special';
-      else if (at === 'upSmash' || at === 'sideSmash' || at === 'downSmash') donKey = 'smash';
-      else if (at === 'strong') donKey = 'attack_s';
-      else donKey = 'attack_n';
-    } else if (animData.animState === 'walk') {
-      donKey = 'walk';
-    } else if (animData.animState === 'jump' || animData.animState === 'fall') {
-      donKey = 'jump';
-    }
-    const donSpr = donSprites[donKey];
-    if (donSpr && donSpr.complete && donSpr.naturalWidth > 0) img = donSpr;
-  }
-  // Saisoku sprite animation: select sprite based on state
-  if (charIndex === 2 && animData) {
-    let sKey = 'idle';
-    if (!animData.alive) sKey = 'knockout';
-    else if (animData.guarding) sKey = 'guard';
-    else if (animData.hitstun > 0) sKey = 'damage';
-    else if (animData.attacking && animData.attackType) {
-      const at = animData.attackType;
-      if (at === 'special' || at === 'cmdSpecial') sKey = 'special';
-      else if (at === 'upSmash' || at === 'sideSmash' || at === 'downSmash') sKey = 'smash';
-      else if (at === 'strong') sKey = 'attack_s';
-      else sKey = 'attack_n';
-    } else if (animData.animState === 'walk') sKey = 'walk';
-    else if (animData.animState === 'jump' || animData.animState === 'fall') sKey = 'jump';
-    const spr = saisokuSprites[sKey];
-    if (spr && spr.complete && spr.naturalWidth > 0) img = spr;
-  }
-  // Meteo sprite animation: select sprite based on state
-  if (charIndex === 3 && animData) {
-    let mKey = 'idle';
-    if (!animData.alive) mKey = 'down';
-    else if (animData.dSkillActive && animData.dSkillTimer > 0) mKey = 'special';
-    else if (animData.guarding) mKey = 'idle';
-    else if (animData.hitstun > 0) mKey = 'damage';
-    else if (animData.attacking && animData.attackType) {
-      const at = animData.attackType;
-      if (at === 'special' || at === 'cmdSpecial') mKey = 'special';
-      else if (at === 'sideSmash') mKey = 'attack_side';
-      else if (at === 'upSmash') mKey = 'attack_up';
-      else if (at === 'downSmash') mKey = 'attack_down';
-      else if (at === 'aerial' || at === 'downair') mKey = 'attack_air';
-      else if (at === 'strong') mKey = 'attack_side';
-      else mKey = 'attack_n';
-    } else if (animData.animState === 'walk') mKey = 'walk';
-    else if (animData.animState === 'jump' || animData.animState === 'fall') mKey = 'jump';
-    const mSpr = meteoSprites[mKey];
-    if (mSpr && mSpr.complete && mSpr.naturalWidth > 0) img = mSpr;
-  }
-  // Long sprite animation: select sprite based on state
-  if (charIndex === 4 && animData) {
-    let lKey = 'idle';
-    if (!animData.alive) lKey = 'down';
-    else if (animData.dSkillActive && animData.dSkillTimer > 0) lKey = 'special';
-    else if (animData.guarding) lKey = 'idle';
-    else if (animData.hitstun > 0) lKey = 'damage';
-    else if (animData.attacking && animData.attackType) {
-      const at = animData.attackType;
-      if (at === 'special' || at === 'cmdSpecial') lKey = 'special';
-      else if (at === 'sideSmash') lKey = 'attack_side';
-      else if (at === 'upSmash') lKey = 'attack_up';
-      else if (at === 'downSmash') lKey = 'attack_down';
-      else if (at === 'aerial' || at === 'downair') lKey = 'attack_air';
-      else if (at === 'strong') lKey = 'attack_side';
-      else lKey = 'attack_n';
-    } else if (animData.animState === 'walk') lKey = 'walk';
-    else if (animData.animState === 'jump' || animData.animState === 'fall') lKey = 'jump';
-    const lSpr = longSprites[lKey];
-    if (lSpr && lSpr.complete && lSpr.naturalWidth > 0) img = lSpr;
-  }
-  // Uruo sprite animation: select sprite based on state
-  if (charIndex === 5 && animData) {
-    let uKey = 'idle';
-    if (!animData.alive) uKey = 'down';
-    else if (animData.dSkillActive && animData.dSkillTimer > 0) uKey = 'special';
-    else if (animData.guarding) uKey = 'idle';
-    else if (animData.hitstun > 0) uKey = 'damage';
-    else if (animData.attacking && animData.attackType) {
-      const at = animData.attackType;
-      if (at === 'special' || at === 'cmdSpecial') uKey = 'special';
-      else if (at === 'sideSmash') uKey = 'attack_side';
-      else if (at === 'upSmash') uKey = 'attack_up';
-      else if (at === 'downSmash') uKey = 'attack_down';
-      else if (at === 'aerial' || at === 'downair') uKey = 'attack_air';
-      else if (at === 'strong') uKey = 'attack_side';
-      else uKey = 'attack_n';
-    } else if (animData.animState === 'walk') uKey = 'walk';
-    else if (animData.animState === 'jump' || animData.animState === 'fall') uKey = 'jump';
-    const uSpr = uruoSprites[uKey];
-    if (uSpr && uSpr.complete && uSpr.naturalWidth > 0) img = uSpr;
-  }
-  // Kumatarou sprite animation: select sprite based on state
-  if (charIndex === 6 && animData) {
-    let kKey = 'idle';
-    if (!animData.alive) kKey = 'down';
-    else if (animData.dSkillActive && animData.dSkillTimer > 0) kKey = 'special';
-    else if (animData.guarding) kKey = 'idle';
-    else if (animData.hitstun > 0) kKey = 'damage';
-    else if (animData.attacking && animData.attackType) {
-      const at = animData.attackType;
-      if (at === 'special' || at === 'cmdSpecial') kKey = 'special';
-      else if (at === 'sideSmash') kKey = 'attack_side';
-      else if (at === 'upSmash') kKey = 'attack_up';
-      else if (at === 'downSmash') kKey = 'attack_down';
-      else if (at === 'aerial' || at === 'downair') kKey = 'attack_air';
-      else if (at === 'strong') kKey = 'attack_side';
-      else kKey = 'attack_n';
-    } else if (animData.animState === 'walk') kKey = 'walk';
-    else if (animData.animState === 'jump' || animData.animState === 'fall') kKey = 'jump';
-    const kSpr = kumatarouSprites[kKey];
-    if (kSpr && kSpr.complete && kSpr.naturalWidth > 0) img = kSpr;
-  }
-  // Bullet sprite animation: select sprite based on state
-  if (charIndex === 7 && animData) {
-    let bKey = 'idle';
-    if (!animData.alive) bKey = 'down';
-    else if (animData.dSkillActive && animData.dSkillTimer > 0) bKey = 'special';
-    else if (animData.guarding) bKey = 'idle';
-    else if (animData.hitstun > 0) bKey = 'damage';
-    else if (animData.attacking && animData.attackType) {
-      const at = animData.attackType;
-      if (at === 'special' || at === 'cmdSpecial') bKey = 'special';
-      else if (at === 'sideSmash') bKey = 'attack_side';
-      else if (at === 'upSmash') bKey = 'attack_up';
-      else if (at === 'downSmash') bKey = 'attack_down';
-      else if (at === 'aerial' || at === 'downair') bKey = 'attack_air';
-      else if (at === 'strong') bKey = 'attack_side';
-      else bKey = 'attack_n';
-    } else if (animData.animState === 'walk') bKey = 'walk';
-    else if (animData.animState === 'jump' || animData.animState === 'fall') bKey = 'jump';
-    const bSpr = bulletSprites[bKey];
-    if (bSpr && bSpr.complete && bSpr.naturalWidth > 0) img = bSpr;
-  }
-  // Shawden sprite animation: select sprite based on state
-  if (charIndex === 8 && animData) {
-    let sKey = 'idle';
-    if (!animData.alive) sKey = 'down';
-    else if (animData.dSkillActive && animData.dSkillTimer > 0) sKey = 'special';
-    else if (animData.guarding) sKey = 'idle';
-    else if (animData.hitstun > 0) sKey = 'damage';
-    else if (animData.attacking && animData.attackType) {
-      const at = animData.attackType;
-      if (at === 'special' || at === 'cmdSpecial') sKey = 'special';
-      else if (at === 'sideSmash') sKey = 'attack_side';
-      else if (at === 'upSmash') sKey = 'attack_up';
-      else if (at === 'downSmash') sKey = 'attack_down';
-      else if (at === 'aerial' || at === 'downair') sKey = 'attack_air';
-      else if (at === 'strong') sKey = 'attack_side';
-      else sKey = 'attack_n';
-    } else if (animData.animState === 'walk') sKey = 'walk';
-    else if (animData.animState === 'jump' || animData.animState === 'fall') sKey = 'jump';
-    const sSpr = shawdenSprites[sKey];
-    if (sSpr && sSpr.complete && sSpr.naturalWidth > 0) img = sSpr;
+  // Sprite animation for all implemented characters
+  const spriteMap = {
+    0: zenSprites, 1: donSprites, 2: saisokuSprites,
+    3: meteoSprites, 4: longSprites, 5: uruoSprites,
+    6: kumatarouSprites, 7: bulletSprites, 8: shawdenSprites,
+  };
+  if (spriteMap[charIndex] && animData) {
+    let key = getSpriteKey(animData);
+    // Don rage override
+    if (charIndex === 1 && animData.dSkillActive && animData.dSkillTimer > 0) key = 'rage';
+    // Zen/Don/Saisoku use 'knockout' instead of 'down'
+    if ((charIndex <= 2) && key === 'down') key = 'knockout';
+    const picked = pickSprite(spriteMap[charIndex], key);
+    if (picked) img = picked;
   }
   if (img && img.complete && img.naturalWidth > 0) {
     const imgW = imgSizes[charIndex][0] * s;
