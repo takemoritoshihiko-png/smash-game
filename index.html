@@ -9931,21 +9931,21 @@ function getWeightGravityMult(p) {
   if (w >= 1.2) return 1.25;       // heavy: faster fall
   if (w >= 0.9) return 1.0;        // mid: default
   if (w >= 0.7) return 0.85;       // light: slower fall
-  return 0.75;                     // ultra-light: much slower
+  return 0.85;                     // ultra-light: slightly slower (was 0.75)
 }
 function getWeightMaxFall(p) {
   const w = characters[p.charIdx] ? characters[p.charIdx].weight : 1.0;
   if (w >= 1.2) return MAX_FALL_SPEED * 1.15;
   if (w >= 0.9) return MAX_FALL_SPEED;
   if (w >= 0.7) return MAX_FALL_SPEED * 0.88;
-  return MAX_FALL_SPEED * 0.8;
+  return MAX_FALL_SPEED * 0.9;
 }
 function getGravity(p) {
   if (p.grounded) return GRAVITY;
   const wm = getWeightGravityMult(p);
   // Apex: light chars float longer
   if (Math.abs(p.vy) < APEX_THRESHOLD) {
-    const apexMult = wm < 1.0 ? 0.65 : 1.0; // light chars get extra float at apex
+    const apexMult = wm < 1.0 ? 0.75 : 1.0; // light chars get extra float at apex (was 0.65)
     return GRAVITY_APEX * wm * apexMult;
   }
   if (p.vy < 0) return GRAVITY_RISE * wm;
