@@ -9730,11 +9730,12 @@ function updateBattle(dt) {
     }
     if (!jumpPress) p.jumpUsed = false;
 
-    // スマブラ風重力: 上昇=弱、頂点=極弱、落下=強
+    // スマブラ風重力: 上昇=弱、頂点=極弱、落下=強（重量で差別化）
     p.vy += getGravity(p);
     // 急降下: 落下速度を倍率で加速
-    const effectiveMaxFall = p.fastFalling ? MAX_FALL_SPEED * FAST_FALL_MULT : MAX_FALL_SPEED;
-    if (p.fastFalling && p.vy > 0) p.vy = Math.min(p.vy * 1.1, effectiveMaxFall); // 急降下時加速
+    const charMaxFall = getWeightMaxFall(p);
+    const effectiveMaxFall = p.fastFalling ? charMaxFall * FAST_FALL_MULT : charMaxFall;
+    if (p.fastFalling && p.vy > 0) p.vy = Math.min(p.vy * 1.1, effectiveMaxFall);
     if (p.vy > effectiveMaxFall) p.vy = effectiveMaxFall;
     p.x += p.vx;
     p.y += p.vy;
@@ -9876,11 +9877,31 @@ function checkHitboxAgainstPlayers(attacker, hitbox, damage, kbBase, kbScale, kb
 }
 
 // スマブラ風の重力計算
+function getWeightGravityMult(p) {
+  // weight: 0.4(lightest) ~ 1.0(mid) ~ 1.7(heaviest)
+  const w = characters[p.charIdx] ? characters[p.charIdx].weight : 1.0;
+  if (w >= 1.2) return 1.25;       // heavy: faster fall
+  if (w >= 0.9) return 1.0;        // mid: default
+  if (w >= 0.7) return 0.85;       // light: slower fall
+  return 0.75;                     // ultra-light: much slower
+}
+function getWeightMaxFall(p) {
+  const w = characters[p.charIdx] ? characters[p.charIdx].weight : 1.0;
+  if (w >= 1.2) return MAX_FALL_SPEED * 1.15;
+  if (w >= 0.9) return MAX_FALL_SPEED;
+  if (w >= 0.7) return MAX_FALL_SPEED * 0.88;
+  return MAX_FALL_SPEED * 0.8;
+}
 function getGravity(p) {
   if (p.grounded) return GRAVITY;
-  if (Math.abs(p.vy) < APEX_THRESHOLD) return GRAVITY_APEX;
-  if (p.vy < 0) return GRAVITY_RISE;
-  return GRAVITY_FALL;
+  const wm = getWeightGravityMult(p);
+  // Apex: light chars float longer
+  if (Math.abs(p.vy) < APEX_THRESHOLD) {
+    const apexMult = wm < 1.0 ? 0.65 : 1.0; // light chars get extra float at apex
+    return GRAVITY_APEX * wm * apexMult;
+  }
+  if (p.vy < 0) return GRAVITY_RISE * wm;
+  return GRAVITY_FALL * wm;
 }
 
 // 慣性付き速度更新
@@ -9893,8 +9914,10 @@ function applyMovement(p, moveX, ch) {
   const saisokuMult = (p.charIdx === 2 && p.grounded) ? 1.15 : 1;
   // パッシブ: シャうでん(8) 空中機動強化+15%（空中）
   const shaudenMult = (p.charIdx === 8 && !p.grounded) ? 1.15 : 1;
-  // 地上最高速度倍率 / 空中移動速度制限
-  const speedMult = p.grounded ? GROUND_SPEED_MULT : AIR_SPEED_MULT;
+  // 地上最高速度倍率 / 空中移動速度制限（重量で差別化）
+  const w = ch.weight || 1.0;
+  const airWeightMult = w >= 1.2 ? 0.55 : (w >= 0.9 ? 0.65 : (w >= 0.7 ? 0.78 : 0.85));
+  const speedMult = p.grounded ? GROUND_SPEED_MULT : AIR_SPEED_MULT * (airWeightMult / 0.65);
   // ダッシュ倍率
   const dashMult = (p.dashing && p.grounded) ? DASH_SPEED_MULT : 1.0;
   // D技: 天才 覚醒 速度1.3倍 / タンク 要塞化 移動不可
