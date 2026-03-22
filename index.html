@@ -9420,9 +9420,33 @@ function updateBattle(dt) {
       } else if (atk.specialType !== 'jumpSlam') {
         p.vy += getGravity(p);
         if (p.vy > MAX_FALL_SPEED) p.vy = MAX_FALL_SPEED;
-        p.x += p.vx * 0.3;
+        if (p.grounded) {
+          // 地上攻撃: 横移動を大幅制限
+          p.x += p.vx * 0.3;
+          p.vx *= 0.85;
+        } else {
+          // 空中攻撃: 慣性を維持し、入力で微調整可能
+          p.x += p.vx;
+          p.vx *= 0.98; // 軽い空気抵抗のみ
+          // 空中攻撃中の横入力（moveXはcontinueでスキップされるのでここで取得）
+          let airMoveX = 0;
+          if (p.id === 0) {
+            if (onlineMode && !isHost) { if (remoteKeys.left) airMoveX = -1; if (remoteKeys.right) airMoveX = 1; }
+            else { if (keys['ArrowLeft']) airMoveX = -1; if (keys['ArrowRight']) airMoveX = 1; }
+          } else if (p.id === 1) {
+            if (onlineMode && isHost) { if (remoteKeys.left) airMoveX = -1; if (remoteKeys.right) airMoveX = 1; }
+            else if (!(gameMode === 'cpu' || bossRushMode)) {
+              if (onlineMode && !isHost) { if (keys['ArrowLeft']) airMoveX = -1; if (keys['ArrowRight']) airMoveX = 1; }
+              else { if (keys['a'] || keys['A']) airMoveX = -1; if (keys['d'] || keys['D']) airMoveX = 1; }
+            }
+          }
+          if (airMoveX !== 0) {
+            const ch2 = characters[p.charIdx];
+            const airDrift = ch2.moveSpeed * AIR_SPEED_MULT * 0.65;
+            p.vx += airMoveX * AIR_ACCEL * airDrift * 0.15;
+          }
+        }
         p.y += p.vy;
-        p.vx *= 0.85;
         landingCheck(p);
         blastCheck(p);
       }
