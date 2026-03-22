@@ -12823,6 +12823,8 @@ function applyHostState(data) {
     if (newDmg > oldDmg) {
       const dmgDiff = newDmg - oldDmg;
       const isBig = dmgDiff >= 12;
+      const isHuge = dmgDiff >= 20;
+      // Damage number
       damageNumbers.push({
         x: p.x + (Math.random() - 0.5) * 20, y: p.y - 50,
         vy: -1.8 - Math.random() * 0.5,
@@ -12832,16 +12834,53 @@ function applyHostState(data) {
         scale: isBig ? 1.4 : 1.0,
         bold: isBig,
       });
-      hitEffects.push({ x: p.x, y: p.y - 35, life: 8, maxLife: 8, color: '#FFFFFF', size: 15 + dmgDiff * 0.5 });
-      // Hit flash
+      // Hit flash effect
       const chColor = characters[p.charIdx] ? characters[p.charIdx].accent : '#FFFFFF';
-      hitFlash.alpha = Math.max(hitFlash.alpha, 0.1 + Math.min(dmgDiff / 40, 0.2));
+      if (isHuge) {
+        hitEffects.push({ x: p.x, y: p.y - 40, life: 18, maxLife: 18, color: chColor, size: 25 + dmgDiff * 0.8 });
+        hitEffects.push({ x: p.x, y: p.y - 35, life: 12, maxLife: 12, color: '#FFFFFF', size: 80, type: 'ring' });
+      } else if (isBig) {
+        hitEffects.push({ x: p.x, y: p.y - 40, life: 14, maxLife: 14, color: '#FF8800', size: 20 + dmgDiff * 0.6 });
+      } else {
+        hitEffects.push({ x: p.x, y: p.y - 40, life: 12, maxLife: 12, color: '#FFDD44', size: 12 + dmgDiff });
+      }
+      // Hit flash overlay
+      hitFlash.alpha = Math.max(hitFlash.alpha, 0.1 + Math.min(dmgDiff / 40, 0.25));
       hitFlash.color = chColor;
       // Screen shake proportional to damage
-      if (dmgDiff >= 8) triggerScreenShake(Math.min(dmgDiff / 3, 8), Math.min(dmgDiff / 2, 12));
-      for (let s = 0; s < Math.min(6, 2 + Math.floor(dmgDiff / 5)); s++) {
-        sparks.push({ x: p.x, y: p.y - 35, vx: (Math.random()-0.5)*6, vy: (Math.random()-0.5)*6 - 2, life: 10+Math.random()*10, maxLife: 20, color: '#FFAA33', size: 2+Math.random()*3, gravity: 0.15, drag: 0.97 });
+      if (dmgDiff >= 5) triggerScreenShake(Math.min(dmgDiff / 3, 10), Math.min(dmgDiff / 2, 14));
+      // Comic text
+      if (dmgDiff >= 5) {
+        const word = isHuge ? 'SMASH!' : isBig ? COMIC_WORDS[Math.floor(Math.random() * COMIC_WORDS.length)] : (dmgDiff >= 8 ? 'POW!' : 'BAM!');
+        const ci = Math.floor(Math.random() * COMIC_COLORS.length);
+        comicTexts.push({
+          text: word, x: p.x + (Math.random()-0.5)*40, y: p.y - 60 + (Math.random()-0.5)*30,
+          life: 35, maxLife: 35,
+          color: COMIC_COLORS[ci], bgColor: COMIC_COLORS[(ci+4)%COMIC_COLORS.length],
+          size: isHuge ? 24 : isBig ? 20 : 14,
+          rotation: (Math.random()-0.5)*0.4,
+        });
       }
+      // Sparks - scale with damage, use attacker colors
+      const other = players[1 - i];
+      const atkCharIdx = other ? other.charIdx : 0;
+      const sparkColors = {
+        0:['#88CCFF','#AADDFF'],1:['#FF4422','#FF8844'],2:['#44FFAA','#88FFcc'],
+        3:['#FFD700','#FFAA33'],4:['#44FFCC','#88AAFF'],5:['#C8A878','#7A6A5A'],
+        6:['#FF6B6B','#3A3A3A'],7:['#FF66AA','#CC3366'],8:['#FF80B0','#E05090'],
+        9:['#C0A0FF','#9966DD'],10:['#FF6600','#FF8833'],11:['#FFBB44','#DD8822'],
+      };
+      const sColors = sparkColors[atkCharIdx] || ['#FFDD44','#FFAA33'];
+      const sparkCount = isHuge ? 25 : isBig ? 15 : Math.min(8, 3 + Math.floor(dmgDiff / 4));
+      for (let s = 0; s < sparkCount; s++) {
+        const a = Math.random() * Math.PI * 2;
+        const speed = 2 + Math.random() * (isHuge ? 7 : isBig ? 5 : 4);
+        sparks.push({ x: p.x, y: p.y - 35, vx: Math.cos(a)*speed, vy: Math.sin(a)*speed - 1, life: 12+Math.random()*12, maxLife: 24, color: s%3===0?'#FFFFFF':sColors[s%sColors.length], size: 1.5+Math.random()*(isHuge?4:2.5), gravity: 0.1+Math.random()*0.08, drag: 0.97 });
+      }
+      // Hit sound
+      if (isHuge) playHitSound('special');
+      else if (isBig) playHitSound('strong');
+      else playHitSound('normal');
     }
     if (newStocks < oldStocks) {
       const ch = characters[p.charIdx] || characters[0];
