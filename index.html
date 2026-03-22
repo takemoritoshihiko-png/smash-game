@@ -9117,11 +9117,6 @@ function updateBattle(dt) {
           if (p.diFrame % 2 === 0) {
             sparks.push({ x: p.x, y: p.y - 30, vx: -p.vx * 0.1, vy: -p.vy * 0.1, life: 8, maxLife: 8, color: '#FFFFFF', size: 2, gravity: 0, drag: 0.9 });
           }
-          // 初回ベク変チュートリアル
-          if (!p.diShown) {
-            p.diShown = true;
-            cmdNameDisplay.push({ text: '方向キーで軌道変更！', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#FFFFFF' });
-          }
         }
       }
 
@@ -11182,22 +11177,6 @@ function drawBattle(dt) {
     ctx.lineTo(p.x - 6, arrowY - 4);
     ctx.lineTo(p.x + 6, arrowY - 4);
     ctx.closePath(); ctx.fill();
-  }
-
-  // DI hint arrows (ベク変ヒント)
-  for (const p of players) {
-    if (!p.alive || p.hitstun <= 0 || p.diFrame > 15) continue;
-    const kbSpd = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
-    if (kbSpd < 5) continue;
-    const diAlpha = p.diFrame <= 10 ? 0.5 : Math.max(0, 0.5 - (p.diFrame - 10) * 0.1);
-    ctx.globalAlpha = diAlpha;
-    ctx.font = 'bold 16px sans-serif'; ctx.textAlign = 'center';
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillText('↑', p.x, p.y - 65);
-    ctx.fillText('↓', p.x, p.y - 5);
-    ctx.fillText('←', p.x - 25, p.y - 35);
-    ctx.fillText('→', p.x + 25, p.y - 35);
-    ctx.globalAlpha = 1;
   }
 
   // Command name display (⑤ コミック風フォント)
