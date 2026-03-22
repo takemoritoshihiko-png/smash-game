@@ -48,7 +48,7 @@ let p1Confirmed = false;
 let p2Confirmed = false;
 
 // Game mode
-let gameMode = 'vs'; // 'vs' | 'cpu'
+let gameMode = 'cpu'; // 'vs' | 'cpu' | 'bossrush'
 let modeSelected = false; // whether mode has been chosen on select screen
 let cpuDifficulty = 1; // 0=easy, 1=normal, 2=hard, 3=extreme
 let difficultyTime = 0;
@@ -5135,14 +5135,17 @@ function drawSelect(dt) {
     ctx.fillStyle = '#FFF';
     ctx.fillText('モード選択', 480, 200);
 
-    const modes = [
-      { label: 'VS 対戦', desc: '2人で対戦', icon: 'VS', color: '#44AAFF' },
-      { label: 'CPU 対戦', desc: 'CPUと対戦', icon: 'CPU', color: '#FF8844' },
-      { label: 'BOSS RUSH', desc: 'ボス3連戦', icon: 'BOSS', color: '#FF44CC' },
+    const modes = onlineMode ? [
+      { label: 'VS 対戦', desc: '2人で対戦', icon: 'VS', color: '#44AAFF', mode: 'vs' },
+    ] : [
+      { label: 'CPU 対戦', desc: 'CPUと対戦', icon: 'CPU', color: '#FF8844', mode: 'cpu' },
+      { label: 'BOSS RUSH', desc: 'ボス3連戦', icon: 'BOSS', color: '#FF44CC', mode: 'bossrush' },
     ];
-    const modeIdx = gameMode === 'vs' ? 0 : (gameMode === 'cpu' ? 1 : 2);
-    for (let i = 0; i < 3; i++) {
-      const mx = 180 + i * 200;
+    const modeIdx = modes.findIndex(m => m.mode === gameMode);
+    const totalW = modes.length * 200 + (modes.length - 1) * 0;
+    const startMX = (960 - totalW) / 2 + 10;
+    for (let i = 0; i < modes.length; i++) {
+      const mx = startMX + i * 200;
       const my = 270;
       const sel = modeIdx === i;
       ctx.fillStyle = sel ? modes[i].color + '33' : 'rgba(20,20,40,0.8)';
@@ -14208,11 +14211,14 @@ function handleKeyDown(e) {
         modeSelected = true;
         return;
       }
+      // オフライン: cpu / bossrush のみ、オンライン: vs のみ
+      const availModes = onlineMode ? ['vs'] : ['cpu', 'bossrush'];
+      const curIdx = availModes.indexOf(gameMode);
       if (e.key === 'ArrowLeft') {
-        gameMode = gameMode === 'vs' ? 'bossrush' : (gameMode === 'cpu' ? 'vs' : 'cpu');
+        gameMode = availModes[(curIdx - 1 + availModes.length) % availModes.length];
       }
       if (e.key === 'ArrowRight') {
-        gameMode = gameMode === 'vs' ? 'cpu' : (gameMode === 'cpu' ? 'bossrush' : 'vs');
+        gameMode = availModes[(curIdx + 1) % availModes.length];
       }
       if (e.key === 'Enter') {
         if (gameMode === 'bossrush') {
