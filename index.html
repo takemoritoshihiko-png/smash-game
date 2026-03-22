@@ -600,6 +600,20 @@ const tensaiHumanImg = new Image();
 tensaiHumanImg.src = 'images/tensai_human.png';
 const tensaiDragonImg = new Image();
 tensaiDragonImg.src = 'images/tensai_dragon.png';
+// Tensai human sprites
+const tensaiSprites = {};
+const tensaiSpriteMap = { idle:'01_idle', walk:'02_walk', jump:'03_jump', attack_n:'04_attack_side', attack_side:'05_attack_slash', attack_up:'06_attack_up', attack_down:'07_spin', attack_air:'03_jump', special:'09_special_dragon', damage:'08_damage', win:'11_win', down:'12_down', projectile:'10_projectile' };
+Object.keys(tensaiSpriteMap).forEach(k => {
+  tensaiSprites[k] = new Image();
+  tensaiSprites[k].src = 'images/tensai/' + tensaiSpriteMap[k] + '.png';
+});
+// Tensai dragon sprites
+const tensaiDragonSprites = {};
+const tensaiDragonSpriteMap = { idle:'01_idle', walk:'02_walk', jump:'05_takeoff', attack_n:'08_bite', attack_side:'09_claw', attack_up:'06_hover', attack_down:'03_rest', attack_air:'04_dive', special:'13_roar', damage:'12_damage', win:'11_win', down:'12_damage', projectile:'07_fire' };
+Object.keys(tensaiDragonSpriteMap).forEach(k => {
+  tensaiDragonSprites[k] = new Image();
+  tensaiDragonSprites[k].src = 'images/tensai/dragon/' + tensaiDragonSpriteMap[k] + '.png';
+});
 const tankImg = new Image();
 tankImg.src = 'images/tank.png';
 const namiojiImg = new Image();
@@ -2735,6 +2749,10 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
     6: kumatarouSprites, 7: bulletSprites, 8: shawdenSprites,
     9: judgemanSprites,
   };
+  // Tensai: switch sprite set based on dragonMode
+  if (charIndex === 10 && animData) {
+    spriteMap[10] = animData.dragonMode ? tensaiDragonSprites : tensaiSprites;
+  }
   if (spriteMap[charIndex] && animData) {
     let key = getSpriteKey(animData);
     // Don rage override

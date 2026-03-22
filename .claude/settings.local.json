@@ -77,7 +77,12 @@
       "Bash(unzip -o \"/Users/yutotakemori/Downloads/files \\(1\\).zip\" -d /tmp/meteor_extract/)",
       "Bash(mv /tmp/meteor_extract/*.png /Users/yutotakemori/new-game/smash-game/images/meteor/)",
       "Bash(rm -rf /tmp/meteor_extract)",
-      "Bash(git status:*)"
+      "Bash(git status:*)",
+      "Bash(mkdir -p /tmp/swap_tensai)",
+      "Bash(mv /Users/yutotakemori/new-game/smash-game/images/tensai/*.png /tmp/swap_tensai/)",
+      "Bash(mv /Users/yutotakemori/new-game/smash-game/images/tensai/dragon/*.png /Users/yutotakemori/new-game/smash-game/images/tensai/)",
+      "Bash(mv /tmp/swap_tensai/*.png /Users/yutotakemori/new-game/smash-game/images/tensai/dragon/)",
+      "Bash(rm -rf /tmp/swap_tensai)"
     ]
   }
 }
