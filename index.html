@@ -580,6 +580,12 @@ Object.keys(bulletSpriteMap).forEach(k => {
 });
 const shaudenImg = new Image();
 shaudenImg.src = 'images/shauden.png';
+const shawdenSprites = {};
+const shawdenSpriteMap = { idle:'01_idle', walk:'02_walk', jump:'03_jump', attack_n:'04_attack_n', attack_side:'05_attack_side', attack_up:'06_electric', attack_down:'07_spin', attack_air:'03_jump', special:'09_special', damage:'08_damage', win:'11_win', down:'12_down', projectile:'10_projectile' };
+Object.keys(shawdenSpriteMap).forEach(k => {
+  shawdenSprites[k] = new Image();
+  shawdenSprites[k].src = 'images/shawden/' + shawdenSpriteMap[k] + '.png';
+});
 const judgemanImg = new Image();
 judgemanImg.src = 'images/judgeman.png';
 const catbusImg = new Image();
@@ -2843,6 +2849,27 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
     else if (animData.animState === 'jump' || animData.animState === 'fall') bKey = 'jump';
     const bSpr = bulletSprites[bKey];
     if (bSpr && bSpr.complete && bSpr.naturalWidth > 0) img = bSpr;
+  }
+  // Shawden sprite animation: select sprite based on state
+  if (charIndex === 8 && animData) {
+    let sKey = 'idle';
+    if (!animData.alive) sKey = 'down';
+    else if (animData.dSkillActive && animData.dSkillTimer > 0) sKey = 'special';
+    else if (animData.guarding) sKey = 'idle';
+    else if (animData.hitstun > 0) sKey = 'damage';
+    else if (animData.attacking && animData.attackType) {
+      const at = animData.attackType;
+      if (at === 'special' || at === 'cmdSpecial') sKey = 'special';
+      else if (at === 'sideSmash') sKey = 'attack_side';
+      else if (at === 'upSmash') sKey = 'attack_up';
+      else if (at === 'downSmash') sKey = 'attack_down';
+      else if (at === 'aerial' || at === 'downair') sKey = 'attack_air';
+      else if (at === 'strong') sKey = 'attack_side';
+      else sKey = 'attack_n';
+    } else if (animData.animState === 'walk') sKey = 'walk';
+    else if (animData.animState === 'jump' || animData.animState === 'fall') sKey = 'jump';
+    const sSpr = shawdenSprites[sKey];
+    if (sSpr && sSpr.complete && sSpr.naturalWidth > 0) img = sSpr;
   }
   if (img && img.complete && img.naturalWidth > 0) {
     const imgW = imgSizes[charIndex][0] * s;
