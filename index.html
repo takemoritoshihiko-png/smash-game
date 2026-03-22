@@ -572,6 +572,12 @@ Object.keys(kumatarouSpriteMap).forEach(k => {
 });
 const bulletImg = new Image();
 bulletImg.src = 'images/bullet.png';
+const bulletSprites = {};
+const bulletSpriteMap = { idle:'01_idle', walk:'02_walk', jump:'02_walk', attack_n:'03_attack_star', attack_side:'03_attack_star', attack_up:'05_spin', attack_down:'04_attack_down', attack_air:'03_attack_star', special:'06_special', damage:'04_attack_down', win:'01_idle', down:'04_attack_down', projectile:'03_attack_star' };
+Object.keys(bulletSpriteMap).forEach(k => {
+  bulletSprites[k] = new Image();
+  bulletSprites[k].src = 'images/bullet/' + bulletSpriteMap[k] + '.png';
+});
 const shaudenImg = new Image();
 shaudenImg.src = 'images/shauden.png';
 const judgemanImg = new Image();
@@ -2816,6 +2822,27 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
     else if (animData.animState === 'jump' || animData.animState === 'fall') kKey = 'jump';
     const kSpr = kumatarouSprites[kKey];
     if (kSpr && kSpr.complete && kSpr.naturalWidth > 0) img = kSpr;
+  }
+  // Bullet sprite animation: select sprite based on state
+  if (charIndex === 7 && animData) {
+    let bKey = 'idle';
+    if (!animData.alive) bKey = 'down';
+    else if (animData.dSkillActive && animData.dSkillTimer > 0) bKey = 'special';
+    else if (animData.guarding) bKey = 'idle';
+    else if (animData.hitstun > 0) bKey = 'damage';
+    else if (animData.attacking && animData.attackType) {
+      const at = animData.attackType;
+      if (at === 'special' || at === 'cmdSpecial') bKey = 'special';
+      else if (at === 'sideSmash') bKey = 'attack_side';
+      else if (at === 'upSmash') bKey = 'attack_up';
+      else if (at === 'downSmash') bKey = 'attack_down';
+      else if (at === 'aerial' || at === 'downair') bKey = 'attack_air';
+      else if (at === 'strong') bKey = 'attack_side';
+      else bKey = 'attack_n';
+    } else if (animData.animState === 'walk') bKey = 'walk';
+    else if (animData.animState === 'jump' || animData.animState === 'fall') bKey = 'jump';
+    const bSpr = bulletSprites[bKey];
+    if (bSpr && bSpr.complete && bSpr.naturalWidth > 0) img = bSpr;
   }
   if (img && img.complete && img.naturalWidth > 0) {
     const imgW = imgSizes[charIndex][0] * s;
