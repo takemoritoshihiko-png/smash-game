@@ -11288,7 +11288,8 @@ function drawBattle(dt) {
         ctx.fillText('ENTER : タイトルに戻る', 480, 480);
       }
       ctx.globalAlpha = 1;
-      // Handle clear input
+      // Restore canvas state before returning (match ctx.save at drawBattle start)
+      ctx.restore();
       return; // skip normal game set rendering
     }
   }
