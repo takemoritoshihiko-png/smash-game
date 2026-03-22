@@ -12650,8 +12650,11 @@ function joinRoom(roomId) {
   });
 }
 
+let guestSendCounter = 0;
+let lastGuestKeys = null;
 function sendGuestInput() {
   if (!peerConn || !peerConn.open) return;
+  guestSendCounter++;
   const myKeys = {
     left: !!(keys['ArrowLeft']),
     right: !!(keys['ArrowRight']),
@@ -12664,6 +12667,13 @@ function sendGuestInput() {
     a: !!(keys['a'] || keys['A']),
     d: !!(keys['d'] || keys['D']),
   };
+  // Send every frame but skip if unchanged (no action keys differ)
+  if (lastGuestKeys && guestSendCounter % 2 !== 0) {
+    let same = true;
+    for (const k in myKeys) { if (myKeys[k] !== lastGuestKeys[k]) { same = false; break; } }
+    if (same) return;
+  }
+  lastGuestKeys = { ...myKeys };
   peerConn.send({ type: 'input', keys: myKeys });
 }
 
@@ -12707,7 +12717,7 @@ let hostSendCounter = 0;
 function sendHostState() {
   if (!peerConn || !peerConn.open) return;
   hostSendCounter++;
-  if (hostSendCounter % 2 !== 0) return; // send every 2 frames
+  // Send every frame for smooth gameplay (was every 2 frames)
   const stateData = {
     type: 'state',
     p1: serializePlayer(players[0]),
@@ -12733,11 +12743,13 @@ function applyHostState(data) {
   const oldStocks0 = players[0].stocks, oldStocks1 = players[1].stocks;
   const oldAlive0 = players[0].alive, oldAlive1 = players[1].alive;
 
-  // Apply player states (with position interpolation for smooth visuals)
-  const LERP = 0.4;
+  // Apply player states (with velocity-predicted interpolation for smooth visuals)
+  const LERP = 0.35;
   const applyFields = (target, src) => {
-    // Lerp position for smoothness; snap if too far or state changed drastically
-    const dx = src.x - target.x, dy = src.y - target.y;
+    // Predict where the character should be using velocity
+    const predictX = src.x + src.vx * 0.5;
+    const predictY = src.y + src.vy * 0.5;
+    const dx = predictX - target.x, dy = predictY - target.y;
     const snapDist = 80;
     if (Math.abs(dx) > snapDist || Math.abs(dy) > snapDist || src.alive !== target.alive || src.respawnTimer !== target.respawnTimer) {
       target.x = src.x; target.y = src.y;
