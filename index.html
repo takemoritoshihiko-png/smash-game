@@ -596,6 +596,12 @@ Object.keys(judgemanSpriteMap).forEach(k => {
 });
 const catbusImg = new Image();
 catbusImg.src = 'images/catbus.png';
+const catbusSprites = {};
+const catbusSpriteMap = { idle:'01_idle', walk:'02_walk', jump:'03_jump', attack_n:'04_bite', attack_side:'05_slam', attack_up:'06_tail', attack_down:'05_slam', attack_air:'03_jump', special:'09_special', damage:'08_damage', win:'11_win', down:'12_down', projectile:'10_projectile' };
+Object.keys(catbusSpriteMap).forEach(k => {
+  catbusSprites[k] = new Image();
+  catbusSprites[k].src = 'images/catbus/' + catbusSpriteMap[k] + '.png';
+});
 const tensaiHumanImg = new Image();
 tensaiHumanImg.src = 'images/tensai_human.png';
 const tensaiDragonImg = new Image();
@@ -2747,7 +2753,7 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
     0: zenSprites, 1: donSprites, 2: saisokuSprites,
     3: meteoSprites, 4: longSprites, 5: uruoSprites,
     6: kumatarouSprites, 7: bulletSprites, 8: shawdenSprites,
-    9: judgemanSprites,
+    9: judgemanSprites, 11: catbusSprites,
   };
   // Tensai: switch sprite set based on dragonMode
   if (charIndex === 10 && animData) {
