@@ -9822,7 +9822,10 @@ function updateBattle(dt) {
       if (p.bossBuffed) jumpMult *= 1.2;
       // パッシブ: サム(15) 3段ジャンプ強化 3回目+15%
       if (p.charIdx === 15 && p.jumps === 1) jumpMult *= 1.15;
-      p.vy = ch.jumpPower * jumpMult;
+      // 重量別ジャンプ力調整: 軽量×0.85, 中量×0.88, 重量そのまま
+      const wJump = ch.weight || 1.0;
+      const jumpWeightMult = wJump >= 1.0 ? 1.0 : (wJump >= 0.8 ? 0.88 : 0.85);
+      p.vy = ch.jumpPower * jumpMult * jumpWeightMult;
       p.jumps--; p.jumpUsed = true; p.grounded = false;
       p.fastFalling = false; // ジャンプ時に急降下リセット
       p.jumpSquash = 6; // jump anticipation squash
