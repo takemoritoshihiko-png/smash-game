@@ -7188,6 +7188,7 @@ function createPlayer(id, charIdx, startX) {
     landLag: 0,            // 着地硬直フレーム
     // D技（固有追加技）
     dHoldTimer: 0,          // Dキー長押しフレーム
+    ultimateGauge: 0,       // 必殺技ゲージ (0-100)
     dSkillCooldown: 0,      // クールダウン残りフレーム（600=10秒）
     dSkillActive: false,    // D技発動中
     dSkillTimer: 0,         // D技効果残りフレーム
@@ -7278,6 +7279,7 @@ function initBattle() {
     createPlayer(0, p1Select, 350),
     createPlayer(1, p2Select, 610),
   ];
+  ultimateActive = false; ultimatePhase = ''; ultimateTimer = 0;
   // Boss Rush: apply boss stat buffs to P2
   if (bossRushMode) {
     gameMode = 'cpu';
@@ -7498,6 +7500,9 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   if (attacker.fearTimer > 0) finalDamage *= 0.8;
 
   target.damage = Math.min(999, target.damage + finalDamage);
+  // 必殺技ゲージ蓄積
+  if (attacker.ultimateGauge !== undefined) attacker.ultimateGauge = Math.min(100, attacker.ultimateGauge + 8);
+  if (target.ultimateGauge !== undefined) target.ultimateGauge = Math.min(100, target.ultimateGauge + 12);
   playHitSE();
   const kb = calcKnockback(target.damage, kbBase, finalKbScale);
   // 体重補正: weight が大きいほど吹っ飛びにくい (weight 0.7=1.43倍, 1.0=1.0倍, 1.5=0.67倍)
@@ -8961,10 +8966,18 @@ function updateBattle(dt) {
     } else {
       dKeyHeld = !!(keys['r'] || keys['R']); // P2ローカル: Rキー
     }
-    if (dKeyHeld && p.dSkillCooldown <= 0 && !p.dSkillActive && p.alive && p.hitstun <= 0 && !p.grabbed) {
+    if (dKeyHeld && !p.dSkillActive && p.alive && p.hitstun <= 0 && !p.grabbed && !ultimateActive) {
       p.dHoldTimer++;
       if (p.dHoldTimer >= D_SKILL_HOLD_FRAMES) {
-        triggerDSkill(p);
+        // ゲージMAX → 必殺技、それ以外 → 通常D技
+        if (p.ultimateGauge >= 100) {
+          triggerUltimate(p);
+        } else if (p.dSkillCooldown <= 0) {
+          triggerDSkill(p);
+        } else {
+          // クールダウン中: 弾くSE
+          playHitSound('guard');
+        }
         p.dHoldTimer = 0;
       }
     } else {
@@ -9849,6 +9862,7 @@ function updateBattle(dt) {
 
     // Landing detection - stronger squash for faster falls + dust particles + 着地硬直
     if (!wasGroundedBefore && p.grounded) {
+      if (p.ultimateGauge !== undefined) p.ultimateGauge = Math.min(100, p.ultimateGauge + 2);
       if (p.charIdx === 13) p.airStrongCount = 0;
       const prevVy = p.vy || 0;
       const impactStrength = Math.min(Math.abs(prevVy) / MAX_FALL_SPEED, 1);
@@ -12684,6 +12698,39 @@ function drawBattleHUD() {
   drawPlayerHUD(120, 530, players[0], '1P', '#44AAFF');
   const p2HudLabel = bossRushMode ? '【BOSS】' : (gameMode === 'cpu' ? 'CPU' : '2P');
   drawPlayerHUD(600, 530, players[1], p2HudLabel, bossRushMode ? '#FF44CC' : '#FF4444');
+
+  // 必殺技ゲージ
+  for (let i = 0; i < players.length; i++) {
+    const p = players[i];
+    if (!p || p.ultimateGauge === undefined) continue;
+    const gx = i === 0 ? 120 : 600;
+    const gy = 525;
+    const gw = 240, gh = 8;
+    const ratio = p.ultimateGauge / 100;
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.fillRect(gx, gy, gw, gh);
+    if (ratio >= 1.0) {
+      const pulse = 0.7 + Math.sin(battleTime * 0.15) * 0.3;
+      ctx.globalAlpha = pulse;
+      const gg = ctx.createLinearGradient(gx, gy, gx + gw, gy);
+      gg.addColorStop(0, '#FFD700'); gg.addColorStop(1, '#FFA500');
+      ctx.fillStyle = gg;
+      ctx.fillRect(gx, gy, gw, gh);
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = '#FFD700'; ctx.lineWidth = 1;
+      ctx.strokeRect(gx, gy, gw, gh);
+      ctx.font = 'bold 9px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillStyle = '#FFD700';
+      ctx.fillText('必殺技 READY!', gx + gw / 2, gy - 2);
+    } else {
+      const gg = ctx.createLinearGradient(gx, gy, gx + gw * ratio, gy);
+      gg.addColorStop(0, '#4488FF'); gg.addColorStop(1, '#00CCFF');
+      ctx.fillStyle = gg;
+      ctx.fillRect(gx, gy, gw * ratio, gh);
+      ctx.strokeStyle = '#444'; ctx.lineWidth = 1;
+      ctx.strokeRect(gx, gy, gw, gh);
+    }
+  }
 }
 
 function drawPlayerHUD(x, y, player, label, color) {
@@ -12776,6 +12823,13 @@ function setupPeerConnection(conn) {
       if (isHost) {
         remoteKeys = data.keys;
       }
+    } else if (data.type === 'ultimate') {
+      // Guest: trigger ultimate visual
+      ultimateActive = true;
+      ultimatePlayerId = data.playerId;
+      ultimatePhase = 'darken';
+      ultimateTimer = 0;
+      ultimateVideo = null; // Guest skips video, uses fallback
     } else if (data.type === 'state') {
       // Guest receives authoritative state from host
       if (!isHost) {
@@ -12894,7 +12948,7 @@ function serializePlayer(p) {
     airDodging: p.airDodging, airDodgeTimer: p.airDodgeTimer, airDodgeUsed: p.airDodgeUsed, airDodgeEndlag: p.airDodgeEndlag, diFrame: p.diFrame,
     dashing: p.dashing, fastFalling: p.fastFalling, landLag: p.landLag, guardPenalty: p.guardPenalty,
     smashCharging: p.smashCharging, smashChargeTime: p.smashChargeTime, smashType: p.smashType,
-    dSkillCooldown: p.dSkillCooldown, dSkillActive: p.dSkillActive, dSkillTimer: p.dSkillTimer, dSkillBuff: p.dSkillBuff,
+    dSkillCooldown: p.dSkillCooldown, dSkillActive: p.dSkillActive, dSkillTimer: p.dSkillTimer, dSkillBuff: p.dSkillBuff, ultimateGauge: p.ultimateGauge,
     autoBuff: p.autoBuff, autoBuffType: p.autoBuffType, consecutiveHits: p.consecutiveHits, dosbossComboCount: p.dosbossComboCount,
   };
 }
@@ -13757,6 +13811,138 @@ function executeSmash(p) {
 // --- D技（固有追加技）システム ---
 const D_SKILL_HOLD_FRAMES = 30;   // 0.5秒長押し
 const D_SKILL_COOLDOWN = 600;     // 10秒クールダウン
+
+// 必殺技（アルティメット）システム
+let ultimateActive = false;
+let ultimateTimer = 0;
+let ultimatePhase = ''; // 'darken' | 'text' | 'video' | 'damage' | 'brighten'
+let ultimatePlayerId = -1;
+let ultimateVideo = null;
+
+function triggerUltimate(p) {
+  if (p.ultimateGauge < 100 || ultimateActive) return false;
+  ultimateActive = true;
+  ultimatePlayerId = p.id;
+  ultimatePhase = 'darken';
+  ultimateTimer = 0;
+  p.ultimateGauge = 0;
+  // Try to play video
+  const charName = characters[p.charIdx].name;
+  const video = document.createElement('video');
+  video.src = 'images/ultimates/' + charName + '_ultimate.mp4';
+  video.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:9999;object-fit:cover;display:none;';
+  video.muted = false;
+  video.playsInline = true;
+  let videoReady = false;
+  video.oncanplay = () => { videoReady = true; };
+  video.onerror = () => { videoReady = false; ultimateVideo = null; };
+  video.onended = () => { video.style.display = 'none'; document.body.removeChild(video); ultimateVideo = null; };
+  document.body.appendChild(video);
+  video.load();
+  ultimateVideo = { el: video, ready: videoReady, charName };
+  // Send to guest
+  if (onlineMode && isHost && peerConn && peerConn.open) {
+    peerConn.send({ type: 'ultimate', playerId: p.id, charIdx: p.charIdx });
+  }
+  return true;
+}
+
+function updateUltimate() {
+  if (!ultimateActive) return;
+  ultimateTimer++;
+  if (ultimatePhase === 'darken' && ultimateTimer > 18) { // 0.3s
+    ultimatePhase = 'text';
+    ultimateTimer = 0;
+  }
+  if (ultimatePhase === 'text' && ultimateTimer > 30) { // 0.5s
+    ultimatePhase = 'video';
+    ultimateTimer = 0;
+    // Try play video
+    if (ultimateVideo && ultimateVideo.el) {
+      ultimateVideo.el.style.display = 'block';
+      ultimateVideo.el.play().catch(() => {});
+      // Set timeout for fallback if video doesn't play
+      setTimeout(() => {
+        if (ultimateActive && ultimatePhase === 'video') {
+          ultimatePhase = 'damage';
+          ultimateTimer = 0;
+        }
+      }, 3000);
+    } else {
+      // No video - skip to damage after short delay
+      setTimeout(() => { if (ultimateActive && ultimatePhase === 'video') { ultimatePhase = 'damage'; ultimateTimer = 0; } }, 500);
+    }
+  }
+  if (ultimatePhase === 'video') {
+    // Check if video ended
+    if (!ultimateVideo || !ultimateVideo.el || ultimateVideo.el.ended || ultimateVideo.el.error) {
+      ultimatePhase = 'damage';
+      ultimateTimer = 0;
+    }
+  }
+  if (ultimatePhase === 'damage' && ultimateTimer === 1) {
+    // Apply damage
+    const attacker = players[ultimatePlayerId];
+    if (attacker) {
+      const target = players.find(pp => pp.id !== attacker.id && pp.alive);
+      if (target) {
+        const baseDmg = 35;
+        const baseKb = 15;
+        applyHit(attacker, target, baseDmg, baseKb, 0.2, -45, 'cmd');
+        triggerScreenShake(15, 18);
+        hitFlash.alpha = 0.5; hitFlash.color = '#FFD700';
+        for (let i = 0; i < 30; i++) {
+          const a = Math.random() * Math.PI * 2;
+          sparks.push({ x: target.x, y: target.y - 35, vx: Math.cos(a)*8, vy: Math.sin(a)*8-3, life: 25, maxLife: 25, color: i%2?'#FFD700':'#FFF', size: 3+Math.random()*4, gravity: 0.1, drag: 0.96 });
+        }
+      }
+    }
+    ultimatePhase = 'brighten';
+    ultimateTimer = 0;
+  }
+  if (ultimatePhase === 'brighten' && ultimateTimer > 18) {
+    ultimateActive = false;
+    ultimatePhase = '';
+  }
+}
+
+function drawUltimateOverlay() {
+  if (!ultimateActive) return;
+  if (ultimatePhase === 'darken') {
+    ctx.fillStyle = `rgba(0,0,0,${Math.min(0.85, ultimateTimer / 18 * 0.85)})`;
+    ctx.fillRect(0, 0, 960, 640);
+  } else if (ultimatePhase === 'text') {
+    ctx.fillStyle = 'rgba(0,0,0,0.85)';
+    ctx.fillRect(0, 0, 960, 640);
+    const a = Math.min(1, ultimateTimer / 10);
+    ctx.globalAlpha = a;
+    const p = players[ultimatePlayerId];
+    const ch = p ? characters[p.charIdx] : characters[0];
+    ctx.font = 'bold 28px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillStyle = ch.accent || '#FFD700';
+    ctx.fillText(ch.name, 480, 280);
+    ctx.font = 'bold 52px sans-serif';
+    ctx.fillStyle = '#FFD700'; ctx.shadowColor = '#FFD700'; ctx.shadowBlur = 20;
+    ctx.fillText('必殺技発動！', 480, 340);
+    ctx.shadowBlur = 0;
+    ctx.globalAlpha = 1;
+  } else if (ultimatePhase === 'video') {
+    ctx.fillStyle = 'rgba(0,0,0,0.85)';
+    ctx.fillRect(0, 0, 960, 640);
+    // Fallback: show flash if no video
+    if (!ultimateVideo || !ultimateVideo.el || ultimateVideo.el.style.display === 'none') {
+      ctx.globalAlpha = 0.5 + Math.sin(ultimateTimer * 0.3) * 0.3;
+      ctx.fillStyle = '#FFD700';
+      ctx.font = 'bold 40px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('⚡', 480, 330);
+      ctx.globalAlpha = 1;
+    }
+  } else if (ultimatePhase === 'brighten') {
+    const a = Math.max(0, 0.85 - ultimateTimer / 18 * 0.85);
+    ctx.fillStyle = `rgba(0,0,0,${a})`;
+    ctx.fillRect(0, 0, 960, 640);
+  }
+}
 
 function triggerDSkill(p) {
   if (p.dSkillCooldown > 0 || p.dSkillActive || !p.alive || p.hitstun > 0 || p.grabbed) return;
@@ -14798,7 +14984,10 @@ function gameLoop(timestamp) {
           updateBattle(FIXED_DT);
         }
       } else {
-        updateBattle(FIXED_DT);
+        if (!ultimateActive || ultimatePhase === 'damage' || ultimatePhase === 'brighten') {
+          updateBattle(FIXED_DT);
+        }
+        updateUltimate();
       }
       // Online host: process remote player's (P2) attack key presses (edge detection)
       if (onlineMode && isHost) {
@@ -14882,6 +15071,7 @@ function gameLoop(timestamp) {
     drawVsIntro(FIXED_DT);
   } else if (scene === 'battle') {
     drawBattle(FIXED_DT);
+    drawUltimateOverlay();
   }
 
   drawTransition();
