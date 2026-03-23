@@ -7465,7 +7465,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   // D技バフ: 与ダメ増加
   if (attacker.dSkillBuff === 'tensaiBoost') finalDamage *= 1.5; // 天才 覚醒
   if (attacker.charIdx === 10 && attacker.dragonMode) finalDamage *= 1.5; // 天才 ドラゴンモード攻撃力1.5倍
-  if (attacker.bossBuffed) finalDamage *= 1.6; // ボスラッシュ: ボス攻撃力1.6倍
+  if (attacker.bossBuffed) finalDamage *= 1.3; // ボスラッシュ: ボス攻撃力1.3倍（1.6→1.3）
   if (attacker.dSkillBuff === 'killIntent') finalDamage *= 1.5;  // とっこ 殺意
   if (attacker.dSkillBuff === 'fortress') finalDamage *= 1.5;    // タンク 要塞化
   if (attacker.dSkillBuff === 'microStar') finalDamage *= 1.3;  // マイクロ スター変身
@@ -7514,7 +7514,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   // ドラゴンモード: ノックバック耐性1.35倍
   if (target.charIdx === 10 && target.dragonMode) weightedKb *= (1 / 1.35);
   // ボスラッシュ: ボスKB耐性1.5倍
-  if (target.bossBuffed) weightedKb *= (1 / 1.5);
+  if (target.bossBuffed) weightedKb *= (1 / 1.25);
   // 自己バフ: おんぱ「共鳴」連続ヒットでKB増加
   if (attacker.charIdx === 17 && attacker.consecutiveHits > 0) weightedKb *= (1 + Math.min(attacker.consecutiveHits * 0.05, 0.25));
   // ドラゴンモード: 横スマッシュKB1.2倍
@@ -9819,7 +9819,7 @@ function updateBattle(dt) {
       // パッシブ: 天才(10) 復帰強化 ジャンプ力+10%（ドラゴン時+15%）
       if (p.charIdx === 10) jumpMult *= p.dragonMode ? 1.15 : 1.1;
       // ボスラッシュ: ボスジャンプ力+20%
-      if (p.bossBuffed) jumpMult *= 1.2;
+      if (p.bossBuffed) jumpMult *= 1.1;
       // パッシブ: サム(15) 3段ジャンプ強化 3回目+15%
       if (p.charIdx === 15 && p.jumps === 1) jumpMult *= 1.15;
       // 重量別ジャンプ力調整: 軽量×0.85, 中量×0.88, 重量そのまま
@@ -10030,7 +10030,7 @@ function applyMovement(p, moveX, ch) {
   const fearSpeedMult = (p.fearTimer > 0) ? 0.7 : 1.0;
   const poisonSpeedMult = (p.poisonTimer > 0) ? 0.9 : 1.0;
   const dragonSpeedMult = (p.charIdx === 10 && p.dragonMode) ? 1.2 : 1.0;
-  const bossSpeedMult = p.bossBuffed ? 1.3 : 1.0;
+  const bossSpeedMult = p.bossBuffed ? 1.15 : 1.0;
   const autoSpeedMult = ((p.charIdx === 10 && p.damage >= 80) ? 1.2 : (p.charIdx === 11 && p.dashing) ? Math.min(1.3, 1 + p.dashTimer * 0.002) : 1.0) * kkArmorSpeed * fearSpeedMult * poisonSpeedMult * dragonSpeedMult * bossSpeedMult;
   if (p.charIdx === 11 && p.dashing) p.dashTimer++;
   if (!p.dashing) p.dashTimer = 0;
