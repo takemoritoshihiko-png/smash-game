@@ -9205,12 +9205,17 @@ function updateBattle(dt) {
         }
         if (p.specialState === 'slamming') {
           p.vy = 16;
+          // 降下中も攻撃判定を出す（足元hitbox）
+          const slamW = atk.slamHw || atk.hw || 60;
+          const slamH = atk.slamHh || atk.hh || 40;
+          const slamHb = { x: p.x - slamW / 2, y: p.y - 10, w: slamW, h: slamH };
+          checkHitboxAgainstPlayers(p, slamHb, atk.damage * 0.7, atk.kbBase, atk.kbScale, 80, 'strong');
           // Check if we hit ground
           if (p.grounded) {
             // Slam hit!
             p.specialState = 'slamHit';
             p.attackFrame = atk.startup + 1; // start active frames
-            p.hitTargets = [];
+            p.hitTargets = []; // 着地時にリセットして着地ヒットも判定
           }
         }
         if (p.specialState === 'slamHit') {
@@ -12028,22 +12033,28 @@ function drawAttackEffect(p) {
         ctx.beginPath(); ctx.arc(cx, cy, 14 * (1 - t / 0.3), 0, Math.PI * 2); ctx.fill();
       }
     } else if (p.specialState === 'slamming') {
-      // Falling indicator with speed lines
+      // Falling indicator with speed lines + active hitbox glow
       ctx.fillStyle = atk.color;
       ctx.globalAlpha = 0.6;
       ctx.beginPath();
       ctx.moveTo(cx, cy + 10);
-      ctx.lineTo(cx - 10, cy - 20);
-      ctx.lineTo(cx + 10, cy - 20);
+      ctx.lineTo(cx - 12, cy - 20);
+      ctx.lineTo(cx + 12, cy - 20);
       ctx.fill();
+      // Hitbox glow (shows active hitbox during descent)
+      ctx.strokeStyle = atk.color;
+      ctx.lineWidth = 2;
+      ctx.globalAlpha = 0.3;
+      const sw = (atk.slamHw || atk.hw || 60);
+      ctx.beginPath(); ctx.arc(cx, cy, sw * 0.4, 0, Math.PI * 2); ctx.stroke();
       // Speed lines above
       ctx.strokeStyle = '#FF8844';
       ctx.lineWidth = 2;
       ctx.globalAlpha = 0.4;
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < 4; i++) {
         ctx.beginPath();
-        ctx.moveTo(cx - 8 + i * 8, cy - 25);
-        ctx.lineTo(cx - 8 + i * 8, cy - 50);
+        ctx.moveTo(cx - 12 + i * 8, cy - 25);
+        ctx.lineTo(cx - 12 + i * 8, cy - 55);
         ctx.stroke();
       }
     }
