@@ -13827,9 +13827,10 @@ function triggerUltimate(p) {
   ultimateTimer = 0;
   p.ultimateGauge = 0;
   // Try to play video
-  const charName = characters[p.charIdx].name;
+  const ultimateFileNames = ['zen','don','saisoku','meteo','long','uruo','kumataro','bullet','shauden','judgeman','tensai','catbus','tank','namioji','tokko','sam','king','onpa','sen','dosboss','micro','mrtwo','kingking','satoru','kowai','yaho','poyo','pull','mussy'];
+  const charFileName = ultimateFileNames[p.charIdx] || 'zen';
   const video = document.createElement('video');
-  video.src = 'images/ultimates/' + charName + '_ultimate.mp4';
+  video.src = 'images/ultimates/' + charFileName + '_ultimate.mp4';
   video.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:9999;object-fit:cover;display:none;';
   video.muted = false;
   video.playsInline = true;
