@@ -2672,7 +2672,7 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
         walkLean = -0.05 * t;
       } else if (frame <= atk.startup + atk.active) {
         // Active: snap forward - fast start, slow end
-        const t = easeOutCubic((frame - atk.startup) / atk.active);
+        const t = easeOutCubic(Math.min(1, (frame - atk.startup) / (atk.active || 1)));
         scaleX = 1 - t * 0.08;
         scaleY = 1 + t * 0.06;
         walkLean = 0.08 * (1 - t);
@@ -10580,7 +10580,7 @@ function drawBattle(dt) {
 
     if (e.type === 'ring') {
       // 衝撃波リング - 円形に広がる
-      const radius = e.size * t;
+      const radius = Math.max(0, e.size * t);
       ctx.globalAlpha = 1 - t;
       ctx.strokeStyle = e.color;
       ctx.lineWidth = 3;
@@ -11873,7 +11873,7 @@ function drawAttackEffect(p) {
 
   if (atk.effect === 'slash') {
     // Sword arc
-    const t = (frame - atk.startup) / atk.active;
+    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     ctx.strokeStyle = atk.color;
     ctx.lineWidth = 4;
     ctx.globalAlpha = 0.8 * (1 - t);
@@ -11900,7 +11900,7 @@ function drawAttackEffect(p) {
   }
 
   if (atk.effect === 'bigslash') {
-    const t = (frame - atk.startup) / atk.active;
+    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     const sx = cx + 10 * dir;
     // Main slash line
     ctx.strokeStyle = atk.color;
@@ -11938,7 +11938,7 @@ function drawAttackEffect(p) {
   }
 
   if (atk.effect === 'punch') {
-    const t = (frame - atk.startup) / atk.active;
+    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     const px = cx + (20 + 20 * t) * dir;
     // Impact circle
     ctx.fillStyle = atk.color;
@@ -11961,7 +11961,7 @@ function drawAttackEffect(p) {
   }
 
   if (atk.effect === 'shockwave') {
-    const t = (frame - atk.startup) / atk.active;
+    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     const es = atk.effectScale || 1;
     const radius = 60 * es * t;
     // Red ground wave
@@ -12004,7 +12004,7 @@ function drawAttackEffect(p) {
 
   if (atk.effect === 'slam') {
     if (p.specialState === 'slamHit') {
-      const t = (frame - atk.startup) / atk.slamActive;
+      const t = Math.min(1, (frame - atk.startup) / (atk.slamActive || 1));
       // Expanding shockwave rings（適正サイズ）
       ctx.strokeStyle = atk.color;
       ctx.lineWidth = 4 * (1 - t);
@@ -12061,7 +12061,7 @@ function drawAttackEffect(p) {
   }
 
   if (atk.effect === 'kick') {
-    const t = (frame - atk.startup) / atk.active;
+    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     const kickNum = Math.floor(t * 3);
     const kickT = (t * 3) % 1;
     ctx.fillStyle = atk.color;
@@ -12084,7 +12084,7 @@ function drawAttackEffect(p) {
 
   if (atk.effect === 'dash') {
     if (p.specialState === 'dashing') {
-      const t = (frame - atk.startup) / atk.active;
+      const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
       // Green energy trail
       ctx.strokeStyle = '#22FFAA';
       ctx.lineWidth = 2;
@@ -12112,7 +12112,7 @@ function drawAttackEffect(p) {
   }
 
   if (atk.effect === 'uppercut') {
-    const t = (frame - atk.startup) / atk.active;
+    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     const startY = cy - 20;
     // Rising arc trail
     ctx.strokeStyle = atk.color;
@@ -12145,7 +12145,7 @@ function drawAttackEffect(p) {
   }
 
   if (atk.effect === 'rapid') {
-    const t = (frame - atk.startup) / atk.active;
+    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     const punchIdx = frame % 4;
     // Orange rapid punch impacts
     const offsets = [[15, -45], [22, -32], [12, -42], [24, -28], [18, -38], [20, -34]];
@@ -12186,7 +12186,7 @@ function drawAttackEffect(p) {
 
   // --- Aerial attack effects ---
   if (atk.effect === 'airslash') {
-    const t = (frame - atk.startup) / atk.active;
+    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     ctx.strokeStyle = atk.color;
     ctx.lineWidth = 4;
     ctx.globalAlpha = 0.8 * (1 - t);
@@ -12197,7 +12197,7 @@ function drawAttackEffect(p) {
   }
 
   if (atk.effect === 'airslam') {
-    const t = (frame - atk.startup) / atk.active;
+    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     ctx.fillStyle = atk.color; ctx.globalAlpha = 0.7 * (1 - t);
     ctx.beginPath();
     ctx.arc(cx, cy + 10, 25 * t, 0, Math.PI * 2); ctx.fill();
@@ -12206,7 +12206,7 @@ function drawAttackEffect(p) {
   }
 
   if (atk.effect === 'airkick') {
-    const t = (frame - atk.startup) / atk.active;
+    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     ctx.strokeStyle = atk.color; ctx.lineWidth = 3; ctx.globalAlpha = 0.8 * (1 - t);
     ctx.beginPath();
     ctx.arc(cx + 5 * dir, cy - 30, 30, t * Math.PI * 2, t * Math.PI * 2 + Math.PI * 0.6);
@@ -12216,7 +12216,7 @@ function drawAttackEffect(p) {
   }
 
   if (atk.effect === 'airknee') {
-    const t = (frame - atk.startup) / atk.active;
+    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     ctx.fillStyle = atk.color; ctx.globalAlpha = 0.7 * (1 - t);
     const kx = cx + (15 + 15 * t) * dir;
     ctx.beginPath(); ctx.arc(kx, cy - 25, 12 * (1 - t * 0.3), 0, Math.PI * 2); ctx.fill();
@@ -12229,7 +12229,7 @@ function drawAttackEffect(p) {
 
   // --- Down attack effects ---
   if (atk.effect === 'sweep') {
-    const t = (frame - atk.startup) / atk.active;
+    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     ctx.strokeStyle = atk.color; ctx.lineWidth = 3; ctx.globalAlpha = 0.7 * (1 - t);
     ctx.beginPath();
     ctx.moveTo(cx, cy - 5);
@@ -12242,13 +12242,13 @@ function drawAttackEffect(p) {
   }
 
   if (atk.effect === 'lowkick') {
-    const t = (frame - atk.startup) / atk.active;
+    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     ctx.fillStyle = atk.color; ctx.globalAlpha = 0.7 * (1 - t);
     ctx.beginPath(); ctx.arc(cx + 25 * dir * t, cy - 8, 10 * (1 - t * 0.3), 0, Math.PI * 2); ctx.fill();
   }
 
   if (atk.effect === 'sliding') {
-    const t = (frame - atk.startup) / atk.active;
+    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     ctx.strokeStyle = atk.color; ctx.lineWidth = 2; ctx.globalAlpha = 0.5;
     for (let i = 0; i < 4; i++) {
       ctx.beginPath(); ctx.moveTo(cx - (10 + i * 12) * dir, cy - 3 + i * 3);
@@ -12261,7 +12261,7 @@ function drawAttackEffect(p) {
   }
 
   if (atk.effect === 'crouchupper') {
-    const t = (frame - atk.startup) / atk.active;
+    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     ctx.strokeStyle = atk.color; ctx.lineWidth = 4; ctx.globalAlpha = 0.8 * (1 - t);
     ctx.beginPath();
     ctx.moveTo(cx + 5 * dir, cy - 10);
@@ -12275,7 +12275,7 @@ function drawAttackEffect(p) {
 
   // Zen cmd1: 真空波 - big blue slash wave
   if (atk.effect === 'cmdZen1') {
-    const t = (frame - atk.startup) / atk.active;
+    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     // Charging slash aura
     ctx.strokeStyle = '#44AAFF';
     ctx.lineWidth = 6 * (1 - t);
@@ -12290,7 +12290,7 @@ function drawAttackEffect(p) {
 
   // Zen cmd2: 神速斬り - teleport slash
   if (atk.effect === 'cmdZen2') {
-    const t = (frame - atk.startup) / atk.active;
+    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     // Flash lines at teleport
     ctx.strokeStyle = '#FFF';
     ctx.lineWidth = 3;
@@ -12310,7 +12310,7 @@ function drawAttackEffect(p) {
 
   // Don cmd1: 大地砕き - massive ground shockwave
   if (atk.effect === 'cmdDon1') {
-    const t = (frame - atk.startup) / atk.active;
+    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     // Multiple expanding ground waves
     for (let w = 0; w < 3; w++) {
       const wt = Math.max(0, t - w * 0.15);
@@ -12339,7 +12339,7 @@ function drawAttackEffect(p) {
   // Don cmd2: 鬼突進 - charging rush
   if (atk.effect === 'cmdDon2') {
     if (p.specialState === 'charging') {
-      const t = (frame - atk.startup) / atk.active;
+      const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
       // Red energy aura
       ctx.fillStyle = '#FF2200'; ctx.globalAlpha = 0.3;
       ctx.beginPath(); ctx.ellipse(cx + 15 * dir, cy - 35, 25, 40, 0, 0, Math.PI * 2); ctx.fill();
@@ -12359,7 +12359,7 @@ function drawAttackEffect(p) {
 
   // Saisoku cmd1: 手裏剣嵐 - shuriken storm (aura only, projectiles handled in update)
   if (atk.effect === 'cmdSaisoku1') {
-    const t = (frame - atk.startup) / atk.active;
+    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     // Spinning green aura
     ctx.strokeStyle = '#44FFAA'; ctx.lineWidth = 2; ctx.globalAlpha = 0.5;
     for (let i = 0; i < 4; i++) {
@@ -12379,7 +12379,7 @@ function drawAttackEffect(p) {
   // Saisoku cmd2: 瞬身乱舞 - clone rush
   if (atk.effect === 'cmdSaisoku2') {
     if (p.specialState === 'cloneRush') {
-      const t = (frame - atk.startup) / atk.active;
+      const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
       // 4 clone afterimages at different positions
       const cloneOffsets = [[-30, -10], [20, -20], [-15, 10], [35, -5]];
       const activeClone = Math.floor(t * 4) % 4;
@@ -12404,7 +12404,7 @@ function drawAttackEffect(p) {
 
   // Meteor cmd1: 百裂拳 (enhanced rapid punches)
   if (atk.effect === 'cmdMeteo1') {
-    const t = (frame - atk.startup) / atk.active;
+    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     const punchIdx = frame % 6;
     const offsets = [[18, -48], [24, -32], [14, -44], [26, -28], [20, -40], [22, -36]];
     const o = offsets[punchIdx];
@@ -12429,7 +12429,7 @@ function drawAttackEffect(p) {
 
   // Meteor cmd2: 昇天拳MAX - super uppercut
   if (atk.effect === 'cmdMeteo2') {
-    const t = (frame - atk.startup) / atk.active;
+    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     const startY = cy - 20;
     // Giant rising arc
     ctx.strokeStyle = '#FF8800'; ctx.lineWidth = 8 * (1 - t * 0.5); ctx.globalAlpha = 0.9 * (1 - t * 0.5);
@@ -12456,7 +12456,7 @@ function drawAttackEffect(p) {
   // Long command effects
   if (atk.effect === 'cmdLong1') {
     // Drill charge: spinning cyan drill effect
-    const t = (frame - atk.startup) / atk.active;
+    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     ctx.save();
     ctx.translate(cx + 30 * dir * t, cy);
     ctx.rotate(t * Math.PI * 8);
@@ -12475,7 +12475,7 @@ function drawAttackEffect(p) {
 
   if (atk.effect === 'cmdLong2') {
     // Extended spear: long cyan beam
-    const t = (frame - atk.startup) / atk.active;
+    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     const beamLen = 140 * Math.min(1, t * 2);
     // Main beam
     ctx.strokeStyle = '#A0B4FF'; ctx.lineWidth = 6 * (1 - t * 0.3); ctx.globalAlpha = 0.9;
@@ -12496,7 +12496,7 @@ function drawAttackEffect(p) {
 
   if (atk.effect === 'cmdJudge1') {
     // 拘束令状: 紫の鎖がターゲットに向かう
-    const t = (frame - atk.startup) / atk.active;
+    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     const range = 70 * Math.min(1, t * 2);
     // 紫の波紋
     ctx.strokeStyle = '#C0A0FF'; ctx.lineWidth = 3 * (1 - t * 0.5); ctx.globalAlpha = 0.7 * (1 - t);
@@ -12516,7 +12516,7 @@ function drawAttackEffect(p) {
 
   if (atk.effect === 'cmdJudge2') {
     // 死刑宣告: 全方向に黒い波動
-    const t = (frame - atk.startup) / atk.active;
+    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     const waveR = 20 + t * 80;
     // 黒い波動リング（複数）
     for (let r = 0; r < 3; r++) {
