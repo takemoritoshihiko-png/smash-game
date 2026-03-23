@@ -660,6 +660,9 @@ const senSpriteMap = { idle:'01_idle', walk:'02_walk', jump:'03_jump', attack_n:
 Object.keys(senSpriteMap).forEach(k => { senSprites[k] = new Image(); senSprites[k].src = 'images/sen_char/' + senSpriteMap[k] + '.png'; });
 const dosbossImg = new Image();
 dosbossImg.src = 'images/dosboss.png';
+const dosbossSprites = {};
+const dosbossSpriteMap = { idle:'01_idle', walk:'02_walk', jump:'03_jump', attack_n:'04_cannon', attack_side:'05_ram', attack_up:'06_turret_spin', attack_down:'07_spin', attack_air:'03_jump', special:'09_special', damage:'08_damage', win:'11_win', down:'12_down', projectile:'10_projectile' };
+Object.keys(dosbossSpriteMap).forEach(k => { dosbossSprites[k] = new Image(); dosbossSprites[k].src = 'images/dosboss_char/' + dosbossSpriteMap[k] + '.png'; });
 const microImg = new Image();
 microImg.src = 'images/micro.png';
 const mrtwoImg = new Image();
@@ -2776,7 +2779,7 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
     0: zenSprites, 1: donSprites, 2: saisokuSprites,
     3: meteoSprites, 4: longSprites, 5: uruoSprites,
     6: kumatarouSprites, 7: bulletSprites, 8: shawdenSprites,
-    9: judgemanSprites, 11: catbusSprites, 12: tankSprites, 13: namiojiSprites, 14: tokkoSprites, 15: samSprites, 16: kingSprites, 17: onpaSprites, 18: senSprites,
+    9: judgemanSprites, 11: catbusSprites, 12: tankSprites, 13: namiojiSprites, 14: tokkoSprites, 15: samSprites, 16: kingSprites, 17: onpaSprites, 18: senSprites, 19: dosbossSprites,
   };
   // Tensai: switch sprite set based on dragonMode
   if (charIndex === 10 && animData) {
@@ -2805,7 +2808,7 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
       sx = (sw - cropW) / 2;
       sw = cropW;
     }
-    if (charIndex === 19) {
+    if (charIndex === 19 && img === dosbossImg) {
       const cropH = sh * 0.85;
       sy = sh * 0.05;
       sh = cropH;
