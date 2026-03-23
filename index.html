@@ -13819,6 +13819,16 @@ let ultimatePhase = ''; // 'darken' | 'text' | 'video' | 'damage' | 'brighten'
 let ultimatePlayerId = -1;
 let ultimateVideo = null;
 
+const ultimateFileNames = ['zen','don','saisoku','meteo','long','uruo','kumataro','bullet','shauden','judgeman','tensai','catbus','tank','namioji','tokko','sam','king','onpa','sen','dosboss','micro','mrtwo','kingking','satoru','kowai','yaho','poyo','pull','mussy'];
+
+function removeUltimateVideo() {
+  if (ultimateVideo && ultimateVideo.el) {
+    try { ultimateVideo.el.pause(); } catch(e) {}
+    if (document.body.contains(ultimateVideo.el)) document.body.removeChild(ultimateVideo.el);
+  }
+  ultimateVideo = null;
+}
+
 function triggerUltimate(p) {
   if (p.ultimateGauge < 100 || ultimateActive) return false;
   ultimateActive = true;
@@ -13826,21 +13836,7 @@ function triggerUltimate(p) {
   ultimatePhase = 'darken';
   ultimateTimer = 0;
   p.ultimateGauge = 0;
-  // Try to play video
-  const ultimateFileNames = ['zen','don','saisoku','meteo','long','uruo','kumataro','bullet','shauden','judgeman','tensai','catbus','tank','namioji','tokko','sam','king','onpa','sen','dosboss','micro','mrtwo','kingking','satoru','kowai','yaho','poyo','pull','mussy'];
-  const charFileName = ultimateFileNames[p.charIdx] || 'zen';
-  const video = document.createElement('video');
-  video.src = 'images/ultimates/' + charFileName + '_ultimate.mp4';
-  video.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:9999;object-fit:cover;display:none;';
-  video.muted = false;
-  video.playsInline = true;
-  let videoReady = false;
-  video.oncanplay = () => { videoReady = true; };
-  video.onerror = () => { videoReady = false; ultimateVideo = null; };
-  video.onended = () => { video.style.display = 'none'; document.body.removeChild(video); ultimateVideo = null; };
-  document.body.appendChild(video);
-  video.load();
-  ultimateVideo = { el: video, ready: videoReady, charName };
+  ultimateVideo = null;
   // Send to guest
   if (onlineMode && isHost && peerConn && peerConn.open) {
     peerConn.send({ type: 'ultimate', playerId: p.id, charIdx: p.charIdx });
@@ -13848,62 +13844,72 @@ function triggerUltimate(p) {
   return true;
 }
 
-function updateUltimate() {
-  if (!ultimateActive) return;
-  ultimateTimer++;
-  if (ultimatePhase === 'darken' && ultimateTimer > 18) { // 0.3s
-    ultimatePhase = 'text';
-    ultimateTimer = 0;
-  }
-  if (ultimatePhase === 'text' && ultimateTimer > 30) { // 0.5s
-    ultimatePhase = 'video';
-    ultimateTimer = 0;
-    // Try play video
-    if (ultimateVideo && ultimateVideo.el) {
-      ultimateVideo.el.style.display = 'block';
-      ultimateVideo.el.play().catch(() => {});
-      // Set timeout for fallback if video doesn't play
-      setTimeout(() => {
-        if (ultimateActive && ultimatePhase === 'video') {
-          ultimatePhase = 'damage';
-          ultimateTimer = 0;
-        }
-      }, 3000);
-    } else {
-      // No video - skip to damage after short delay
-      setTimeout(() => { if (ultimateActive && ultimatePhase === 'video') { ultimatePhase = 'damage'; ultimateTimer = 0; } }, 500);
-    }
-  }
-  if (ultimatePhase === 'video') {
-    // Check if video ended
-    if (!ultimateVideo || !ultimateVideo.el || ultimateVideo.el.ended || ultimateVideo.el.error) {
+function startUltimateVideo() {
+  const p = players[ultimatePlayerId];
+  if (!p) { ultimatePhase = 'damage'; ultimateTimer = 0; return; }
+  const charFileName = ultimateFileNames[p.charIdx] || 'zen';
+  const video = document.createElement('video');
+  video.src = 'images/ultimates/' + charFileName + '_ultimate.mp4';
+  video.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:9999;object-fit:cover;background:black;';
+  video.muted = true;        // autoplay requires muted
+  video.playsInline = true;
+  video.autoplay = true;
+  let finished = false;
+  function onFinish() {
+    if (finished) return;
+    finished = true;
+    removeUltimateVideo();
+    if (ultimateActive && ultimatePhase === 'video') {
       ultimatePhase = 'damage';
       ultimateTimer = 0;
     }
   }
-  if (ultimatePhase === 'damage' && ultimateTimer === 1) {
-    // Apply damage
-    const attacker = players[ultimatePlayerId];
-    if (attacker) {
-      const target = players.find(pp => pp.id !== attacker.id && pp.alive);
-      if (target) {
-        const baseDmg = 35;
-        const baseKb = 15;
-        applyHit(attacker, target, baseDmg, baseKb, 0.2, -45, 'cmd');
-        triggerScreenShake(15, 18);
-        hitFlash.alpha = 0.5; hitFlash.color = '#FFD700';
-        for (let i = 0; i < 30; i++) {
-          const a = Math.random() * Math.PI * 2;
-          sparks.push({ x: target.x, y: target.y - 35, vx: Math.cos(a)*8, vy: Math.sin(a)*8-3, life: 25, maxLife: 25, color: i%2?'#FFD700':'#FFF', size: 3+Math.random()*4, gravity: 0.1, drag: 0.96 });
+  video.onended = onFinish;
+  video.onerror = onFinish;
+  document.body.appendChild(video);
+  video.play().catch(onFinish);
+  ultimateVideo = { el: video };
+  // Safety timeout: 8 seconds max
+  setTimeout(onFinish, 8000);
+}
+
+function updateUltimate() {
+  if (!ultimateActive) return;
+  ultimateTimer++;
+  if (ultimatePhase === 'darken' && ultimateTimer > 18) {
+    ultimatePhase = 'text';
+    ultimateTimer = 0;
+  }
+  if (ultimatePhase === 'text' && ultimateTimer > 30) {
+    ultimatePhase = 'video';
+    ultimateTimer = 0;
+    startUltimateVideo();
+  }
+  if (ultimatePhase === 'damage') {
+    if (ultimateTimer === 1) {
+      const attacker = players[ultimatePlayerId];
+      if (attacker) {
+        const target = players.find(pp => pp.id !== attacker.id && pp.alive);
+        if (target) {
+          applyHit(attacker, target, 35, 15, 0.2, -45, 'cmd');
+          triggerScreenShake(15, 18);
+          hitFlash.alpha = 0.5; hitFlash.color = '#FFD700';
+          for (let i = 0; i < 30; i++) {
+            const a = Math.random() * Math.PI * 2;
+            sparks.push({ x: target.x, y: target.y - 35, vx: Math.cos(a)*8, vy: Math.sin(a)*8-3, life: 25, maxLife: 25, color: i%2?'#FFD700':'#FFF', size: 3+Math.random()*4, gravity: 0.1, drag: 0.96 });
+          }
         }
       }
     }
-    ultimatePhase = 'brighten';
-    ultimateTimer = 0;
+    if (ultimateTimer > 5) {
+      ultimatePhase = 'brighten';
+      ultimateTimer = 0;
+    }
   }
   if (ultimatePhase === 'brighten' && ultimateTimer > 18) {
     ultimateActive = false;
     ultimatePhase = '';
+    removeUltimateVideo(); // cleanup
   }
 }
 
@@ -13928,10 +13934,11 @@ function drawUltimateOverlay() {
     ctx.shadowBlur = 0;
     ctx.globalAlpha = 1;
   } else if (ultimatePhase === 'video') {
+    // Video element covers the screen via DOM; canvas shows fallback behind it
     ctx.fillStyle = 'rgba(0,0,0,0.85)';
     ctx.fillRect(0, 0, 960, 640);
-    // Fallback: show flash if no video
-    if (!ultimateVideo || !ultimateVideo.el || ultimateVideo.el.style.display === 'none') {
+    // Pulsing flash (visible if video hasn't loaded yet or file missing)
+    {
       ctx.globalAlpha = 0.5 + Math.sin(ultimateTimer * 0.3) * 0.3;
       ctx.fillStyle = '#FFD700';
       ctx.font = 'bold 40px sans-serif'; ctx.textAlign = 'center';
