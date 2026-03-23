@@ -7100,7 +7100,7 @@ function createPlayer(id, charIdx, startX) {
     // Attack state
     attacking: false, attackType: null, attackFrame: 0, attackData: null,
     hitTargets: [], lastHitFrame: -99,
-    hitstun: 0, diFrame: 0, diBaseVx: 0, diBaseVy: 0, diShown: false,
+    hitstun: 0, diFrame: 0, diBaseVx: 0, diBaseVy: 0, diShown: false, groundBounced: false, bounceStun: 0,
     // Special attack states
     specialState: null,
     // Grab/throw state
@@ -9084,6 +9084,20 @@ function updateBattle(dt) {
       continue;
     }
 
+    // バウンド硬直
+    if (p.bounceStun > 0) {
+      p.bounceStun--;
+      p.vy += getGravity(p);
+      if (p.vy > MAX_FALL_SPEED) p.vy = MAX_FALL_SPEED;
+      p.vx *= 0.92;
+      p.x += p.vx;
+      p.y += p.vy;
+      landingCheck(p);
+      blastCheck(p);
+      if (p.bounceStun <= 0) p.groundBounced = false;
+      continue;
+    }
+
     // Hitstun - 自然な放物線＋回転＋壁バウンド
     if (p.hitstun > 0) {
       p.hitstun--;
@@ -10012,27 +10026,52 @@ function wallBounceCheck(p) {
 function landingCheck(p) {
   p.grounded = false;
   if (p.vy >= 0) {
+    const prevVy = p.vy; // 着地前の落下速度を保存
+    let landed = false;
     if (p.x >= STAGE_LEFT && p.x <= STAGE_RIGHT) {
       if (p.y >= STAGE_GROUND_Y && p.y - p.vy < STAGE_GROUND_Y + 8) {
-        p.y = STAGE_GROUND_Y; p.vy = 0; p.grounded = true; p.jumps = p.charIdx === 15 ? 3 : 2; p.strongLocked = false;
+        p.y = STAGE_GROUND_Y; p.vy = 0; p.grounded = true; landed = true;
+        p.jumps = p.charIdx === 15 ? 3 : 2; p.strongLocked = false;
         p.airDodgeUsed = false; p.airDodging = false; p.airDodgeTimer = 0; p.airDodgeEndlag = 0;
-        // divekick着地で攻撃終了
         if (p.attacking && p.attackData && p.attackData.specialType === 'divekick') {
           p.attacking = false; p.specialState = null; p.attackFrame = 0;
         }
       }
     }
-    for (const plat of platforms) {
-      if (p.x >= plat.x && p.x <= plat.x + plat.w) {
-        if (p.y >= plat.y && p.y - p.vy < plat.y + 8) {
-          p.y = plat.y; p.vy = 0; p.grounded = true; p.jumps = p.charIdx === 15 ? 3 : 2; p.strongLocked = false;
-          p.airDodgeUsed = false; p.airDodging = false; p.airDodgeTimer = 0; p.airDodgeEndlag = 0;
-          if (p.attacking && p.attackData && p.attackData.specialType === 'divekick') {
-            p.attacking = false; p.specialState = null; p.attackFrame = 0;
+    if (!landed) {
+      for (const plat of platforms) {
+        if (p.x >= plat.x && p.x <= plat.x + plat.w) {
+          if (p.y >= plat.y && p.y - prevVy < plat.y + 8) {
+            p.y = plat.y; p.vy = 0; p.grounded = true; landed = true;
+            p.jumps = p.charIdx === 15 ? 3 : 2; p.strongLocked = false;
+            p.airDodgeUsed = false; p.airDodging = false; p.airDodgeTimer = 0; p.airDodgeEndlag = 0;
+            if (p.attacking && p.attackData && p.attackData.specialType === 'divekick') {
+              p.attacking = false; p.specialState = null; p.attackFrame = 0;
+            }
+            break;
           }
         }
       }
     }
+    // スパイクバウンド: 下方向に高速で叩きつけられた時
+    if (landed && p.hitstun > 0 && prevVy > 8 && !p.groundBounced) {
+      p.groundBounced = true;
+      p.grounded = false;
+      p.vy = -(prevVy * 0.5);
+      p.bounceStun = 18; // 0.3秒硬直
+      p.landSquash = 10; // 潰れアニメーション
+      // 衝撃波エフェクト
+      triggerScreenShake(8, 8);
+      hitEffects.push({ x: p.x, y: p.y, life: 14, maxLife: 14, color: '#FFAA44', size: 90, type: 'ring' });
+      hitEffects.push({ x: p.x, y: p.y, life: 10, maxLife: 10, color: '#FFFFFF', size: 60 });
+      // 砂埃パーティクル
+      for (let i = 0; i < 12; i++) {
+        const a = Math.PI + (Math.random() - 0.5) * Math.PI;
+        sparks.push({ x: p.x + (Math.random()-0.5)*30, y: p.y, vx: Math.cos(a)*(3+Math.random()*5), vy: -1-Math.random()*3, life: 12+Math.random()*8, maxLife: 20, color: i%3===0?'#FFFFFF':'#FFCC88', size: 2+Math.random()*2, gravity: 0.15, drag: 0.95 });
+      }
+    }
+    // バウンド済みリセット（着地して通常着地の場合）
+    if (landed && p.hitstun <= 0) p.groundBounced = false;
   }
 }
 
