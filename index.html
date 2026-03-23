@@ -668,6 +668,9 @@ microImg.src = 'images/micro.png';
 const microSprites = {};
 const microSpriteMap = { idle:'01_idle', walk:'02_walk', jump:'03_jump', attack_n:'04_staff_smash', attack_side:'05_magic_orb', attack_up:'06_spin', attack_down:'07_body_slam', attack_air:'03_jump', special:'09_special', damage:'08_damage', win:'11_win', down:'12_down', projectile:'10_projectile' };
 Object.keys(microSpriteMap).forEach(k => { microSprites[k] = new Image(); microSprites[k].src = 'images/micro_char/' + microSpriteMap[k] + '.png'; });
+const mrtwoSprites = {};
+const mrtwoSpriteMap = { idle:'01_idle', walk:'02_walk', jump:'03_jump', attack_n:'04_bomb', attack_side:'05_fireball', attack_up:'06_bite', attack_down:'07_spin', attack_air:'04_bomb', special:'09_special', damage:'08_damage', win:'11_win', down:'12_down', projectile:'10_projectile' };
+Object.keys(mrtwoSpriteMap).forEach(k => { mrtwoSprites[k] = new Image(); mrtwoSprites[k].src = 'images/mrtwo_char/' + mrtwoSpriteMap[k] + '.png'; });
 const mrtwoImg = new Image();
 mrtwoImg.src = 'images/mrtwo.png';
 const kingkingImg = new Image();
@@ -2782,7 +2785,7 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
     0: zenSprites, 1: donSprites, 2: saisokuSprites,
     3: meteoSprites, 4: longSprites, 5: uruoSprites,
     6: kumatarouSprites, 7: bulletSprites, 8: shawdenSprites,
-    9: judgemanSprites, 11: catbusSprites, 12: tankSprites, 13: namiojiSprites, 14: tokkoSprites, 15: samSprites, 16: kingSprites, 17: onpaSprites, 18: senSprites, 19: dosbossSprites, 20: microSprites,
+    9: judgemanSprites, 11: catbusSprites, 12: tankSprites, 13: namiojiSprites, 14: tokkoSprites, 15: samSprites, 16: kingSprites, 17: onpaSprites, 18: senSprites, 19: dosbossSprites, 20: microSprites, 21: mrtwoSprites,
   };
   // Tensai: switch sprite set based on dragonMode
   if (charIndex === 10 && animData) {
@@ -2824,8 +2827,8 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
       sw = origW * 0.55;
       sh = origH * 0.88;
     }
-    if (charIndex === 21) {
-      // ミスターツー: 横長画像のキャラ部分をクロップ
+    if (charIndex === 21 && img === mrtwoImg) {
+      // ミスターツー: 横長画像のキャラ部分をクロップ（元画像のみ）
       const origW = img.naturalWidth, origH = img.naturalHeight;
       sx = origW * 0.12;
       sy = origH * 0.05;
