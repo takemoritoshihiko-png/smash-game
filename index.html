@@ -5892,6 +5892,39 @@ function stopBGM() {
   bgmPlaying = false;
 }
 
+let bgmFadeInterval = null;
+const BGM_VOLUME = 0.4;
+function fadeOutBGM(duration, callback) {
+  if (bgmFadeInterval) clearInterval(bgmFadeInterval);
+  if (!bgmPlaying) { if (callback) callback(); return; }
+  const steps = Math.max(1, Math.floor(duration * 60));
+  const dec = currentBgmAudio.volume / steps;
+  let i = 0;
+  bgmFadeInterval = setInterval(() => {
+    i++;
+    currentBgmAudio.volume = Math.max(0, currentBgmAudio.volume - dec);
+    if (i >= steps) {
+      clearInterval(bgmFadeInterval); bgmFadeInterval = null;
+      currentBgmAudio.pause();
+      if (callback) callback();
+    }
+  }, 1000 / 60);
+}
+function fadeInBGM(duration) {
+  if (bgmFadeInterval) clearInterval(bgmFadeInterval);
+  if (!bgmPlaying) return;
+  currentBgmAudio.volume = 0;
+  currentBgmAudio.play().catch(() => {});
+  const steps = Math.max(1, Math.floor(duration * 60));
+  const inc = BGM_VOLUME / steps;
+  let i = 0;
+  bgmFadeInterval = setInterval(() => {
+    i++;
+    currentBgmAudio.volume = Math.min(BGM_VOLUME, currentBgmAudio.volume + inc);
+    if (i >= steps) { clearInterval(bgmFadeInterval); bgmFadeInterval = null; }
+  }, 1000 / 60);
+}
+
 // === SE (攻撃ヒット・撃墜) ===
 function playHitSE() {
   try {
@@ -13837,6 +13870,8 @@ function triggerUltimate(p) {
   ultimateTimer = 0;
   p.ultimateGauge = 0;
   ultimateVideo = null;
+  // BGMフェードアウト
+  fadeOutBGM(0.3);
   // Send to guest
   if (onlineMode && isHost && peerConn && peerConn.open) {
     peerConn.send({ type: 'ultimate', playerId: p.id, charIdx: p.charIdx });
@@ -13851,7 +13886,7 @@ function startUltimateVideo() {
   const video = document.createElement('video');
   video.src = 'images/ultimates/' + charFileName + '_ultimate.mp4';
   video.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:9999;object-fit:cover;background:black;';
-  video.muted = true;        // autoplay requires muted
+  video.muted = false;       // play video audio (BGM already faded out)
   video.playsInline = true;
   video.autoplay = true;
   let finished = false;
@@ -13867,7 +13902,11 @@ function startUltimateVideo() {
   video.onended = onFinish;
   video.onerror = onFinish;
   document.body.appendChild(video);
-  video.play().catch(onFinish);
+  video.play().catch(() => {
+    // Unmuted autoplay blocked - retry muted
+    video.muted = true;
+    video.play().catch(onFinish);
+  });
   ultimateVideo = { el: video };
   // Safety timeout: 8 seconds max
   setTimeout(onFinish, 8000);
@@ -13909,7 +13948,8 @@ function updateUltimate() {
   if (ultimatePhase === 'brighten' && ultimateTimer > 18) {
     ultimateActive = false;
     ultimatePhase = '';
-    removeUltimateVideo(); // cleanup
+    removeUltimateVideo();
+    fadeInBGM(0.5); // BGM再開
   }
 }
 
