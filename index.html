@@ -2663,22 +2663,21 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
     if (animData.attacking && animData.attackData) {
       const atk = animData.attackData;
       const frame = animData.attackFrame;
-      const total = atk.startup + atk.active + atk.recovery;
       if (frame <= atk.startup) {
         // Startup: wind-up - slight pullback with easing
-        const t = easeInCubic(frame / atk.startup);
+        const t = easeInCubic(frame / (atk.startup || 1));
         scaleX = 1 + t * 0.06;
         scaleY = 1 - t * 0.04;
         walkLean = -0.05 * t;
-      } else if (frame <= atk.startup + atk.active) {
+      } else if (atk.active > 0 && frame <= atk.startup + atk.active) {
         // Active: snap forward - fast start, slow end
-        const t = easeOutCubic(Math.min(1, (frame - atk.startup) / (atk.active || 1)));
+        const t = easeOutCubic(Math.min(1, (frame - atk.startup) / atk.active));
         scaleX = 1 - t * 0.08;
         scaleY = 1 + t * 0.06;
         walkLean = 0.08 * (1 - t);
-      } else {
-        // Recovery: ease back to neutral
-        const t = easeOutCubic((frame - atk.startup - atk.active) / atk.recovery);
+      } else if (atk.recovery > 0) {
+        // Recovery: ease back to neutral (clamp t to 0-1)
+        const t = easeOutCubic(Math.min(1, (frame - atk.startup - atk.active) / atk.recovery));
         scaleX = 1 - (1 - t) * 0.08;
         scaleY = 1 + (1 - t) * 0.06;
         walkLean = 0;
