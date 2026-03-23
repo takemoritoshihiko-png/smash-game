@@ -665,6 +665,9 @@ const dosbossSpriteMap = { idle:'01_idle', walk:'02_walk', jump:'03_jump', attac
 Object.keys(dosbossSpriteMap).forEach(k => { dosbossSprites[k] = new Image(); dosbossSprites[k].src = 'images/dosboss_char/' + dosbossSpriteMap[k] + '.png'; });
 const microImg = new Image();
 microImg.src = 'images/micro.png';
+const microSprites = {};
+const microSpriteMap = { idle:'01_idle', walk:'02_walk', jump:'03_jump', attack_n:'04_staff_smash', attack_side:'05_magic_orb', attack_up:'06_spin', attack_down:'07_body_slam', attack_air:'03_jump', special:'09_special', damage:'08_damage', win:'11_win', down:'12_down', projectile:'10_projectile' };
+Object.keys(microSpriteMap).forEach(k => { microSprites[k] = new Image(); microSprites[k].src = 'images/micro_char/' + microSpriteMap[k] + '.png'; });
 const mrtwoImg = new Image();
 mrtwoImg.src = 'images/mrtwo.png';
 const kingkingImg = new Image();
@@ -2779,7 +2782,7 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
     0: zenSprites, 1: donSprites, 2: saisokuSprites,
     3: meteoSprites, 4: longSprites, 5: uruoSprites,
     6: kumatarouSprites, 7: bulletSprites, 8: shawdenSprites,
-    9: judgemanSprites, 11: catbusSprites, 12: tankSprites, 13: namiojiSprites, 14: tokkoSprites, 15: samSprites, 16: kingSprites, 17: onpaSprites, 18: senSprites, 19: dosbossSprites,
+    9: judgemanSprites, 11: catbusSprites, 12: tankSprites, 13: namiojiSprites, 14: tokkoSprites, 15: samSprites, 16: kingSprites, 17: onpaSprites, 18: senSprites, 19: dosbossSprites, 20: microSprites,
   };
   // Tensai: switch sprite set based on dragonMode
   if (charIndex === 10 && animData) {
@@ -2813,8 +2816,8 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
       sy = sh * 0.05;
       sh = cropH;
     }
-    if (charIndex === 20) {
-      // マイクロ: 横長画像の中央キャラ部分をクロップ
+    if (charIndex === 20 && img === microImg) {
+      // マイクロ: 横長画像の中央キャラ部分をクロップ（元画像のみ）
       const origW = img.naturalWidth, origH = img.naturalHeight;
       sx = origW * 0.22;
       sy = origH * 0.02;
