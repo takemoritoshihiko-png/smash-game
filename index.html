@@ -9140,23 +9140,29 @@ function updateBattle(dt) {
         const spinRate = Math.min(kbSpeed / 80, 0.15);
         p.spinAngle += (p.vx > 0 ? spinRate : -spinRate);
       }
-      // 吹っ飛び中も上昇/落下で重力が変化（放物線が自然に）
-      // ③ 空中コンボ: 落下速度低下で追撃しやすくする
-      const gravMult = p.airComboTimer > 0 ? 0.5 : 1.0;
-      p.vy += getGravity(p) * gravMult;
-      if (p.vy > MAX_FALL_SPEED * (p.airComboTimer > 0 ? 0.6 : 1.0)) p.vy = MAX_FALL_SPEED * (p.airComboTimer > 0 ? 0.6 : 1.0);
+      // 放物線ノックバック: ダメージ量で重力を調整
+      const comboGrav = p.airComboTimer > 0 ? 0.5 : 1.0;
+      const dmgGrav = p.damage <= 50 ? 1.0 : (p.damage <= 100 ? 0.85 : 0.7);
+      const kbGravity = getGravity(p) * 0.8 * comboGrav * dmgGrav;
+      p.vy += kbGravity;
+      const effMaxFall = MAX_FALL_SPEED * (p.airComboTimer > 0 ? 0.6 : 1.0);
+      if (p.vy > effMaxFall) p.vy = effMaxFall;
       p.x += p.vx;
       p.y += p.vy;
-      // 空気抵抗（速いほど減衰が弱い = 遠くまで飛ぶ）
-      const airRes = kbSpeed > 12 ? 0.98 : 0.95;
+      // 空気抵抗（高ダメージ時は緩めて遠くまで飛ばす）
+      const airRes = p.damage > 100 ? 0.99 : (kbSpeed > 12 ? 0.98 : 0.96);
       p.vx *= airRes;
-      // ③ 吹っ飛び中のカラフル星軌跡
+      // 吹っ飛び中の軌跡エフェクト
       if (kbSpeed > 6 && p.hitstun % 3 === 0) {
+        // 高ダメージ時はピンク白グラデーション軌跡
+        const trailColor = p.damage > 100
+          ? ['#FFAACC','#FFDDEE','#FFFFFF','#FF88AA'][Math.floor(Math.random() * 4)]
+          : ['#FF4444','#FFDD00','#44AAFF','#FF66AA','#44FF88'][Math.floor(Math.random() * 5)];
         sparks.push({
           x: p.x + (Math.random() - 0.5) * 10, y: p.y - 35 + (Math.random() - 0.5) * 10,
           vx: (Math.random() - 0.5) * 2, vy: (Math.random() - 0.5) * 2 - 1,
-          life: 15 + Math.floor(Math.random() * 10), maxLife: 25,
-          color: ['#FF4444','#FFDD00','#44AAFF','#FF66AA','#44FF88'][Math.floor(Math.random() * 5)],
+          life: p.damage > 100 ? 18 : 15 + Math.floor(Math.random() * 10), maxLife: p.damage > 100 ? 18 : 25,
+          color: trailColor,
           size: 3 + Math.random() * 3, type: 'star',
           gravity: 0.08, drag: 0.97,
           spin: (Math.random() - 0.5) * 0.3, angle: Math.random() * Math.PI * 2,
