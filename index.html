@@ -640,6 +640,9 @@ const tokkoSpriteMap = { idle:'01_idle', walk:'02_walk', jump:'03_jump', attack_
 Object.keys(tokkoSpriteMap).forEach(k => { tokkoSprites[k] = new Image(); tokkoSprites[k].src = 'images/tokko/' + tokkoSpriteMap[k] + '.png'; });
 const samImg = new Image();
 samImg.src = 'images/sam.png';
+const samSprites = {};
+const samSpriteMap = { idle:'01_idle', walk:'02_walk', jump:'03_jump', attack_n:'06_peck', attack_side:'04_wing_slap', attack_up:'03_jump', attack_down:'05_spin', attack_air:'04_wing_slap', special:'09_special', damage:'08_damage', win:'11_win', down:'12_down', projectile:'10_projectile' };
+Object.keys(samSpriteMap).forEach(k => { samSprites[k] = new Image(); samSprites[k].src = 'images/sam_char/' + samSpriteMap[k] + '.png'; });
 const kingImg = new Image();
 kingImg.src = 'images/king.png';
 const onpaImg = new Image();
@@ -2764,7 +2767,7 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
     0: zenSprites, 1: donSprites, 2: saisokuSprites,
     3: meteoSprites, 4: longSprites, 5: uruoSprites,
     6: kumatarouSprites, 7: bulletSprites, 8: shawdenSprites,
-    9: judgemanSprites, 11: catbusSprites, 12: tankSprites, 13: namiojiSprites, 14: tokkoSprites,
+    9: judgemanSprites, 11: catbusSprites, 12: tankSprites, 13: namiojiSprites, 14: tokkoSprites, 15: samSprites,
   };
   // Tensai: switch sprite set based on dragonMode
   if (charIndex === 10 && animData) {
