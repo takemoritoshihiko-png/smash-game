@@ -622,6 +622,12 @@ Object.keys(tensaiDragonSpriteMap).forEach(k => {
 });
 const tankImg = new Image();
 tankImg.src = 'images/tank.png';
+const tankSprites = {};
+const tankSpriteMap = { idle:'01_idle', walk:'02_walk', jump:'03_jump', attack_n:'04_cannon', attack_side:'05_blade', attack_up:'06_turret_spin', attack_down:'07_spin360', attack_air:'03_jump', special:'09_special', damage:'08_damage', win:'11_win', down:'12_down', projectile:'10_projectile' };
+Object.keys(tankSpriteMap).forEach(k => {
+  tankSprites[k] = new Image();
+  tankSprites[k].src = 'images/tank/' + tankSpriteMap[k] + '.png';
+});
 const namiojiImg = new Image();
 namiojiImg.src = 'images/namioji.png';
 const tokkoImg = new Image();
@@ -2752,7 +2758,7 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
     0: zenSprites, 1: donSprites, 2: saisokuSprites,
     3: meteoSprites, 4: longSprites, 5: uruoSprites,
     6: kumatarouSprites, 7: bulletSprites, 8: shawdenSprites,
-    9: judgemanSprites, 11: catbusSprites,
+    9: judgemanSprites, 11: catbusSprites, 12: tankSprites,
   };
   // Tensai: switch sprite set based on dragonMode
   if (charIndex === 10 && animData) {
