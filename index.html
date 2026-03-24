@@ -7537,8 +7537,8 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
 
   target.damage = Math.min(999, target.damage + finalDamage);
   // 必殺技ゲージ蓄積
-  if (attacker.ultimateGauge !== undefined) attacker.ultimateGauge = Math.min(100, attacker.ultimateGauge + 8);
-  if (target.ultimateGauge !== undefined) target.ultimateGauge = Math.min(100, target.ultimateGauge + 12);
+  if (attacker.ultimateGauge !== undefined) attacker.ultimateGauge = Math.min(100, attacker.ultimateGauge + 3);
+  if (target.ultimateGauge !== undefined) target.ultimateGauge = Math.min(100, target.ultimateGauge + 5 + (target.damage >= 50 ? 2 : 0));
   playHitSE();
   const kb = calcKnockback(target.damage, kbBase, finalKbScale);
   // 体重補正: weight が大きいほど吹っ飛びにくい (weight 0.7=1.43倍, 1.0=1.0倍, 1.5=0.67倍)
@@ -9913,7 +9913,7 @@ function updateBattle(dt) {
 
     // Landing detection - stronger squash for faster falls + dust particles + 着地硬直
     if (!wasGroundedBefore && p.grounded) {
-      if (p.ultimateGauge !== undefined) p.ultimateGauge = Math.min(100, p.ultimateGauge + 2);
+      // 着地ゲージ増加廃止
       if (p.charIdx === 13) p.airStrongCount = 0;
       const prevVy = p.vy || 0;
       const impactStrength = Math.min(Math.abs(prevVy) / MAX_FALL_SPEED, 1);
