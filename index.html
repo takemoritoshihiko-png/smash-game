@@ -7222,6 +7222,9 @@ function createPlayer(id, charIdx, startX) {
     // D技（固有追加技）
     dHoldTimer: 0,          // Dキー長押しフレーム
     ultimateGauge: 0,       // 必殺技ゲージ (0-100)
+    // 状態異常
+    frozen: 0, burning: 0, burnDmg: 3, poisoned: 0, poisonDmg: 0,
+    stunned: 0, cursed: 0, confused: 0, paralyzed: 0, feared2: 0, sealMagic: 0,
     dSkillCooldown: 0,      // クールダウン残りフレーム（600=10秒）
     dSkillActive: false,    // D技発動中
     dSkillTimer: 0,         // D技効果残りフレーム
@@ -8999,7 +9002,7 @@ function updateBattle(dt) {
     } else {
       dKeyHeld = !!(keys['r'] || keys['R']); // P2ローカル: Rキー
     }
-    if (dKeyHeld && !p.dSkillActive && p.alive && p.hitstun <= 0 && !p.grabbed && !ultimateActive) {
+    if (dKeyHeld && !p.dSkillActive && p.alive && p.hitstun <= 0 && !p.grabbed && !ultimateActive && p.sealMagic <= 0) {
       p.dHoldTimer++;
       if (p.dHoldTimer >= D_SKILL_HOLD_FRAMES) {
         // ゲージMAX → 必殺技、それ以外 → 通常D技
@@ -9161,6 +9164,17 @@ function updateBattle(dt) {
       blastCheck(p);
       continue;
     }
+
+    // 状態異常更新
+    if (p.frozen > 0) { p.frozen--; p.vx = 0; p.vy = 0; continue; } // 凍結: 完全行動不能
+    if (p.stunned > 0) { p.stunned--; p.vx *= 0.9; continue; } // スタン
+    if (p.burning > 0) { p.burning--; if (p.burning % 60 === 0) p.damage = Math.min(999, p.damage + p.burnDmg); }
+    if (p.poisoned > 0) { p.poisoned--; if (p.poisoned % 30 === 0 && p.poisonDmg > 0) p.damage = Math.min(999, p.damage + Math.ceil(p.poisonDmg / 10)); }
+    if (p.cursed > 0) p.cursed--;
+    if (p.confused > 0) p.confused--;
+    if (p.paralyzed > 0) p.paralyzed--;
+    if (p.feared2 > 0) p.feared2--;
+    if (p.sealMagic > 0) p.sealMagic--;
 
     // バウンド硬直
     if (p.bounceStun > 0) {
@@ -9734,6 +9748,10 @@ function updateBattle(dt) {
       }
     }
 
+    // 状態異常: 混乱→入力反転、呪縛→ジャンプ禁止
+    if (p.confused > 0) moveX = -moveX;
+    if (p.cursed > 0) jumpPress = false;
+
     // --- ダッシュ検出: 同方向に素早く2回入力 ---
     if (moveX !== 0 && p.grounded && !p.dashing) {
       if (moveX === p.lastMoveDir && (battleTime - p.lastMoveDirTime) < DASH_INPUT_WINDOW && p.lastMoveDirTime > 0) {
@@ -10076,9 +10094,10 @@ function applyMovement(p, moveX, ch) {
   const kkArmorSpeed = (p.charIdx === 22 && p.kingkingArmorTimer > 0) ? 1.2 : 1.0;
   const fearSpeedMult = (p.fearTimer > 0) ? 0.7 : 1.0;
   const poisonSpeedMult = (p.poisonTimer > 0) ? 0.9 : 1.0;
+  const paralysisMult = (p.paralyzed > 0) ? 0.5 : 1.0;
   const dragonSpeedMult = (p.charIdx === 10 && p.dragonMode) ? 1.2 : 1.0;
   const bossSpeedMult = p.bossBuffed ? 1.15 : 1.0;
-  const autoSpeedMult = ((p.charIdx === 10 && p.damage >= 80) ? 1.2 : (p.charIdx === 11 && p.dashing) ? Math.min(1.3, 1 + p.dashTimer * 0.002) : 1.0) * kkArmorSpeed * fearSpeedMult * poisonSpeedMult * dragonSpeedMult * bossSpeedMult;
+  const autoSpeedMult = ((p.charIdx === 10 && p.damage >= 80) ? 1.2 : (p.charIdx === 11 && p.dashing) ? Math.min(1.3, 1 + p.dashTimer * 0.002) : 1.0) * kkArmorSpeed * fearSpeedMult * poisonSpeedMult * dragonSpeedMult * bossSpeedMult * paralysisMult;
   if (p.charIdx === 11 && p.dashing) p.dashTimer++;
   if (!p.dashing) p.dashTimer = 0;
   const targetVx = moveX * ch.moveSpeed * senSpeedMult * gravDebuffMult * saisokuMult * shaudenMult * speedMult * dashMult * dSkillSpeedMult * autoSpeedMult;
@@ -11309,6 +11328,34 @@ function drawBattle(dt) {
     ctx.lineTo(p.x - 6, arrowY - 4);
     ctx.lineTo(p.x + 6, arrowY - 4);
     ctx.closePath(); ctx.fill();
+  }
+
+  // 状態異常エフェクト描画
+  for (const p of players) {
+    if (!p.alive) continue;
+    const sx2 = p.x, sy2 = p.y - 70;
+    ctx.font = '14px sans-serif'; ctx.textAlign = 'center';
+    if (p.frozen > 0) {
+      ctx.globalAlpha = 0.4; ctx.fillStyle = '#88DDFF';
+      ctx.fillRect(p.x - 18, p.y - 60, 36, 60);
+      ctx.globalAlpha = 1; ctx.fillText('🧊', sx2, sy2);
+    }
+    if (p.burning > 0) { ctx.fillText('🔥', sx2, sy2 - (p.frozen > 0 ? 16 : 0)); }
+    if (p.poisoned > 0) {
+      ctx.globalAlpha = 0.3; ctx.fillStyle = '#44CC44';
+      ctx.beginPath(); ctx.arc(p.x, p.y - 35, 20, 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = 1; ctx.fillText('💀', sx2 + 14, sy2);
+    }
+    if (p.stunned > 0) { ctx.fillText('⚡', sx2 - 14, sy2); }
+    if (p.cursed > 0) {
+      ctx.globalAlpha = 0.25; ctx.fillStyle = '#9944CC';
+      ctx.beginPath(); ctx.arc(p.x, p.y - 35, 22, 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = 1; ctx.fillText('🔮', sx2, sy2 - 16);
+    }
+    if (p.confused > 0) { ctx.fillText('💫', sx2, sy2 - 16); }
+    if (p.paralyzed > 0) { ctx.fillText('🌀', sx2 + 14, sy2 - 16); }
+    if (p.feared2 > 0) { ctx.fillText('😱', sx2 - 14, sy2 - 16); }
+    if (p.sealMagic > 0) { ctx.fillText('🚫', sx2, sy2 - 32); }
   }
 
   // Command name display (⑤ コミック風フォント)
@@ -12982,6 +13029,7 @@ function serializePlayer(p) {
     dashing: p.dashing, fastFalling: p.fastFalling, landLag: p.landLag, guardPenalty: p.guardPenalty,
     smashCharging: p.smashCharging, smashChargeTime: p.smashChargeTime, smashType: p.smashType,
     dSkillCooldown: p.dSkillCooldown, dSkillActive: p.dSkillActive, dSkillTimer: p.dSkillTimer, dSkillBuff: p.dSkillBuff, ultimateGauge: p.ultimateGauge,
+    frozen: p.frozen, burning: p.burning, poisoned: p.poisoned, stunned: p.stunned, cursed: p.cursed, confused: p.confused, paralyzed: p.paralyzed, feared2: p.feared2, sealMagic: p.sealMagic,
     autoBuff: p.autoBuff, autoBuffType: p.autoBuffType, consecutiveHits: p.consecutiveHits, dosbossComboCount: p.dosbossComboCount,
   };
 }
@@ -13853,6 +13901,37 @@ let ultimatePlayerId = -1;
 let ultimateVideo = null;
 
 const ultimateFileNames = ['zen','don','saisoku','meteo','long','uruo','kumataro','bullet','shauden','judgeman','tensai','catbus','tank','namioji','tokko','sam','king','onpa','sen','dosboss','micro','mrtwo','kingking','satoru','kowai','yaho','poyo','pull','mussy'];
+const ultimateData = [
+  { name:'蒼龍覇斬', dmg:36, kb:16, angle:-15, range:'line', status:'frozen', dur:120, color:'#44CCFF' },
+  { name:'天地崩壊拳', dmg:40, kb:18, angle:-80, range:'circle', radius:150, status:'bounce', color:'#FF4422' },
+  { name:'光速乱舞', dmg:12, kb:8, angle:-30, range:'all', hits:3, status:'stunned', dur:30, color:'#44FF88' },
+  { name:'黄金隕石衝', dmg:40, kb:17, angle:-70, range:'all', status:'burning', dur:180, color:'#FFD700' },
+  { name:'水龍天穿', dmg:38, kb:16, angle:-15, range:'line', color:'#44CCFF' },
+  { name:'蒼牙滅砕陣', dmg:38, kb:20, angle:-30, range:'circle', radius:160, color:'#C8A878' },
+  { name:'星降る大熊撃', dmg:28, kb:12, angle:-40, range:'all', status:'stunned', dur:18, color:'#FF6B6B' },
+  { name:'レインボーバースト', dmg:8, kb:6, angle:-20, range:'all', hits:4, status:'confused', dur:60, color:'#FF66AA' },
+  { name:'超電磁スポンジ砲', dmg:30, kb:14, angle:-40, range:'all', status:'stunned', dur:30, steal:20, color:'#FF80B0' },
+  { name:'暗黒最終審判', dmg:35, kb:15, angle:-25, range:'front', status:'cursed', dur:180, color:'#C0A0FF' },
+  { name:'龍炎合一', dmg:35, kb:16, angle:-40, range:'front', status:'burning', dur:180, color:'#FF6600' },
+  { name:'瞬間移動体当たり', dmg:40, kb:18, angle:-30, range:'teleport', color:'#FFBB44' },
+  { name:'超巨大砲弾', dmg:37, kb:17, angle:-15, range:'line', color:'#A0B858' },
+  { name:'怒涛の百連撃', dmg:5, kb:4, angle:-10, range:'front', hits:8, color:'#FF6644' },
+  { name:'暗黒三刀流', dmg:25, kb:13, angle:-30, range:'front', status:'poisoned', dur:300, poisonDmg:12, color:'#CC44FF' },
+  { name:'虹羽大爆散', dmg:18, kb:12, angle:-50, range:'circle', radius:140, status:'confused', dur:90, color:'#FFD700' },
+  { name:'黄金時間停止', dmg:35, kb:16, angle:-45, range:'all', status:'frozen', dur:90, color:'#FFD700' },
+  { name:'破壊音波砲', dmg:33, kb:15, angle:-40, range:'circle', radius:180, status:'stunned', dur:60, color:'#88FFFF' },
+  { name:'億万長者の怒り', dmg:32, kb:14, angle:-35, range:'front', status:'stunned', dur:30, color:'#FF8844' },
+  { name:'紫電超砲撃', dmg:37, kb:16, angle:-15, range:'line', status:'paralyzed', dur:180, color:'#CC66FF' },
+  { name:'三体合体魔砲', dmg:38, kb:17, angle:-40, range:'front', status:'sealMagic', dur:180, color:'#3388FF' },
+  { name:'爆炎デュアルブラスト', dmg:18, kb:12, angle:-30, range:'all', hits:2, status:'burning', dur:120, color:'#7733CC' },
+  { name:'黄金竜巻マネーストーム', dmg:34, kb:15, angle:-50, range:'circle', radius:170, pull:true, color:'#FFD700' },
+  { name:'太極鯛拳', dmg:36, kb:18, angle:-85, range:'front', color:'#44AAFF' },
+  { name:'恐怖のハサミ地獄', dmg:22, kb:10, angle:-20, range:'front', status:'feared2', dur:60, color:'#CC0044' },
+  { name:'謎の大爆発', dmg:0, kb:0, angle:0, range:'random', color:'#FF8800' },
+  { name:'ぷよぷよ大爆発', dmg:8, kb:8, angle:80, range:'all', hits:5, status:'bounce', color:'#44CCEE' },
+  { name:'超重力崩壊', dmg:35, kb:16, angle:-50, range:'circle', radius:160, pull:true, color:'#6622AA' },
+  { name:'毒虫大群', dmg:28, kb:12, angle:-30, range:'circle', radius:140, status:'poisoned', dur:180, poisonDmg:8, color:'#228822' },
+];
 
 function removeUltimateVideo() {
   if (ultimateVideo && ultimateVideo.el) {
@@ -13928,16 +14007,69 @@ function updateUltimate() {
     if (ultimateTimer === 1) {
       const attacker = players[ultimatePlayerId];
       if (attacker) {
+        const ud = ultimateData[attacker.charIdx] || ultimateData[0];
         const target = players.find(pp => pp.id !== attacker.id && pp.alive);
+        // Yaho: random everything
+        let dmg = ud.dmg, kb = ud.kb, angle = ud.angle;
+        if (ud.range === 'random') {
+          dmg = Math.floor(Math.random() * 40) + 1;
+          kb = 5 + Math.random() * 15;
+          angle = -Math.floor(Math.random() * 80);
+        }
+        // Teleport (catbus)
+        if (ud.range === 'teleport' && target && attacker) {
+          attacker.x = target.x + (target.facingLeft ? 60 : -60);
+          attacker.y = target.y;
+        }
+        // Pull (kinkin, pull)
+        if (ud.pull && target) {
+          target.vx = (attacker.x - target.x) * 0.15;
+          target.vy = (attacker.y - target.y) * 0.1;
+        }
+        // Dragon mode boost for tensai
+        if (attacker.charIdx === 10 && attacker.dragonMode) { dmg = 40; kb = 20; }
+        // Apply hits
+        const hitCount = ud.hits || 1;
         if (target) {
-          applyHit(attacker, target, 35, 15, 0.2, -45, 'cmd');
-          triggerScreenShake(15, 18);
-          hitFlash.alpha = 0.5; hitFlash.color = '#FFD700';
-          for (let i = 0; i < 30; i++) {
-            const a = Math.random() * Math.PI * 2;
-            sparks.push({ x: target.x, y: target.y - 35, vx: Math.cos(a)*8, vy: Math.sin(a)*8-3, life: 25, maxLife: 25, color: i%2?'#FFD700':'#FFF', size: 3+Math.random()*4, gravity: 0.1, drag: 0.96 });
+          for (let h = 0; h < hitCount; h++) {
+            applyHit(attacker, target, dmg, kb, 0.2, angle, 'cmd');
+          }
+          // Status effects
+          if (ud.status) {
+            const dur = ud.dur || 60;
+            if (ud.status === 'frozen') target.frozen = Math.max(target.frozen, dur);
+            if (ud.status === 'burning') { target.burning = Math.max(target.burning, dur); target.burnDmg = 3; }
+            if (ud.status === 'poisoned') { target.poisoned = Math.max(target.poisoned, ud.dur); target.poisonDmg = ud.poisonDmg || 8; }
+            if (ud.status === 'stunned') target.stunned = Math.max(target.stunned, dur);
+            if (ud.status === 'cursed') target.cursed = Math.max(target.cursed, dur);
+            if (ud.status === 'confused') target.confused = Math.max(target.confused, dur);
+            if (ud.status === 'paralyzed') target.paralyzed = Math.max(target.paralyzed, dur);
+            if (ud.status === 'feared2') target.feared2 = Math.max(target.feared2, dur);
+            if (ud.status === 'sealMagic') target.sealMagic = Math.max(target.sealMagic, dur);
+            if (ud.status === 'bounce') { target.vy = 12; target.groundBounced = false; }
+          }
+          // Gauge steal (shawden)
+          if (ud.steal && target.ultimateGauge !== undefined) {
+            const stolen = target.ultimateGauge * (ud.steal / 100);
+            target.ultimateGauge -= stolen;
+            attacker.ultimateGauge = Math.min(100, attacker.ultimateGauge + stolen);
+          }
+          // Yaho random status
+          if (ud.range === 'random') {
+            const effs = ['frozen','burning','stunned','confused','paralyzed'];
+            target[effs[Math.floor(Math.random()*effs.length)]] = 60 + Math.floor(Math.random()*60);
           }
         }
+        // Visual effects
+        triggerScreenShake(15, 18);
+        hitFlash.alpha = 0.5; hitFlash.color = ud.color;
+        const ex = target ? target.x : attacker.x;
+        const ey = target ? target.y - 35 : attacker.y - 35;
+        for (let i = 0; i < 30; i++) {
+          const a = Math.random() * Math.PI * 2;
+          sparks.push({ x: ex, y: ey, vx: Math.cos(a)*8, vy: Math.sin(a)*8-3, life: 25, maxLife: 25, color: i%2?ud.color:'#FFF', size: 3+Math.random()*4, gravity: 0.1, drag: 0.96 });
+        }
+        cmdNameDisplay.push({ text: ud.name, x: 480, y: 200, life: 70, maxLife: 70, color: ud.color });
       }
     }
     if (ultimateTimer > 5) {
@@ -13968,9 +14100,10 @@ function drawUltimateOverlay() {
     ctx.font = 'bold 28px sans-serif'; ctx.textAlign = 'center';
     ctx.fillStyle = ch.accent || '#FFD700';
     ctx.fillText(ch.name, 480, 280);
-    ctx.font = 'bold 52px sans-serif';
-    ctx.fillStyle = '#FFD700'; ctx.shadowColor = '#FFD700'; ctx.shadowBlur = 20;
-    ctx.fillText('必殺技発動！', 480, 340);
+    const ud2 = ultimateData[p ? p.charIdx : 0] || ultimateData[0];
+    ctx.font = 'bold 44px sans-serif';
+    ctx.fillStyle = ud2.color || '#FFD700'; ctx.shadowColor = ud2.color || '#FFD700'; ctx.shadowBlur = 20;
+    ctx.fillText(ud2.name, 480, 340);
     ctx.shadowBlur = 0;
     ctx.globalAlpha = 1;
   } else if (ultimatePhase === 'video') {
