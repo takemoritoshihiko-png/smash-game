@@ -7315,7 +7315,7 @@ function initBattle() {
     createPlayer(0, p1Select, 350),
     createPlayer(1, p2Select, 610),
   ];
-  ultimateActive = false; ultimatePhase = ''; ultimateTimer = 0;
+  ultimateActive = false; ultimatePhase = ''; ultimateTimer = 0; ultimateHitTarget = -1;
   // Boss Rush: apply boss stat buffs to P2
   if (bossRushMode) {
     gameMode = 'cpu';
@@ -13899,6 +13899,7 @@ let ultimateTimer = 0;
 let ultimatePhase = ''; // 'darken' | 'text' | 'video' | 'damage' | 'brighten'
 let ultimatePlayerId = -1;
 let ultimateVideo = null;
+let ultimateHitTarget = -1;
 
 const ultimateFileNames = ['zen','don','saisoku','meteo','long','uruo','kumataro','bullet','shauden','judgeman','tensai','catbus','tank','namioji','tokko','sam','king','onpa','sen','dosboss','micro','mrtwo','kingking','satoru','kowai','yaho','poyo','pull','mussy'];
 const ultimateData = [
@@ -14071,29 +14072,60 @@ function updateUltimate() {
       const attacker = players[ultimatePlayerId];
       const target = attacker ? players.find(pp => pp.id !== attacker.id && pp.alive) : null;
       if (attacker && target && checkUltimateHit(attacker, target)) {
-        // HIT → consume gauge, proceed to cinematic
+        // HIT confirmed → slow-mo phase
         attacker.ultimateGauge = 0;
-        fadeOutBGM(0.3);
-        ultimatePhase = 'darken';
+        ultimatePhase = 'hitconfirm';
         ultimateTimer = 0;
+        ultimateHitTarget = target.id;
+        // Hit effects
+        hitFlash.alpha = 0.6; hitFlash.color = '#FFFFFF';
+        triggerScreenShake(15, 20);
+        playHitSound('cmd');
+        target.damageTint = 15;
+        const ud = ultimateData[attacker.charIdx];
+        // HIT!! text
+        comicTexts.push({ text: 'HIT!!', x: target.x, y: target.y - 60, life: 35, maxLife: 35, color: '#FF4444', bgColor: '#FFD700', size: 32, rotation: 0 });
+        // Hitbox flash
+        hitEffects.push({ x: target.x, y: target.y - 35, life: 12, maxLife: 12, color: ud ? ud.color : '#FFD700', size: 100, type: 'ring' });
         // Send to guest
         if (onlineMode && isHost && peerConn && peerConn.open) {
           peerConn.send({ type: 'ultimate', playerId: attacker.id, charIdx: attacker.charIdx });
         }
       } else {
-        // MISS → ゲージ消費して終了
-        ultimateActive = false;
-        ultimatePhase = '';
+        // MISS → ゲージ消費・よろけ硬直
         if (attacker) {
           attacker.ultimateGauge = 0;
-          playHitSound('miss');
-          cmdNameDisplay.push({ text: 'MISS!', x: attacker.x, y: attacker.y - 80, life: 40, maxLife: 40, color: '#FF4444' });
-          // 失敗エフェクト（煙）
-          for (let i = 0; i < 8; i++) {
-            sparks.push({ x: attacker.x + (Math.random()-0.5)*30, y: attacker.y - 30, vx: (Math.random()-0.5)*3, vy: -1-Math.random()*2, life: 15, maxLife: 15, color: '#888888', size: 3+Math.random()*3, gravity: -0.02, drag: 0.95 });
+          attacker.hitstun = Math.max(attacker.hitstun, 12); // 0.2秒よろけ
+        }
+        ultimatePhase = 'missdrain';
+        ultimateTimer = 0;
+        playHitSound('guardBreak');
+        if (attacker) {
+          comicTexts.push({ text: 'MISS...', x: 480, y: 280, life: 48, maxLife: 48, color: '#666666', bgColor: '#333333', size: 28, rotation: 0 });
+          for (let i = 0; i < 12; i++) {
+            sparks.push({ x: attacker.x+(Math.random()-0.5)*40, y: attacker.y-30, vx: (Math.random()-0.5)*4, vy: -1-Math.random()*3, life: 18, maxLife: 18, color: '#888888', size: 3+Math.random()*3, gravity: -0.02, drag: 0.94 });
           }
         }
       }
+    }
+    return;
+  }
+
+  // Phase 1.5: Hit confirm slow-mo (0.3s at 0.2x speed)
+  if (ultimatePhase === 'hitconfirm') {
+    if (ultimateTimer > 18) {
+      fadeOutBGM(0.3);
+      ultimatePhase = 'darken';
+      ultimateTimer = 0;
+    }
+    return; // game loop runs at reduced speed during this phase
+  }
+
+  // Phase 1.5b: Miss gauge drain animation
+  if (ultimatePhase === 'missdrain') {
+    if (ultimateTimer > 30) {
+      ultimateActive = false;
+      ultimatePhase = '';
     }
     return;
   }
@@ -14145,6 +14177,31 @@ function drawUltimateOverlay() {
       ctx.beginPath(); ctx.arc(p.x, p.y - 35, 40 + t * 30, 0, Math.PI * 2); ctx.fill();
       ctx.globalAlpha = 1;
       ctx.restore();
+    }
+    return;
+  }
+  if (ultimatePhase === 'hitconfirm') {
+    // Slow-mo overlay with vignette
+    const t = ultimateTimer / 18;
+    ctx.fillStyle = `rgba(0,0,0,${t * 0.3})`;
+    ctx.fillRect(0, 0, 960, 640);
+    // Pulsing white edge glow
+    const p2 = players[ultimatePlayerId];
+    const ud2 = p2 ? ultimateData[p2.charIdx] : null;
+    const edgeColor = ud2 ? ud2.color : '#FFD700';
+    ctx.strokeStyle = edgeColor;
+    ctx.lineWidth = 4 + Math.sin(ultimateTimer * 0.5) * 2;
+    ctx.globalAlpha = 0.4 + Math.sin(ultimateTimer * 0.3) * 0.2;
+    ctx.strokeRect(4, 4, 952, 632);
+    ctx.globalAlpha = 1;
+    return;
+  }
+  if (ultimatePhase === 'missdrain') {
+    // Gauge drain flash: red pulse fading out
+    const t = ultimateTimer / 30;
+    if (t < 0.5) {
+      ctx.fillStyle = `rgba(255,0,0,${(0.5 - t) * 0.15})`;
+      ctx.fillRect(0, 0, 960, 640);
     }
     return;
   }
@@ -15226,7 +15283,10 @@ function gameLoop(timestamp) {
           updateBattle(FIXED_DT);
         }
       } else {
-        if (!ultimateActive || ultimatePhase === 'startup' || ultimatePhase === 'damage' || ultimatePhase === 'brighten') {
+        if (ultimateActive && ultimatePhase === 'hitconfirm') {
+          // Slow-mo: update every 5 frames
+          if (ultimateTimer % 5 === 0) updateBattle(FIXED_DT);
+        } else if (!ultimateActive || ultimatePhase === 'startup' || ultimatePhase === 'missdrain' || ultimatePhase === 'damage' || ultimatePhase === 'brighten') {
           updateBattle(FIXED_DT);
         }
         updateUltimate();
