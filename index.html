@@ -14081,12 +14081,17 @@ function updateUltimate() {
           peerConn.send({ type: 'ultimate', playerId: attacker.id, charIdx: attacker.charIdx });
         }
       } else {
-        // MISS → no gauge cost, cancel
+        // MISS → ゲージ消費して終了
         ultimateActive = false;
         ultimatePhase = '';
-        playHitSound('miss');
         if (attacker) {
-          cmdNameDisplay.push({ text: 'MISS!', x: attacker.x, y: attacker.y - 80, life: 40, maxLife: 40, color: '#888888' });
+          attacker.ultimateGauge = 0;
+          playHitSound('miss');
+          cmdNameDisplay.push({ text: 'MISS!', x: attacker.x, y: attacker.y - 80, life: 40, maxLife: 40, color: '#FF4444' });
+          // 失敗エフェクト（煙）
+          for (let i = 0; i < 8; i++) {
+            sparks.push({ x: attacker.x + (Math.random()-0.5)*30, y: attacker.y - 30, vx: (Math.random()-0.5)*3, vy: -1-Math.random()*2, life: 15, maxLife: 15, color: '#888888', size: 3+Math.random()*3, gravity: -0.02, drag: 0.95 });
+          }
         }
       }
     }
