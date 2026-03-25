@@ -4983,312 +4983,218 @@ function drawTitle(dt) {
 function drawSelect(dt) {
   selectTime += dt;
 
-  const grad = ctx.createLinearGradient(0, 0, 960, 640);
-  grad.addColorStop(0, '#0a0a20');
-  grad.addColorStop(1, '#1a0a20');
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, 960, 640);
+  // === 背景 ===
+  const bgGrad = ctx.createLinearGradient(0, 0, 0, 640);
+  bgGrad.addColorStop(0, '#000022'); bgGrad.addColorStop(1, '#000011');
+  ctx.fillStyle = bgGrad; ctx.fillRect(0, 0, 960, 640);
 
-  // Header (compact)
-  ctx.font = 'bold 22px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillStyle = '#FFF';
-  ctx.shadowColor = '#FF4466';
-  ctx.shadowBlur = 8;
-  ctx.fillText('CHARACTER SELECT', 480, 20);
-  ctx.shadowBlur = 0;
+  // 背景パーティクル
+  if (Math.random() < 0.15) spawnTitleParticle();
+  updateParticles(); drawParticles();
 
-  // Divider
-  const lineGrad = ctx.createLinearGradient(100, 0, 860, 0);
-  lineGrad.addColorStop(0, 'transparent');
-  lineGrad.addColorStop(0.5, '#FF4466');
-  lineGrad.addColorStop(1, 'transparent');
-  ctx.strokeStyle = lineGrad;
-  ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(100, 30); ctx.lineTo(860, 30); ctx.stroke();
+  // === ヘッダー ===
+  ctx.font = 'bold 30px sans-serif'; ctx.textAlign = 'center';
+  const hGrad = ctx.createLinearGradient(300, 0, 660, 0);
+  hGrad.addColorStop(0, '#FFD700'); hGrad.addColorStop(0.5, '#FFFFFF'); hGrad.addColorStop(1, '#FFD700');
+  ctx.fillStyle = hGrad; ctx.shadowColor = '#FFD700'; ctx.shadowBlur = 12;
+  ctx.fillText('CHARACTER SELECT', 480, 28); ctx.shadowBlur = 0;
+  // 金ライン
+  ctx.strokeStyle = '#FFD70044'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(200, 38); ctx.lineTo(760, 38); ctx.stroke();
 
-  // Character cards - grid layout (+ random slot) - 8列対応（最大32体）
+  // === キャラグリッド（中央） ===
   const charCount = characters.length;
-  const totalSlots = charCount + 1; // +1 for random
-  const RANDOM_IDX = charCount;
-  const cols = 8;
-  const rows = Math.ceil(totalSlots / cols);
-  const cardW = 90;
-  const cardH = rows <= 2 ? 130 : 105;
-  const gapX = 5;
-  const gapY = 3;
-  const totalW = cols * cardW + (cols - 1) * gapX;
-  const gridStartX = (960 - totalW) / 2;
-  const gridStartY = 34;
+  const totalSlots = charCount + 1;
+  const cols = 8, rows = Math.ceil(totalSlots / cols);
+  const cardW = 70, cardH = 70, gapX = 4, gapY = 4;
+  const gridW = cols * cardW + (cols - 1) * gapX;
+  const gridStartX = (960 - gridW) / 2;
+  const gridStartY = 48;
 
   for (let i = 0; i < totalSlots; i++) {
-    const isRandom = i === RANDOM_IDX;
+    const isRandom = i >= charCount;
     const ch = isRandom ? null : characters[i];
-    const row = Math.floor(i / cols);
-    const col = i % cols;
-    const rowCount = (row < rows - 1) ? cols : (totalSlots - cols * (rows - 1));
-    const rowTotalW = rowCount * cardW + (rowCount - 1) * gapX;
-    const rowStartX = (960 - rowTotalW) / 2;
-    const cx = rowStartX + col * (cardW + gapX);
+    const row = Math.floor(i / cols), col = i % cols;
+    const lastRowCount = totalSlots - cols * (rows - 1);
+    const rowCount = row < rows - 1 ? cols : lastRowCount;
+    const rowW = rowCount * cardW + (rowCount - 1) * gapX;
+    const rowX = (960 - rowW) / 2;
+    const cx = rowX + (row < rows - 1 ? col : col) * (cardW + gapX);
     const cy = gridStartY + row * (cardH + gapY);
-    const isP1 = p1Select === i;
-    const isP2 = p2Select === i;
+    const isP1 = p1Select === i, isP2 = p2Select === i;
+    const selected = isP1 || isP2;
+    const bounce = selected ? Math.sin(selectTime * 0.008 + i) * 2 : 0;
 
     ctx.save();
+    // 非選択は暗く
+    if (!selected) ctx.globalAlpha = 0.55;
 
-    // Card bg
-    const cardGrad = ctx.createLinearGradient(cx, cy, cx, cy + cardH);
-    cardGrad.addColorStop(0, (isP1 || isP2) ? (isRandom ? '#44336688' : ch.dark + '88') : '#1a1a2e');
-    cardGrad.addColorStop(1, '#0d0d1a');
-    ctx.fillStyle = cardGrad;
-    roundRect(ctx, cx, cy, cardW, cardH, 10);
-    ctx.fill();
+    // カード背景
+    ctx.fillStyle = selected ? (isRandom ? '#333322' : ch.dark + 'AA') : '#111118';
+    roundRect(ctx, cx, cy + bounce, cardW, cardH, 8); ctx.fill();
 
-    // Border - P1 blue, P2 red, both = split
+    // 枠
     if (isP1 && isP2) {
-      ctx.strokeStyle = '#44AAFF';
-      ctx.lineWidth = 3;
-      ctx.save();
-      ctx.beginPath();
-      ctx.rect(cx, cy, cardW / 2, cardH);
-      ctx.clip();
-      roundRect(ctx, cx, cy, cardW, cardH, 10);
-      ctx.stroke();
-      ctx.restore();
-      ctx.save();
-      ctx.strokeStyle = '#FF4444';
-      ctx.beginPath();
-      ctx.rect(cx + cardW / 2, cy, cardW / 2, cardH);
-      ctx.clip();
-      roundRect(ctx, cx, cy, cardW, cardH, 10);
-      ctx.stroke();
-      ctx.restore();
+      ctx.strokeStyle = '#44AAFF'; ctx.lineWidth = 2;
+      ctx.save(); ctx.beginPath(); ctx.rect(cx, cy + bounce, cardW / 2, cardH); ctx.clip();
+      roundRect(ctx, cx, cy + bounce, cardW, cardH, 8); ctx.stroke(); ctx.restore();
+      ctx.strokeStyle = '#FF4444'; ctx.save(); ctx.beginPath(); ctx.rect(cx + cardW / 2, cy + bounce, cardW / 2, cardH); ctx.clip();
+      roundRect(ctx, cx, cy + bounce, cardW, cardH, 8); ctx.stroke(); ctx.restore();
     } else if (isP1) {
-      ctx.strokeStyle = '#44AAFF';
-      ctx.lineWidth = 3;
-      roundRect(ctx, cx, cy, cardW, cardH, 10);
-      ctx.stroke();
+      ctx.strokeStyle = '#44AAFF'; ctx.lineWidth = 2;
+      if (isP1 && !p1Confirmed) { ctx.shadowColor = '#44AAFF'; ctx.shadowBlur = 8; }
+      roundRect(ctx, cx, cy + bounce, cardW, cardH, 8); ctx.stroke(); ctx.shadowBlur = 0;
     } else if (isP2) {
-      ctx.strokeStyle = '#FF4444';
-      ctx.lineWidth = 3;
-      roundRect(ctx, cx, cy, cardW, cardH, 10);
-      ctx.stroke();
+      ctx.strokeStyle = '#FF4444'; ctx.lineWidth = 2;
+      if (isP2 && !p2Confirmed) { ctx.shadowColor = '#FF4444'; ctx.shadowBlur = 8; }
+      roundRect(ctx, cx, cy + bounce, cardW, cardH, 8); ctx.stroke(); ctx.shadowBlur = 0;
     } else {
-      ctx.strokeStyle = '#333';
-      ctx.lineWidth = 1;
-      roundRect(ctx, cx, cy, cardW, cardH, 10);
-      ctx.stroke();
+      ctx.strokeStyle = '#222'; ctx.lineWidth = 1;
+      roundRect(ctx, cx, cy + bounce, cardW, cardH, 8); ctx.stroke();
     }
 
-    // P1/P2 indicators at top
-    if (isP1) {
-      ctx.fillStyle = '#44AAFF';
-      ctx.font = 'bold 12px sans-serif';
-      ctx.textAlign = 'left';
-      ctx.fillText('▼ 1P', cx + 6, cy + 14);
-      if (p1Confirmed) {
-        ctx.fillStyle = '#44FF44';
-        ctx.fillText('OK!', cx + 6, cy + 28);
-      }
-    }
-    if (isP2) {
-      ctx.fillStyle = '#FF4444';
-      ctx.font = 'bold 12px sans-serif';
-      ctx.textAlign = 'right';
-      ctx.fillText(gameMode === 'bossrush' ? 'BOSS ▼' : (gameMode === 'cpu' ? 'CPU ▼' : '2P ▼'), cx + cardW - 6, cy + 14);
-      if (p2Confirmed) {
-        ctx.fillStyle = '#44FF44';
-        ctx.fillText('OK!', cx + cardW - 6, cy + 28);
-      }
-    }
-
-    // Type label
-    ctx.font = 'bold 10px sans-serif';
-    ctx.textAlign = 'center';
+    // キャラアイコン
+    ctx.globalAlpha = selected ? 1 : 0.55;
     if (isRandom) {
-      ctx.fillStyle = '#FFDD44';
-      ctx.fillText('RANDOM', cx + cardW / 2, cy + 38);
-    } else {
-      ctx.fillStyle = ch.accent;
-      ctx.fillText(ch.type, cx + cardW / 2, cy + 38);
-    }
-
-    // Character / Random "?" icon
-    const charScale = cardH <= 105 ? 0.45 : (rows <= 1 ? 1.0 : 0.55);
-    const charY = cardH <= 105 ? cy + 62 : (rows <= 1 ? cy + 115 : cy + 72);
-    if (isRandom) {
-      ctx.font = 'bold ' + Math.floor(48 * charScale) + 'px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillStyle = '#FFDD44';
+      ctx.font = 'bold 32px sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#FFD700';
       ctx.globalAlpha = 0.7 + Math.sin(selectTime * 0.005) * 0.3;
-      ctx.fillText('?', cx + cardW / 2, charY + 8 * charScale);
-      ctx.globalAlpha = 1;
+      ctx.fillText('?', cx + cardW / 2, cy + bounce + 48);
     } else {
-      drawCharacterBody(cx + cardW / 2, charY, charScale, i, selectTime, false);
+      drawCharacterBody(cx + cardW / 2, cy + bounce + 50, 0.4, i, selectTime, false);
     }
 
-    // Name
-    ctx.font = rows <= 1 ? 'bold 22px sans-serif' : (cardH <= 105 ? 'bold 11px sans-serif' : 'bold 13px sans-serif');
-    ctx.textAlign = 'center';
-    ctx.fillStyle = (isP1 || isP2) ? '#FFF' : '#888';
-    ctx.fillText(isRandom ? 'ランダム' : ch.name, cx + cardW / 2, cy + cardH - 8);
+    // 名前（選択中のみ）
+    if (selected) {
+      ctx.globalAlpha = 1; ctx.font = 'bold 9px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillStyle = '#FFF';
+      ctx.fillText(isRandom ? 'ランダム' : ch.name, cx + cardW / 2, cy + bounce + cardH - 3);
+    }
 
+    // P1/P2マーカー
+    if (isP1) { ctx.globalAlpha = 1; ctx.font = 'bold 9px sans-serif'; ctx.textAlign = 'left'; ctx.fillStyle = p1Confirmed ? '#44FF44' : '#44AAFF'; ctx.fillText(p1Confirmed ? '✓1P' : '1P', cx + 3, cy + bounce + 10); }
+    if (isP2) { ctx.globalAlpha = 1; ctx.font = 'bold 9px sans-serif'; ctx.textAlign = 'right'; ctx.fillStyle = p2Confirmed ? '#44FF44' : '#FF4444'; ctx.fillText(p2Confirmed ? '✓' : (gameMode === 'bossrush' ? 'B' : (gameMode === 'cpu' ? 'CPU' : '2P')), cx + cardW - 3, cy + bounce + 10); }
     ctx.restore();
   }
 
-  // Detail panels - P1 left, P2 right
-  const detailY = gridStartY + rows * (cardH + gapY) + 4;
-  const p1Label = '1P';
-  drawSelectDetail(60, detailY, p1Select, p1Label, '#44AAFF', p1Confirmed);
-  const p2Label = gameMode === 'bossrush' ? 'BOSS' : (gameMode === 'cpu' ? 'CPU' : '2P');
-  drawSelectDetail(500, detailY, p2Select, p2Label, gameMode === 'bossrush' ? '#FF44CC' : '#FF4444', p2Confirmed);
+  // === P1 大表示（左） ===
+  const panelY = gridStartY + rows * (cardH + gapY) + 8;
+  drawSelectPanel(20, panelY, p1Select, '1P', '#44AAFF', p1Confirmed);
+  // === P2 大表示（右） ===
+  const p2Lbl = gameMode === 'bossrush' ? 'BOSS' : (gameMode === 'cpu' ? 'CPU' : '2P');
+  const p2Col = gameMode === 'bossrush' ? '#FF44CC' : '#FF4444';
+  drawSelectPanel(500, panelY, p2Select, p2Lbl, p2Col, p2Confirmed);
 
-  // Mode selection overlay (before char select starts)
+  // === モード選択オーバーレイ ===
   if (!modeSelected) {
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
-    ctx.fillRect(0, 0, 960, 640);
-
-    ctx.font = 'bold 36px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillStyle = '#FFF';
-    ctx.fillText('モード選択', 480, 200);
+    ctx.fillStyle = 'rgba(0,0,0,0.8)'; ctx.fillRect(0, 0, 960, 640);
+    ctx.font = 'bold 38px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillStyle = '#FFD700'; ctx.shadowColor = '#FFD700'; ctx.shadowBlur = 15;
+    ctx.fillText('SELECT MODE', 480, 200); ctx.shadowBlur = 0;
 
     const modes = onlineMode ? [
-      { label: 'VS 対戦', desc: '2人で対戦', icon: 'VS', color: '#44AAFF', mode: 'vs' },
+      { label: 'VS 対戦', desc: '2人で対戦', icon: '⚔️', color: '#44AAFF', mode: 'vs' },
     ] : [
-      { label: 'CPU 対戦', desc: 'CPUと対戦', icon: 'CPU', color: '#FF8844', mode: 'cpu' },
-      { label: 'BOSS RUSH', desc: 'ボス3連戦', icon: 'BOSS', color: '#FF44CC', mode: 'bossrush' },
+      { label: 'CPU 対戦', desc: 'CPUと対戦', icon: '🤖', color: '#FF8844', mode: 'cpu' },
+      { label: 'BOSS RUSH', desc: 'ボス3連戦', icon: '👑', color: '#FF44CC', mode: 'bossrush' },
     ];
     const modeIdx = modes.findIndex(m => m.mode === gameMode);
-    const totalW = modes.length * 200 + (modes.length - 1) * 0;
-    const startMX = (960 - totalW) / 2 + 10;
     for (let i = 0; i < modes.length; i++) {
-      const mx = startMX + i * 200;
-      const my = 270;
+      const mw = 200, mx = (960 - modes.length * mw) / 2 + i * mw + 10, my = 260;
       const sel = modeIdx === i;
-      ctx.fillStyle = sel ? modes[i].color + '33' : 'rgba(20,20,40,0.8)';
-      roundRect(ctx, mx, my, 180, 130, 12); ctx.fill();
-      ctx.strokeStyle = sel ? modes[i].color : '#444';
-      ctx.lineWidth = sel ? 3 : 1;
-      roundRect(ctx, mx, my, 180, 130, 12); ctx.stroke();
-
-      ctx.font = 'bold 32px sans-serif';
-      ctx.fillStyle = sel ? modes[i].color : '#888';
-      ctx.fillText(modes[i].icon, mx + 90, my + 55);
-      ctx.font = 'bold 16px sans-serif';
-      ctx.fillStyle = sel ? '#FFF' : '#888';
-      ctx.fillText(modes[i].label, mx + 90, my + 85);
-      ctx.font = '13px sans-serif';
-      ctx.fillStyle = '#888';
-      ctx.fillText(modes[i].desc, mx + 90, my + 108);
+      ctx.fillStyle = sel ? modes[i].color + '22' : 'rgba(10,10,20,0.9)';
+      roundRect(ctx, mx, my, mw - 20, 140, 14); ctx.fill();
+      ctx.strokeStyle = sel ? modes[i].color : '#333'; ctx.lineWidth = sel ? 3 : 1;
+      roundRect(ctx, mx, my, mw - 20, 140, 14); ctx.stroke();
+      if (sel) { ctx.shadowColor = modes[i].color; ctx.shadowBlur = 12; }
+      ctx.font = '36px sans-serif'; ctx.fillStyle = sel ? modes[i].color : '#555';
+      ctx.fillText(modes[i].icon, mx + (mw - 20) / 2, my + 50); ctx.shadowBlur = 0;
+      ctx.font = 'bold 18px sans-serif'; ctx.fillStyle = sel ? '#FFF' : '#666';
+      ctx.fillText(modes[i].label, mx + (mw - 20) / 2, my + 85);
+      ctx.font = '13px sans-serif'; ctx.fillStyle = '#777';
+      ctx.fillText(modes[i].desc, mx + (mw - 20) / 2, my + 108);
     }
-
-    ctx.font = '14px sans-serif';
-    ctx.fillStyle = '#555';
+    ctx.font = '14px sans-serif'; ctx.fillStyle = '#555';
     ctx.fillText('← → で選択  |  Enter で決定  |  ESC で戻る', 480, 460);
     return;
   }
 
-  // Controls
-  ctx.textAlign = 'center';
-  ctx.font = '13px sans-serif';
-  ctx.fillStyle = '#555';
+  // === 操作ガイド ===
+  ctx.textAlign = 'center'; ctx.font = '12px sans-serif'; ctx.fillStyle = '#444';
   if (p1Confirmed && p2Confirmed) {
-    ctx.font = 'bold 22px sans-serif';
-    ctx.fillStyle = '#44FF44';
-    ctx.shadowColor = '#44FF44';
-    ctx.shadowBlur = 10;
-    if (gameMode === 'cpu') {
-      ctx.fillText('READY!  Enter で難易度選択へ', 480, 618);
-    } else {
-      ctx.fillText('READY TO FIGHT!  Press ENTER to start', 480, 618);
-    }
+    ctx.font = 'bold 20px sans-serif'; ctx.fillStyle = '#44FF44';
+    ctx.shadowColor = '#44FF44'; ctx.shadowBlur = 8;
+    ctx.fillText(gameMode === 'cpu' ? 'READY! Enter → 難易度選択' : 'READY TO FIGHT! Press ENTER', 480, 628);
     ctx.shadowBlur = 0;
+  } else if (gameMode === 'bossrush') {
+    ctx.fillText('← → で選択  |  Enter で決定  |  ESC で戻る', 480, 628);
   } else if (gameMode === 'cpu') {
-    ctx.fillText('1P: ← → + Enter で選択   |   A D で CPU キャラ変更   |   ESC で戻る', 480, 618);
+    ctx.fillText('1P: ← → + Enter  |  CPU: A D  |  ESC: 戻る', 480, 628);
   } else {
-    ctx.fillText('1P: ← → + Enter で選択   |   2P: A D + Space で選択   |   ESC で戻る', 480, 618);
+    ctx.fillText('1P: ← → + Enter  |  2P: A D + Space  |  ESC: 戻る', 480, 628);
   }
 }
 
-function drawSelectDetail(px, py, charIdx, label, color, isConfirmed) {
+function drawSelectPanel(px, py, charIdx, label, color, isConfirmed) {
   const isRandom = charIdx >= characters.length;
-  const ch = isRandom ? { name:'ランダム', type:'RANDOM', accent:'#FFDD44', desc:'ランダムでキャラが選ばれる', stats:{power:0,speed:0,tech:0,defense:0} } : characters[charIdx];
-  const pw = 400;
-  const ph = Math.min(190, 640 - py - 30);
+  const ch = isRandom ? { name:'ランダム', type:'RANDOM', accent:'#FFD700', desc:'ランダムでキャラが選ばれる', stats:{power:0,speed:0,tech:0,defense:0}, bodyColors:{main:'#888'} } : characters[charIdx];
+  const pw = 440, ph = Math.min(260, 640 - py - 14);
 
-  ctx.fillStyle = 'rgba(15, 15, 30, 0.85)';
-  roundRect(ctx, px, py, pw, ph, 10);
-  ctx.fill();
-  ctx.strokeStyle = isConfirmed ? '#44FF44' : color;
-  ctx.lineWidth = 1.5;
-  roundRect(ctx, px, py, pw, ph, 10);
-  ctx.stroke();
-
-  // Label
-  ctx.font = 'bold 14px sans-serif';
-  ctx.textAlign = 'left';
-  ctx.fillStyle = color;
-  ctx.fillText(label, px + 12, py + 18);
-
-  // Character preview
-  const detailScale = ph < 160 ? 0.85 : 1.15;
-  const detailCharY = ph < 160 ? py + 75 : py + 95;
-  if (isRandom) {
-    ctx.font = `bold ${ph < 160 ? 40 : 60}px sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.fillStyle = '#FFDD44';
-    ctx.globalAlpha = 0.7 + Math.sin(selectTime * 0.005) * 0.3;
-    ctx.fillText('?', px + 75, detailCharY + 10);
-    ctx.globalAlpha = 1;
-  } else {
-    drawCharacterBody(px + 75, detailCharY, detailScale, charIdx, selectTime, false);
+  // 背景のキャラシルエット
+  if (!isRandom) {
+    ctx.save(); ctx.globalAlpha = 0.04;
+    drawCharacterBody(px + pw / 2, py + ph / 2 + 20, 2.5, charIdx, selectTime, label !== '1P');
+    ctx.restore();
   }
 
-  // Info
+  // パネル
+  ctx.fillStyle = 'rgba(8,8,20,0.85)';
+  roundRect(ctx, px, py, pw, ph, 10); ctx.fill();
+  ctx.strokeStyle = isConfirmed ? '#44FF44' : color; ctx.lineWidth = isConfirmed ? 2 : 1;
+  roundRect(ctx, px, py, pw, ph, 10); ctx.stroke();
+
+  // ラベル
+  ctx.font = 'bold 16px sans-serif'; ctx.textAlign = 'left'; ctx.fillStyle = color;
+  ctx.fillText(label, px + 12, py + 20);
+
+  // キャラプレビュー
+  const previewScale = ph < 200 ? 0.9 : 1.2;
+  const previewY = ph < 200 ? py + 80 : py + 100;
+  if (isRandom) {
+    ctx.font = 'bold 50px sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#FFD700';
+    ctx.globalAlpha = 0.7 + Math.sin(selectTime * 0.005) * 0.3;
+    ctx.fillText('?', px + 80, previewY + 10); ctx.globalAlpha = 1;
+  } else {
+    drawCharacterBody(px + 80, previewY, previewScale, charIdx, selectTime, false);
+  }
+
+  // 名前・タイプ
   ctx.textAlign = 'left';
-  ctx.font = 'bold 24px sans-serif';
-  ctx.fillStyle = '#FFF';
-  ctx.fillText(ch.name, px + 155, py + 35);
+  ctx.font = 'bold 26px sans-serif'; ctx.fillStyle = '#FFF';
+  ctx.fillText(ch.name, px + 160, py + 40);
+  ctx.font = 'bold 13px sans-serif'; ctx.fillStyle = ch.accent || '#888';
+  ctx.fillText(ch.type || '', px + 160, py + 58);
+  ctx.font = '11px sans-serif'; ctx.fillStyle = '#888';
+  ctx.fillText(ch.desc || '', px + 160, py + 75);
 
-  ctx.font = 'bold 13px sans-serif';
-  ctx.fillStyle = ch.accent;
-  ctx.fillText(ch.type, px + 155, py + 53);
-
-  ctx.font = '12px sans-serif';
-  ctx.fillStyle = '#AAA';
-  ctx.fillText(ch.desc, px + 155, py + 72);
-
-  // Stats
+  // ステータスバー
   const stats = ['POW', 'SPD', 'TEC', 'DEF'];
   const statKeys = ['power', 'speed', 'tech', 'defense'];
-  const statColors = ['#FF4444', '#44FF88', '#FFDD44', '#4488FF'];
-
-  const statGap = ph < 160 ? 16 : 20;
-  const statStartY = ph < 160 ? py + 68 : py + 84;
+  const statColors = ['#FF4444', '#44FF88', '#FFD700', '#4488FF'];
+  const barW = 140, barH = 8, statGap = 18;
+  const statY = py + (ph < 200 ? 72 : 90);
   for (let i = 0; i < 4; i++) {
-    const sy = statStartY + i * statGap;
-    ctx.font = 'bold 10px sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillStyle = '#777';
-    ctx.fillText(stats[i], px + 155, sy + 2);
-
-    ctx.fillStyle = '#1a1a2e';
-    roundRect(ctx, px + 192, sy - 6, 170, 11, 3);
-    ctx.fill();
-
-    const val = ch.stats[statKeys[i]];
-    const bw = (val / 5) * 170;
-    ctx.fillStyle = statColors[i];
-    roundRect(ctx, px + 192, sy - 6, bw, 11, 3);
-    ctx.fill();
+    const sy = statY + i * statGap;
+    ctx.font = 'bold 9px sans-serif'; ctx.textAlign = 'left'; ctx.fillStyle = '#555';
+    ctx.fillText(stats[i], px + 160, sy + 6);
+    ctx.fillStyle = '#111122'; roundRect(ctx, px + 195, sy, barW, barH, 3); ctx.fill();
+    const val = ch.stats ? ch.stats[statKeys[i]] : 0;
+    ctx.fillStyle = statColors[i]; roundRect(ctx, px + 195, sy, (val / 5) * barW, barH, 3); ctx.fill();
   }
 
+  // 確定エフェクト
   if (isConfirmed) {
-    ctx.globalAlpha = 0.15 + Math.sin(selectTime * 0.005) * 0.05;
-    ctx.fillStyle = '#44FF44';
-    roundRect(ctx, px, py, pw, ph, 10);
-    ctx.fill();
+    ctx.globalAlpha = 0.1 + Math.sin(selectTime * 0.005) * 0.05;
+    ctx.fillStyle = '#44FF44'; roundRect(ctx, px, py, pw, ph, 10); ctx.fill();
     ctx.globalAlpha = 1;
   }
 }
