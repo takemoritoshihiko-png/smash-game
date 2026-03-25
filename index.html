@@ -6286,6 +6286,39 @@ function executeCommand(player, cmd) {
   return true;
 }
 
+// === キャラ別攻撃スタイル定義 ===
+const CHARACTER_ATTACK_STYLE = {
+  0:  { style:'sword',     color:'#88CCFF' },  // ゼン: 斬撃線
+  1:  { style:'heavyPunch', color:'#FF6644' },  // ドン: 巨大衝撃波
+  2:  { style:'ninjaSlash', color:'#44FFAA' },  // サイソク: 残像付き高速斬り
+  3:  { style:'flameKick',  color:'#FFAA22' },  // メテオ: 炎の蹴り
+  4:  { style:'spear',      color:'#A0B4FF' },  // ロング: 槍の直線
+  5:  { style:'beastSlam',  color:'#C8A878' },  // うる男: 獣の爪
+  6:  { style:'bearHug',    color:'#FF6B6B' },  // 熊太郎: 熊の一撃
+  7:  { style:'starShot',   color:'#FF66AA' },  // バレット: 星エフェクト
+  8:  { style:'electric',   color:'#FFFF44' },  // シャうでん: 電撃
+  9:  { style:'dark',       color:'#9966DD' },  // ジャッジマン: 暗黒
+  10: { style:'sword',      color:'#FF8833' },  // 天才: 剣（ドラゴン時は炎）
+  11: { style:'pounce',     color:'#66DDFF' },  // Catbus: 飛びかかり
+  12: { style:'cannon',     color:'#88AA66' },  // タンク: 砲撃
+  13: { style:'boxing',     color:'#FF4444' },  // 波おじ: ボクシング
+  14: { style:'multiSlash', color:'#CC44FF' },  // とっこ: 三刀流
+  15: { style:'feather',    color:'#EEEEFF' },  // サム: 羽エフェクト
+  16: { style:'standRush',  color:'#FFD700' },  // キング: スタンド残像
+  17: { style:'soundWave',  color:'#88FFFF' },  // おんぱ: 音波
+  18: { style:'ricePower',  color:'#FF8844' },  // セン: 米パワー
+  19: { style:'cannon',     color:'#CC66FF' },  // ドスボス: 砲撃
+  20: { style:'magic',      color:'#44DDFF' },  // マイクロ: 魔法陣
+  21: { style:'dualAttack', color:'#FF6688' },  // ミスターツー: 爆弾+炎
+  22: { style:'money',      color:'#FFD700' },  // 金金: コイン
+  23: { style:'waterKick',  color:'#66CCFF' },  // サトル: 水流蹴り
+  24: { style:'scissors',   color:'#CC0044' },  // 怖: ハサミ
+  25: { style:'random',     color:'#FFDD00' },  // ヤッホ: ランダム
+  26: { style:'bounce',     color:'#FF88CC' },  // ぽよ: バウンド
+  27: { style:'gravity',    color:'#AA66FF' },  // プル: 重力
+  28: { style:'poison',     color:'#66CC44' },  // ムッシー: 毒
+};
+
 const attackDefs = {
   // Zen - Sword [タイプ別調整: Z3-6, X8-14, C12-20]
   0: {
@@ -7397,10 +7430,57 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   if (attacker.charIdx === 17) attacker.consecutiveHits++;  // おんぱ「共鳴」カウント
   if (attacker.charIdx === 14) attacker.consecutiveHits++;  // とっこ「殺気」カウント
 
-  // ゼン(0): 氷エフェクト
-  if (attacker.charIdx === 0) {
-    sparks.push({ x: target.x + (Math.random()-0.5)*15, y: target.y - 35, vx: (Math.random()-0.5)*2, vy: -1-Math.random(), life: 10, maxLife: 10, color: '#88CCFF', size: 3+Math.random()*2, gravity: -0.02, drag: 0.96 });
-    sparks.push({ x: target.x + (Math.random()-0.5)*15, y: target.y - 25, vx: (Math.random()-0.5)*2, vy: -0.5-Math.random(), life: 8, maxLife: 8, color: '#AADDFF', size: 2+Math.random(), gravity: -0.01, drag: 0.97 });
+  // キャラ固有ヒットエフェクト
+  const atkStyle = CHARACTER_ATTACK_STYLE[attacker.charIdx];
+  if (atkStyle) {
+    const tx = target.x, ty = target.y - 35;
+    const sc2 = atkStyle.color;
+    if (atkStyle.style === 'sword') {
+      // 斬撃スパーク（氷+白）
+      sparks.push({ x: tx + (Math.random()-0.5)*15, y: ty, vx: (Math.random()-0.5)*2, vy: -1-Math.random(), life: 10, maxLife: 10, color: '#88CCFF', size: 3+Math.random()*2, gravity: -0.02, drag: 0.96 });
+      sparks.push({ x: tx + (Math.random()-0.5)*15, y: ty+10, vx: (Math.random()-0.5)*2, vy: -0.5-Math.random(), life: 8, maxLife: 8, color: '#AADDFF', size: 2+Math.random(), gravity: -0.01, drag: 0.97 });
+    } else if (atkStyle.style === 'heavyPunch') {
+      // 大きな衝撃エフェクト
+      hitEffects.push({ x: tx, y: ty, life: 8, maxLife: 8, color: sc2, size: 25 });
+      sparks.push({ x: tx, y: ty, vx: dir * 3, vy: -2, life: 10, maxLife: 10, color: '#FF8844', size: 4, gravity: 0.1, drag: 0.95 });
+    } else if (atkStyle.style === 'electric') {
+      // 電撃スパーク
+      for (let ei2 = 0; ei2 < 3; ei2++) {
+        sparks.push({ x: tx + (Math.random()-0.5)*20, y: ty + (Math.random()-0.5)*20, vx: (Math.random()-0.5)*4, vy: (Math.random()-0.5)*4, life: 6, maxLife: 6, color: '#FFFF44', size: 2, gravity: 0, drag: 0.9, type: 'bolt' });
+      }
+    } else if (atkStyle.style === 'flameKick') {
+      // 炎スパーク
+      sparks.push({ x: tx, y: ty, vx: (Math.random()-0.5)*3, vy: -1.5-Math.random(), life: 10, maxLife: 10, color: '#FF6600', size: 3+Math.random()*2, gravity: -0.03, drag: 0.96, type: 'fireball' });
+    } else if (atkStyle.style === 'spear') {
+      // 槍の突きスパーク
+      sparks.push({ x: tx, y: ty, vx: dir * 4, vy: (Math.random()-0.5)*2, life: 8, maxLife: 8, color: '#A0B4FF', size: 2, gravity: 0, drag: 0.94 });
+    } else if (atkStyle.style === 'multiSlash') {
+      // 三連斬撃
+      for (let ms = 0; ms < 3; ms++) {
+        sparks.push({ x: tx + (Math.random()-0.5)*15, y: ty + ms * 8 - 8, vx: dir*(1+Math.random()*2), vy: -0.5+Math.random(), life: 8, maxLife: 8, color: '#CC44FF', size: 2, gravity: 0, drag: 0.95 });
+      }
+    } else if (atkStyle.style === 'dark') {
+      // 暗黒スパーク
+      hitEffects.push({ x: tx, y: ty, life: 8, maxLife: 8, color: '#440066', size: 20 });
+    } else if (atkStyle.style === 'soundWave') {
+      // 音波リング
+      hitEffects.push({ x: tx, y: ty, life: 10, maxLife: 10, color: '#88FFFF', size: 25, type: 'ring' });
+    } else if (atkStyle.style === 'boxing') {
+      // ボクシングインパクト
+      sparks.push({ x: tx, y: ty, vx: dir*3, vy: -1, life: 6, maxLife: 6, color: '#FF4444', size: 3, gravity: 0, drag: 0.9 });
+    } else if (atkStyle.style === 'money') {
+      // コインスパーク
+      sparks.push({ x: tx, y: ty, vx: (Math.random()-0.5)*4, vy: -2-Math.random()*2, life: 12, maxLife: 12, color: '#FFD700', size: 3, gravity: 0.1, drag: 0.96 });
+    } else if (atkStyle.style === 'scissors') {
+      // ハサミ斬撃
+      hitEffects.push({ x: tx, y: ty, life: 6, maxLife: 6, color: '#CC0044', size: 15, type: 'charSlash' });
+    } else if (atkStyle.style === 'bounce') {
+      // バウンドインパクト
+      hitEffects.push({ x: tx, y: ty, life: 8, maxLife: 8, color: '#FF88CC', size: 20 });
+    } else {
+      // デフォルト: キャラカラーのスパーク
+      sparks.push({ x: tx + (Math.random()-0.5)*10, y: ty, vx: (Math.random()-0.5)*3, vy: -1-Math.random(), life: 8, maxLife: 8, color: sc2, size: 2+Math.random()*2, gravity: 0.05, drag: 0.96 });
+    }
   }
   // おんぱ(17): 音波共鳴 - 攻撃が当たるたびに小さな音波が広がり周囲の相手に1ダメージ
   if (attacker.charIdx === 17) {
@@ -12614,6 +12694,296 @@ function drawAttackEffect(p) {
     ctx.stroke();
     ctx.fillStyle = '#FF8800'; ctx.globalAlpha = 0.4 * (1 - t);
     ctx.beginPath(); ctx.arc(cx + 12 * dir, cy - 50 * t, 8, 0, Math.PI * 2); ctx.fill();
+  }
+
+  // === キャラ固有攻撃エフェクト（upslash/sideslash/meteor用） ===
+  // 未対応のeffect名はキャラ固有スタイルで描画
+  const charStyle = CHARACTER_ATTACK_STYLE[p.charIdx];
+  if (charStyle && (atk.effect === 'upslash' || atk.effect === 'sideslash' || atk.effect === 'meteor' || atk.effect === 'none')) {
+    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
+    const sc = charStyle.color;
+
+    if (charStyle.style === 'spear') {
+      // 槍の直線エフェクト
+      const len = (atk.effect === 'upslash') ? 80 : 120;
+      ctx.strokeStyle = sc; ctx.lineWidth = 4; ctx.globalAlpha = 0.8 * (1 - t);
+      ctx.beginPath();
+      if (atk.effect === 'upslash') {
+        ctx.moveTo(cx, cy - 20); ctx.lineTo(cx + 5 * dir, cy - 20 - len * t);
+      } else if (atk.effect === 'meteor') {
+        ctx.moveTo(cx, cy); ctx.lineTo(cx, cy + len * t);
+      } else {
+        ctx.moveTo(cx, cy - 35); ctx.lineTo(cx + len * dir * t, cy - 35);
+      }
+      ctx.stroke();
+      // 先端の光
+      ctx.fillStyle = '#FFF'; ctx.globalAlpha = 0.5 * (1 - t);
+      const tipX2 = atk.effect === 'upslash' ? cx + 5 * dir : (atk.effect === 'meteor' ? cx : cx + len * dir * t);
+      const tipY2 = atk.effect === 'upslash' ? cy - 20 - len * t : (atk.effect === 'meteor' ? cy + len * t : cy - 35);
+      ctx.beginPath(); ctx.arc(tipX2, tipY2, 5 * (1 - t), 0, Math.PI * 2); ctx.fill();
+    }
+    else if (charStyle.style === 'electric') {
+      // ジグザグ稲妻
+      ctx.strokeStyle = '#FFFF00'; ctx.lineWidth = 2; ctx.globalAlpha = 0.8 * (1 - t);
+      ctx.beginPath();
+      let ex = cx, ey = cy - 30;
+      ctx.moveTo(ex, ey);
+      const segs = 5;
+      for (let i = 0; i < segs; i++) {
+        ex += dir * 18 * t;
+        ey += (i % 2 === 0 ? -12 : 12) * t;
+        ctx.lineTo(ex, ey);
+      }
+      ctx.stroke();
+      // 電気の粒
+      ctx.fillStyle = '#FFFF88'; ctx.globalAlpha = 0.6 * (1 - t);
+      for (let i = 0; i < 3; i++) {
+        ctx.beginPath(); ctx.arc(cx + (20 + i * 15) * dir * t, cy - 35 + (Math.random()-0.5)*20, 3, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+    else if (charStyle.style === 'dark') {
+      // 暗黒の渦
+      ctx.strokeStyle = '#8800FF'; ctx.lineWidth = 3; ctx.globalAlpha = 0.6 * (1 - t);
+      ctx.beginPath(); ctx.arc(cx + 20 * dir, cy - 35, 35 * t, 0, Math.PI * 1.5 * t); ctx.stroke();
+      ctx.fillStyle = '#440066'; ctx.globalAlpha = 0.2 * (1 - t);
+      ctx.beginPath(); ctx.arc(cx + 20 * dir, cy - 35, 20 * t, 0, Math.PI * 2); ctx.fill();
+    }
+    else if (charStyle.style === 'multiSlash') {
+      // 三刀流・3本の斬撃線
+      for (let sl = 0; sl < 3; sl++) {
+        ctx.strokeStyle = sc; ctx.lineWidth = 2.5; ctx.globalAlpha = (0.8 - sl * 0.2) * (1 - t);
+        const startA = dir > 0 ? -Math.PI * 0.6 + sl * 0.3 : Math.PI * 0.4 - sl * 0.3;
+        ctx.beginPath();
+        ctx.arc(cx + 10 * dir, cy - 30 + sl * 8, 40, startA, startA + Math.PI * 0.7 * t * dir);
+        ctx.stroke();
+      }
+    }
+    else if (charStyle.style === 'standRush') {
+      // スタンド残像ラッシュ
+      for (let si = 0; si < 3; si++) {
+        const offset = (si + 1) * 12 * dir * t;
+        ctx.globalAlpha = (0.4 - si * 0.12) * (1 - t);
+        ctx.fillStyle = sc;
+        ctx.beginPath(); ctx.ellipse(cx + offset, cy - 35, 10, 25, 0, 0, Math.PI * 2); ctx.fill();
+      }
+      // パンチのインパクト
+      ctx.fillStyle = '#FFF'; ctx.globalAlpha = 0.7 * (1 - t);
+      ctx.beginPath(); ctx.arc(cx + 35 * dir * t, cy - 35, 8 * (1 - t), 0, Math.PI * 2); ctx.fill();
+    }
+    else if (charStyle.style === 'boxing') {
+      // ボクシング・素早いパンチライン
+      ctx.strokeStyle = '#FF0000'; ctx.lineWidth = 3; ctx.globalAlpha = 0.7 * (1 - t);
+      ctx.beginPath(); ctx.moveTo(cx + 5 * dir, cy - 30); ctx.lineTo(cx + 60 * dir * t, cy - 30); ctx.stroke();
+      // パンチ先端
+      ctx.fillStyle = sc; ctx.globalAlpha = 0.6 * (1 - t);
+      ctx.beginPath(); ctx.arc(cx + 60 * dir * t, cy - 30, 8 * (1 - t * 0.5), 0, Math.PI * 2); ctx.fill();
+    }
+    else if (charStyle.style === 'flameKick') {
+      // 炎の蹴りエフェクト
+      ctx.strokeStyle = '#FF6600'; ctx.lineWidth = 3; ctx.globalAlpha = 0.7 * (1 - t);
+      const kickAngle = atk.effect === 'upslash' ? -Math.PI * 0.4 : (atk.effect === 'meteor' ? Math.PI * 0.3 : 0);
+      ctx.beginPath();
+      ctx.arc(cx + 10 * dir, cy - 30, 35, kickAngle, kickAngle + Math.PI * 0.8 * t * dir);
+      ctx.stroke();
+      // 炎パーティクル
+      ctx.fillStyle = '#FFAA00'; ctx.globalAlpha = 0.5 * (1 - t);
+      for (let fi2 = 0; fi2 < 3; fi2++) {
+        const fa = kickAngle + Math.PI * 0.3 * fi2 * t * dir;
+        ctx.beginPath(); ctx.arc(cx + 10 * dir + Math.cos(fa) * 30 * t, cy - 30 + Math.sin(fa) * 30 * t, 4 * (1 - t), 0, Math.PI * 2); ctx.fill();
+      }
+    }
+    else if (charStyle.style === 'beastSlam') {
+      // 獣の爪跡（3本の平行線）
+      ctx.strokeStyle = sc; ctx.lineWidth = 2.5; ctx.globalAlpha = 0.7 * (1 - t);
+      for (let cl = 0; cl < 3; cl++) {
+        ctx.beginPath();
+        ctx.moveTo(cx + 5 * dir, cy - 45 + cl * 12);
+        ctx.lineTo(cx + (40 + cl * 8) * dir * t, cy - 35 + cl * 12);
+        ctx.stroke();
+      }
+    }
+    else if (charStyle.style === 'bearHug') {
+      // 熊のぷにぷにインパクト
+      ctx.fillStyle = sc; ctx.globalAlpha = 0.6 * (1 - t);
+      ctx.beginPath(); ctx.arc(cx + 25 * dir * t, cy - 30, 18 * (1 - t * 0.4), 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#FFF'; ctx.lineWidth = 2; ctx.globalAlpha = 0.4 * (1 - t);
+      ctx.beginPath(); ctx.arc(cx + 25 * dir * t, cy - 30, 22 * (1 - t * 0.3), 0, Math.PI * 2); ctx.stroke();
+    }
+    else if (charStyle.style === 'starShot') {
+      // 星型インパクト
+      ctx.fillStyle = sc; ctx.globalAlpha = 0.7 * (1 - t);
+      const sx2 = cx + 30 * dir * t, sy2 = cy - 35;
+      drawStar(sx2, sy2, 5, 12 * (1 - t * 0.3), ctx);
+      ctx.strokeStyle = '#FFF'; ctx.lineWidth = 1.5; ctx.globalAlpha = 0.5 * (1 - t);
+      ctx.beginPath(); ctx.arc(sx2, sy2, 15 * t, 0, Math.PI * 2); ctx.stroke();
+    }
+    else if (charStyle.style === 'pounce') {
+      // 飛びかかり（弧を描く爪跡）
+      ctx.strokeStyle = sc; ctx.lineWidth = 3; ctx.globalAlpha = 0.7 * (1 - t);
+      ctx.beginPath();
+      const pa = dir > 0 ? -Math.PI * 0.5 : Math.PI * 0.5;
+      ctx.arc(cx + 15 * dir, cy - 25, 30, pa, pa + Math.PI * 0.6 * t * dir);
+      ctx.stroke();
+      // 二重爪跡
+      ctx.lineWidth = 1.5; ctx.globalAlpha = 0.4 * (1 - t);
+      ctx.beginPath(); ctx.arc(cx + 15 * dir, cy - 20, 25, pa, pa + Math.PI * 0.5 * t * dir); ctx.stroke();
+    }
+    else if (charStyle.style === 'cannon') {
+      // 砲弾の煙と衝撃波
+      ctx.fillStyle = 'rgba(150,150,150,0.5)'; ctx.globalAlpha = 0.6 * (1 - t);
+      ctx.beginPath(); ctx.arc(cx + 30 * dir * t, cy - 35, 15 * (1 - t * 0.3), 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#FF6600'; ctx.lineWidth = 2; ctx.globalAlpha = 0.4 * (1 - t);
+      ctx.beginPath(); ctx.arc(cx + 30 * dir * t, cy - 35, 25 * t, 0, Math.PI * 2); ctx.stroke();
+    }
+    else if (charStyle.style === 'feather') {
+      // 羽エフェクト
+      ctx.strokeStyle = '#EEEEFF'; ctx.lineWidth = 2; ctx.globalAlpha = 0.6 * (1 - t);
+      for (let fi3 = 0; fi3 < 3; fi3++) {
+        const fa2 = -Math.PI * 0.3 + fi3 * 0.4 + t * Math.PI * 0.5;
+        const fx2 = cx + Math.cos(fa2) * 30 * t * dir;
+        const fy2 = cy - 35 + Math.sin(fa2) * 20 * t;
+        ctx.beginPath(); ctx.moveTo(fx2, fy2 - 5); ctx.quadraticCurveTo(fx2 + 5 * dir, fy2, fx2, fy2 + 5); ctx.stroke();
+      }
+    }
+    else if (charStyle.style === 'soundWave') {
+      // 音波の同心円
+      for (let wr = 15; wr <= 50; wr += 15) {
+        const wrt = Math.max(0, t - (wr - 15) / 70);
+        ctx.strokeStyle = sc; ctx.lineWidth = 2 * (1 - wrt); ctx.globalAlpha = (0.6 - wr / 100) * (1 - wrt);
+        ctx.beginPath(); ctx.arc(cx + 15 * dir, cy - 35, wr * wrt + 5, 0, Math.PI * 2); ctx.stroke();
+      }
+    }
+    else if (charStyle.style === 'ricePower') {
+      // 米粒が飛び散る
+      ctx.fillStyle = '#FFFFFF'; ctx.globalAlpha = 0.7 * (1 - t);
+      for (let ri = 0; ri < 5; ri++) {
+        const ra = (ri / 5) * Math.PI * 2 + t * 3;
+        const rx2 = cx + 15 * dir + Math.cos(ra) * 20 * t;
+        const ry2 = cy - 35 + Math.sin(ra) * 15 * t;
+        ctx.beginPath(); ctx.ellipse(rx2, ry2, 3, 1.5, ra, 0, Math.PI * 2); ctx.fill();
+      }
+      // 衝撃円
+      ctx.strokeStyle = sc; ctx.lineWidth = 2; ctx.globalAlpha = 0.4 * (1 - t);
+      ctx.beginPath(); ctx.arc(cx + 15 * dir, cy - 35, 25 * t, 0, Math.PI * 2); ctx.stroke();
+    }
+    else if (charStyle.style === 'magic') {
+      // 魔法陣エフェクト
+      ctx.strokeStyle = sc; ctx.lineWidth = 1.5; ctx.globalAlpha = 0.6 * (1 - t);
+      const mr = 25 * t;
+      ctx.beginPath(); ctx.arc(cx + 15 * dir, cy - 35, mr, 0, Math.PI * 2); ctx.stroke();
+      // 六芒星
+      for (let mi = 0; mi < 6; mi++) {
+        const ma = (mi / 6) * Math.PI * 2 + frame * 0.1;
+        ctx.beginPath();
+        ctx.moveTo(cx + 15 * dir + Math.cos(ma) * mr, cy - 35 + Math.sin(ma) * mr);
+        ctx.lineTo(cx + 15 * dir + Math.cos(ma + Math.PI) * mr, cy - 35 + Math.sin(ma + Math.PI) * mr);
+        ctx.stroke();
+      }
+    }
+    else if (charStyle.style === 'dualAttack') {
+      // 爆弾/炎の交互エフェクト
+      if (p.mrtwoPersonality === 0) {
+        // 爆弾: 衝撃波
+        ctx.strokeStyle = '#FF8800'; ctx.lineWidth = 3; ctx.globalAlpha = 0.6 * (1 - t);
+        ctx.beginPath(); ctx.arc(cx + 20 * dir, cy - 35, 25 * t, 0, Math.PI * 2); ctx.stroke();
+      } else {
+        // 炎: 火炎
+        ctx.fillStyle = '#FF4400'; ctx.globalAlpha = 0.5 * (1 - t);
+        for (let fl = 0; fl < 4; fl++) {
+          const fa3 = (fl / 4) * Math.PI * 2 + frame * 0.2;
+          ctx.beginPath(); ctx.arc(cx + 15 * dir + Math.cos(fa3) * 18 * t, cy - 35 + Math.sin(fa3) * 12 * t, 5 * (1 - t), 0, Math.PI * 2); ctx.fill();
+        }
+      }
+    }
+    else if (charStyle.style === 'money') {
+      // コインが飛び散る
+      ctx.fillStyle = '#FFD700'; ctx.globalAlpha = 0.7 * (1 - t);
+      for (let ci3 = 0; ci3 < 4; ci3++) {
+        const ca = (ci3 / 4) * Math.PI + t * 2;
+        ctx.beginPath(); ctx.arc(cx + 15 * dir + Math.cos(ca) * 25 * t, cy - 35 + Math.sin(ca) * 18 * t, 4, 0, Math.PI * 2); ctx.fill();
+      }
+      // $ マーク
+      ctx.fillStyle = '#FFD700'; ctx.globalAlpha = 0.5 * (1 - t);
+      ctx.font = 'bold 14px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('$', cx + 30 * dir * t, cy - 40);
+    }
+    else if (charStyle.style === 'waterKick') {
+      // 水流蹴り
+      ctx.strokeStyle = '#66CCFF'; ctx.lineWidth = 3; ctx.globalAlpha = 0.6 * (1 - t);
+      ctx.beginPath();
+      ctx.arc(cx + 10 * dir, cy - 30, 35, -Math.PI * 0.3 * dir, Math.PI * 0.8 * t * dir);
+      ctx.stroke();
+      // 水しぶき
+      ctx.fillStyle = '#88DDFF'; ctx.globalAlpha = 0.4 * (1 - t);
+      for (let wi = 0; wi < 3; wi++) {
+        ctx.beginPath(); ctx.arc(cx + (20 + wi * 10) * dir * t, cy - 35 + (Math.random()-0.5)*15, 3 * (1 - t), 0, Math.PI * 2); ctx.fill();
+      }
+    }
+    else if (charStyle.style === 'scissors') {
+      // ハサミの交差エフェクト
+      ctx.strokeStyle = sc; ctx.lineWidth = 3; ctx.globalAlpha = 0.7 * (1 - t);
+      // 上の刃
+      ctx.beginPath(); ctx.moveTo(cx, cy - 50); ctx.lineTo(cx + 45 * dir * t, cy - 25); ctx.stroke();
+      // 下の刃
+      ctx.beginPath(); ctx.moveTo(cx, cy - 20); ctx.lineTo(cx + 45 * dir * t, cy - 45); ctx.stroke();
+    }
+    else if (charStyle.style === 'random') {
+      // ランダムエフェクト（毎フレーム色が変わる）
+      const randColors = ['#FF4444','#44FF44','#4444FF','#FFFF44','#FF44FF','#44FFFF'];
+      ctx.fillStyle = randColors[frame % randColors.length]; ctx.globalAlpha = 0.6 * (1 - t);
+      ctx.beginPath(); ctx.arc(cx + 25 * dir * t, cy - 35, 15 * (1 - t * 0.3), 0, Math.PI * 2); ctx.fill();
+      // ?マーク
+      ctx.fillStyle = '#FFF'; ctx.globalAlpha = 0.5 * (1 - t);
+      ctx.font = 'bold 16px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('?', cx + 25 * dir * t, cy - 30);
+    }
+    else if (charStyle.style === 'bounce') {
+      // バウンドエフェクト（弾むリング）
+      ctx.strokeStyle = sc; ctx.lineWidth = 3; ctx.globalAlpha = 0.6 * (1 - t);
+      const br = 20 + 15 * Math.abs(Math.sin(t * Math.PI * 2));
+      ctx.beginPath(); ctx.arc(cx + 20 * dir * t, cy - 30, br, 0, Math.PI * 2); ctx.stroke();
+    }
+    else if (charStyle.style === 'gravity') {
+      // 重力エフェクト（歪む空間）
+      ctx.strokeStyle = '#AA66FF'; ctx.lineWidth = 1.5; ctx.globalAlpha = 0.5 * (1 - t);
+      for (let gi = 0; gi < 4; gi++) {
+        const gr = (10 + gi * 10) * t;
+        ctx.beginPath(); ctx.arc(cx + 15 * dir, cy - 35, gr, 0, Math.PI * 2); ctx.stroke();
+      }
+    }
+    else if (charStyle.style === 'poison') {
+      // 毒エフェクト
+      ctx.fillStyle = '#66CC44'; ctx.globalAlpha = 0.5 * (1 - t);
+      for (let pi2 = 0; pi2 < 4; pi2++) {
+        const pa2 = (pi2 / 4) * Math.PI * 2 + frame * 0.15;
+        ctx.beginPath(); ctx.arc(cx + 15 * dir + Math.cos(pa2) * 20 * t, cy - 35 + Math.sin(pa2) * 15 * t, 4 * (1 - t), 0, Math.PI * 2); ctx.fill();
+      }
+    }
+    else if (charStyle.style === 'ninjaSlash') {
+      // 高速残像斬り
+      ctx.strokeStyle = sc; ctx.lineWidth = 2; ctx.globalAlpha = 0.7 * (1 - t);
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - 45);
+      ctx.lineTo(cx + 50 * dir * t, cy - 25);
+      ctx.stroke();
+      // 残像
+      ctx.globalAlpha = 0.2 * (1 - t);
+      ctx.fillStyle = sc;
+      ctx.beginPath(); ctx.ellipse(cx + 20 * dir * t, cy - 35, 8, 20, 0, 0, Math.PI * 2); ctx.fill();
+    }
+    else if (charStyle.style === 'heavyPunch') {
+      // 巨大パンチの衝撃波
+      ctx.strokeStyle = sc; ctx.lineWidth = 5 * (1 - t); ctx.globalAlpha = 0.6 * (1 - t);
+      ctx.beginPath(); ctx.arc(cx + 25 * dir * t, cy - 35, 30 * t, 0, Math.PI * 2); ctx.stroke();
+      // 地面の振動線
+      ctx.lineWidth = 2; ctx.globalAlpha = 0.3 * (1 - t);
+      for (let hi = 0; hi < 3; hi++) {
+        ctx.beginPath();
+        ctx.moveTo(cx - 20 + hi * 20, cy);
+        ctx.lineTo(cx - 20 + hi * 20, cy - 8 * (1 - t));
+        ctx.stroke();
+      }
+    }
   }
 
   // === COMMAND ATTACK EFFECTS ===
