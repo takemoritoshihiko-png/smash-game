@@ -11085,8 +11085,10 @@ function drawBattle(dt) {
       }
       // 本体半透明
       ctx.globalAlpha = 0.35;
-    } else if (p.invincibleTimer > 0 && Math.floor(p.invincibleTimer / 4) % 2 === 0) {
-      ctx.globalAlpha = 0.4;
+    } else if (p.invincibleTimer > 0) {
+      // 崖無敵: 残り5Fから速い点滅
+      const blinkRate = (p.ledgeGrab && p.ledgeInvincible > 0 && p.ledgeInvincible <= 5) ? 2 : 4;
+      if (Math.floor(p.invincibleTimer / blinkRate) % 2 === 0) ctx.globalAlpha = 0.4;
     }
 
     // Hitstun flash + knockback afterimage
@@ -13961,13 +13963,14 @@ function grabLedge(p, side) {
   p.ledgeGrab = true;
   p.ledgeSide = side;
   p.ledgeTimer = 0;
+  p.ledgeInvincible = 30; // 崖つかまり無敵0.5秒
   p.vx = 0; p.vy = 0;
   p.x = side === -1 ? STAGE_LEFT : STAGE_RIGHT;
   p.y = STAGE_GROUND_Y + 30;
-  p.facingLeft = side === 1; // 向きをステージ内側に
+  p.facingLeft = side === 1;
   p.attacking = false; p.specialState = null;
   p.grounded = false;
-  p.jumps = p.charIdx === 15 ? 3 : 2; // ジャンプ回数リセット
+  p.jumps = p.charIdx === 15 ? 3 : 2;
 }
 
 function releaseLedge(p, type) {
@@ -14002,7 +14005,12 @@ function releaseLedge(p, type) {
 
 function updateLedge(p) {
   if (p.ledgeCooldown > 0) p.ledgeCooldown--;
-  if (p.ledgeInvincible > 0) { p.ledgeInvincible--; p.invincibleTimer = Math.max(p.invincibleTimer, 1); }
+  if (p.ledgeInvincible > 0) {
+    p.ledgeInvincible--;
+    p.invincibleTimer = Math.max(p.invincibleTimer, 1);
+    // 無敵解除の瞬間: 赤フラッシュ
+    if (p.ledgeInvincible === 0 && p.ledgeGrab) p.damageTint = 6;
+  }
   if (p.ledgeEndlag > 0) { p.ledgeEndlag--; p.vx *= 0.8; }
   if (!p.ledgeGrab) return;
   p.ledgeTimer++;
@@ -14011,8 +14019,8 @@ function updateLedge(p) {
   p.y = STAGE_GROUND_Y + 30;
   // 3秒経過で自動落下
   if (p.ledgeTimer >= LEDGE_MAX_TIME) { releaseLedge(p, 'drop'); return; }
-  // 被弾で崖離し
-  if (p.hitstun > 0) { releaseLedge(p, 'drop'); }
+  // 無敵解除後のみ被弾で崖離し
+  if (p.ledgeInvincible <= 0 && p.hitstun > 0) { releaseLedge(p, 'drop'); }
 }
 
 // --- D技（固有追加技）システム ---
