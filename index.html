@@ -7773,14 +7773,52 @@ function getPlayerHitbox(p) {
   return { x: p.x - 18, y: p.y - 70, w: 36, h: 70 };
 }
 
+// キャラ別リーチ倍率 [normalW, sideW, upH, downH]
+const CHAR_REACH = [
+  [1.4,1.5,1.3,1.2], // 0 zen (剣)
+  [1.1,1.2,1.0,1.1], // 1 don
+  [0.8,0.9,0.9,0.8], // 2 saisoku (短リーチ高速)
+  [1.1,1.2,1.0,1.0], // 3 meteo
+  [1.8,2.0,1.5,1.6], // 4 long (超長槍)
+  [1.1,1.1,1.0,1.0], // 5 uruo
+  [0.9,1.0,0.9,0.9], // 6 kumatarou
+  [0.7,0.8,0.9,0.7], // 7 bullet (超短リーチ遠距離型)
+  [0.8,0.9,0.8,0.8], // 8 shawden
+  [1.3,1.4,1.2,1.3], // 9 judgeman
+  [1.4,1.5,1.4,1.2], // 10 tensai
+  [1.0,1.1,0.9,1.0], // 11 catbus
+  [1.2,1.4,0.8,0.9], // 12 tank (横長)
+  [1.0,1.1,1.2,0.9], // 13 namioji
+  [1.6,1.8,1.4,1.5], // 14 tokko (長リーチ攻撃特化)
+  [0.8,1.0,0.9,0.8], // 15 sam
+  [1.3,1.4,1.5,1.2], // 16 king
+  [1.2,1.3,1.0,1.1], // 17 onpa
+  [1.0,1.1,1.0,0.9], // 18 sen
+  [1.2,1.4,0.8,0.9], // 19 dosboss (横長)
+  [1.2,1.3,1.4,1.0], // 20 micro
+  [1.1,1.2,1.0,1.0], // 21 mrtwo
+  [1.1,1.2,1.0,1.0], // 22 kinkin
+  [0.9,1.0,1.3,0.8], // 23 satoru (上方向リーチ)
+  [0.8,0.9,0.8,0.8], // 24 kowai
+  [0.9,0.9,0.9,0.9], // 25 yaho
+  [0.7,0.8,0.8,0.7], // 26 poyo (最短)
+  [1.0,1.0,1.0,1.0], // 27 pull
+  [0.9,1.0,0.9,0.9], // 28 mussy
+];
 function getAttackHitbox(p, atk) {
   const dir = p.facingLeft ? -1 : 1;
-  // パッシブ: ロング(4) リーチ強化 攻撃範囲+10%
-  const reachMult = p.charIdx === 4 ? 1.1 : 1.0;
-  const cx = p.x + atk.hx * dir * reachMult;
-  const hw = atk.hw * reachMult;
+  const r = CHAR_REACH[p.charIdx] || [1,1,1,1];
+  // 攻撃タイプに応じたリーチ倍率を選択
+  const at = p.attackType || '';
+  let wMult, hMult;
+  if (at === 'up' || at === 'upSmash') { wMult = 1.0; hMult = r[2]; }
+  else if (at === 'down' || at === 'downSmash' || at === 'downair') { wMult = 1.0; hMult = r[3]; }
+  else if (at === 'side' || at === 'sideSmash' || at === 'dash' || at === 'aerial' || at === 'strong') { wMult = r[1]; hMult = 1.0; }
+  else { wMult = r[0]; hMult = 1.0; } // normal, command等
+  const cx = p.x + atk.hx * dir * wMult;
+  const hw = atk.hw * wMult;
   const hx = dir > 0 ? cx : cx - hw;
-  return { x: hx, y: p.y + atk.hy, w: hw, h: atk.hh * reachMult };
+  return { x: hx, y: p.y + atk.hy, w: hw, h: atk.hh * hMult };
 }
 
 // --- Projectile spawning ---
