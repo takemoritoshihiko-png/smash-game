@@ -2544,8 +2544,9 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
     if (picked) img = picked;
   }
   if (img && img.complete && img.naturalWidth > 0) {
-    const imgW = imgSizes[charIndex][0] * s;
-    const imgH = imgSizes[charIndex][1] * s;
+    const bodyScale = CHAR_BODY[charIndex] || [1.0, 1.0];
+    const imgW = imgSizes[charIndex][0] * s * bodyScale[0];
+    const imgH = imgSizes[charIndex][1] * s * bodyScale[1];
     const tankOfsX = charIndex === 12 ? -5 * s : 0;
     const tankOfsY = charIndex === 12 ? -20 * s : 0;
     // 全キャラ source-over で描画（明るい背景対応）
@@ -7738,39 +7739,42 @@ function hitboxCollides(ax, ay, aw, ah, bx, by, bw, bh) {
   return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
 }
 
+// キャラ別体格 [width倍率, height倍率] (基準: 36w × 70h)
+const CHAR_BODY = [
+  [1.0, 1.0],   // 0 zen 標準
+  [1.3, 1.2],   // 1 don 巨漢
+  [0.8, 0.9],   // 2 saisoku 小さい
+  [0.9, 0.95],  // 3 meteo 軽量格闘家
+  [0.85,1.05],  // 4 long 細身
+  [1.4, 1.2],   // 5 uruo 装甲獣
+  [1.2, 1.1],   // 6 kumatarou 熊・丸い
+  [0.75,0.85],  // 7 bullet 最小・鳥
+  [0.85,0.9],   // 8 shawden スポンジ
+  [1.0, 1.1],   // 9 judgeman 標準やや大
+  [1.0, 1.05],  // 10 tensai 標準
+  [1.5, 0.85],  // 11 catbus 横長低め
+  [1.3, 0.85],  // 12 tank 横広低め
+  [1.05,0.9],   // 13 namioji 標準
+  [0.85,1.05],  // 14 tokko 細身
+  [0.8, 0.85],  // 15 sam 小鳥
+  [0.9, 1.1],   // 16 king スリム
+  [1.2, 1.0],   // 17 onpa 丸い
+  [1.15,1.0],   // 18 sen おにぎり
+  [1.25,0.9],   // 19 dosboss 横広
+  [1.0, 1.2],   // 20 micro 3体積み縦長
+  [1.25,1.0],   // 21 mrtwo 双頭横広
+  [1.15,1.0],   // 22 kinkin 太め
+  [0.85,0.95],  // 23 satoru 細身
+  [0.8, 1.1],   // 24 kowai 細長亡霊
+  [0.9, 0.9],   // 25 yaho 標準小
+  [0.85,0.85],  // 26 poyo 小さい
+  [1.0, 1.0],   // 27 pull 標準
+  [0.9, 0.9],   // 28 mussy 細め虫
+];
 function getPlayerHitbox(p) {
-  // キャラ固有の当たり判定形状
-  const ci = p.charIdx;
-  if (ci === 0) return { x: p.x - 14, y: p.y - 75, w: 28, h: 75 };  // ゼン: 縦長細め
-  if (ci === 1) return { x: p.x - 22, y: p.y - 68, w: 44, h: 68 };  // ドン: 大きめ
-  if (ci === 2) return { x: p.x - 13, y: p.y - 72, w: 26, h: 72 };  // サイソク: 小さめ縦長
-  if (ci === 3) return { x: p.x - 20, y: p.y - 65, w: 40, h: 65 };  // メテオ: 横広
-  if (ci === 4) return { x: p.x - 16, y: p.y - 70, w: 42, h: 70 };  // ロング: 前方に長い
-  if (ci === 5) return { x: p.x - 22, y: p.y - 68, w: 44, h: 68 };  // うる男: 大きめ
-  if (ci === 6) return { x: p.x - 20, y: p.y - 68, w: 40, h: 68 };  // 熊太郎: 丸い大きめ
-  if (ci === 7) return { x: p.x - 13, y: p.y - 72, w: 26, h: 72 };  // バレット: 小さめ縦長
-  if (ci === 8) return { x: p.x - 22, y: p.y - 60, w: 44, h: 60 };  // シャうでん: 横広楕円
-  if (ci === 9) return { x: p.x - 18, y: p.y - 70, w: 36, h: 70 };  // ジャッジマン: 標準
-  if (ci === 10) return { x: p.x - 22, y: p.y - 72, w: 44, h: 72 }; // 天才: 横広大きめ
-  if (ci === 11) return { x: p.x - 24, y: p.y - 55, w: 48, h: 55 }; // Catbus: 横長
-  if (ci === 12) return { x: p.x - 25, y: p.y - 55, w: 50, h: 55 }; // タンク: 横広低め
-  if (ci === 13) return { x: p.x - 18, y: p.y - 70, w: 36, h: 70 }; // 波おじ: 標準
-  if (ci === 14) return { x: p.x - 13, y: p.y - 72, w: 26, h: 72 }; // とっこ: 小さめ縦長
-  if (ci === 15) return { x: p.x - 20, y: p.y - 62, w: 40, h: 62 }; // サム: 横広楕円
-  if (ci === 16) return { x: p.x - 20, y: p.y - 72, w: 40, h: 72 }; // キング: やや大きめ
-  if (ci === 17) return { x: p.x - 20, y: p.y - 65, w: 40, h: 65 }; // おんぱ: 円形
-  if (ci === 18) return { x: p.x - 18, y: p.y - 68, w: 36, h: 68 }; // セン: 丸み標準
-  if (ci === 19) return { x: p.x - 24, y: p.y - 55, w: 48, h: 55 }; // ドスボス: 横広低め
-  if (ci === 20) return { x: p.x - 14, y: p.y - 68, w: 28, h: 68 }; // マイクロ: 小さめ縦長
-  if (ci === 21) return { x: p.x - 22, y: p.y - 65, w: 44, h: 65 }; // ミスターツー: 横広
-  if (ci === 22) return { x: p.x - 22, y: p.y - 72, w: 44, h: 72 }; // 金金: 大きめ鎧
-  if (ci === 23) return { x: p.x - 20, y: p.y - 68, w: 40, h: 68 }; // サトル: がっしり標準
-  if (ci === 24) return { x: p.x - 16, y: p.y - 75, w: 32, h: 75 }; // 怖: 細長い亡霊
-  if (ci === 25) return { x: p.x - 18, y: p.y - 68, w: 36, h: 68 }; // ヤッホ: 標準
-  if (ci === 26) return { x: p.x - 20, y: p.y - 50, w: 40, h: 50 }; // ぽよ: 丸い低め
-  if (ci === 27) return { x: p.x - 18, y: p.y - 72, w: 36, h: 72 }; // プル: やや縦長
-  if (ci === 28) return { x: p.x - 16, y: p.y - 68, w: 32, h: 68 }; // ムッシー: 細め虫
-  return { x: p.x - 18, y: p.y - 70, w: 36, h: 70 };
+  const b = CHAR_BODY[p.charIdx] || [1.0, 1.0];
+  const bw = 36 * b[0], bh = 70 * b[1];
+  return { x: p.x - bw / 2, y: p.y - bh, w: bw, h: bh };
 }
 
 // キャラ別リーチ倍率 [normalW, sideW, upH, downH]
