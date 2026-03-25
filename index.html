@@ -4854,26 +4854,29 @@ function roundRect(ctx, x, y, w, h, r) {
 function drawTitle(dt) {
   titleTime += dt;
 
-  const grad = ctx.createLinearGradient(0, 0, 0, 640);
-  grad.addColorStop(0, '#0a0a1a');
-  grad.addColorStop(0.5, '#141428');
-  grad.addColorStop(1, '#0a0a1a');
-  ctx.fillStyle = grad;
+  // === 背景: 深い紺→黒グラデーション ===
+  const bgGrad = ctx.createLinearGradient(0, 0, 0, 640);
+  bgGrad.addColorStop(0, '#000022');
+  bgGrad.addColorStop(0.5, '#000011');
+  bgGrad.addColorStop(1, '#000000');
+  ctx.fillStyle = bgGrad;
   ctx.fillRect(0, 0, 960, 640);
 
-  ctx.strokeStyle = 'rgba(100, 100, 255, 0.07)';
-  ctx.lineWidth = 1;
-  for (let x = 0; x < 960; x += 40) {
-    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 640); ctx.stroke();
+  // === 背景キャラシルエット（ゆっくり流れる）===
+  ctx.globalAlpha = 0.04;
+  for (let i = 0; i < 6; i++) {
+    const cx = ((titleTime * 0.3 + i * 180) % 1200) - 120;
+    const ci = (i * 7 + 3) % characters.length;
+    drawCharacterBody(cx, 400 + Math.sin(i * 2.1) * 60, 1.2, ci, titleTime, i % 2 === 0);
   }
-  for (let y = 0; y < 640; y += 40) {
-    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(960, y); ctx.stroke();
-  }
+  ctx.globalAlpha = 1;
 
-  if (Math.random() < 0.3) spawnTitleParticle();
+  // === パーティクル（星・光の粒）===
+  if (Math.random() < 0.4) spawnTitleParticle();
   updateParticles();
   drawParticles();
 
+  // === フェードイン ===
   if (titleFadeIn) {
     titleAlpha = Math.min(1, titleAlpha + 0.02);
     if (titleAlpha >= 1) titleFadeIn = false;
@@ -4882,62 +4885,94 @@ function drawTitle(dt) {
   ctx.save();
   ctx.globalAlpha = titleAlpha;
 
-  const glowIntensity = 15 + Math.sin(titleTime * 0.002) * 8;
-  ctx.shadowColor = '#FF4466';
-  ctx.shadowBlur = glowIntensity;
-  ctx.font = 'bold 90px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.strokeStyle = '#FF2244';
-  ctx.lineWidth = 4;
-  ctx.strokeText('SMASH GAME', 480, 200);
+  // === タイトルロゴ（ズームイン + 浮遊）===
+  const logoAge = Math.min(1, titleTime * 0.015); // 1秒かけて登場
+  const logoScale = logoAge < 1 ? 0.3 + logoAge * 0.7 : 1;
+  const logoY = 190 + (logoAge < 1 ? (1 - logoAge) * 80 : Math.sin(titleTime * 0.002) * 5);
+  ctx.save();
+  ctx.translate(480, logoY);
+  ctx.scale(logoScale, logoScale);
 
-  const titleGrad = ctx.createLinearGradient(200, 150, 760, 250);
-  titleGrad.addColorStop(0, '#FF6688');
-  titleGrad.addColorStop(0.5, '#FFDDDD');
-  titleGrad.addColorStop(1, '#FF6688');
+  // オーラエフェクト
+  const glowPulse = 20 + Math.sin(titleTime * 0.003) * 10;
+  ctx.shadowColor = '#FFD700';
+  ctx.shadowBlur = glowPulse;
+
+  // タイトル文字
+  ctx.font = 'bold 88px sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.strokeStyle = '#AA7700'; ctx.lineWidth = 5;
+  ctx.strokeText('SMASH GAME', 0, 0);
+  const titleGrad = ctx.createLinearGradient(-250, -40, 250, 40);
+  titleGrad.addColorStop(0, '#FFD700');
+  titleGrad.addColorStop(0.3, '#FFFFAA');
+  titleGrad.addColorStop(0.5, '#FFFFFF');
+  titleGrad.addColorStop(0.7, '#FFFFAA');
+  titleGrad.addColorStop(1, '#FFD700');
   ctx.fillStyle = titleGrad;
-  ctx.fillText('SMASH GAME', 480, 200);
+  ctx.fillText('SMASH GAME', 0, 0);
   ctx.shadowBlur = 0;
 
-  ctx.font = 'bold 22px sans-serif';
-  ctx.fillStyle = '#8888CC';
-  ctx.fillText('— 格闘アクション —', 480, 270);
+  // サブタイトル
+  ctx.font = 'bold 20px sans-serif';
+  ctx.fillStyle = '#8899CC';
+  ctx.fillText('— ULTIMATE BRAWL —', 0, 55);
+  ctx.restore();
 
-  for (let i = 0; i < 4; i++) {
-    ctx.globalAlpha = titleAlpha * 0.4;
-    drawCharacterBody(180 + i * 210, 430, 0.9, i, titleTime, false);
-    ctx.globalAlpha = titleAlpha;
+  // === メニュー項目 ===
+  const menuItems = [
+    { label: 'ENTER  ゲーム開始', color: '#FFD700' },
+    { label: 'O  オンライン対戦', color: '#44DDFF' },
+  ];
+  const menuStartY = 350;
+  for (let i = 0; i < menuItems.length; i++) {
+    const my = menuStartY + i * 45;
+    const pulse = 0.7 + Math.sin(titleTime * 0.004 + i) * 0.3;
+    ctx.globalAlpha = titleAlpha * pulse;
+    ctx.font = 'bold 22px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillStyle = menuItems[i].color;
+    ctx.shadowColor = menuItems[i].color; ctx.shadowBlur = 8;
+    ctx.fillText(menuItems[i].label, 480, my);
+    ctx.shadowBlur = 0;
   }
+  ctx.globalAlpha = titleAlpha;
 
-  pressAlpha += pressDir * 0.025;
-  if (pressAlpha > 1) { pressAlpha = 1; pressDir = -1; }
-  if (pressAlpha < 0.2) { pressAlpha = 0.2; pressDir = 1; }
-
-  ctx.globalAlpha = titleAlpha * pressAlpha;
-  ctx.font = 'bold 28px sans-serif';
-  ctx.fillStyle = '#FFFFFF';
-  ctx.shadowColor = '#FFFFFF';
-  ctx.shadowBlur = 10;
-  ctx.fillText('PRESS ENTER / CLICK TO START', 480, 535);
-  ctx.shadowBlur = 0;
-
-  // Boss Rush title display
+  // === ボスラッシュ称号 ===
   try {
     const savedTitle = localStorage.getItem('smash_bossrush_title');
     if (savedTitle) {
-      ctx.globalAlpha = titleAlpha * 0.7;
-      ctx.font = 'bold 16px sans-serif';
+      ctx.globalAlpha = titleAlpha * 0.6;
+      ctx.font = 'bold 14px sans-serif';
       ctx.fillStyle = '#FFD700';
-      ctx.fillText('称号: ' + savedTitle, 480, 310);
+      ctx.fillText('🏆 ' + savedTitle, 480, 440);
     }
   } catch(e) {}
 
-  // Online button
-  ctx.globalAlpha = titleAlpha * (0.6 + pressAlpha * 0.4);
-  ctx.font = 'bold 18px sans-serif';
-  ctx.fillStyle = '#44DDFF';
-  ctx.fillText('O キー : オンライン対戦', 480, 575);
+  // === 前景キャラ（画面端から走ってくる）===
+  ctx.globalAlpha = titleAlpha * 0.5;
+  const runCycle = Math.floor(titleTime * 0.005) % characters.length;
+  const runX = ((titleTime * 1.5) % 1400) - 200;
+  if (runX > -100 && runX < 1060) {
+    drawCharacterBody(runX, 540, 0.8, runCycle, titleTime, runX > 480);
+  }
+  ctx.globalAlpha = titleAlpha;
+
+  // === Press Any Key ===
+  pressAlpha += pressDir * 0.025;
+  if (pressAlpha > 1) { pressAlpha = 1; pressDir = -1; }
+  if (pressAlpha < 0.2) { pressAlpha = 0.2; pressDir = 1; }
+  ctx.globalAlpha = titleAlpha * pressAlpha * 0.6;
+  ctx.font = '16px sans-serif';
+  ctx.fillStyle = '#666688';
+  ctx.fillText('Press Any Key to Start', 480, 590);
+
+  // === クレジット・バージョン ===
+  ctx.globalAlpha = titleAlpha * 0.35;
+  ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+  ctx.fillStyle = '#555566';
+  ctx.fillText('© Good Idea Company', 20, 630);
+  ctx.textAlign = 'right';
+  ctx.fillText('v1.0.0', 940, 630);
 
   ctx.restore();
 }
