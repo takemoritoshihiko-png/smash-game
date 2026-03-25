@@ -7222,6 +7222,8 @@ function createPlayer(id, charIdx, startX) {
     // D技（固有追加技）
     dHoldTimer: 0,          // Dキー長押しフレーム
     ultimateGauge: 0,       // 必殺技ゲージ (0-100)
+    // 崖つかまり
+    ledgeGrab: false, ledgeSide: 0, ledgeTimer: 0, ledgeCooldown: 0, ledgeInvincible: 0, ledgeEndlag: 0,
     // 状態異常
     frozen: 0, burning: 0, burnDmg: 3, poisoned: 0, poisonDmg: 0,
     stunned: 0, cursed: 0, confused: 0, paralyzed: 0, feared2: 0, sealMagic: 0,
@@ -7560,6 +7562,8 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   if (attacker.charIdx === 17 && attacker.consecutiveHits > 0) weightedKb *= (1 + Math.min(attacker.consecutiveHits * 0.05, 0.25));
   // ドラゴンモード: 横スマッシュKB1.2倍
   if (attacker.charIdx === 10 && attacker.dragonMode && hitType === 'smash') weightedKb *= 1.2;
+  // 崖外復帰阻止ボーナス: ステージ外の相手には1.3倍KB
+  if (target.x < STAGE_LEFT - 30 || target.x > STAGE_RIGHT + 30) weightedKb *= 1.3;
   // --- ノックバック角度補正 ---
   let finalAngle = kbAngle;
   // 全キャラ共通の角度設定（hitTypeベース）
@@ -8411,6 +8415,14 @@ function getCpuGuard(cpu, target) {
 function getCpuInput(cpu, target) {
   const result = { moveX: 0, jump: false, attack: null, grab: false, throwDir: null };
   if (!target.alive || !cpu.alive) return result;
+  // CPU崖つかまり処理
+  if (cpu.ledgeGrab) {
+    const choices = cpuDifficulty >= 2 ? ['normal','attack','dodge'] : ['normal','normal','dodge'];
+    if (cpu.ledgeTimer > 30 || Math.random() < 0.03) {
+      releaseLedge(cpu, choices[Math.floor(Math.random() * choices.length)]);
+    }
+    return result;
+  }
 
   const dx = target.x - cpu.x;
   const dy = target.y - cpu.y;
@@ -9165,6 +9177,10 @@ function updateBattle(dt) {
       continue;
     }
 
+    // 崖つかまり更新
+    updateLedge(p);
+    if (p.ledgeGrab) continue; // 崖つかまり中は通常処理スキップ
+
     // 状態異常更新
     if (p.frozen > 0) { p.frozen--; p.vx = 0; p.vy = 0; continue; } // 凍結: 完全行動不能
     if (p.stunned > 0) { p.stunned--; p.vx *= 0.9; continue; } // スタン
@@ -9910,6 +9926,7 @@ function updateBattle(dt) {
     landingCheck(p);
     wallBounceCheck(p);
     blastCheck(p);
+    checkLedgeGrab(p);
 
     // Landing detection - stronger squash for faster falls + dust particles + 着地硬直
     if (!wasGroundedBefore && p.grounded) {
@@ -11329,6 +11346,29 @@ function drawBattle(dt) {
     ctx.lineTo(p.x + 6, arrowY - 4);
     ctx.closePath(); ctx.fill();
   }
+
+  // 崖マーカー描画
+  ctx.save();
+  for (const side of [-1, 1]) {
+    const lx = side === -1 ? STAGE_LEFT : STAGE_RIGHT;
+    const ly = STAGE_GROUND_Y;
+    // 光るエッジ
+    ctx.fillStyle = '#FFD700';
+    ctx.globalAlpha = 0.4 + Math.sin(battleTime * 0.08) * 0.2;
+    ctx.fillRect(lx - 3, ly - 5, 6, 10);
+    ctx.globalAlpha = 1;
+    // つかまり中のキャラ表示
+    for (const p of players) {
+      if (p.ledgeGrab && p.ledgeSide === side) {
+        ctx.globalAlpha = 0.7;
+        ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center';
+        ctx.fillStyle = '#FFD700';
+        ctx.fillText('▲崖', lx, ly + 45);
+        ctx.globalAlpha = 1;
+      }
+    }
+  }
+  ctx.restore();
 
   // 状態異常エフェクト描画
   for (const p of players) {
@@ -13030,6 +13070,7 @@ function serializePlayer(p) {
     smashCharging: p.smashCharging, smashChargeTime: p.smashChargeTime, smashType: p.smashType,
     dSkillCooldown: p.dSkillCooldown, dSkillActive: p.dSkillActive, dSkillTimer: p.dSkillTimer, dSkillBuff: p.dSkillBuff, ultimateGauge: p.ultimateGauge,
     frozen: p.frozen, burning: p.burning, poisoned: p.poisoned, stunned: p.stunned, cursed: p.cursed, confused: p.confused, paralyzed: p.paralyzed, feared2: p.feared2, sealMagic: p.sealMagic,
+    ledgeGrab: p.ledgeGrab, ledgeSide: p.ledgeSide, ledgeTimer: p.ledgeTimer,
     autoBuff: p.autoBuff, autoBuffType: p.autoBuffType, consecutiveHits: p.consecutiveHits, dosbossComboCount: p.dosbossComboCount,
   };
 }
@@ -13887,6 +13928,91 @@ function executeSmash(p) {
   }
   triggerScreenShake(2 + chargeRatio * 3, 6);
   playHitSound('cmd');
+}
+
+// --- 崖つかまりシステム ---
+const LEDGE_GRAB_RANGE = 30;      // 崖端からの判定幅
+const LEDGE_Y_RANGE = 50;         // 崖Y座標からの判定高さ
+const LEDGE_MAX_TIME = 180;       // 最大つかまり時間(3秒)
+const LEDGE_COOLDOWN = 60;        // 連続つかまり制限(1秒)
+
+function checkLedgeGrab(p) {
+  if (p.ledgeGrab || p.grounded || p.ledgeCooldown > 0 || !p.alive) return;
+  if (p.hitstun > 0 || p.attacking || p.airDodging) return;
+  // 上方向に移動中 or 落下速度が遅い時のみ
+  if (p.vy > 4) return;
+  const gy = STAGE_GROUND_Y;
+  // 崖より下にいる
+  if (p.y < gy - LEDGE_Y_RANGE) return;
+  // 左崖
+  if (p.x >= STAGE_LEFT - LEDGE_GRAB_RANGE && p.x <= STAGE_LEFT + 15 && p.y >= gy - LEDGE_Y_RANGE && p.y <= gy + LEDGE_Y_RANGE) {
+    // 他のプレイヤーが同じ崖を掴んでいない
+    if (players.some(pp => pp.id !== p.id && pp.ledgeGrab && pp.ledgeSide === -1)) return;
+    grabLedge(p, -1);
+  }
+  // 右崖
+  if (p.x >= STAGE_RIGHT - 15 && p.x <= STAGE_RIGHT + LEDGE_GRAB_RANGE && p.y >= gy - LEDGE_Y_RANGE && p.y <= gy + LEDGE_Y_RANGE) {
+    if (players.some(pp => pp.id !== p.id && pp.ledgeGrab && pp.ledgeSide === 1)) return;
+    grabLedge(p, 1);
+  }
+}
+
+function grabLedge(p, side) {
+  p.ledgeGrab = true;
+  p.ledgeSide = side;
+  p.ledgeTimer = 0;
+  p.vx = 0; p.vy = 0;
+  p.x = side === -1 ? STAGE_LEFT : STAGE_RIGHT;
+  p.y = STAGE_GROUND_Y + 30;
+  p.facingLeft = side === 1; // 向きをステージ内側に
+  p.attacking = false; p.specialState = null;
+  p.grounded = false;
+  p.jumps = p.charIdx === 15 ? 3 : 2; // ジャンプ回数リセット
+}
+
+function releaseLedge(p, type) {
+  if (!p.ledgeGrab) return;
+  p.ledgeGrab = false;
+  p.ledgeCooldown = LEDGE_COOLDOWN;
+  const dir = -p.ledgeSide; // ステージ内側方向
+  if (type === 'normal') {
+    // その場上がり
+    p.x += dir * 40;
+    p.y = STAGE_GROUND_Y;
+    p.grounded = true;
+    p.ledgeInvincible = 10;
+  } else if (type === 'attack') {
+    // 攻撃上がり
+    p.x += dir * 50;
+    p.y = STAGE_GROUND_Y - 10;
+    p.vy = -3;
+    startAttack(p, 'normal');
+  } else if (type === 'dodge') {
+    // 回避上がり
+    p.x += dir * 70;
+    p.y = STAGE_GROUND_Y;
+    p.grounded = true;
+    p.ledgeInvincible = 20;
+    p.ledgeEndlag = 18; // 0.3秒硬直
+  } else if (type === 'drop') {
+    // 崖離し（落下）
+    p.vy = 0;
+  }
+}
+
+function updateLedge(p) {
+  if (p.ledgeCooldown > 0) p.ledgeCooldown--;
+  if (p.ledgeInvincible > 0) { p.ledgeInvincible--; p.invincibleTimer = Math.max(p.invincibleTimer, 1); }
+  if (p.ledgeEndlag > 0) { p.ledgeEndlag--; p.vx *= 0.8; }
+  if (!p.ledgeGrab) return;
+  p.ledgeTimer++;
+  p.vx = 0; p.vy = 0;
+  p.x = p.ledgeSide === -1 ? STAGE_LEFT : STAGE_RIGHT;
+  p.y = STAGE_GROUND_Y + 30;
+  // 3秒経過で自動落下
+  if (p.ledgeTimer >= LEDGE_MAX_TIME) { releaseLedge(p, 'drop'); return; }
+  // 被弾で崖離し
+  if (p.hitstun > 0) { releaseLedge(p, 'drop'); }
 }
 
 // --- D技（固有追加技）システム ---
@@ -15086,6 +15212,27 @@ function handleKeyDown(e) {
     }
     if (!battleStarted || gameOver) return;
     const p1 = players[0], p2 = players[1];
+
+    // 崖つかまり中の入力処理（P1）
+    if (p1 && p1.ledgeGrab) {
+      if (e.key === 'ArrowUp') {
+        if (keys['z'] || keys['Z'] || keys['x'] || keys['X']) releaseLedge(p1, 'attack');
+        else if (keys['s'] || keys['S']) releaseLedge(p1, 'dodge');
+        else releaseLedge(p1, 'normal');
+      }
+      if (e.key === 'ArrowDown') releaseLedge(p1, 'drop');
+      return;
+    }
+    // 崖つかまり中の入力処理（P2ローカル）
+    if (p2 && p2.ledgeGrab && !(gameMode === 'cpu' || bossRushMode) && !onlineMode) {
+      if (e.key === 'w' || e.key === 'W') {
+        if (keys['j'] || keys['J'] || keys['i'] || keys['I']) releaseLedge(p2, 'attack');
+        else if (keys['k'] || keys['K']) releaseLedge(p2, 'dodge');
+        else releaseLedge(p2, 'normal');
+      }
+      if (e.key === 's' || e.key === 'S') releaseLedge(p2, 'drop');
+      return;
+    }
 
     // Online: guest's local input controls P2, not P1
     // Remote attacks are handled in the game loop via remoteKeys
