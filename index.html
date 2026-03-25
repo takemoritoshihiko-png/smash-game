@@ -6907,6 +6907,10 @@ function createPlayer(id, charIdx, startX) {
     // D技（固有追加技）
     dHoldTimer: 0,          // Dキー長押しフレーム
     ultimateGauge: 0,       // 必殺技ゲージ (0-100)
+    // 固有システム
+    rageGauge: 0, rageActive: false, rageTimer: 0, // うる男
+    comboCount: 0, comboDecay: 0, // 波おじ
+    yahoPassive: Math.floor(Math.random() * 6), // ヤッホ ランダムパッシブ
     // 崖つかまり
     ledgeGrab: false, ledgeSide: 0, ledgeTimer: 0, ledgeCooldown: 0, ledgeInvincible: 0, ledgeEndlag: 0,
     // 状態異常
@@ -7059,8 +7063,11 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
 
     // Normal Guard: 80% damage reduction, reduced knockback, lose durability
     // パッシブ: ジャッジマン(9) ガード強化 ガード中被ダメ-15%
-    const guardPassive = target.charIdx === 9 ? 0.85 : (target.charIdx === 5 ? 0.85 : 1.0);
+    const gci = target.charIdx;
+    const guardPassive = gci === 6 ? 0.2 : (gci === 9 ? 0.85 : (gci === 5 ? 0.85 : 1.0)); // 熊太郎: 90%カット(0.2)
     const reducedDamage = damage * GUARD_DAMAGE_REDUCTION * guardPassive;
+    // シャうでん(8): ガード成功でゲージ+5%
+    if (gci === 8 && target.ultimateGauge !== undefined) target.ultimateGauge = Math.min(100, target.ultimateGauge + 5);
     target.damage = Math.min(999, target.damage + reducedDamage);
     target.guardDurability -= damage * GUARD_DURABILITY_COST;
     // Small pushback
@@ -7221,6 +7228,42 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   if (tci === 22 && target.kingkingArmorTimer > 0) finalDamage *= 0.7; // 金金「お金の鎧」被ダメ
   // 恐怖状態: 攻撃力0.8倍
   if (attacker.fearTimer > 0) finalDamage *= 0.8;
+  // === 固有パッシブ（攻撃側） ===
+  const aci2 = attacker.charIdx;
+  // ゼン(0): 凍結相手へ1.3倍
+  if (aci2 === 0 && target.frozen > 0) finalDamage *= 1.3;
+  // サイソク(2): ダッシュ攻撃1.2倍
+  if (aci2 === 2 && attacker.dashing) finalDamage *= 1.2;
+  // ロング(4): 距離でダメージ変動
+  if (aci2 === 4) {
+    const d4 = Math.abs(target.x - attacker.x);
+    if (d4 > 150) finalDamage *= 1.1;
+    else if (d4 < 50) finalDamage *= 0.8;
+  }
+  // うる男(5): 怒り中1.3倍
+  if (aci2 === 5 && attacker.rageActive) finalDamage *= 1.3;
+  // シャうでん(8): 感電相手へ1.3倍
+  if (aci2 === 8 && target.stunned > 0) finalDamage *= 1.3;
+  // ジャッジマン(9): 相手ダメージに応じてアップ
+  if (aci2 === 9) finalDamage *= 1 + Math.min(0.3, target.damage * 0.002);
+  // 波おじ(13): コンボ補正
+  if (aci2 === 13 && attacker.comboWindow > 0) {
+    attacker.comboCount = (attacker.comboCount || 0) + 1;
+    if (attacker.comboCount >= 6) finalDamage *= 1.15;
+    else if (attacker.comboCount >= 5) finalDamage *= 1.1;
+    else if (attacker.comboCount >= 4) finalDamage *= 1.05;
+  } else if (aci2 === 13) { attacker.comboCount = 1; }
+  // とっこ(14): 全攻撃に毒付与
+  if (aci2 === 14) target.poisoned = Math.max(target.poisoned || 0, 120);
+  // セン(18): 逆境強化
+  if (aci2 === 18) finalDamage *= 1 + Math.min(0.2, attacker.damage * 0.0013);
+  // === 固有パッシブ（防御側） ===
+  // うる男(5): 怒り中被ダメ0.8倍
+  if (tci === 5 && target.rageActive) finalDamage *= 0.8;
+  // うる男(5): 怒りゲージ蓄積
+  if (tci === 5) target.rageGauge = Math.min(100, (target.rageGauge || 0) + Math.ceil(finalDamage * 0.8));
+  // ドスボス(19): ガード中85%カット
+  if (tci === 19 && target.guarding) finalDamage *= 0.15;
 
   target.damage = Math.min(999, target.damage + finalDamage);
   // 必殺技ゲージ蓄積
@@ -7241,7 +7284,11 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   if (target.charIdx === 13 && target.damage >= 100) weightedKb *= (1 / 1.2);
   // ドラゴンモード: ノックバック耐性1.35倍
   if (target.charIdx === 10 && target.dragonMode) weightedKb *= (1 / 1.35);
-  // ボスラッシュ: ボスKB耐性1.5倍
+  // タンク(12): 常時KB耐性+10%
+  if (target.charIdx === 12) weightedKb *= 0.9;
+  // サトル(23): 空中回避直後のカウンター+20%
+  if (attacker.charIdx === 23 && attacker.airDodgeEndlag > 0) weightedKb *= 1.2;
+  // ボスラッシュ: ボスKB耐性1.25倍
   if (target.bossBuffed) weightedKb *= (1 / 1.25);
   // 自己バフ: おんぱ「共鳴」連続ヒットでKB増加
   if (attacker.charIdx === 17 && attacker.consecutiveHits > 0) weightedKb *= (1 + Math.min(attacker.consecutiveHits * 0.05, 0.25));
@@ -8906,6 +8953,49 @@ function updateBattle(dt) {
     // 崖つかまり更新
     updateLedge(p);
     if (p.ledgeGrab) continue; // 崖つかまり中は通常処理スキップ
+
+    // === 固有パッシブシステム更新 ===
+    const ci = p.charIdx;
+    // ドン(1): 着地時スタン
+    if (ci === 1 && p.grounded && !p._wasGrounded) {
+      for (const t of players) {
+        if (t.id !== p.id && t.alive && Math.hypot(t.x - p.x, t.y - p.y) < 100) {
+          t.stunned = Math.max(t.stunned, 12);
+        }
+      }
+    }
+    p._wasGrounded = p.grounded;
+    // サイソク(2): 高速移動中残像
+    if (ci === 2 && Math.abs(p.vx) > 6 && battleTime % 3 === 0) {
+      sparks.push({ x: p.x, y: p.y - 35, vx: 0, vy: 0, life: 8, maxLife: 8, color: '#44FFAA', size: 15, gravity: 0, drag: 1, type: 'charGhost' });
+    }
+    // メテオ(3): 常時炎エフェクト
+    if (ci === 3 && battleTime % 8 === 0 && p.alive) {
+      sparks.push({ x: p.x + (Math.random()-0.5)*20, y: p.y - 20, vx: (Math.random()-0.5)*1.5, vy: -1-Math.random(), life: 10, maxLife: 10, color: Math.random()>0.5?'#FFD700':'#FF8833', size: 2+Math.random(), gravity: -0.03, drag: 0.96 });
+    }
+    // うる男(5): 怒り蓄積
+    if (ci === 5) {
+      if (p.rageActive) { p.rageTimer--; if (p.rageTimer <= 0) { p.rageActive = false; p.rageGauge = 0; } }
+      if (p.rageGauge >= 100 && !p.rageActive) {
+        p.rageActive = true; p.rageTimer = 300;
+        cmdNameDisplay.push({ text: '怒り爆発！', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FF4444' });
+      }
+    }
+    // 怖(24): 相手ゲージ蓄積5%低下（常時）
+    if (ci === 24 && p.alive) {
+      for (const t of players) {
+        if (t.id !== p.id && t.ultimateGauge !== undefined) {
+          // 蓄積速度を遅くする（直接減らすのではなく、updateで-0.05/frame）
+          if (battleTime % 12 === 0 && t.ultimateGauge > 0) t.ultimateGauge = Math.max(0, t.ultimateGauge - 0.05);
+        }
+      }
+      // 近くの相手が震えるエフェクト
+      for (const t of players) {
+        if (t.id !== p.id && t.alive && Math.hypot(t.x - p.x, t.y - p.y) < 150 && battleTime % 4 < 2) {
+          // 震えは描画側で処理（ここではフラグのみ）
+        }
+      }
+    }
 
     // 状態異常更新
     if (p.frozen > 0) { p.frozen--; p.vx = 0; p.vy = 0; continue; } // 凍結: 完全行動不能
