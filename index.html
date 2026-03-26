@@ -5547,6 +5547,79 @@ function playHitSound(type) {
   } catch (e) { /* ignore audio errors */ }
 }
 
+// === Ultimate Hit Sound Effects ===
+function playUltimateChargeSE() {
+  try {
+    const ac = getAudioCtx();
+    const now = ac.currentTime;
+    // High-pitched charge whine (0.2s)
+    const o = ac.createOscillator(); const g = ac.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(800, now);
+    o.frequency.exponentialRampToValueAtTime(2400, now + 0.15);
+    o.frequency.exponentialRampToValueAtTime(3200, now + 0.2);
+    g.gain.setValueAtTime(0.18, now);
+    g.gain.exponentialRampToValueAtTime(0.35, now + 0.15);
+    g.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+    o.connect(g); g.connect(ac.destination);
+    o.start(now); o.stop(now + 0.22);
+    // Shimmer layer
+    const o2 = ac.createOscillator(); const g2 = ac.createGain();
+    o2.type = 'sine';
+    o2.frequency.setValueAtTime(1200, now);
+    o2.frequency.exponentialRampToValueAtTime(4000, now + 0.2);
+    g2.gain.setValueAtTime(0.06, now);
+    g2.gain.exponentialRampToValueAtTime(0.15, now + 0.15);
+    g2.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+    o2.connect(g2); g2.connect(ac.destination);
+    o2.start(now); o2.stop(now + 0.22);
+  } catch(e) {}
+}
+
+function playUltimateExplosionSE() {
+  try {
+    const ac = getAudioCtx();
+    const now = ac.currentTime;
+    // Deep explosion bass (ドォン) - sine 80Hz, sharp attack, long decay
+    const o = ac.createOscillator(); const g = ac.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(80, now);
+    o.frequency.exponentialRampToValueAtTime(30, now + 0.6);
+    g.gain.setValueAtTime(0.001, now);
+    g.gain.linearRampToValueAtTime(0.45, now + 0.015); // sharp attack
+    g.gain.exponentialRampToValueAtTime(0.2, now + 0.15);
+    g.gain.exponentialRampToValueAtTime(0.001, now + 0.7);
+    o.connect(g); g.connect(ac.destination);
+    o.start(now); o.stop(now + 0.7);
+    // Sub-bass rumble
+    const o2 = ac.createOscillator(); const g2 = ac.createGain();
+    o2.type = 'sine';
+    o2.frequency.setValueAtTime(40, now);
+    o2.frequency.exponentialRampToValueAtTime(20, now + 0.8);
+    g2.gain.setValueAtTime(0.001, now);
+    g2.gain.linearRampToValueAtTime(0.35, now + 0.02);
+    g2.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+    o2.connect(g2); g2.connect(ac.destination);
+    o2.start(now); o2.stop(now + 0.8);
+    // Mid crunch layer
+    const o3 = ac.createOscillator(); const g3 = ac.createGain();
+    o3.type = 'sawtooth';
+    o3.frequency.setValueAtTime(200, now);
+    o3.frequency.exponentialRampToValueAtTime(40, now + 0.4);
+    g3.gain.setValueAtTime(0.001, now);
+    g3.gain.linearRampToValueAtTime(0.3, now + 0.01);
+    g3.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+    o3.connect(g3); g3.connect(ac.destination);
+    o3.start(now); o3.stop(now + 0.5);
+    // Heavy noise burst
+    const n = makeNoise(ac, 0.25, 0.35);
+    n.src.start(now); n.src.stop(now + 0.25);
+    // Delayed rumble noise tail
+    const n2 = makeNoise(ac, 0.3, 0.15);
+    n2.src.start(now + 0.1); n2.src.stop(now + 0.4);
+  } catch(e) {}
+}
+
 // === BGM ===
 const bgmAudio = new Audio('sounds/bgm.mp3?v=2');
 bgmAudio.loop = true;
@@ -14730,13 +14803,19 @@ function applyUltimateDamage(attacker, target) {
       target[effs[Math.floor(Math.random()*effs.length)]] = 60+Math.floor(Math.random()*60);
     }
   }
-  triggerScreenShake(15, 18);
-  hitFlash.alpha = 0.5; hitFlash.color = ud.color;
+  triggerScreenShake(30, 36);
+  hitFlash.alpha = 0.8; hitFlash.color = ud.color;
+  playUltimateExplosionSE();
   const ex = target ? target.x : attacker.x, ey = target ? target.y-35 : attacker.y-35;
-  for (let i = 0; i < 30; i++) {
+  // 3x particles (90), 1.5x size
+  for (let i = 0; i < 90; i++) {
     const a = Math.random()*Math.PI*2;
-    sparks.push({ x:ex,y:ey,vx:Math.cos(a)*8,vy:Math.sin(a)*8-3,life:25,maxLife:25,color:i%2?ud.color:'#FFF',size:3+Math.random()*4,gravity:0.1,drag:0.96 });
+    const spd = 4 + Math.random() * 10;
+    sparks.push({ x:ex,y:ey,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd-4,life:30+Math.floor(Math.random()*12),maxLife:35,color:i%3===0?'#FFF':(i%3===1?ud.color:'#FFD700'),size:4.5+Math.random()*6,gravity:0.08,drag:0.96 });
   }
+  // Shockwave rings
+  hitEffects.push({ x:ex, y:ey, life:24, maxLife:24, color:'#FFFFFF', size:200, type:'ring' });
+  hitEffects.push({ x:ex, y:ey, life:30, maxLife:30, color:ud.color, size:300, type:'ring' });
   cmdNameDisplay.push({ text: ud.name, x: 480, y: 200, life: 70, maxLife: 70, color: ud.color });
 }
 
@@ -14755,16 +14834,41 @@ function updateUltimate() {
         ultimatePhase = 'hitconfirm';
         ultimateTimer = 0;
         ultimateHitTarget = target.id;
-        // Hit effects
-        hitFlash.alpha = 0.6; hitFlash.color = '#FFFFFF';
-        triggerScreenShake(15, 20);
-        playHitSound('cmd');
-        target.damageTint = 15;
         const ud = ultimateData[attacker.charIdx];
-        // HIT!! text
-        comicTexts.push({ text: 'HIT!!', x: target.x, y: target.y - 60, life: 35, maxLife: 35, color: '#FF4444', bgColor: '#FFD700', size: 32, rotation: 0 });
-        // Hitbox flash
-        hitEffects.push({ x: target.x, y: target.y - 35, life: 12, maxLife: 12, color: ud ? ud.color : '#FFD700', size: 100, type: 'ring' });
+        const udColor = ud ? ud.color : '#FFD700';
+        // Charge SE (0.2s ため音) then explosion
+        playUltimateChargeSE();
+        setTimeout(() => { playUltimateExplosionSE(); }, 200);
+        // Hit sound at 1.5x volume (play cmd sound which is the loudest)
+        playHitSound('cmd');
+        playHitSound('strong'); // layer extra hit for more impact
+        // Enhanced screen shake: 2x intensity & duration (30 intensity, 36 frames = 0.6s)
+        triggerScreenShake(30, 36);
+        // White flash (will be rendered as 3 rapid blinks in drawUltimateOverlay)
+        hitFlash.alpha = 0.8; hitFlash.color = '#FFFFFF';
+        target.damageTint = 20;
+        // HIT!! text (bigger)
+        comicTexts.push({ text: 'HIT!!', x: target.x, y: target.y - 60, life: 45, maxLife: 45, color: '#FF4444', bgColor: '#FFD700', size: 40, rotation: 0 });
+        // Hitbox flash ring (larger)
+        hitEffects.push({ x: target.x, y: target.y - 35, life: 18, maxLife: 18, color: udColor, size: 150, type: 'ring' });
+        // Shockwave ring effect (radial, expanding)
+        hitEffects.push({ x: target.x, y: target.y - 35, life: 24, maxLife: 24, color: '#FFFFFF', size: 200, type: 'ring' });
+        hitEffects.push({ x: target.x, y: target.y - 35, life: 30, maxLife: 30, color: udColor, size: 280, type: 'ring' });
+        // Explosion particles: 3x quantity (90 total), 1.5x size
+        for (let i = 0; i < 90; i++) {
+          const a = Math.random() * Math.PI * 2;
+          const spd = 3 + Math.random() * 10;
+          const colors = [udColor, '#FFFFFF', '#FFD700', '#FF4444'];
+          sparks.push({
+            x: target.x, y: target.y - 35,
+            vx: Math.cos(a) * spd, vy: Math.sin(a) * spd - 4,
+            life: 30 + Math.floor(Math.random() * 15),
+            maxLife: 35,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            size: 4.5 + Math.random() * 6,
+            gravity: 0.08, drag: 0.96
+          });
+        }
         // Send to guest
         if (onlineMode && isHost && peerConn && peerConn.open) {
           peerConn.send({ type: 'ultimate', playerId: attacker.id, charIdx: attacker.charIdx });
@@ -14859,18 +14963,72 @@ function drawUltimateOverlay() {
     return;
   }
   if (ultimatePhase === 'hitconfirm') {
-    // Slow-mo overlay with vignette
     const t = ultimateTimer / 18;
-    ctx.fillStyle = `rgba(0,0,0,${t * 0.3})`;
-    ctx.fillRect(0, 0, 960, 640);
-    // Pulsing white edge glow
     const p2 = players[ultimatePlayerId];
     const ud2 = p2 ? ultimateData[p2.charIdx] : null;
     const edgeColor = ud2 ? ud2.color : '#FFD700';
+    const hitTarget = ultimateHitTarget >= 0 ? players[ultimateHitTarget] : null;
+    const cx = hitTarget ? hitTarget.x : 480;
+    const cy = hitTarget ? hitTarget.y - 35 : 285;
+
+    // 1) White flash blinks (3 rapid blinks in first 12 frames)
+    if (ultimateTimer <= 12) {
+      const blinkPhase = Math.floor(ultimateTimer / 2) % 3;
+      const blinkOn = ultimateTimer % 2 === 0;
+      if (blinkOn && blinkPhase < 3) {
+        const blinkAlpha = 0.9 - blinkPhase * 0.2;
+        ctx.fillStyle = `rgba(255,255,255,${blinkAlpha})`;
+        ctx.fillRect(0, 0, 960, 640);
+      }
+    }
+
+    // 2) Gradual darken
+    ctx.fillStyle = `rgba(0,0,0,${t * 0.3})`;
+    ctx.fillRect(0, 0, 960, 640);
+
+    // 3) Radial shockwave (expanding circle from hit point)
+    if (ultimateTimer > 2) {
+      const shockT = (ultimateTimer - 2) / 16;
+      const shockRadius = shockT * 400;
+      const shockAlpha = Math.max(0, 0.6 - shockT * 0.6);
+      ctx.save();
+      ctx.globalAlpha = shockAlpha;
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.lineWidth = 6 - shockT * 4;
+      ctx.beginPath(); ctx.arc(cx, cy, shockRadius, 0, Math.PI * 2); ctx.stroke();
+      // Second shockwave ring (colored, slightly delayed)
+      if (ultimateTimer > 5) {
+        const shockT2 = (ultimateTimer - 5) / 16;
+        const shockR2 = shockT2 * 350;
+        const shockA2 = Math.max(0, 0.5 - shockT2 * 0.5);
+        ctx.globalAlpha = shockA2;
+        ctx.strokeStyle = edgeColor;
+        ctx.lineWidth = 4 - shockT2 * 3;
+        ctx.beginPath(); ctx.arc(cx, cy, shockR2, 0, Math.PI * 2); ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // 4) Vignette flash (bright edges)
+    ctx.save();
+    const vigGrad = ctx.createRadialGradient(480, 320, 150, 480, 320, 520);
+    vigGrad.addColorStop(0, 'rgba(255,255,255,0)');
+    vigGrad.addColorStop(0.7, 'rgba(255,255,255,0)');
+    vigGrad.addColorStop(1, `rgba(255,255,255,${0.25 + Math.sin(ultimateTimer * 0.8) * 0.15})`);
+    ctx.fillStyle = vigGrad;
+    ctx.fillRect(0, 0, 960, 640);
+    ctx.restore();
+
+    // 5) Pulsing edge glow (stronger)
     ctx.strokeStyle = edgeColor;
-    ctx.lineWidth = 4 + Math.sin(ultimateTimer * 0.5) * 2;
-    ctx.globalAlpha = 0.4 + Math.sin(ultimateTimer * 0.3) * 0.2;
-    ctx.strokeRect(4, 4, 952, 632);
+    ctx.lineWidth = 6 + Math.sin(ultimateTimer * 0.5) * 3;
+    ctx.globalAlpha = 0.6 + Math.sin(ultimateTimer * 0.3) * 0.3;
+    ctx.strokeRect(3, 3, 954, 634);
+    // Inner white edge
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 2;
+    ctx.globalAlpha = 0.3 + Math.sin(ultimateTimer * 0.6) * 0.2;
+    ctx.strokeRect(6, 6, 948, 628);
     ctx.globalAlpha = 1;
     return;
   }
