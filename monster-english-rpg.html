@@ -79,6 +79,69 @@ h3{font-family:'Press Start 2P',monospace;font-size:10px;color:#e94560;margin-bo
 .btn-small{padding:8px 14px;font-size:12px;}
 .btn:disabled{opacity:0.4;pointer-events:none;animation:none;}
 
+/* ===== EXPLANATION OVERLAY ===== */
+.explanation-overlay{
+  position:absolute;bottom:0;left:0;width:100%;
+  padding:14px 16px;
+  border-radius:0 0 10px 10px;
+  z-index:10;
+  text-align:center;
+  font-size:12px;
+  line-height:1.5;
+  cursor:pointer;
+  animation:explFadeIn .3s ease;
+}
+.explanation-overlay.correct{
+  background:linear-gradient(180deg,rgba(39,174,96,0.95),rgba(30,134,73,0.95));
+  color:#fff;border-top:2px solid #2ecc71;
+}
+.explanation-overlay.wrong{
+  background:linear-gradient(180deg,rgba(192,57,43,0.95),rgba(150,45,34,0.95));
+  color:#fff;border-top:2px solid #e74c3c;
+}
+.explanation-overlay .expl-header{font-family:'Press Start 2P',monospace;font-size:10px;margin-bottom:4px;}
+.explanation-overlay .expl-body{font-size:11px;opacity:0.95;}
+.explanation-overlay .expl-tap{font-size:9px;opacity:0.6;margin-top:6px;}
+@keyframes explFadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ===== MISTAKE REVIEW ===== */
+.mistake-badge{
+  display:inline-block;background:#e74c3c;color:#fff;
+  font-family:'Press Start 2P',monospace;font-size:8px;
+  padding:2px 5px;border-radius:10px;margin-left:4px;
+  vertical-align:middle;min-width:16px;text-align:center;
+}
+#mistakes-screen{gap:8px;}
+.mistake-list{display:flex;flex-direction:column;gap:8px;overflow-y:auto;flex:1;padding-bottom:12px;}
+.mistake-card{
+  background:rgba(10,10,26,0.7);border:1px solid rgba(231,76,60,0.3);
+  border-radius:8px;padding:10px 12px;font-size:11px;line-height:1.5;
+}
+.mistake-card .mistake-q{color:#e0e0e0;margin-bottom:4px;}
+.mistake-card .mistake-a{color:#2ecc71;font-weight:bold;}
+.mistake-card .mistake-expl{color:#aaa;font-size:10px;margin-top:2px;}
+.mistake-card .mistake-streak{color:#f1c40f;font-size:9px;font-family:'Press Start 2P',monospace;margin-top:4px;}
+.mistake-empty{text-align:center;color:#888;padding:40px 20px;font-size:13px;}
+
+/* ===== VOCAB HIGHLIGHT IN STORY ===== */
+.vocab-word{
+  color:#f1c40f;text-decoration:underline;text-decoration-style:dotted;
+  text-underline-offset:3px;cursor:pointer;
+  transition:color .2s;position:relative;
+}
+.vocab-word:hover,.vocab-word:active{color:#ffd700;text-shadow:0 0 8px rgba(241,196,15,0.4);}
+.vocab-tooltip{
+  position:fixed;z-index:100;
+  background:rgba(10,10,30,0.95);border:2px solid #f1c40f;
+  border-radius:8px;padding:10px 14px;
+  max-width:280px;font-size:11px;color:#e0e0e0;
+  box-shadow:0 4px 20px rgba(0,0,0,0.5);
+  animation:tooltipPop .2s ease;
+}
+.vocab-tooltip .vt-word{font-family:'Press Start 2P',monospace;font-size:9px;color:#f1c40f;margin-bottom:4px;}
+.vocab-tooltip .vt-meaning{line-height:1.5;}
+@keyframes tooltipPop{from{opacity:0;transform:scale(0.9)}to{opacity:1;transform:scale(1)}}
+
 /* ===== HOME SCREEN ===== */
 #home-screen{align-items:center;gap:8px;padding-top:16px;}
 .title-area{text-align:center;margin-bottom:2px;}
@@ -691,7 +754,7 @@ h3{font-family:'Press Start 2P',monospace;font-size:10px;color:#e94560;margin-bo
     <div class="gold-display">Gold: <span id="gold-val">0</span></div>
     <div class="stat-bar-bg" style="width:100%;height:10px;border-radius:5px;"><div class="stat-bar-fill" id="exp-bar" style="width:0%;background:linear-gradient(90deg,#9b59b6,#e94560);border-radius:5px;position:relative;"><span style="position:absolute;right:4px;top:-1px;font-size:8px;color:#fff;font-weight:bold;" id="exp-text"></span></div></div>
     <div class="home-buttons">
-      <button class="btn btn-primary" onclick="goStudy()">Study</button>
+      <button class="btn btn-primary" onclick="goStudy()">Study <span class="mistake-badge" id="home-mistake-badge" style="display:none;">0</span></button>
       <button class="btn" onclick="goBattle()">Battle</button>
       <button class="btn" onclick="goStory()">Story</button>
       <button class="btn" onclick="goShop()">Shop</button>
@@ -715,7 +778,27 @@ h3{font-family:'Press Start 2P',monospace;font-size:10px;color:#e94560;margin-bo
     <div class="question-box" id="study-question">Select a category to start!</div>
     <div class="choices" id="study-choices"></div>
     <div class="study-feedback" id="study-feedback"></div>
+    <div class="explanation-overlay" id="study-explanation" style="display:none;position:relative;border-radius:10px;margin-top:4px;"></div>
     <button class="btn btn-primary" id="study-next-btn" onclick="nextStudyQuestion()" style="display:none;">Next Question</button>
+    <button class="btn" id="study-mistakes-btn" onclick="goMistakes()" style="margin-top:4px;display:none;">Review Mistakes <span class="mistake-badge" id="study-mistake-badge">0</span></button>
+  </div>
+
+  <!-- MISTAKES SCREEN -->
+  <div id="mistakes-screen" class="screen">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+      <h2>Review Mistakes</h2>
+      <button class="btn btn-small" onclick="goStudy()">Back</button>
+    </div>
+    <p style="font-size:11px;color:#888;margin-bottom:8px;">Answer each mistake correctly <b>2 times in a row</b> to clear it!</p>
+    <div id="mistakes-review-area" style="display:none;">
+      <div class="question-box" id="mistakes-question"></div>
+      <div class="choices" id="mistakes-choices"></div>
+      <div class="study-feedback" id="mistakes-feedback"></div>
+      <div class="explanation-overlay" id="mistakes-explanation" style="display:none;position:relative;border-radius:10px;margin-top:4px;"></div>
+      <button class="btn btn-primary" id="mistakes-next-btn" onclick="nextMistakeQuestion()" style="display:none;">Next Mistake</button>
+    </div>
+    <div class="mistake-list" id="mistake-list"></div>
+    <button class="btn btn-primary" id="mistakes-start-btn" onclick="startMistakeReview()" style="margin-top:8px;display:none;">Start Review</button>
   </div>
 
   <!-- SHOP SCREEN -->
@@ -850,6 +933,7 @@ h3{font-family:'Press Start 2P',monospace;font-size:10px;color:#e94560;margin-bo
     <div class="battle-question-area" id="battle-question-area">
       <div class="battle-question-text" id="battle-question"></div>
       <div class="battle-choices" id="battle-choices"></div>
+      <div class="explanation-overlay" id="battle-explanation" style="display:none;position:relative;border-radius:10px;margin-top:4px;"></div>
     </div>
   </div>
 </div>
@@ -859,141 +943,141 @@ h3{font-family:'Press Start 2P',monospace;font-size:10px;color:#e94560;margin-bo
 const questions = {
   vocabulary: [
     // --- School/Academic (easier) ---
-    {q:"The teacher gave us a new ___ to complete by Friday.", choices:["absence","assignment","substitute","permission"], answer:1},
-    {q:"What does \"deadline\" mean?", choices:["The start of a project","The last day to submit work","A type of exam","A study break"], answer:1},
-    {q:"A \"presentation\" is when you ___.", choices:["take a written test","speak in front of a group about a topic","read silently at your desk","do homework at home"], answer:1},
-    {q:"In science class, an \"experiment\" is ___.", choices:["a guess about what will happen","a test done to discover something","a chapter in the textbook","the final grade on a report"], answer:1},
-    {q:"A \"hypothesis\" is ___.", choices:["the result of an experiment","a type of lab equipment","an educated guess you can test","a summary of your notes"], answer:2},
-    {q:"Your school \"schedule\" shows ___.", choices:["your test scores","which classes you have and when","the lunch menu","your homework answers"], answer:1},
-    {q:"You need \"permission\" from a teacher to ___.", choices:["sit in your assigned seat","open your textbook","leave the classroom early","listen during a lecture"], answer:2},
-    {q:"If a student has an \"absence,\" it means ___.", choices:["they arrived early","they were not at school","they got a perfect score","they finished their work quickly"], answer:1},
-    {q:"A \"substitute\" teacher is someone who ___.", choices:["teaches your class when your regular teacher is away","helps you after school","grades your exams","designs the curriculum"], answer:0},
-    {q:"The \"curriculum\" is ___.", choices:["a single homework assignment","the school cafeteria menu","the set of subjects and topics taught at a school","a type of classroom"], answer:2},
+    {q:"The teacher gave us a new ___ to complete by Friday.", choices:["absence","assignment","substitute","permission"], answer:1, expl:"An assignment is a task or piece of work given to students by a teacher."},
+    {q:"What does \"deadline\" mean?", choices:["The start of a project","The last day to submit work","A type of exam","A study break"], answer:1, expl:"A deadline is the latest time by which something must be completed or submitted."},
+    {q:"A \"presentation\" is when you ___.", choices:["take a written test","speak in front of a group about a topic","read silently at your desk","do homework at home"], answer:1, expl:"A presentation means standing up and explaining a topic to an audience."},
+    {q:"In science class, an \"experiment\" is ___.", choices:["a guess about what will happen","a test done to discover something","a chapter in the textbook","the final grade on a report"], answer:1, expl:"An experiment is a scientific test carried out to discover or prove something."},
+    {q:"A \"hypothesis\" is ___.", choices:["the result of an experiment","a type of lab equipment","an educated guess you can test","a summary of your notes"], answer:2, expl:"A hypothesis is a prediction you make before an experiment that can be tested."},
+    {q:"Your school \"schedule\" shows ___.", choices:["your test scores","which classes you have and when","the lunch menu","your homework answers"], answer:1, expl:"A schedule is a timetable that shows the plan of classes and their times."},
+    {q:"You need \"permission\" from a teacher to ___.", choices:["sit in your assigned seat","open your textbook","leave the classroom early","listen during a lecture"], answer:2, expl:"Permission means approval or consent from someone in authority to do something."},
+    {q:"If a student has an \"absence,\" it means ___.", choices:["they arrived early","they were not at school","they got a perfect score","they finished their work quickly"], answer:1, expl:"Absence means not being present; the student was not at school that day."},
+    {q:"A \"substitute\" teacher is someone who ___.", choices:["teaches your class when your regular teacher is away","helps you after school","grades your exams","designs the curriculum"], answer:0, expl:"A substitute replaces someone temporarily \u2014 here, a teacher filling in for the regular one."},
+    {q:"The \"curriculum\" is ___.", choices:["a single homework assignment","the school cafeteria menu","the set of subjects and topics taught at a school","a type of classroom"], answer:2, expl:"Curriculum refers to the overall plan of subjects and content taught at a school."},
     // --- Emotions (moderate) ---
-    {q:"She felt ___ before her presentation because she hadn't practiced enough.", choices:["confident","anxious","relieved","grateful"], answer:1},
-    {q:"After struggling with the math problem for an hour, Tom felt ___.", choices:["motivated","embarrassed","frustrated","jealous"], answer:2},
-    {q:"When she finally passed her exam, she felt ___ and proud.", choices:["overwhelmed","exhausted","anxious","confident"], answer:3},
-    {q:"He was ___ when his test came back with a much higher score than expected.", choices:["frustrated","jealous","embarrassed","relieved"], answer:3},
-    {q:"Having three projects due on the same day made her feel ___.", choices:["grateful","motivated","overwhelmed","jealous"], answer:2},
-    {q:"He tripped in front of the whole class and felt very ___.", choices:["confident","motivated","exhausted","embarrassed"], answer:3},
-    {q:"The coach's speech before the game made the whole team feel ___.", choices:["anxious","motivated","frustrated","jealous"], answer:1},
-    {q:"She was ___ of her classmate who won the art competition.", choices:["relieved","grateful","exhausted","jealous"], answer:3},
-    {q:"I'm ___ to my tutor for helping me improve my writing.", choices:["frustrated","embarrassed","grateful","anxious"], answer:2},
+    {q:"She felt ___ before her presentation because she hadn't practiced enough.", choices:["confident","anxious","relieved","grateful"], answer:1, expl:"Anxious means feeling worried or nervous about something uncertain."},
+    {q:"After struggling with the math problem for an hour, Tom felt ___.", choices:["motivated","embarrassed","frustrated","jealous"], answer:2, expl:"Frustrated means feeling upset or annoyed because you cannot achieve something."},
+    {q:"When she finally passed her exam, she felt ___ and proud.", choices:["overwhelmed","exhausted","anxious","confident"], answer:3, expl:"Confident means feeling sure about your own abilities and success."},
+    {q:"He was ___ when his test came back with a much higher score than expected.", choices:["frustrated","jealous","embarrassed","relieved"], answer:3, expl:"Relieved means feeling happy because something stressful is over or went well."},
+    {q:"Having three projects due on the same day made her feel ___.", choices:["grateful","motivated","overwhelmed","jealous"], answer:2, expl:"Overwhelmed means feeling like there is too much to handle at once."},
+    {q:"He tripped in front of the whole class and felt very ___.", choices:["confident","motivated","exhausted","embarrassed"], answer:3, expl:"Embarrassed means feeling ashamed or awkward in front of others."},
+    {q:"The coach's speech before the game made the whole team feel ___.", choices:["anxious","motivated","frustrated","jealous"], answer:1, expl:"Motivated means feeling eager and driven to do something."},
+    {q:"She was ___ of her classmate who won the art competition.", choices:["relieved","grateful","exhausted","jealous"], answer:3, expl:"Jealous means wanting what someone else has, or feeling envious of their success."},
+    {q:"I'm ___ to my tutor for helping me improve my writing.", choices:["frustrated","embarrassed","grateful","anxious"], answer:2, expl:"Grateful means feeling thankful and appreciative for someone's help."},
     // --- Mixed sentence completion (harder) ---
-    {q:"After running the 5K race, all the students felt completely ___.", choices:["motivated","jealous","anxious","exhausted"], answer:3},
-    {q:"The teacher asked for a volunteer, but nobody had the ___ to raise their hand.", choices:["absence","permission","confidence","schedule"], answer:2},
-    {q:"Our group needs to ___ our findings to the whole class tomorrow.", choices:["postpone","present","substitute","assign"], answer:1},
-    {q:"The school changed its ___ to include a new coding class.", choices:["deadline","hypothesis","absence","curriculum"], answer:3},
-    {q:"Please ask for ___ before using the lab equipment.", choices:["experiment","permission","schedule","presentation"], answer:1},
-    {q:"His ___ from school for a week meant he had a lot of work to catch up on.", choices:["deadline","substitute","absence","curriculum"], answer:2}
+    {q:"After running the 5K race, all the students felt completely ___.", choices:["motivated","jealous","anxious","exhausted"], answer:3, expl:"Exhausted means extremely tired, with no energy left."},
+    {q:"The teacher asked for a volunteer, but nobody had the ___ to raise their hand.", choices:["absence","permission","confidence","schedule"], answer:2, expl:"Confidence is the belief in your own ability; without it, you hesitate to act."},
+    {q:"Our group needs to ___ our findings to the whole class tomorrow.", choices:["postpone","present","substitute","assign"], answer:1, expl:"Present means to show or explain something to an audience."},
+    {q:"The school changed its ___ to include a new coding class.", choices:["deadline","hypothesis","absence","curriculum"], answer:3, expl:"Curriculum is the set of courses and content taught at a school; adding coding changes it."},
+    {q:"Please ask for ___ before using the lab equipment.", choices:["experiment","permission","schedule","presentation"], answer:1, expl:"Permission means getting approval before doing something, especially from authority."},
+    {q:"His ___ from school for a week meant he had a lot of work to catch up on.", choices:["deadline","substitute","absence","curriculum"], answer:2, expl:"Absence means being away; missing a week of school means lots of missed work."}
   ],
   grammar: [
     // --- Present perfect ---
-    {q:"I ___ already finished my homework.", choices:["had","have","am","was"], answer:1},
-    {q:"She ___ never visited another country before.", choices:["have","is","has","was"], answer:2},
-    {q:"We ___ studied three chapters so far this semester.", choices:["are","have","had","will"], answer:1},
+    {q:"I ___ already finished my homework.", choices:["had","have","am","was"], answer:1, expl:"'I have finished' is present perfect. Use 'have' with I/you/we/they."},
+    {q:"She ___ never visited another country before.", choices:["have","is","has","was"], answer:2, expl:"'She' is third person singular, so we use 'has' in present perfect (has + past participle)."},
+    {q:"We ___ studied three chapters so far this semester.", choices:["are","have","had","will"], answer:1, expl:"'So far' signals present perfect tense. 'We have studied' shows an action continuing to now."},
     // --- Past perfect ---
-    {q:"She ___ left the classroom before the bell rang.", choices:["has","have","had","is"], answer:2},
-    {q:"By the time we arrived, the movie ___.", choices:["has started","had already started","is starting","will start"], answer:1},
-    {q:"They ___ finished the experiment before the teacher collected the reports.", choices:["have","has","had","are"], answer:2},
+    {q:"She ___ left the classroom before the bell rang.", choices:["has","have","had","is"], answer:2, expl:"Past perfect uses 'had' + past participle to show one past event happened before another."},
+    {q:"By the time we arrived, the movie ___.", choices:["has started","had already started","is starting","will start"], answer:1, expl:"'By the time we arrived' refers to a past moment; the movie started even earlier, so use past perfect."},
+    {q:"They ___ finished the experiment before the teacher collected the reports.", choices:["have","has","had","are"], answer:2, expl:"Two past events: finishing came first, so use past perfect 'had finished'."},
     // --- Passive voice ---
-    {q:"The experiment ___ by the science class last week.", choices:["conducted","was conducted","has conducted","is conducting"], answer:1},
-    {q:"The school rules ___ in the student handbook.", choices:["are explained","have explaining","is explain","were explaining"], answer:0},
-    {q:"A new library ___ on campus next year.", choices:["builds","is building","will be built","has built"], answer:2},
+    {q:"The experiment ___ by the science class last week.", choices:["conducted","was conducted","has conducted","is conducting"], answer:1, expl:"Passive voice: the subject receives the action. 'Was conducted' = past passive."},
+    {q:"The school rules ___ in the student handbook.", choices:["are explained","have explaining","is explain","were explaining"], answer:0, expl:"Passive voice with plural subject 'rules' uses 'are explained' (are + past participle)."},
+    {q:"A new library ___ on campus next year.", choices:["builds","is building","will be built","has built"], answer:2, expl:"Future passive: 'will be built' because the library receives the action of being built."},
     // --- Conditional sentences ---
-    {q:"If I study hard, I ___ pass the test.", choices:["would","will","had","am"], answer:1},
-    {q:"If she ___ more time, she would join the debate club.", choices:["has","have","had","will have"], answer:2},
-    {q:"We will miss the bus if we ___ hurry.", choices:["won't","hadn't","don't","aren't"], answer:2},
+    {q:"If I study hard, I ___ pass the test.", choices:["would","will","had","am"], answer:1, expl:"First conditional (real/possible): If + present simple, will + base verb."},
+    {q:"If she ___ more time, she would join the debate club.", choices:["has","have","had","will have"], answer:2, expl:"Second conditional (unreal/hypothetical): If + past simple ('had'), would + base verb."},
+    {q:"We will miss the bus if we ___ hurry.", choices:["won't","hadn't","don't","aren't"], answer:2, expl:"First conditional: If + present simple. 'Don't hurry' is the present simple negative."},
     // --- Relative clauses ---
-    {q:"The teacher ___ helped me is very kind.", choices:["which","whose","whom","who"], answer:3},
-    {q:"The book ___ I borrowed from the library was fascinating.", choices:["who","whose","that","whom"], answer:2},
-    {q:"The student ___ project won first place gave a speech.", choices:["who","whose","which","that"], answer:1},
+    {q:"The teacher ___ helped me is very kind.", choices:["which","whose","whom","who"], answer:3, expl:"'Who' is used for people as the subject of a relative clause."},
+    {q:"The book ___ I borrowed from the library was fascinating.", choices:["who","whose","that","whom"], answer:2, expl:"'That' (or 'which') is used for things. 'Who' is only for people."},
+    {q:"The student ___ project won first place gave a speech.", choices:["who","whose","which","that"], answer:1, expl:"'Whose' shows possession \u2014 the project belongs to the student."},
     // --- Reported speech ---
-    {q:"He said that he ___ tired after the long practice.", choices:["is","was","will be","has been"], answer:1},
-    {q:"She told me she ___ submit her essay the next day.", choices:["will","is going to","would","can"], answer:2},
-    {q:"The teacher announced that the test ___ postponed.", choices:["is","will","has","had been"], answer:3},
+    {q:"He said that he ___ tired after the long practice.", choices:["is","was","will be","has been"], answer:1, expl:"In reported speech, present tense 'is' shifts back to past tense 'was'."},
+    {q:"She told me she ___ submit her essay the next day.", choices:["will","is going to","would","can"], answer:2, expl:"In reported speech, 'will' shifts to 'would'. 'The next day' replaces 'tomorrow'."},
+    {q:"The teacher announced that the test ___ postponed.", choices:["is","will","has","had been"], answer:3, expl:"In reported speech, present perfect 'has been' shifts to past perfect 'had been'."},
     // --- Modal verbs ---
-    {q:"You ___ submit your essay by Friday. It's required.", choices:["might","could","must","would"], answer:2},
-    {q:"She ___ be at the library; I saw her heading that way.", choices:["must","might","should","would"], answer:1},
-    {q:"You ___ ask before borrowing someone else's notes.", choices:["would","might","could","should"], answer:3},
+    {q:"You ___ submit your essay by Friday. It's required.", choices:["might","could","must","would"], answer:2, expl:"'Must' expresses obligation or requirement. It's required = you must do it."},
+    {q:"She ___ be at the library; I saw her heading that way.", choices:["must","might","should","would"], answer:1, expl:"'Might' expresses possibility when you're not certain. 'I saw her heading that way' suggests likelihood but not certainty."},
+    {q:"You ___ ask before borrowing someone else's notes.", choices:["would","might","could","should"], answer:3, expl:"'Should' gives advice or suggests the right thing to do."},
     // --- Articles in academic context ---
-    {q:"We need to write ___ essay about climate change.", choices:["a","an","the","no article"], answer:1},
-    {q:"___ students in our class passed the final exam.", choices:["A","An","The","No article"], answer:2},
-    {q:"She wants to become ___ engineer when she grows up.", choices:["a","an","the","no article"], answer:1},
-    {q:"___ homework that was assigned yesterday is due tomorrow.", choices:["A","An","The","No article"], answer:2}
+    {q:"We need to write ___ essay about climate change.", choices:["a","an","the","no article"], answer:1, expl:"'Essay' starts with a vowel sound, so we use 'an' (not 'a')."},
+    {q:"___ students in our class passed the final exam.", choices:["A","An","The","No article"], answer:2, expl:"'The students' refers to a specific group \u2014 the ones in our class."},
+    {q:"She wants to become ___ engineer when she grows up.", choices:["a","an","the","no article"], answer:1, expl:"'Engineer' starts with a vowel sound, so we use 'an'."},
+    {q:"___ homework that was assigned yesterday is due tomorrow.", choices:["A","An","The","No article"], answer:2, expl:"'The' is used because we're talking about specific homework (assigned yesterday)."}
   ],
   reading: [
     // --- School projects ---
-    {q:"\"Maria had been working on her history project for three days. Although she felt exhausted, she was determined to finish before the deadline. When she finally submitted it, she felt an overwhelming sense of relief.\" — What does 'overwhelming' most closely mean here?",
-     choices:["Small and quiet","Very strong and intense","Disappointing and sad","Completely unexpected"], answer:1},
-    {q:"\"The group couldn't agree on a topic for their science presentation. After a long discussion, they finally chose renewable energy because everyone found it interesting.\" — Why did the group pick renewable energy?",
-     choices:["The teacher told them to","It was the easiest topic","Everyone found it interesting","It was the only option left"], answer:2},
-    {q:"\"James forgot to bring his permission slip for the field trip. His teacher said he could call his parents to get verbal permission instead.\" — What was James's problem?",
-     choices:["He lost his bus pass","He forgot his permission slip","His parents were out of town","The field trip was cancelled"], answer:1},
+    {q:"\"Maria had been working on her history project for three days. Although she felt exhausted, she was determined to finish before the deadline. When she finally submitted it, she felt an overwhelming sense of relief.\" \u2014 What does 'overwhelming' most closely mean here?",
+     choices:["Small and quiet","Very strong and intense","Disappointing and sad","Completely unexpected"], answer:1, expl:"The passage says she felt exhausted but determined \u2014 her relief after finishing was very strong and intense."},
+    {q:"\"The group couldn't agree on a topic for their science presentation. After a long discussion, they finally chose renewable energy because everyone found it interesting.\" \u2014 Why did the group pick renewable energy?",
+     choices:["The teacher told them to","It was the easiest topic","Everyone found it interesting","It was the only option left"], answer:2, expl:"The passage directly states 'because everyone found it interesting'."},
+    {q:"\"James forgot to bring his permission slip for the field trip. His teacher said he could call his parents to get verbal permission instead.\" \u2014 What was James's problem?",
+     choices:["He lost his bus pass","He forgot his permission slip","His parents were out of town","The field trip was cancelled"], answer:1, expl:"The first sentence says 'James forgot to bring his permission slip'."},
     // --- Friendships ---
-    {q:"\"Aisha noticed that her friend Priya had been quiet all week. During lunch, Aisha asked if everything was okay. Priya admitted she was stressed about her parents moving to a new city.\" — What can you infer about Aisha?",
-     choices:["She is too busy to care about friends","She is observant and caring","She is also moving away","She doesn't like Priya"], answer:1},
-    {q:"\"After their argument, both Ravi and Sam avoided each other for days. Eventually, Ravi sent a message apologizing. Sam replied that he had also been meaning to say sorry.\" — What is the main idea of this passage?",
-     choices:["Ravi and Sam are no longer friends","Arguments are always someone's fault","Both friends wanted to make up","Sam refused to forgive Ravi"], answer:2},
+    {q:"\"Aisha noticed that her friend Priya had been quiet all week. During lunch, Aisha asked if everything was okay. Priya admitted she was stressed about her parents moving to a new city.\" \u2014 What can you infer about Aisha?",
+     choices:["She is too busy to care about friends","She is observant and caring","She is also moving away","She doesn't like Priya"], answer:1, expl:"Aisha noticed Priya was quiet and asked about it \u2014 this shows she pays attention and cares."},
+    {q:"\"After their argument, both Ravi and Sam avoided each other for days. Eventually, Ravi sent a message apologizing. Sam replied that he had also been meaning to say sorry.\" \u2014 What is the main idea of this passage?",
+     choices:["Ravi and Sam are no longer friends","Arguments are always someone's fault","Both friends wanted to make up","Sam refused to forgive Ravi"], answer:2, expl:"Both Ravi and Sam apologized, showing they each wanted to reconcile."},
     // --- Sports teams ---
-    {q:"\"The basketball team had lost five games in a row. Their coach decided to change the training schedule and focus more on defense. In the next game, they won by twelve points.\" — What change led to the team's improvement?",
-     choices:["They got new players","They practiced less often","They focused more on defense","They changed their uniforms"], answer:2},
-    {q:"\"Despite being the shortest player on the team, Yuki was the fastest. Her speed allowed her to steal the ball more often than anyone else.\" — What is Yuki's main strength?",
-     choices:["Her height","Her speed","Her shooting accuracy","Her defensive skills"], answer:1},
+    {q:"\"The basketball team had lost five games in a row. Their coach decided to change the training schedule and focus more on defense. In the next game, they won by twelve points.\" \u2014 What change led to the team's improvement?",
+     choices:["They got new players","They practiced less often","They focused more on defense","They changed their uniforms"], answer:2, expl:"The passage says the coach 'focus more on defense' and then they won."},
+    {q:"\"Despite being the shortest player on the team, Yuki was the fastest. Her speed allowed her to steal the ball more often than anyone else.\" \u2014 What is Yuki's main strength?",
+     choices:["Her height","Her speed","Her shooting accuracy","Her defensive skills"], answer:1, expl:"The passage says 'Yuki was the fastest' and her speed helped her steal the ball."},
     // --- Science topics ---
-    {q:"\"Photosynthesis is the process by which plants convert sunlight into energy. Without it, plants could not produce the food they need to grow. This process also releases oxygen into the air.\" — According to the passage, what does photosynthesis release?",
-     choices:["Carbon dioxide","Water vapor","Oxygen","Nitrogen"], answer:2},
-    {q:"\"The water cycle begins when the sun heats water in oceans and lakes, causing it to evaporate. The water vapor rises, cools, and forms clouds. Eventually, it falls back to Earth as precipitation.\" — What causes water to evaporate?",
-     choices:["Wind pushing the water","Heat from the sun","Cold temperatures","Gravity pulling the water"], answer:1},
+    {q:"\"Photosynthesis is the process by which plants convert sunlight into energy. Without it, plants could not produce the food they need to grow. This process also releases oxygen into the air.\" \u2014 According to the passage, what does photosynthesis release?",
+     choices:["Carbon dioxide","Water vapor","Oxygen","Nitrogen"], answer:2, expl:"The last sentence states: 'This process also releases oxygen into the air.'"},
+    {q:"\"The water cycle begins when the sun heats water in oceans and lakes, causing it to evaporate. The water vapor rises, cools, and forms clouds. Eventually, it falls back to Earth as precipitation.\" \u2014 What causes water to evaporate?",
+     choices:["Wind pushing the water","Heat from the sun","Cold temperatures","Gravity pulling the water"], answer:1, expl:"The passage says 'the sun heats water...causing it to evaporate'."},
     // --- Travel experiences ---
-    {q:"\"On their class trip to Kyoto, the students visited several ancient temples. Their guide explained that some of the buildings were over 500 years old. Many students were amazed that the wooden structures had survived for so long.\" — What surprised the students?",
-     choices:["How modern the temples looked","How expensive the tickets were","How long the wooden buildings had lasted","How crowded the city was"], answer:2},
-    {q:"\"During the exchange program in London, Hana found it difficult to understand British English at first. After two weeks, she noticed that she could follow conversations much more easily.\" — What happened after two weeks?",
-     choices:["Hana decided to go home early","Hana's listening improved","Hana stopped speaking English","Hana switched to a different school"], answer:1},
+    {q:"\"On their class trip to Kyoto, the students visited several ancient temples. Their guide explained that some of the buildings were over 500 years old. Many students were amazed that the wooden structures had survived for so long.\" \u2014 What surprised the students?",
+     choices:["How modern the temples looked","How expensive the tickets were","How long the wooden buildings had lasted","How crowded the city was"], answer:2, expl:"The passage says students 'were amazed that the wooden structures had survived for so long'."},
+    {q:"\"During the exchange program in London, Hana found it difficult to understand British English at first. After two weeks, she noticed that she could follow conversations much more easily.\" \u2014 What happened after two weeks?",
+     choices:["Hana decided to go home early","Hana's listening improved","Hana stopped speaking English","Hana switched to a different school"], answer:1, expl:"The passage says she 'could follow conversations much more easily' \u2014 her listening got better."},
     // --- Inference / harder ---
-    {q:"\"The substitute teacher handed out a worksheet that no one had seen before. Several students raised their hands to ask questions, but the substitute wasn't sure of the answers either. Eventually, one student found the instructions in their textbook.\" — What can you infer about the substitute?",
-     choices:["They were well prepared for the class","They were not familiar with the lesson plan","They refused to help the students","They had taught this class before"], answer:1},
-    {q:"\"Leo always completed his assignments on time, but this week he missed two deadlines. His best friend noticed and asked if something was wrong. Leo explained that his grandmother was in the hospital and he couldn't focus.\" — Why did Leo miss his deadlines?",
-     choices:["He forgot about them","He was busy playing games","He was worried about his grandmother","He didn't understand the assignments"], answer:2},
-    {q:"\"The school announced that the annual science fair would now include a category for digital projects such as apps and websites. Many students who had never entered before said they were excited to participate this year.\" — Why were more students interested this year?",
-     choices:["The prizes were bigger","A new digital category was added","The science fair was moved to a weekend","Teachers required everyone to enter"], answer:1},
-    {q:"\"Although the experiment did not produce the results they expected, the students learned an important lesson: negative results can be just as valuable as positive ones because they help eliminate wrong hypotheses.\" — What is the main message of this passage?",
-     choices:["Failed experiments are a waste of time","Students should always get the expected result","Unexpected results can still teach you something","Only positive results matter in science"], answer:2}
+    {q:"\"The substitute teacher handed out a worksheet that no one had seen before. Several students raised their hands to ask questions, but the substitute wasn't sure of the answers either. Eventually, one student found the instructions in their textbook.\" \u2014 What can you infer about the substitute?",
+     choices:["They were well prepared for the class","They were not familiar with the lesson plan","They refused to help the students","They had taught this class before"], answer:1, expl:"The substitute didn't know the answers \u2014 this implies they were unfamiliar with the lesson."},
+    {q:"\"Leo always completed his assignments on time, but this week he missed two deadlines. His best friend noticed and asked if something was wrong. Leo explained that his grandmother was in the hospital and he couldn't focus.\" \u2014 Why did Leo miss his deadlines?",
+     choices:["He forgot about them","He was busy playing games","He was worried about his grandmother","He didn't understand the assignments"], answer:2, expl:"Leo said 'his grandmother was in the hospital and he couldn't focus' \u2014 worry was the cause."},
+    {q:"\"The school announced that the annual science fair would now include a category for digital projects such as apps and websites. Many students who had never entered before said they were excited to participate this year.\" \u2014 Why were more students interested this year?",
+     choices:["The prizes were bigger","A new digital category was added","The science fair was moved to a weekend","Teachers required everyone to enter"], answer:1, expl:"The passage connects the new digital category directly to students' new interest."},
+    {q:"\"Although the experiment did not produce the results they expected, the students learned an important lesson: negative results can be just as valuable as positive ones because they help eliminate wrong hypotheses.\" \u2014 What is the main message of this passage?",
+     choices:["Failed experiments are a waste of time","Students should always get the expected result","Unexpected results can still teach you something","Only positive results matter in science"], answer:2, expl:"The passage says 'negative results can be just as valuable' \u2014 you learn from unexpected outcomes."}
   ],
   listening: [
     // Type 1: "What did you hear?"
     {q:"\uD83D\uDD0A Listen and choose what you heard.", speech:"She submitted her assignment early.",
-     choices:["She submitted her assignment early","She submitted her assignment lately","She submitted her essay early","He submitted his assignment early"], answer:0},
+     choices:["She submitted her assignment early","She submitted her assignment lately","She submitted her essay early","He submitted his assignment early"], answer:0, expl:"Listen for key words: 'She', 'assignment', and 'early'. The other options change these words."},
     {q:"\uD83D\uDD0A Listen and choose what you heard.", speech:"The experiment was conducted by the students.",
-     choices:["The experiment was conducted by the teachers","The experiment was connected by the students","The experiment was conducted by the students","The experience was conducted by the students"], answer:2},
+     choices:["The experiment was conducted by the teachers","The experiment was connected by the students","The experiment was conducted by the students","The experience was conducted by the students"], answer:2, expl:"'Conducted' (not 'connected') and 'students' (not 'teachers') are the key words to hear."},
     {q:"\uD83D\uDD0A Listen and choose what you heard.", speech:"Please bring your textbook to class tomorrow.",
-     choices:["Please bring your notebook to class tomorrow","Please bring your textbook to class today","Please bring your textbook to class tomorrow","Please take your textbook to class tomorrow"], answer:2},
+     choices:["Please bring your notebook to class tomorrow","Please bring your textbook to class today","Please bring your textbook to class tomorrow","Please take your textbook to class tomorrow"], answer:2, expl:"'Textbook' (not notebook), 'bring' (not take), and 'tomorrow' (not today) are the exact words."},
     {q:"\uD83D\uDD0A Listen and choose what you heard.", speech:"He felt relieved after finishing the test.",
-     choices:["He felt relaxed after finishing the test","He felt relieved after finishing the task","He felt relieved after finishing the test","He felt believed after finishing the test"], answer:2},
+     choices:["He felt relaxed after finishing the test","He felt relieved after finishing the task","He felt relieved after finishing the test","He felt believed after finishing the test"], answer:2, expl:"'Relieved' (not relaxed/believed) and 'test' (not task) match the audio exactly."},
     {q:"\uD83D\uDD0A Listen and choose what you heard.", speech:"The library is closed on weekends.",
-     choices:["The library is closed on weekdays","The library is open on weekends","The library is closed on weekends","The laboratory is closed on weekends"], answer:2},
+     choices:["The library is closed on weekdays","The library is open on weekends","The library is closed on weekends","The laboratory is closed on weekends"], answer:2, expl:"'Library' (not laboratory), 'closed' (not open), and 'weekends' (not weekdays) are correct."},
     // Type 2: "What does it mean?"
     {q:"\uD83D\uDD0A Listen and choose the meaning.", speech:"I'm running late for class.",
-     choices:["I am exercising before class","I am going to be late for class","I am running to the classroom","I left class early"], answer:1},
+     choices:["I am exercising before class","I am going to be late for class","I am running to the classroom","I left class early"], answer:1, expl:"'Running late' is an idiom meaning 'going to be late'. It's not about physical running."},
     {q:"\uD83D\uDD0A Listen and choose the meaning.", speech:"Could you give me a hand with this project?",
-     choices:["Could you lend me your hands","Could you help me with this project","Could you hand me the project","Could you clap for my project"], answer:1},
+     choices:["Could you lend me your hands","Could you help me with this project","Could you hand me the project","Could you clap for my project"], answer:1, expl:"'Give me a hand' is an idiom meaning 'help me'. It doesn't literally mean hands."},
     {q:"\uD83D\uDD0A Listen and choose the meaning.", speech:"The teacher told us to hand in our homework.",
-     choices:["The teacher said to raise our hands","The teacher said to submit our homework","The teacher said to hold our homework","The teacher said to copy our homework"], answer:1},
+     choices:["The teacher said to raise our hands","The teacher said to submit our homework","The teacher said to hold our homework","The teacher said to copy our homework"], answer:1, expl:"'Hand in' is a phrasal verb meaning 'submit' or 'turn in' work to the teacher."},
     {q:"\uD83D\uDD0A Listen and choose the meaning.", speech:"She has a lot on her plate this week.",
-     choices:["She is eating a large meal","She is carrying many plates","She is very busy this week","She is cooking for many people"], answer:2},
+     choices:["She is eating a large meal","She is carrying many plates","She is very busy this week","She is cooking for many people"], answer:2, expl:"'A lot on her plate' is an idiom meaning she has many tasks and responsibilities."},
     {q:"\uD83D\uDD0A Listen and choose the meaning.", speech:"Let's call it a day.",
-     choices:["Let's make a phone call today","Let's name this day","Let's stop working for today","Let's start a new day"], answer:2},
+     choices:["Let's make a phone call today","Let's name this day","Let's stop working for today","Let's start a new day"], answer:2, expl:"'Call it a day' is an idiom meaning to stop working and finish for today."},
     // Type 3: "Complete the sentence"
     {q:"\uD83D\uDD0A Listen and choose the missing word: 'The students were ___ about the field trip.'", speech:"The students were excited about the field trip.",
-     choices:["exhausted","anxious","excited","embarrassed"], answer:2},
+     choices:["exhausted","anxious","excited","embarrassed"], answer:2, expl:"The audio says 'excited'. Excited means feeling enthusiastic and eager."},
     {q:"\uD83D\uDD0A Listen and choose the missing word: 'You ___ finish your homework before watching TV.'", speech:"You should finish your homework before watching TV.",
-     choices:["might","would","could","should"], answer:3},
+     choices:["might","would","could","should"], answer:3, expl:"The audio says 'should'. Should is used for advice or the right thing to do."},
     {q:"\uD83D\uDD0A Listen and choose the missing word: 'The science fair ___ held in the gymnasium last Friday.'", speech:"The science fair was held in the gymnasium last Friday.",
-     choices:["is","was","has","will be"], answer:1},
+     choices:["is","was","has","will be"], answer:1, expl:"The audio says 'was'. Past tense passive voice: 'was held' for a past event."},
     {q:"\uD83D\uDD0A Listen and choose the missing word: 'She ___ been studying English for three years.'", speech:"She has been studying English for three years.",
-     choices:["have","has","had","is"], answer:1},
+     choices:["have","has","had","is"], answer:1, expl:"The audio says 'has'. 'She' is third person singular, so 'has been studying' (present perfect continuous)."},
     {q:"\uD83D\uDD0A Listen and choose the missing word: 'If it ___ tomorrow, the game will be cancelled.'", speech:"If it rains tomorrow, the game will be cancelled.",
-     choices:["rained","raining","rains","rain"], answer:2}
+     choices:["rained","raining","rains","rain"], answer:2, expl:"The audio says 'rains'. First conditional: If + present simple ('rains'), will + base verb."}
   ]
 };
 
@@ -1330,6 +1414,7 @@ function updateHomeUI() {
   document.getElementById('exp-text').textContent = Math.floor(expPct) + '%';
 
   updateEvoGaugeUI();
+  updateMistakeBadges();
 }
 
 // ===== START GAME =====
@@ -1364,8 +1449,10 @@ function goStudy() {
   currentQuestion = null;
   document.getElementById('study-feedback').innerHTML = '';
   document.getElementById('study-next-btn').style.display = 'none';
+  document.getElementById('study-explanation').style.display = 'none';
   document.getElementById('study-choices').innerHTML = '';
   document.getElementById('study-question').textContent = 'Select a category to start!';
+  updateMistakeBadges();
   selectCategory('vocabulary');
   showScreen('study-screen');
   nextStudyQuestion();
@@ -1383,6 +1470,8 @@ function nextStudyQuestion() {
   studyAnswered = false;
   document.getElementById('study-feedback').innerHTML = '';
   document.getElementById('study-next-btn').style.display = 'none';
+  document.getElementById('study-explanation').style.display = 'none';
+  clearTimeout(explanationTimer);
 
   const pool = questions[currentCategory];
   const idx = Math.floor(Math.random() * pool.length);
@@ -1437,6 +1526,8 @@ function answerStudy(idx, btnEl) {
   studyAnswered = true;
 
   const correct = idx === currentQuestion.answer;
+  const correctAnswer = currentQuestion.choices[currentQuestion.answer];
+  const explanation = currentQuestion.expl || '';
   const allBtns = document.querySelectorAll('#study-choices .choice-btn');
   allBtns.forEach((b, i) => {
     b.classList.add('disabled');
@@ -1452,6 +1543,9 @@ function answerStudy(idx, btnEl) {
       gameState.hp += 2;
       gameState.vocabCorrect++;
       statMsg = 'HP +2 !!';
+      // Mark vocabulary as learned
+      const vocabWord = extractVocabWord(currentQuestion.q) || extractVocabFromAnswer(currentQuestion.q, correctAnswer);
+      if (vocabWord) markVocabLearned(vocabWord, explanation);
     } else if (currentCategory === 'grammar') {
       gameState.grammarCorrect++;
       gameState.grammarStreak++;
@@ -1485,12 +1579,18 @@ function answerStudy(idx, btnEl) {
   } else {
     if (currentCategory === 'grammar') gameState.grammarStreak = 0;
     if (currentCategory === 'reading') gameState.readingStreak = 0;
-    feedback.innerHTML = `<span class="wrong-text">Wrong... The answer was ${String.fromCharCode(65 + currentQuestion.answer)}. ${currentQuestion.choices[currentQuestion.answer]}</span>`;
+    feedback.innerHTML = `<span class="wrong-text">Wrong... The answer was ${String.fromCharCode(65 + currentQuestion.answer)}. ${correctAnswer}</span>`;
     sfx.wrong();
+    // Track mistake
+    addMistake(currentQuestion.q, correctAnswer, explanation, currentCategory);
+    updateMistakeBadges();
     saveGame();
   }
 
-  document.getElementById('study-next-btn').style.display = 'block';
+  // Show explanation overlay
+  showExplanation('study-explanation', correct, correctAnswer, explanation, () => {
+    document.getElementById('study-next-btn').style.display = 'block';
+  });
 }
 
 // ===== SHOP SYSTEM =====
@@ -1624,34 +1724,34 @@ const storyChapters = [
 // Boss-tier questions (harder)
 const bossQuestions = {
   vocabulary: [
-    {q:"The author's ___ description of the sunset made readers feel like they were there.", choices:["dull","vivid","reluctant","ambiguous"], answer:1},
-    {q:"Breaking the school rules has serious ___.", choices:["consequences","phenomena","hypotheses","absences"], answer:0},
-    {q:"A \"phenomenon\" is ___.", choices:["a common everyday event","a type of experiment","an observable event that is remarkable","a prediction about the future"], answer:2},
-    {q:"He was ___ to join the debate team because he feared public speaking.", choices:["ambitious","confident","reluctant","grateful"], answer:2},
-    {q:"The instructions were ___, so nobody knew what to do.", choices:["vivid","precise","reluctant","ambiguous"], answer:3},
-    {q:"She gave a ___ argument that convinced the entire class.", choices:["fragile","compelling","reluctant","trivial"], answer:1},
-    {q:"The scientist needed more ___ before drawing a conclusion.", choices:["evidence","absence","permission","curriculum"], answer:0},
-    {q:"His excuse sounded ___, so the teacher didn't believe him.", choices:["credible","inevitable","implausible","preliminary"], answer:2}
+    {q:"The author's ___ description of the sunset made readers feel like they were there.", choices:["dull","vivid","reluctant","ambiguous"], answer:1, expl:"Vivid means producing strong, clear images in the mind \u2014 very detailed and lifelike."},
+    {q:"Breaking the school rules has serious ___.", choices:["consequences","phenomena","hypotheses","absences"], answer:0, expl:"Consequences are the results or effects of an action, especially negative ones."},
+    {q:"A \"phenomenon\" is ___.", choices:["a common everyday event","a type of experiment","an observable event that is remarkable","a prediction about the future"], answer:2, expl:"A phenomenon is something that can be observed and is unusual or remarkable."},
+    {q:"He was ___ to join the debate team because he feared public speaking.", choices:["ambitious","confident","reluctant","grateful"], answer:2, expl:"Reluctant means unwilling or hesitant to do something."},
+    {q:"The instructions were ___, so nobody knew what to do.", choices:["vivid","precise","reluctant","ambiguous"], answer:3, expl:"Ambiguous means having more than one possible meaning; unclear or confusing."},
+    {q:"She gave a ___ argument that convinced the entire class.", choices:["fragile","compelling","reluctant","trivial"], answer:1, expl:"Compelling means very convincing and powerful \u2014 hard to argue against."},
+    {q:"The scientist needed more ___ before drawing a conclusion.", choices:["evidence","absence","permission","curriculum"], answer:0, expl:"Evidence is the facts or information that support or prove something."},
+    {q:"His excuse sounded ___, so the teacher didn't believe him.", choices:["credible","inevitable","implausible","preliminary"], answer:2, expl:"Implausible means not believable or hard to accept as true."}
   ],
   grammar: [
-    {q:"If I ___ known about the test, I would have studied harder.", choices:["have","has","had","would"], answer:2},
-    {q:"She wishes she ___ more time to finish the project.", choices:["has","have","had","having"], answer:2},
-    {q:"Not only ___ she pass the exam, but she also got the highest score.", choices:["does","did","has","was"], answer:1},
-    {q:"The research paper, ___ was published last month, received international attention.", choices:["that","who","which","whom"], answer:2},
-    {q:"Had the students ___ more carefully, they would have found the error.", choices:["read","reads","reading","been read"], answer:0},
-    {q:"It is essential that every student ___ the assignment on time.", choices:["submits","submit","submitted","submitting"], answer:1},
-    {q:"The teacher insisted that he ___ his essay before the deadline.", choices:["rewrites","rewrite","rewrote","rewriting"], answer:1},
-    {q:"Neither the students nor the teacher ___ aware of the schedule change.", choices:["were","was","are","have been"], answer:1}
+    {q:"If I ___ known about the test, I would have studied harder.", choices:["have","has","had","would"], answer:2, expl:"Third conditional (past unreal): If + had + past participle. 'Had known' is correct."},
+    {q:"She wishes she ___ more time to finish the project.", choices:["has","have","had","having"], answer:2, expl:"'Wish' + past simple expresses a desire for something unreal. 'Had' is subjunctive mood."},
+    {q:"Not only ___ she pass the exam, but she also got the highest score.", choices:["does","did","has","was"], answer:1, expl:"'Not only' at the start requires inversion. Past tense \u2192 'did she pass'."},
+    {q:"The research paper, ___ was published last month, received international attention.", choices:["that","who","which","whom"], answer:2, expl:"Non-restrictive relative clause (with commas) uses 'which', not 'that', for things."},
+    {q:"Had the students ___ more carefully, they would have found the error.", choices:["read","reads","reading","been read"], answer:0, expl:"Inverted third conditional: Had + subject + past participle. 'Read' (past participle) is correct."},
+    {q:"It is essential that every student ___ the assignment on time.", choices:["submits","submit","submitted","submitting"], answer:1, expl:"Subjunctive mood after 'essential that': use the base form 'submit' (no -s)."},
+    {q:"The teacher insisted that he ___ his essay before the deadline.", choices:["rewrites","rewrite","rewrote","rewriting"], answer:1, expl:"Subjunctive mood after 'insisted that': use the base form 'rewrite'."},
+    {q:"Neither the students nor the teacher ___ aware of the schedule change.", choices:["were","was","are","have been"], answer:1, expl:"With 'neither...nor', the verb agrees with the nearest subject: 'teacher' (singular) \u2192 'was'."}
   ],
   reading: [
-    {q:"\"The expedition team had been climbing for six days when the weather suddenly changed. Dark clouds gathered, and the temperature dropped by 15 degrees in an hour. The team leader decided to set up camp immediately rather than risk the summit.\" — The leader's decision shows he valued ___.",
-     choices:["reaching the top quickly","the team's safety over the goal","proving his courage","ignoring the weather forecast"], answer:1},
-    {q:"\"Dr. Chen's research revealed that students who read for pleasure scored significantly higher on vocabulary tests than those who only read textbooks. She suggested that schools should encourage free reading time during the school day.\" — What is Dr. Chen's main recommendation?",
-     choices:["Stop using textbooks entirely","Test vocabulary more often","Add free reading time to school","Only read fiction books"], answer:2},
-    {q:"\"The ancient Romans built aqueducts to carry water from distant sources into their cities. Some of these structures still stand today, over two thousand years later, demonstrating the remarkable engineering skills of that era.\" — The word 'remarkable' most closely means ___.",
-     choices:["ordinary and common","impressive and noteworthy","outdated and useless","simple and basic"], answer:1},
-    {q:"\"When Maya moved to a new country, she couldn't understand anyone at school. But she noticed that smiling was a universal language. Within a month, she had made several friends, even before she could speak their language fluently.\" — What helped Maya make friends?",
-     choices:["Learning the language quickly","Her excellent grades","Her friendly attitude and smiles","Her teacher introducing her"], answer:2}
+    {q:"\"The expedition team had been climbing for six days when the weather suddenly changed. Dark clouds gathered, and the temperature dropped by 15 degrees in an hour. The team leader decided to set up camp immediately rather than risk the summit.\" \u2014 The leader's decision shows he valued ___.",
+     choices:["reaching the top quickly","the team's safety over the goal","proving his courage","ignoring the weather forecast"], answer:1, expl:"He chose to stop rather than risk danger \u2014 prioritizing safety over reaching the summit."},
+    {q:"\"Dr. Chen's research revealed that students who read for pleasure scored significantly higher on vocabulary tests than those who only read textbooks. She suggested that schools should encourage free reading time during the school day.\" \u2014 What is Dr. Chen's main recommendation?",
+     choices:["Stop using textbooks entirely","Test vocabulary more often","Add free reading time to school","Only read fiction books"], answer:2, expl:"The passage says she 'suggested that schools should encourage free reading time during the school day'."},
+    {q:"\"The ancient Romans built aqueducts to carry water from distant sources into their cities. Some of these structures still stand today, over two thousand years later, demonstrating the remarkable engineering skills of that era.\" \u2014 The word 'remarkable' most closely means ___.",
+     choices:["ordinary and common","impressive and noteworthy","outdated and useless","simple and basic"], answer:1, expl:"The fact that structures lasted 2000+ years is impressive and noteworthy, i.e. remarkable."},
+    {q:"\"When Maya moved to a new country, she couldn't understand anyone at school. But she noticed that smiling was a universal language. Within a month, she had made several friends, even before she could speak their language fluently.\" \u2014 What helped Maya make friends?",
+     choices:["Learning the language quickly","Her excellent grades","Her friendly attitude and smiles","Her teacher introducing her"], answer:2, expl:"The passage says 'smiling was a universal language' and she made friends before speaking fluently."}
   ]
 };
 
@@ -1711,7 +1811,8 @@ function openStoryChapter(idx) {
 
   document.getElementById('story-intro-title').textContent = ch.title;
   document.getElementById('story-intro-boss-emoji').textContent = ch.boss.emoji;
-  document.getElementById('story-intro-text').textContent = ch.intro;
+  // Highlight learned vocabulary words in story intro
+  document.getElementById('story-intro-text').innerHTML = highlightLearnedWords(ch.intro);
   document.getElementById('story-intro').classList.add('active');
 }
 
@@ -1968,11 +2069,29 @@ function battleAnswer(idx, correctIdx, btnEl) {
   });
   if (!correct) btnEl.classList.add('wrong');
 
+  // Track mistakes and vocab in battle
+  if (currentBattleQuestion) {
+    const correctAnswer = currentBattleQuestion.choices[currentBattleQuestion.answer];
+    const explanation = currentBattleQuestion.expl || '';
+    if (!correct) {
+      addMistake(currentBattleQuestion.q, correctAnswer, explanation, '');
+      updateMistakeBadges();
+    } else if (currentBattleQuestion.expl) {
+      // Mark vocab learned if applicable
+      const vocabWord = extractVocabWord(currentBattleQuestion.q) || extractVocabFromAnswer(currentBattleQuestion.q, correctAnswer);
+      if (vocabWord) markVocabLearned(vocabWord, explanation);
+    }
+    // Show explanation briefly in battle
+    showExplanation('battle-explanation', correct, correctAnswer, explanation, null);
+  }
+
   const sk = activeSkillIdx >= 0 ? battleSkills[activeSkillIdx] : null;
   const skillMult = sk ? sk.mult : 1.0;
   const skillFlash = sk ? sk.flash : '';
 
   setTimeout(() => {
+    document.getElementById('battle-explanation').style.display = 'none';
+    clearTimeout(explanationTimer);
     document.getElementById('battle-question-area').classList.remove('active');
     document.getElementById('battle-commands').style.display = 'grid';
     renderBattleSkills();
@@ -2026,7 +2145,7 @@ function battleAnswer(idx, correctIdx, btnEl) {
       setTimeout(() => enemyTurn(), 800);
     }
     activeSkillIdx = -1;
-  }, 1000);
+  }, 2500);
 }
 
 function doEnemyAttack(playerDef, applyGuard) {
@@ -2273,6 +2392,8 @@ function renderBattleSkills() {
   });
 }
 
+let currentBattleQuestion = null;
+
 function useSkill(idx) {
   if (battleState.finished) return;
   activeSkillIdx = idx;
@@ -2297,6 +2418,7 @@ function useSkill(idx) {
   }
   const qPool = qSource[qCat];
   const q = qPool[Math.floor(Math.random() * qPool.length)];
+  currentBattleQuestion = q;
 
   document.getElementById('battle-question').textContent = q.q;
   const choicesEl = document.getElementById('battle-choices');
@@ -2540,6 +2662,343 @@ getEffectiveDef = function() {
   if (mon.trait === 'All +15%' || mon.trait === 'All highest') def = Math.floor(def * 1.15);
   return def;
 };
+
+// ===== EXPLANATION SYSTEM =====
+let explanationTimer = null;
+
+function showExplanation(containerId, correct, correctAnswer, explanation, onDone) {
+  clearTimeout(explanationTimer);
+  const el = document.getElementById(containerId);
+  el.style.display = 'block';
+  el.className = 'explanation-overlay ' + (correct ? 'correct' : 'wrong');
+
+  if (correct) {
+    el.innerHTML = `<div class="expl-header">\u2713 Correct!</div><div class="expl-body">${explanation}</div><div class="expl-tap">Tap to continue</div>`;
+  } else {
+    el.innerHTML = `<div class="expl-header">\u2717 ${correctAnswer} is correct.</div><div class="expl-body">${explanation}</div><div class="expl-tap">Tap to continue</div>`;
+  }
+
+  const dismiss = () => {
+    clearTimeout(explanationTimer);
+    el.style.display = 'none';
+    el.onclick = null;
+    if (onDone) onDone();
+  };
+
+  el.onclick = dismiss;
+  explanationTimer = setTimeout(dismiss, 3000);
+}
+
+// ===== MISTAKE TRACKER =====
+function loadMistakes() {
+  try {
+    return JSON.parse(localStorage.getItem('monsterRPG_mistakes') || '[]');
+  } catch(e) { return []; }
+}
+
+function saveMistakes(mistakes) {
+  localStorage.setItem('monsterRPG_mistakes', JSON.stringify(mistakes));
+}
+
+function addMistake(question, correctAnswer, explanation, category) {
+  const mistakes = loadMistakes();
+  // Don't add duplicates (same question text)
+  if (mistakes.find(m => m.q === question)) return;
+  mistakes.push({
+    q: question,
+    a: correctAnswer,
+    expl: explanation || '',
+    cat: category || '',
+    streak: 0,  // correct-in-a-row count for removal
+    added: Date.now()
+  });
+  saveMistakes(mistakes);
+}
+
+function recordMistakeCorrect(questionText) {
+  const mistakes = loadMistakes();
+  const m = mistakes.find(m => m.q === questionText);
+  if (m) {
+    m.streak = (m.streak || 0) + 1;
+    if (m.streak >= 2) {
+      // Remove from mistake list
+      const idx = mistakes.indexOf(m);
+      mistakes.splice(idx, 1);
+    }
+    saveMistakes(mistakes);
+  }
+}
+
+function recordMistakeWrong(questionText) {
+  const mistakes = loadMistakes();
+  const m = mistakes.find(m => m.q === questionText);
+  if (m) {
+    m.streak = 0;
+    saveMistakes(mistakes);
+  }
+}
+
+function updateMistakeBadges() {
+  const count = loadMistakes().length;
+  const homeBadge = document.getElementById('home-mistake-badge');
+  const studyBadge = document.getElementById('study-mistake-badge');
+  const studyBtn = document.getElementById('study-mistakes-btn');
+
+  if (count > 0) {
+    if (homeBadge) { homeBadge.textContent = count; homeBadge.style.display = 'inline-block'; }
+    if (studyBadge) studyBadge.textContent = count;
+    if (studyBtn) studyBtn.style.display = 'block';
+  } else {
+    if (homeBadge) homeBadge.style.display = 'none';
+    if (studyBtn) studyBtn.style.display = 'none';
+  }
+}
+
+function goMistakes() {
+  renderMistakeList();
+  document.getElementById('mistakes-review-area').style.display = 'none';
+  document.getElementById('mistakes-feedback').innerHTML = '';
+  document.getElementById('mistakes-explanation').style.display = 'none';
+  document.getElementById('mistakes-next-btn').style.display = 'none';
+  showScreen('mistakes-screen');
+}
+
+function renderMistakeList() {
+  const list = document.getElementById('mistake-list');
+  const mistakes = loadMistakes();
+  list.innerHTML = '';
+
+  if (mistakes.length === 0) {
+    list.innerHTML = '<div class="mistake-empty">No mistakes to review! Keep up the great work!</div>';
+    document.getElementById('mistakes-start-btn').style.display = 'none';
+    return;
+  }
+
+  document.getElementById('mistakes-start-btn').style.display = 'block';
+
+  mistakes.forEach(m => {
+    const card = document.createElement('div');
+    card.className = 'mistake-card';
+    card.innerHTML = `
+      <div class="mistake-q">${m.q.length > 80 ? m.q.substring(0, 80) + '...' : m.q}</div>
+      <div class="mistake-a">\u2713 ${m.a}</div>
+      ${m.expl ? '<div class="mistake-expl">' + m.expl + '</div>' : ''}
+      <div class="mistake-streak">${m.streak > 0 ? '\u2B50 ' + m.streak + '/2 correct' : 'Not reviewed yet'}</div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+let currentMistakeQuestion = null;
+let mistakeAnswered = false;
+
+function startMistakeReview() {
+  document.getElementById('mistake-list').innerHTML = '';
+  document.getElementById('mistakes-start-btn').style.display = 'none';
+  document.getElementById('mistakes-review-area').style.display = 'block';
+  nextMistakeQuestion();
+}
+
+function nextMistakeQuestion() {
+  mistakeAnswered = false;
+  document.getElementById('mistakes-feedback').innerHTML = '';
+  document.getElementById('mistakes-explanation').style.display = 'none';
+  document.getElementById('mistakes-next-btn').style.display = 'none';
+
+  const mistakes = loadMistakes();
+  if (mistakes.length === 0) {
+    document.getElementById('mistakes-review-area').style.display = 'none';
+    renderMistakeList();
+    updateMistakeBadges();
+    return;
+  }
+
+  // Pick a random mistake, find the original question for choices
+  const m = mistakes[Math.floor(Math.random() * mistakes.length)];
+  // Find original question from all pools
+  let origQ = null;
+  const allPools = [questions.vocabulary, questions.grammar, questions.reading, questions.listening,
+                    bossQuestions.vocabulary, bossQuestions.grammar, bossQuestions.reading];
+  for (const pool of allPools) {
+    const found = pool.find(q => q.q === m.q);
+    if (found) { origQ = found; break; }
+  }
+
+  if (!origQ) {
+    // Question no longer exists, remove it
+    const idx = mistakes.indexOf(m);
+    mistakes.splice(idx, 1);
+    saveMistakes(mistakes);
+    nextMistakeQuestion();
+    return;
+  }
+
+  currentMistakeQuestion = origQ;
+
+  const qBox = document.getElementById('mistakes-question');
+  if (origQ.speech && currentMistakeQuestion) {
+    qBox.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+      <div style="font-size:13px;">${origQ.q}</div>
+      <button class="listen-btn" onclick="playMistakeListening()">\uD83D\uDD0A</button>
+    </div>`;
+    setTimeout(() => playMistakeListening(), 400);
+  } else {
+    qBox.textContent = origQ.q;
+  }
+
+  const choicesEl = document.getElementById('mistakes-choices');
+  choicesEl.innerHTML = '';
+  origQ.choices.forEach((c, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = String.fromCharCode(65 + i) + '. ' + c;
+    btn.onclick = () => answerMistake(i, btn);
+    choicesEl.appendChild(btn);
+  });
+}
+
+function playMistakeListening() {
+  if (!currentMistakeQuestion || !currentMistakeQuestion.speech || !window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(currentMistakeQuestion.speech);
+  utter.lang = 'en-US';
+  utter.rate = 0.85;
+  window.speechSynthesis.speak(utter);
+}
+
+function answerMistake(idx, btnEl) {
+  if (mistakeAnswered) return;
+  mistakeAnswered = true;
+
+  const correct = idx === currentMistakeQuestion.answer;
+  const allBtns = document.querySelectorAll('#mistakes-choices .choice-btn');
+  allBtns.forEach((b, i) => {
+    b.classList.add('disabled');
+    if (i === currentMistakeQuestion.answer) b.classList.add('correct');
+  });
+  if (!correct) btnEl.classList.add('wrong');
+
+  const feedback = document.getElementById('mistakes-feedback');
+  const correctAnswer = currentMistakeQuestion.choices[currentMistakeQuestion.answer];
+  const explanation = currentMistakeQuestion.expl || '';
+
+  if (correct) {
+    feedback.innerHTML = '<span class="correct-text">Correct!</span>';
+    sfx.correct();
+    recordMistakeCorrect(currentMistakeQuestion.q);
+  } else {
+    feedback.innerHTML = `<span class="wrong-text">Wrong... The answer was ${correctAnswer}</span>`;
+    sfx.wrong();
+    recordMistakeWrong(currentMistakeQuestion.q);
+  }
+
+  showExplanation('mistakes-explanation', correct, correctAnswer, explanation, () => {
+    document.getElementById('mistakes-next-btn').style.display = 'block';
+  });
+}
+
+// ===== LEARNED VOCABULARY =====
+function loadLearnedVocab() {
+  try {
+    return JSON.parse(localStorage.getItem('monsterRPG_learnedVocab') || '{}');
+  } catch(e) { return {}; }
+}
+
+function saveLearnedVocab(vocab) {
+  localStorage.setItem('monsterRPG_learnedVocab', JSON.stringify(vocab));
+}
+
+function markVocabLearned(word, explanation) {
+  const vocab = loadLearnedVocab();
+  const key = word.toLowerCase().trim();
+  if (!vocab[key]) {
+    vocab[key] = explanation;
+    saveLearnedVocab(vocab);
+  }
+}
+
+// Extract vocabulary words from vocabulary questions when answered correctly
+function extractVocabWord(question) {
+  // Try to extract the key vocabulary word from the question
+  const patterns = [
+    /What does "(\w+)" mean/i,
+    /A "(\w+)" is/i,
+    /The "(\w+)" is/i,
+    /Your school "(\w+)"/i,
+    /You need "(\w+)"/i,
+    /"(\w+)," it means/i,
+    /"(\w+)" teacher/i,
+  ];
+  for (const p of patterns) {
+    const m = question.match(p);
+    if (m) return m[1];
+  }
+  return null;
+}
+
+// Also extract from answer choices for fill-in-the-blank questions
+function extractVocabFromAnswer(question, answer) {
+  // For emotion/completion questions, the answer itself is the vocabulary word
+  const emotionWords = ['anxious','frustrated','confident','relieved','overwhelmed',
+    'embarrassed','motivated','jealous','grateful','exhausted','confidence',
+    'assignment','deadline','presentation','experiment','hypothesis','schedule',
+    'permission','absence','substitute','curriculum','vivid','consequences',
+    'phenomenon','reluctant','ambiguous','compelling','evidence','implausible'];
+  const lower = answer.toLowerCase();
+  if (emotionWords.includes(lower)) return answer;
+  return null;
+}
+
+// Highlight learned words in story intro text
+function highlightLearnedWords(text) {
+  const vocab = loadLearnedVocab();
+  const words = Object.keys(vocab);
+  if (words.length === 0) return text;
+
+  // Sort by length (longest first) to avoid partial matches
+  words.sort((a, b) => b.length - a.length);
+
+  // Replace words with highlighted spans
+  let result = text;
+  words.forEach(word => {
+    const regex = new RegExp('\\b(' + word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')\\b', 'gi');
+    result = result.replace(regex, '<span class="vocab-word" data-word="$1" onclick="showVocabTooltip(event, \'$1\')">$1</span>');
+  });
+  return result;
+}
+
+let activeTooltip = null;
+function showVocabTooltip(event, word) {
+  event.stopPropagation();
+  hideVocabTooltip();
+
+  const vocab = loadLearnedVocab();
+  const meaning = vocab[word.toLowerCase()];
+  if (!meaning) return;
+
+  const tooltip = document.createElement('div');
+  tooltip.className = 'vocab-tooltip';
+  tooltip.id = 'active-vocab-tooltip';
+  tooltip.innerHTML = `<div class="vt-word">${word}</div><div class="vt-meaning">${meaning}</div>`;
+
+  document.body.appendChild(tooltip);
+  activeTooltip = tooltip;
+
+  // Position near tap
+  const rect = event.target.getBoundingClientRect();
+  tooltip.style.left = Math.min(rect.left, window.innerWidth - 290) + 'px';
+  tooltip.style.top = (rect.bottom + 8) + 'px';
+
+  // Auto-hide after 4 seconds
+  setTimeout(hideVocabTooltip, 4000);
+  document.addEventListener('click', hideVocabTooltip, { once: true });
+}
+
+function hideVocabTooltip() {
+  const el = document.getElementById('active-vocab-tooltip');
+  if (el) el.remove();
+  activeTooltip = null;
+}
 
 // ===== FIREBASE & RANKING =====
 const firebaseConfig = {
