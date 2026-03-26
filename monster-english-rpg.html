@@ -156,8 +156,8 @@ h3{font-family:'Press Start 2P',monospace;font-size:10px;color:#e94560;margin-bo
   position:relative;
   box-shadow:0 0 30px rgba(83,52,131,0.2),inset 0 0 20px rgba(83,52,131,0.1);
 }
-.monster-display img{max-width:160px;max-height:160px;object-fit:contain;}
-.monster-img-home{width:160px;height:160px;object-fit:contain;animation:monsterFloat 2.5s ease-in-out infinite;filter:drop-shadow(0 0 12px rgba(83,52,131,0.5));}
+.monster-display img{max-width:120px;max-height:120px;object-fit:contain;}
+.monster-img-home{width:120px;height:120px;object-fit:contain;animation:monsterFloat 2.5s ease-in-out infinite;filter:drop-shadow(0 0 12px rgba(83,52,131,0.5));}
 @keyframes monsterFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
 @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 
@@ -648,11 +648,11 @@ h3{font-family:'Press Start 2P',monospace;font-size:10px;color:#e94560;margin-bo
 .collection-card.unowned{opacity:0.4;cursor:default;}
 .collection-card.unowned:hover{border-color:rgba(83,52,131,0.3);}
 .card-circle{
-  width:50px;height:50px;border-radius:50%;
+  width:64px;height:64px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;
   font-size:24px;border:2px solid rgba(255,255,255,0.2);
+  overflow:hidden;
 }
-.card-circle.silhouette{filter:brightness(0.2);background:#111!important;}
 .card-name{font-size:9px;font-weight:bold;color:#e0e0e0;}
 .card-rarity-stars{font-size:8px;color:#f1c40f;}
 .card-element{font-size:8px;color:#888;}
@@ -693,7 +693,7 @@ h3{font-family:'Press Start 2P',monospace;font-size:10px;color:#e94560;margin-bo
   <div id="name-screen" class="screen active">
     <h1>Monster English RPG</h1>
     <p style="color:#888;font-size:12px;text-align:center;">Give your monster a name!</p>
-    <img src="monster-stage1.png" alt="monster" style="width:100px;height:100px;object-fit:contain;animation:bounce 1.5s ease-in-out infinite;">
+    <img src="monster-1.png" alt="monster" style="width:100px;height:100px;object-fit:contain;animation:bounce 1.5s ease-in-out infinite;">
     <input type="text" id="monster-name-input" placeholder="Monster name" maxlength="12">
     <button class="btn btn-primary" onclick="startGame()">Start Adventure</button>
   </div>
@@ -705,7 +705,7 @@ h3{font-family:'Press Start 2P',monospace;font-size:10px;color:#e94560;margin-bo
       <p>Learn English and raise your monster!</p>
     </div>
     <div class="monster-display" style="position:relative;">
-      <img id="monster-img" class="monster-img-home" src="monster-stage1.png" alt="monster">
+      <img id="monster-img" class="monster-img-home" src="monster-1.png" alt="monster">
     </div>
     <div class="monster-name"><span id="home-monster-name">???</span><span class="level-badge" id="home-level-badge">Lv.1</span></div>
     <div class="stage-name" id="home-stage-name">Stage 1</div>
@@ -910,7 +910,7 @@ h3{font-family:'Press Start 2P',monospace;font-size:10px;color:#e94560;margin-bo
         <div class="battle-monster">
           <div class="battle-monster-name" id="battle-player-name">???</div>
           <div class="battle-monster-img">
-            <img id="player-battle-sprite" class="player-monster-img" src="monster-stage1.png" alt="player monster">
+            <img id="player-battle-sprite" class="player-monster-img" src="monster-1.png" alt="player monster">
           </div>
           <div class="battle-hp-bar"><div class="battle-hp-fill" id="player-hp-bar" style="width:100%"></div></div>
           <div class="battle-monster-hp-text" id="player-hp-text">HP: 10/10</div>
@@ -1186,7 +1186,8 @@ function getMonsterImage(level) {
 }
 
 function updateMonsterImages() {
-  const img = getMonsterImage(getPlayerLevel());
+  const activeMon = getActiveMonster();
+  const img = activeMon.img || getMonsterImage(getPlayerLevel());
   document.getElementById('monster-img').src = img;
   document.getElementById('player-battle-sprite').src = img;
 }
@@ -2434,16 +2435,16 @@ function useSkill(idx) {
 
 // ===== MONSTER ROSTER & GACHA =====
 const monsterRoster = [
-  {id:1,name:'Blue Slime',element:'Water',emoji:'\uD83C\uDF0A',color:'#2980b9',rarity:'Normal',hp:20,atk:5,def:3,trait:'Starter'},
-  {id:2,name:'Fire Fox',element:'Fire',emoji:'\uD83D\uDD25',color:'#e74c3c',rarity:'Normal',hp:18,atk:8,def:2,trait:'ATK +20%'},
-  {id:3,name:'Stone Golem',element:'Earth',emoji:'\uD83C\uDF0D',color:'#8B6914',rarity:'Normal',hp:25,atk:4,def:10,trait:'DEF +30%'},
-  {id:4,name:'Thunder Bird',element:'Thunder',emoji:'\u26A1',color:'#f1c40f',rarity:'Rare',hp:18,atk:7,def:4,trait:'SPD +30%'},
-  {id:5,name:'Ice Wolf',element:'Ice',emoji:'\u2744\uFE0F',color:'#5dade2',rarity:'Rare',hp:28,atk:6,def:5,trait:'HP +30%'},
-  {id:6,name:'Dark Bat',element:'Dark',emoji:'\uD83C\uDF11',color:'#6c3483',rarity:'Rare',hp:22,atk:9,def:5,trait:'Balanced'},
-  {id:7,name:'Wind Dragon',element:'Wind',emoji:'\uD83D\uDCA8',color:'#27ae60',rarity:'Super Rare',hp:25,atk:11,def:7,trait:'All +15%'},
-  {id:8,name:'Lava Titan',element:'Fire/Earth',emoji:'\uD83C\uDF0B',color:'#d35400',rarity:'Super Rare',hp:22,atk:14,def:12,trait:'ATK+DEF'},
-  {id:9,name:'Storm Phoenix',element:'Thunder/Wind',emoji:'\uD83E\uDD85',color:'#8e44ad',rarity:'Super Rare',hp:28,atk:12,def:8,trait:'Epic evo'},
-  {id:10,name:'Celestial Beast',element:'Light',emoji:'\u2728',color:'#f1c40f',rarity:'Legend',hp:35,atk:15,def:12,trait:'All highest'}
+  {id:1,name:'Blue Slime',element:'Water',emoji:'\uD83C\uDF0A',color:'#2980b9',rarity:'Normal',hp:20,atk:5,def:3,trait:'Starter',img:'monster-1.png'},
+  {id:2,name:'Fire Fox',element:'Fire',emoji:'\uD83D\uDD25',color:'#e74c3c',rarity:'Normal',hp:18,atk:8,def:2,trait:'ATK +20%',img:'monster-2.png'},
+  {id:3,name:'Stone Golem',element:'Earth',emoji:'\uD83C\uDF0D',color:'#8B6914',rarity:'Normal',hp:25,atk:4,def:10,trait:'DEF +30%',img:'monster-3.png'},
+  {id:4,name:'Thunder Bird',element:'Thunder',emoji:'\u26A1',color:'#f1c40f',rarity:'Rare',hp:18,atk:7,def:4,trait:'SPD +30%',img:'monster-4.png'},
+  {id:5,name:'Ice Wolf',element:'Ice',emoji:'\u2744\uFE0F',color:'#5dade2',rarity:'Rare',hp:28,atk:6,def:5,trait:'HP +30%',img:'monster-5.png'},
+  {id:6,name:'Dark Bat',element:'Dark',emoji:'\uD83C\uDF11',color:'#6c3483',rarity:'Rare',hp:22,atk:9,def:5,trait:'Balanced',img:'monster-6.png'},
+  {id:7,name:'Wind Dragon',element:'Wind',emoji:'\uD83D\uDCA8',color:'#27ae60',rarity:'Super Rare',hp:25,atk:11,def:7,trait:'All +15%',img:'monster-7.png'},
+  {id:8,name:'Lava Titan',element:'Fire/Earth',emoji:'\uD83C\uDF0B',color:'#d35400',rarity:'Super Rare',hp:22,atk:14,def:12,trait:'ATK+DEF',img:'monster-8.png'},
+  {id:9,name:'Storm Phoenix',element:'Thunder/Wind',emoji:'\uD83E\uDD85',color:'#8e44ad',rarity:'Super Rare',hp:28,atk:12,def:8,trait:'Epic evo',img:'monster-9.png'},
+  {id:10,name:'Celestial Beast',element:'Light',emoji:'\u2728',color:'#f1c40f',rarity:'Legend',hp:35,atk:15,def:12,trait:'All highest',img:'monster-10.png'}
 ];
 
 const rarityWeights = {Normal:50,Rare:30,'Super Rare':15,Legend:5};
@@ -2558,8 +2559,9 @@ function showGachaReveal(mon, totalCount) {
     egg.style.display = 'none';
     reveal.classList.add('active');
 
-    document.getElementById('gacha-circle').style.background = mon.color;
-    document.getElementById('gacha-circle').textContent = mon.emoji;
+    const gachaCircle = document.getElementById('gacha-circle');
+    gachaCircle.style.background = 'transparent';
+    gachaCircle.innerHTML = `<img src="${mon.img}" alt="${mon.name}" style="width:80px;height:80px;object-fit:contain;filter:drop-shadow(0 0 12px ${mon.color});">`;
 
     const rarityMap = {Normal:'rarity-normal',Rare:'rarity-rare','Super Rare':'rarity-sr',Legend:'rarity-legend'};
     const rarityEl = document.getElementById('gacha-rarity');
@@ -2601,8 +2603,11 @@ function renderCollection() {
     const starCount = mon.rarity === 'Legend' ? 4 : mon.rarity === 'Super Rare' ? 3 : mon.rarity === 'Rare' ? 2 : 1;
     const stars = '\u2B50'.repeat(starCount);
 
+    const imgFilter = !isOwned ? 'filter:grayscale(100%) brightness(30%);' : '';
     card.innerHTML = `
-      <div class="card-circle ${!isOwned ? 'silhouette' : ''}" style="background:${mon.color};">${isOwned ? mon.emoji : '?'}</div>
+      <div class="card-circle" style="background:${isOwned ? 'transparent' : mon.color};">
+        <img src="${mon.img}" alt="${mon.name}" style="width:60px;height:60px;object-fit:contain;${imgFilter}">
+      </div>
       <div class="card-name">${isOwned ? mon.name : '???'}</div>
       <div class="card-rarity-stars">${isOwned ? stars : ''}</div>
       <div class="card-element">${isOwned ? mon.element : ''}</div>
