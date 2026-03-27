@@ -81,11 +81,54 @@ function getMonsterImage(level) {
   return stageImages[getMonsterStage(level)];
 }
 
+function getMonsterStageImage(mon, stage) {
+  if (!mon) return 'monster-1.png';
+  if (stage <= 0) return mon.img;
+  // Stage 2+: try monster-X-stage(N+1).png, fallback to base with CSS effect
+  return `monster-${mon.id}-stage${stage + 1}.png`;
+}
+
 function updateMonsterImages() {
   const activeMon = getActiveMonster();
-  const img = activeMon.img || getMonsterImage(getPlayerLevel());
-  document.getElementById('monster-img').src = img;
-  document.getElementById('player-battle-sprite').src = img;
+  const stage = gameState.evoStage || 0;
+  const imgEl = document.getElementById('monster-img');
+  const battleEl = document.getElementById('player-battle-sprite');
+
+  if (stage > 0 && activeMon.id !== 1) {
+    // Non-Blue Slime evolved: use stage image with CSS fallback
+    const stageImg = getMonsterStageImage(activeMon, stage);
+    imgEl.src = stageImg;
+    battleEl.src = stageImg;
+    // CSS fallback: brightness + scale increase for evolved stages
+    const evoScale = 1 + stage * 0.08;
+    const evoBright = 1 + stage * 0.15;
+    const evoFilter = `brightness(${evoBright}) drop-shadow(0 0 ${8 + stage * 6}px ${activeMon.color})`;
+    imgEl.style.filter = evoFilter;
+    imgEl.style.transform = `scale(${evoScale})`;
+    battleEl.style.filter = evoFilter;
+    // On image error, fall back to base image with filter
+    imgEl.onerror = () => { imgEl.src = activeMon.img; };
+    battleEl.onerror = () => { battleEl.src = activeMon.img; };
+  } else if (activeMon.id === 1 && stage > 0) {
+    // Blue Slime: use existing stageImages
+    const img = stageImages[stage] || activeMon.img;
+    imgEl.src = img;
+    battleEl.src = img;
+    imgEl.style.filter = '';
+    imgEl.style.transform = '';
+    battleEl.style.filter = '';
+    imgEl.onerror = null;
+    battleEl.onerror = null;
+  } else {
+    // Base stage
+    imgEl.src = activeMon.img || 'monster-1.png';
+    battleEl.src = activeMon.img || 'monster-1.png';
+    imgEl.style.filter = '';
+    imgEl.style.transform = '';
+    battleEl.style.filter = '';
+    imgEl.onerror = null;
+    battleEl.onerror = null;
+  }
 }
 
 // ===== EVOLUTION GAUGE SYSTEM =====
@@ -98,14 +141,27 @@ const skillData = [
   {name:'Final Form', desc:'Crit + 2x damage', icon:'\uD83D\uDD25'}
 ];
 
+function getActiveMonsterMaxStages() {
+  const mon = getActiveMonster();
+  return mon.maxStages || 4;
+}
+
+function getActiveMonsterEvoThresholds() {
+  const mon = getActiveMonster();
+  return mon.evoThresholds || evoThresholds;
+}
+
 function getEvoMax() {
   const stage = gameState.evoStage || 0;
-  if (stage >= 3) return 0; // max stage
-  return evoThresholds[stage];
+  const maxStages = getActiveMonsterMaxStages();
+  if (stage >= maxStages - 1) return 0; // already at max stage
+  const thresholds = getActiveMonsterEvoThresholds();
+  return thresholds[stage] || 0;
 }
 
 function addEvoGauge(amount) {
-  if ((gameState.evoStage || 0) >= 3) return;
+  const maxStages = getActiveMonsterMaxStages();
+  if ((gameState.evoStage || 0) >= maxStages - 1) return;
   gameState.evoGauge = (gameState.evoGauge || 0) + amount;
   saveGame();
   updateEvoGaugeUI();
@@ -115,10 +171,13 @@ function updateEvoGaugeUI() {
   const stage = gameState.evoStage || 0;
   const gauge = gameState.evoGauge || 0;
   const max = getEvoMax();
+  const mon = getActiveMonster();
+  const maxStages = mon.maxStages || 4;
+  const names = mon.stageNames || stageNames;
 
-  document.getElementById('home-stage-name').textContent = stageNames[stage];
+  document.getElementById('home-stage-name').textContent = names[stage] || mon.name;
 
-  if (stage >= 3) {
+  if (stage >= maxStages - 1) {
     document.getElementById('evo-gauge-label').textContent = 'MAX EVOLUTION';
     document.getElementById('evo-gauge-fill').style.width = '100%';
     document.getElementById('evo-gauge-text').textContent = 'MAX';
@@ -144,13 +203,16 @@ function updateEvoGaugeUI() {
 function triggerEvolution() {
   const oldStage = gameState.evoStage || 0;
   const newStage = oldStage + 1;
+  const mon = getActiveMonster();
+  const bonus = mon.evoBonus || {hp:5,atk:2,def:2,spd:2};
+
   gameState.evoStage = newStage;
   gameState.evoGauge = 0;
-  // Stat bonuses on evolution
-  gameState.hp += 5;
-  gameState.atk += 2;
-  gameState.def += 2;
-  gameState.spd = (gameState.spd || 1) + 2;
+  // Per-monster stat bonuses on evolution
+  gameState.hp += bonus.hp;
+  gameState.atk += bonus.atk;
+  gameState.def += bonus.def;
+  gameState.spd = (gameState.spd || 1) + bonus.spd;
   saveGame();
   updateMonsterImages();
   playEvoAnimation(newStage);
@@ -164,8 +226,12 @@ function playEvoAnimation(newStage) {
   const subtitle = document.getElementById('evo-subtitle');
   const statsList = document.getElementById('evo-stats-list');
 
-  monster.src = stageImages[newStage];
-  subtitle.textContent = stageNames[newStage] + ' has awakened!';
+  const activeMon = getActiveMonster();
+  const names = activeMon.stageNames || stageNames;
+  const stageImg = (activeMon.id === 1) ? stageImages[newStage] : getMonsterStageImage(activeMon, newStage);
+  monster.src = stageImg;
+  monster.onerror = () => { monster.src = activeMon.img; };
+  subtitle.textContent = (names[newStage] || activeMon.name) + ' has awakened!';
   statsList.innerHTML = '';
   overlay.classList.add('active');
 
@@ -210,7 +276,8 @@ function playEvoAnimation(newStage) {
   }, 2900);
 
   // Phase 6: stats count up (3200ms+)
-  const statNames = ['HP +5','ATK +2','DEF +2','SPD +2'];
+  const bonus = activeMon.evoBonus || {hp:5,atk:2,def:2,spd:2};
+  const statNames = [`HP +${bonus.hp}`,`ATK +${bonus.atk}`,`DEF +${bonus.def}`,`SPD +${bonus.spd}`];
   statNames.forEach((s, i) => {
     setTimeout(() => {
       const line = document.createElement('div');
@@ -1200,11 +1267,24 @@ const battleSkills = [
 
 function renderBattleSkills() {
   const stage = gameState.evoStage || 0;
+  const mon = getActiveMonster();
+  const maxStages = mon.maxStages || 4;
+  // Map reqStage (0-3) to actual monster stages: skill unlocks at proportional stage
+  // reqStage 0 = always unlocked, 1 = stage 1+, 2 = stage 2+, 3 = max stage
+  // For 2-stage monster: skill 0 always, skill 1 at stage 1, skills 2-3 at stage 1 (max)
+  // For 3-stage monster: skill 0 always, skill 1 at stage 1, skill 2 at stage 2, skill 3 at stage 2 (max)
+  function isSkillUnlocked(reqStage) {
+    if (reqStage === 0) return true;
+    if (maxStages === 2) return stage >= 1;
+    if (maxStages === 3) return stage >= Math.min(reqStage, 2);
+    return stage >= reqStage; // 4-stage (Blue Slime)
+  }
+
   const container = document.getElementById('battle-skills');
   container.innerHTML = '';
   container.classList.add('active');
   battleSkills.forEach((sk, i) => {
-    const unlocked = stage >= sk.reqStage;
+    const unlocked = isSkillUnlocked(sk.reqStage);
     const btn = document.createElement('button');
     btn.className = 'skill-btn ' + (unlocked ? sk.cls : 'sk-locked');
     btn.disabled = !unlocked;
@@ -1214,7 +1294,7 @@ function renderBattleSkills() {
       btn.innerHTML = `<span class="skill-name">${sk.icon} ${sk.name}${specLabel}</span><span class="skill-sub">${sk.mult}x dmg</span>`;
       btn.onclick = () => useSkill(i);
     } else {
-      btn.innerHTML = `<span class="skill-name">\uD83D\uDD12 ${sk.name}</span><span class="skill-sub">Stage ${sk.reqStage + 1}</span>`;
+      btn.innerHTML = `<span class="skill-name">\uD83D\uDD12 ${sk.name}</span><span class="skill-sub">Evolve</span>`;
     }
     container.appendChild(btn);
   });
