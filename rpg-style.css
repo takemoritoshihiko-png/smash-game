@@ -269,10 +269,14 @@ h3{font-family:'Press Start 2P',monospace;font-size:10px;color:#e94560;margin-bo
 .home-buttons .btn:nth-child(2):hover{box-shadow:0 4px 15px rgba(231,76,60,0.4);}
 .home-buttons .btn:nth-child(3){background:linear-gradient(180deg,#8e44ad,#6c3483);border-color:rgba(142,68,173,0.4);}
 .home-buttons .btn:nth-child(3):hover{box-shadow:0 4px 15px rgba(142,68,173,0.4);}
-.home-buttons .btn:nth-child(4){background:linear-gradient(180deg,#f39c12,#d68910);border-color:rgba(243,156,18,0.4);}
-.home-buttons .btn:nth-child(4):hover{box-shadow:0 4px 15px rgba(243,156,18,0.4);}
-.home-buttons .btn:nth-child(5){background:linear-gradient(180deg,#2980b9,#1f6f9f);border-color:rgba(41,128,185,0.4);}
-.home-buttons .btn:nth-child(5):hover{box-shadow:0 4px 15px rgba(41,128,185,0.4);}
+.home-buttons .btn:nth-child(4){background:linear-gradient(180deg,#16a085,#1abc9c);border-color:rgba(26,188,156,0.4);}
+.home-buttons .btn:nth-child(4):hover{box-shadow:0 4px 15px rgba(26,188,156,0.4);}
+.home-buttons .btn:nth-child(5){background:linear-gradient(180deg,#f39c12,#d68910);border-color:rgba(243,156,18,0.4);}
+.home-buttons .btn:nth-child(5):hover{box-shadow:0 4px 15px rgba(243,156,18,0.4);}
+.home-buttons .btn:nth-child(6){background:linear-gradient(180deg,#2980b9,#1f6f9f);border-color:rgba(41,128,185,0.4);}
+.home-buttons .btn:nth-child(6):hover{box-shadow:0 4px 15px rgba(41,128,185,0.4);}
+.home-buttons .btn:nth-child(7){background:linear-gradient(180deg,#7f8c8d,#606c6d);border-color:rgba(127,140,141,0.4);}
+.home-buttons .btn:nth-child(7):hover{box-shadow:0 4px 15px rgba(127,140,141,0.4);}
 
 /* ===== STUDY SCREEN ===== */
 #study-screen{gap:12px;}
@@ -668,6 +672,50 @@ h3{font-family:'Press Start 2P',monospace;font-size:10px;color:#e94560;margin-bo
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-track{background:#0a0a1a;}
 ::-webkit-scrollbar-thumb{background:#533483;border-radius:2px;}
+
+/* Team screen */
+.team-slots{display:flex;gap:8px;justify-content:center;margin-bottom:12px;}
+.team-slot{
+  width:90px;height:110px;
+  background:rgba(10,10,26,0.7);border:2px solid rgba(83,52,131,0.4);
+  border-radius:8px;padding:6px;text-align:center;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  transition:all .2s;position:relative;
+}
+.team-slot.selected{border-color:#e94560;box-shadow:0 0 12px rgba(233,69,96,0.4);}
+.team-slot.filled img{width:50px;height:50px;object-fit:contain;}
+.team-slot .slot-label{font-family:'Press Start 2P',monospace;font-size:7px;color:#888;margin-bottom:2px;}
+.team-slot .slot-name{font-size:8px;color:#e0e0e0;margin-top:2px;}
+.team-slot .slot-level{font-size:7px;color:#f1c40f;font-family:'Press Start 2P',monospace;}
+.team-slot .slot-empty{font-size:24px;color:#333;}
+.team-slot .leader-badge{position:absolute;top:-6px;left:-6px;background:#e94560;color:#fff;font-size:7px;padding:1px 4px;border-radius:4px;font-family:'Press Start 2P',monospace;}
+.team-monster-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:8px;overflow-y:auto;max-height:300px;}
+.team-mon-card{
+  background:rgba(10,10,26,0.6);border:1px solid rgba(83,52,131,0.3);
+  border-radius:6px;padding:6px;text-align:center;cursor:pointer;transition:.2s;
+}
+.team-mon-card:active{transform:scale(0.95);}
+.team-mon-card.in-team{border-color:#f1c40f;background:rgba(241,196,15,0.1);}
+.team-mon-card.disabled{opacity:0.3;pointer-events:none;}
+.team-mon-card img{width:50px;height:50px;object-fit:contain;}
+.team-mon-card .tmc-name{font-size:8px;color:#e0e0e0;margin-top:2px;}
+.team-mon-card .tmc-level{font-size:7px;color:#f1c40f;font-family:'Press Start 2P',monospace;}
+.team-mon-card .tmc-spec{font-size:7px;color:#2ecc71;margin-top:1px;}
+/* Battle switch button */
+.battle-switch-btn{
+  background:linear-gradient(180deg,#8e44ad,#6c3483);color:#fff;
+  border:2px solid rgba(142,68,173,0.4);padding:8px 12px;
+  font-family:inherit;font-size:11px;border-radius:8px;cursor:pointer;
+  transition:.2s;
+}
+.battle-switch-btn:active{transform:scale(0.95);}
+.battle-switch-btn:disabled{opacity:0.3;pointer-events:none;}
+/* Specialty badge on skill buttons */
+.spec-badge{
+  display:inline-block;background:#2ecc71;color:#fff;
+  font-size:7px;padding:1px 3px;border-radius:3px;margin-left:2px;
+  font-family:'Press Start 2P',monospace;vertical-align:middle;
+}
 
 /* ===== RESPONSIVE ===== */
 @media(max-width:500px){

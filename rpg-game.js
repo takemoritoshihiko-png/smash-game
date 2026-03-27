@@ -20,7 +20,8 @@ const defaultState = {
   evoStage: 0,
   ownedMonsters: [1],
   activeMonster: 1,
-  monsterProgress: {}
+  monsterProgress: {},
+  team: [1, null, null]
 };
 let gameState = { ...defaultState };
 
@@ -51,6 +52,7 @@ function loadGame() {
     if (!Array.isArray(gameState.ownedMonsters)) gameState.ownedMonsters = [1];
     if (!gameState.activeMonster) gameState.activeMonster = 1;
     if (!gameState.monsterProgress) gameState.monsterProgress = {};
+    if (!Array.isArray(gameState.team)) gameState.team = [gameState.activeMonster || 1, null, null];
     // Migrate old playerId from gameState if present
     if (saved.playerId && saved.playerId !== playerId) {
       playerId = saved.playerId;
@@ -726,6 +728,7 @@ function startBattle(enemyData, boss, headerLabel) {
     finished: false,
     potionsUsed: 0
   };
+  battleState.teamHp = {};
 
   const label = boss ? enemy.name + ' [BOSS]' : enemy.name;
   document.getElementById('enemy-name').textContent = label;
@@ -792,6 +795,7 @@ function goBattle() {
     finished: false,
     potionsUsed: 0
   };
+  battleState.teamHp = {};
 
   document.getElementById('enemy-name').textContent = enemy.name + ' Lv.' + playerLevel;
   document.getElementById('enemy-sprite').textContent = enemy.emoji;
@@ -836,6 +840,11 @@ function addBattleLog(msg) {
 
 function battleAction(action) {
   if (battleState.finished) return;
+
+  if (action === 'switch') {
+    showBattleSwitchMenu();
+    return;
+  }
 
   if (action === 'run') {
     if (battleMode === 'story') {
@@ -914,7 +923,12 @@ function battleAnswer(idx, correctIdx, btnEl) {
         addBattleLog(`${battleState.enemy.name} counterattacks!`);
         doEnemyAttack(effDef, false);
         if (battleState.playerHp <= 0) {
-          setTimeout(() => endBattle(false, false), 600);
+          if (checkTeamWipe()) {
+            setTimeout(() => endBattle(false, false), 600);
+          } else {
+            addBattleLog(`${getActiveMonster().name} fainted!`);
+            setTimeout(() => showBattleSwitchMenu(), 600);
+          }
           return;
         }
         setTimeout(() => enemyTurn(), 600);
@@ -923,6 +937,8 @@ function battleAnswer(idx, correctIdx, btnEl) {
       sfx.correct();
       let baseDmg = Math.max(1, effAtk - battleState.enemy.def + Math.floor(Math.random() * 4));
       baseDmg = Math.max(1, Math.floor(baseDmg * skillMult));
+      const specBonus = getSpecialtyBonus(sk ? sk.cat : 'vocabulary');
+      if (specBonus > 0) baseDmg = Math.floor(baseDmg * (1 + specBonus));
 
       const playerHit = applyCrit(baseDmg);
       if (playerHit.crit) addBattleLog('<span class="crit-text">CRITICAL HIT!</span>');
@@ -996,7 +1012,12 @@ function enemyTurn() {
   battleState.defending = false;
 
   if (battleState.playerHp <= 0) {
-    setTimeout(() => endBattle(false, false), 600);
+    if (checkTeamWipe()) {
+      setTimeout(() => endBattle(false, false), 600);
+    } else {
+      addBattleLog(`${getActiveMonster().name} fainted!`);
+      setTimeout(() => showBattleSwitchMenu(), 600);
+    }
   }
 }
 
@@ -1188,7 +1209,9 @@ function renderBattleSkills() {
     btn.className = 'skill-btn ' + (unlocked ? sk.cls : 'sk-locked');
     btn.disabled = !unlocked;
     if (unlocked) {
-      btn.innerHTML = `<span class="skill-name">${sk.icon} ${sk.name}</span><span class="skill-sub">${sk.mult}x dmg</span>`;
+      const specBonus = getSpecialtyBonus(sk.cat);
+      const specLabel = specBonus > 0 ? ` <span class="spec-badge">+${Math.round(specBonus*100)}%</span>` : '';
+      btn.innerHTML = `<span class="skill-name">${sk.icon} ${sk.name}${specLabel}</span><span class="skill-sub">${sk.mult}x dmg</span>`;
       btn.onclick = () => useSkill(i);
     } else {
       btn.innerHTML = `<span class="skill-name">\uD83D\uDD12 ${sk.name}</span><span class="skill-sub">Stage ${sk.reqStage + 1}</span>`;
@@ -1793,6 +1816,181 @@ function hideVocabTooltip() {
   const el = document.getElementById('active-vocab-tooltip');
   if (el) el.remove();
   activeTooltip = null;
+}
+
+// ===== TEAM SYSTEM =====
+let teamSelectedSlot = 0;
+
+function goTeam() {
+  teamSelectedSlot = 0;
+  renderTeamScreen();
+  showScreen('team-screen');
+}
+
+function renderTeamScreen() {
+  const slotsEl = document.getElementById('team-slots');
+  const listEl = document.getElementById('team-monster-list');
+  const team = gameState.team || [1, null, null];
+  const owned = getOwnedMonsters();
+
+  // Render slots
+  slotsEl.innerHTML = '';
+  for (let i = 0; i < 3; i++) {
+    const monId = team[i];
+    const mon = monId ? monsterRoster.find(m => m.id === monId) : null;
+    const prog = monId ? getMonsterData(monId) : null;
+    const div = document.createElement('div');
+    div.className = 'team-slot' + (i === teamSelectedSlot ? ' selected' : '') + (mon ? ' filled' : '');
+
+    let inner = '';
+    if (i === 0) inner += '<div class="leader-badge">LEADER</div>';
+    inner += `<div class="slot-label">Slot ${i + 1}</div>`;
+    if (mon) {
+      const stage = prog ? (prog.evoStage || 0) : 0;
+      inner += `<img src="${mon.img}" alt="${mon.name}">`;
+      inner += `<div class="slot-name">${mon.name}</div>`;
+      inner += `<div class="slot-level">Stg.${stage + 1}</div>`;
+    } else {
+      inner += '<div class="slot-empty">+</div>';
+    }
+    div.innerHTML = inner;
+    div.onclick = () => { teamSelectedSlot = i; renderTeamScreen(); };
+    slotsEl.appendChild(div);
+  }
+
+  // Render owned monster list
+  listEl.innerHTML = '';
+  owned.forEach(id => {
+    const mon = monsterRoster.find(m => m.id === id);
+    if (!mon) return;
+    const inTeam = team.includes(id);
+    const prog = getMonsterData(id);
+    const stage = prog ? (prog.evoStage || 0) : 0;
+    const card = document.createElement('div');
+    card.className = 'team-mon-card' + (inTeam ? ' in-team' : '');
+    const specText = mon.specialty ? mon.specialty.cats.map(c => c.substring(0,4)).join('+') + ' +' + Math.round(mon.specialty.bonus*100) + '%' : '';
+    card.innerHTML = `
+      <img src="${mon.img}" alt="${mon.name}">
+      <div class="tmc-name">${mon.name}</div>
+      <div class="tmc-level">Stg.${stage + 1}</div>
+      ${specText ? '<div class="tmc-spec">' + specText + '</div>' : ''}
+    `;
+    card.onclick = () => assignToSlot(id);
+    listEl.appendChild(card);
+  });
+}
+
+function assignToSlot(monId) {
+  const team = gameState.team || [1, null, null];
+  // If monster is already in another slot, remove it from that slot
+  for (let i = 0; i < 3; i++) {
+    if (team[i] === monId) team[i] = null;
+  }
+  // Assign to selected slot
+  team[teamSelectedSlot] = monId;
+  gameState.team = team;
+  // Leader (slot 0) is the active monster
+  if (team[0]) {
+    saveCurrentMonsterProgress();
+    gameState.activeMonster = team[0];
+    loadMonsterProgress(team[0]);
+  }
+  saveGame();
+  renderTeamScreen();
+}
+
+// Get specialty bonus for active monster on a given skill category
+function getSpecialtyBonus(skillCat) {
+  const activeMon = getActiveMonster();
+  if (!activeMon.specialty) return 0;
+  if (skillCat === 'mixed') return 0;
+  if (activeMon.specialty.cats.includes(skillCat)) return activeMon.specialty.bonus;
+  return 0;
+}
+
+// Battle switch menu
+function showBattleSwitchMenu() {
+  const team = gameState.team || [1, null, null];
+  const activeId = gameState.activeMonster;
+  const log = document.getElementById('battle-log');
+
+  // Build switch options
+  let switchHtml = '<div style="display:flex;gap:6px;justify-content:center;padding:4px;">';
+  let hasOptions = false;
+
+  for (let i = 0; i < 3; i++) {
+    const monId = team[i];
+    if (!monId || monId === activeId) continue;
+    const mon = monsterRoster.find(m => m.id === monId);
+    if (!mon) continue;
+    // Check if this monster has HP left (use team battle HP if tracked)
+    const teamHp = battleState.teamHp ? battleState.teamHp[monId] : null;
+    if (teamHp !== null && teamHp !== undefined && teamHp <= 0) continue;
+    hasOptions = true;
+    switchHtml += `<button class="btn btn-small" onclick="doSwitch(${monId})" style="padding:6px 10px;">
+      <img src="${mon.img}" style="width:30px;height:30px;object-fit:contain;display:block;margin:0 auto;">
+      <span style="font-size:8px;">${mon.name}</span>
+    </button>`;
+  }
+  switchHtml += '</div>';
+
+  if (!hasOptions) {
+    addBattleLog('No other team members available!');
+    return;
+  }
+
+  addBattleLog('Choose a monster to switch to:');
+  log.innerHTML += switchHtml;
+  log.scrollTop = log.scrollHeight;
+}
+
+function doSwitch(monId) {
+  if (battleState.finished) return;
+
+  // Save current monster's battle HP
+  if (!battleState.teamHp) battleState.teamHp = {};
+  battleState.teamHp[gameState.activeMonster] = battleState.playerHp;
+
+  // Switch active monster
+  saveCurrentMonsterProgress();
+  gameState.activeMonster = monId;
+  loadMonsterProgress(monId);
+
+  const newMon = getActiveMonster();
+
+  // Restore new monster's HP (or use full HP if first time)
+  if (battleState.teamHp[monId] !== undefined) {
+    battleState.playerHp = battleState.teamHp[monId];
+  } else {
+    battleState.playerHp = gameState.hp;
+    battleState.playerMaxHp = gameState.hp;
+  }
+  battleState.playerMaxHp = gameState.hp;
+
+  updateBattleHP();
+  updateMonsterImages();
+  renderBattleSkills();
+
+  addBattleLog(`Switched to <b>${newMon.name}</b>!`);
+
+  // Switching costs a turn - enemy attacks
+  enemyTurn();
+}
+
+function checkTeamWipe() {
+  const team = gameState.team || [1, null, null];
+  if (!battleState.teamHp) battleState.teamHp = {};
+  battleState.teamHp[gameState.activeMonster] = 0;
+
+  // Check if any team member has HP remaining
+  for (let i = 0; i < 3; i++) {
+    const monId = team[i];
+    if (!monId) continue;
+    if (monId === gameState.activeMonster) continue;
+    const hp = battleState.teamHp[monId];
+    if (hp === undefined || hp > 0) return false; // survivor found
+  }
+  return true; // all fainted
 }
 
 // ===== FIREBASE & RANKING =====

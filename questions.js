@@ -361,14 +361,14 @@ const bossQuestions = {
 
 // ===== MONSTER ROSTER & GACHA =====
 const monsterRoster = [
-  {id:1,name:'Blue Slime',element:'Water',emoji:'\uD83C\uDF0A',color:'#2980b9',rarity:'Normal',hp:20,atk:5,def:3,trait:'Starter',img:'monster-1.png'},
-  {id:2,name:'Fire Fox',element:'Fire',emoji:'\uD83D\uDD25',color:'#e74c3c',rarity:'Normal',hp:18,atk:8,def:2,trait:'ATK +20%',img:'monster-2.png'},
-  {id:3,name:'Stone Golem',element:'Earth',emoji:'\uD83C\uDF0D',color:'#8B6914',rarity:'Normal',hp:25,atk:4,def:10,trait:'DEF +30%',img:'monster-3.png'},
-  {id:4,name:'Thunder Bird',element:'Thunder',emoji:'\u26A1',color:'#f1c40f',rarity:'Rare',hp:18,atk:7,def:4,trait:'SPD +30%',img:'monster-4.png'},
-  {id:5,name:'Ice Wolf',element:'Ice',emoji:'\u2744\uFE0F',color:'#5dade2',rarity:'Rare',hp:28,atk:6,def:5,trait:'HP +30%',img:'monster-5.png'},
-  {id:6,name:'Dark Bat',element:'Dark',emoji:'\uD83C\uDF11',color:'#6c3483',rarity:'Rare',hp:22,atk:9,def:5,trait:'Balanced',img:'monster-6.png'},
-  {id:7,name:'Wind Dragon',element:'Wind',emoji:'\uD83D\uDCA8',color:'#27ae60',rarity:'Super Rare',hp:25,atk:11,def:7,trait:'All +15%',img:'monster-7.png'},
-  {id:8,name:'Lava Titan',element:'Fire/Earth',emoji:'\uD83C\uDF0B',color:'#d35400',rarity:'Super Rare',hp:22,atk:14,def:12,trait:'ATK+DEF',img:'monster-8.png'},
-  {id:9,name:'Storm Phoenix',element:'Thunder/Wind',emoji:'\uD83E\uDD85',color:'#8e44ad',rarity:'Super Rare',hp:28,atk:12,def:8,trait:'Epic evo',img:'monster-9.png'},
-  {id:10,name:'Celestial Beast',element:'Light',emoji:'\u2728',color:'#f1c40f',rarity:'Legend',hp:35,atk:15,def:12,trait:'All highest',img:'monster-10.png'}
+  {id:1,name:'Blue Slime',element:'Water',emoji:'\uD83C\uDF0A',color:'#2980b9',rarity:'Normal',hp:20,atk:5,def:3,trait:'Starter',img:'monster-1.png',specialty:{cats:['vocabulary'],bonus:0.10}},
+  {id:2,name:'Fire Fox',element:'Fire',emoji:'\uD83D\uDD25',color:'#e74c3c',rarity:'Normal',hp:18,atk:8,def:2,trait:'ATK +20%',img:'monster-2.png',specialty:{cats:['grammar'],bonus:0.10}},
+  {id:3,name:'Stone Golem',element:'Earth',emoji:'\uD83C\uDF0D',color:'#8B6914',rarity:'Normal',hp:25,atk:4,def:10,trait:'DEF +30%',img:'monster-3.png',specialty:{cats:['reading'],bonus:0.10}},
+  {id:4,name:'Thunder Bird',element:'Thunder',emoji:'\u26A1',color:'#f1c40f',rarity:'Rare',hp:18,atk:7,def:4,trait:'SPD +30%',img:'monster-4.png',specialty:{cats:['listening'],bonus:0.10}},
+  {id:5,name:'Ice Wolf',element:'Ice',emoji:'\u2744\uFE0F',color:'#5dade2',rarity:'Rare',hp:28,atk:6,def:5,trait:'HP +30%',img:'monster-5.png',specialty:{cats:['vocabulary'],bonus:0.15}},
+  {id:6,name:'Dark Bat',element:'Dark',emoji:'\uD83C\uDF11',color:'#6c3483',rarity:'Rare',hp:22,atk:9,def:5,trait:'Balanced',img:'monster-6.png',specialty:{cats:['grammar'],bonus:0.15}},
+  {id:7,name:'Wind Dragon',element:'Wind',emoji:'\uD83D\uDCA8',color:'#27ae60',rarity:'Super Rare',hp:25,atk:11,def:7,trait:'All +15%',img:'monster-7.png',specialty:{cats:['reading'],bonus:0.15}},
+  {id:8,name:'Lava Titan',element:'Fire/Earth',emoji:'\uD83C\uDF0B',color:'#d35400',rarity:'Super Rare',hp:22,atk:14,def:12,trait:'ATK+DEF',img:'monster-8.png',specialty:{cats:['listening'],bonus:0.15}},
+  {id:9,name:'Storm Phoenix',element:'Thunder/Wind',emoji:'\uD83E\uDD85',color:'#8e44ad',rarity:'Super Rare',hp:28,atk:12,def:8,trait:'Epic evo',img:'monster-9.png',specialty:{cats:['grammar','listening'],bonus:0.20}},
+  {id:10,name:'Celestial Beast',element:'Light',emoji:'\u2728',color:'#f1c40f',rarity:'Legend',hp:35,atk:15,def:12,trait:'All highest',img:'monster-10.png',specialty:{cats:['vocabulary','grammar','reading','listening'],bonus:0.15}}
 ];
