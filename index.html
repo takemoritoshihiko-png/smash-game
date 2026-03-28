@@ -9444,9 +9444,10 @@ function updateBattle(dt) {
       // ヒットストップ中もattackFrameを進める（hitbox消失→再ヒットループ防止）
       if (p.attacking && p.attackData) {
         p.attackFrame++;
-        const totalF = (p.attackData.startup || 0) + (p.attackData.active || 0) + (p.attackData.recovery || 0);
+        const ad = p.attackData;
+        const totalF = (ad.startup || 0) + (ad.active || 0) + (ad.recovery || 0);
         if (p.attackFrame >= totalF) {
-          p.attacking = false; p.specialState = null; p.hitTargets = [];
+          p.attacking = false; p.specialState = null; p.attackFrame = 0; p.hitTargets = [];
         }
       }
       continue;
