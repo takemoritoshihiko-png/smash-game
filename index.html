@@ -7625,8 +7625,8 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
     else if (attacker.comboCount >= 5) finalDamage *= 1.1;
     else if (attacker.comboCount >= 4) finalDamage *= 1.05;
   } else if (aci2 === 13) { attacker.comboCount = 1; }
-  // とっこ(14): 全攻撃に毒付与（2秒間、毎秒1%ダメージ）
-  if (aci2 === 14) { target.poisoned = 120; target.poisonDmg = 6; } // 120F=2秒、poisonDmg=6→毎30Fに1dmg
+  // とっこ(14): 全攻撃に毒付与（3秒間、毎秒2%ダメージ、合計6%）
+  if (aci2 === 14) { target.poisoned = Math.max(target.poisoned || 0, 180); target.poisonDmg = 2; } // 重ねがけはタイマー延長のみ
   // セン(18): 逆境強化
   if (aci2 === 18) finalDamage *= 1 + Math.min(0.2, attacker.damage * 0.0013);
   // ミスターツー(21): 二重人格 - 爆弾(KB大) or 炎(燃焼付与)
@@ -9825,11 +9825,11 @@ function updateBattle(dt) {
       p.vx *= 0.85; // 硬直中は減速
     }
 
-    // 状態異常更新
-    if (p.frozen > 0) { p.frozen--; p.vx = 0; p.vy = 0; continue; } // 凍結: 完全行動不能
-    if (p.stunned > 0) { p.stunned--; p.vx *= 0.9; continue; } // スタン
+    // 状態異常更新（continueなし: 後続のガード・描画処理は通常通り実行）
+    if (p.frozen > 0) { p.frozen--; p.vx = 0; p.vy = 0; } // 凍結: 移動不能
+    if (p.stunned > 0) { p.stunned--; p.vx *= 0.9; } // スタン: 減速
     if (p.burning > 0) { p.burning--; if (p.burning % 60 === 0) p.damage = Math.min(999, p.damage + p.burnDmg); }
-    if (p.poisoned > 0) { p.poisoned--; if (p.poisoned % 30 === 0 && p.poisonDmg > 0) p.damage = Math.min(999, p.damage + Math.ceil(p.poisonDmg / 10)); }
+    if (p.poisoned > 0) { p.poisoned--; if (p.poisoned % 60 === 0 && p.poisonDmg > 0) p.damage = Math.min(999, p.damage + p.poisonDmg); } // 毎60F(1秒)にpoisonDmg%ダメージ
     if (p.cursed > 0) p.cursed--;
     if (p.confused > 0) p.confused--;
     if (p.paralyzed > 0) p.paralyzed--;
@@ -15673,7 +15673,7 @@ const ultimateData = [
   { name:'瞬間移動体当たり', dmg:40, kb:18, angle:-30, range:'teleport', color:'#FFBB44' },
   { name:'超巨大砲弾', dmg:37, kb:17, angle:-15, range:'line', color:'#A0B858' },
   { name:'怒涛の百連撃', dmg:5, kb:4, angle:-10, range:'front', hits:8, color:'#FF6644' },
-  { name:'暗黒三刀流', dmg:25, kb:13, angle:-30, range:'front', status:'poisoned', dur:300, poisonDmg:12, color:'#CC44FF' },
+  { name:'暗黒三刀流', dmg:25, kb:13, angle:-30, range:'front', status:'poisoned', dur:180, poisonDmg:2, color:'#CC44FF' },
   { name:'虹羽大爆散', dmg:18, kb:12, angle:-50, range:'circle', radius:140, status:'confused', dur:90, color:'#FFD700' },
   { name:'黄金時間停止', dmg:35, kb:16, angle:-45, range:'all', status:'frozen', dur:90, color:'#FFD700' },
   { name:'破壊音波砲', dmg:33, kb:15, angle:-40, range:'circle', radius:180, status:'stunned', dur:60, color:'#88FFFF' },
@@ -15687,7 +15687,7 @@ const ultimateData = [
   { name:'謎の大爆発', dmg:0, kb:0, angle:0, range:'random', color:'#FF8800' },
   { name:'ぷよぷよ大爆発', dmg:8, kb:8, angle:80, range:'all', hits:5, status:'bounce', color:'#44CCEE' },
   { name:'超重力崩壊', dmg:35, kb:16, angle:-50, range:'circle', radius:160, pull:true, color:'#6622AA' },
-  { name:'毒虫大群', dmg:28, kb:12, angle:-30, range:'circle', radius:140, status:'poisoned', dur:180, poisonDmg:8, color:'#228822' },
+  { name:'毒虫大群', dmg:28, kb:12, angle:-30, range:'circle', radius:140, status:'poisoned', dur:180, poisonDmg:2, color:'#228822' },
 ];
 
 function removeUltimateVideo() {
