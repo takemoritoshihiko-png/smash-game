@@ -7171,6 +7171,10 @@ function createPlayer(id, charIdx, startX) {
     facingLeft: id === 1,
     grounded: false, jumps: charIdx === 15 ? 3 : 2, jumpUsed: false,
     wasAirAttacking: false, // 空中攻撃着地硬直判定用
+    jumpRampTimer: 0,      // ジャンプ上昇カーブ用タイマー
+    jumpTargetVy: 0,       // ジャンプ最終速度
+    turnTimer: 0,          // 振り向きモーション残りフレーム
+    turnDir: 0,            // 振り向き方向
     damage: 0, stocks: MAX_STOCKS,
     respawnTimer: 0, invincibleTimer: 0, alive: true,
     // Attack state
@@ -10484,7 +10488,7 @@ function updateBattle(dt) {
           if (airMoveX !== 0) {
             const ch2 = characters[p.charIdx];
             const airDrift = ch2.moveSpeed * AIR_SPEED_MULT * 0.65;
-            p.vx += airMoveX * AIR_ACCEL * airDrift * 0.15;
+            p.vx += airMoveX * AIR_ACCEL * airDrift * 0.06; // 空中攻撃中の横入力を弱める
           }
         }
         p.y += p.vy;
@@ -10817,7 +10821,7 @@ function updateBattle(dt) {
       }
     }
 
-    // === ジャンプ処理（シンプル版） ===
+    // === ジャンプ処理（上昇カーブ付き） ===
     if (jumpPress && !p.jumpUsed && p.jumps > 0) {
       let jumpMult = 1.15;
       if (p.charIdx === 10) jumpMult *= p.dragonMode ? 1.15 : 1.1;
@@ -10826,7 +10830,10 @@ function updateBattle(dt) {
       if (p.charIdx === 25 && p.yahoPassive === 5) jumpMult *= 1.15;
       const wJump = ch.weight || 1.0;
       const jumpWeightMult = wJump >= 1.0 ? 1.0 : (wJump >= 0.8 ? 0.88 : 0.85);
-      p.vy = ch.jumpPower * jumpMult * jumpWeightMult;
+      const finalJumpVy = ch.jumpPower * jumpMult * jumpWeightMult;
+      p.vy = finalJumpVy * 0.6; // 初速は最終速度の0.6倍
+      p.jumpTargetVy = finalJumpVy;
+      p.jumpRampTimer = 8; // 8Fかけて最終速度へ
       p.jumps--; p.jumpUsed = true; p.grounded = false;
       p.fastFalling = false;
       p.jumpSquash = 6;
@@ -10842,6 +10849,14 @@ function updateBattle(dt) {
     }
     if (!jumpPress) p.jumpUsed = false;
 
+    // ジャンプ上昇カーブ: 8Fかけて最終速度まで加速
+    if (p.jumpRampTimer > 0) {
+      p.jumpRampTimer--;
+      const rampT = 1 - p.jumpRampTimer / 8; // 0→1
+      p.vy = p.jumpTargetVy * (0.6 + 0.4 * rampT); // 0.6→1.0
+    }
+    // 振り向きタイマー更新
+    if (p.turnTimer > 0) p.turnTimer--;
     // スマブラ風重力: 上昇=弱、頂点=極弱、落下=強（重量で差別化）
     p.vy += getGravity(p);
     // 急降下: 落下速度を倍率で加速
@@ -11032,9 +11047,9 @@ function getWeightMaxFall(p) {
 function getGravity(p) {
   if (p.grounded) return GRAVITY;
   const wm = getWeightGravityMult(p);
-  // Apex: light chars float longer
+  // Apex: 頂点付近の滞空を長く（重力×0.7）
   if (Math.abs(p.vy) < APEX_THRESHOLD) {
-    const apexMult = wm < 1.0 ? 0.88 : 0.92; // light: 0.88, mid/heavy: 0.92 (was 0.75/1.0)
+    const apexMult = wm < 1.0 ? 0.7 : 0.75; // 軽量:0.7, 標準以上:0.75
     return GRAVITY_APEX * wm * apexMult;
   }
   if (p.vy < 0) return GRAVITY_RISE * wm;
@@ -11076,8 +11091,9 @@ const CHAR_MOVE = [
 ];
 function applyMovement(p, moveX, ch) {
   const cm = CHAR_MOVE[p.charIdx] || [0.70,0.75,0.45,0.88];
-  const accel = p.grounded ? cm[0] : cm[2];
-  let friction = p.grounded ? cm[1] * STAGE_FRICTION : cm[3];
+  // 空中慣性強化: airAccel×0.4, airFriction×0.6（慣性が残る）
+  const accel = p.grounded ? cm[0] : cm[2] * 0.4;
+  let friction = p.grounded ? cm[1] * STAGE_FRICTION : 1 - (1 - cm[3]) * 0.6;
   const senSpeedMult = (p.charIdx === 18 && p.senBuffTimer > 0) ? 1.3 : 1;
   const gravDebuffMult = (p.gravityDebuffTimer > 0) ? 0.5 : 1;
   // パッシブ: サイソク(2) ダッシュ速度+15%（地上）
@@ -11109,6 +11125,20 @@ function applyMovement(p, moveX, ch) {
   const targetVx = moveX * ch.moveSpeed * senSpeedMult * gravDebuffMult * saisokuMult * shaudenMult * yahoSpeedMult * microSplitSpeedMult * speedMult * dashMult * dSkillSpeedMult * autoSpeedMult;
 
   if (moveX !== 0) {
+    // 振り向きモーション: 地上で逆方向に入力→6F振り向き
+    if (p.grounded && Math.sign(p.vx) !== 0 && Math.sign(p.vx) !== moveX && Math.abs(p.vx) > 2 && p.turnTimer <= 0) {
+      p.turnTimer = 6;
+      p.turnDir = moveX;
+    }
+    // 振り向き中は急減速
+    if (p.turnTimer > 0 && p.grounded) {
+      p.vx *= 0.2;
+      // 振り向き完了後に方向転換
+      if (p.turnTimer === 1) {
+        p.facingLeft = p.turnDir < 0;
+      }
+      return; // 振り向き中は加速しない
+    }
     // ダッシュターン: ダッシュ中に逆方向入力→少し滑る
     if (p.dashing && p.grounded && moveX !== 0 && Math.sign(p.vx) !== 0 && Math.sign(p.vx) !== moveX) {
       p.vx *= DASH_TURN_FRICTION;
@@ -12201,6 +12231,22 @@ function drawBattle(dt) {
     const isIdle = p.grounded && !p.attacking && Math.abs(p.vx) < 0.5 && p.hitstun <= 0 && !p.grabbing && !p.grabbed && !p.guarding && p.guardBreakStun <= 0;
     const idleOfs = isIdle ? Math.sin(battleTime * (Math.PI * 2 / 180)) * 0.3 : 0;
     const drawY = p.y - 55 + idleOfs;
+
+    // 着地スクワッシュ（landSquash: 縦圧縮→元に戻す）
+    if (p.landSquash > 0) {
+      const squashT = p.landSquash / 12; // 0→1
+      const scaleY = 1 - squashT * (p.fastFalling ? 0.3 : 0.15);
+      const scaleX = 1 + squashT * (p.fastFalling ? 0.15 : 0.08);
+      ctx.translate(p.x, p.y);
+      ctx.scale(scaleX, scaleY);
+      ctx.translate(-p.x, -p.y);
+    }
+    // ステージ端のオフセット表示（端を向いている時のみ）
+    const edgeL = p.x - STAGE_LEFT, edgeR = STAGE_RIGHT - p.x;
+    if (p.grounded && p.hitstun <= 0) {
+      if (edgeL < 30 && p.facingLeft) ctx.translate(-4, 0);
+      else if (edgeR < 30 && !p.facingLeft) ctx.translate(4, 0);
+    }
 
     // ⑤ コマンド技スケールエフェクト & ドラゴンモード拡大
     const dragonScale = (p.charIdx === 10 && p.dragonMode) ? 1.3 : 1.0;
