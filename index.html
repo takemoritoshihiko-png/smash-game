@@ -8298,7 +8298,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   }
   // 上限: 弱6F、強8F、スマッシュ10F
   const hitStopCap = isSmash ? 10 : (isStrong || isSpecial) ? 8 : 6;
-  hitStopFrames = Math.max(hitStopFrames, Math.min(newHitStop, hitStopCap));
+  hitStopFrames = Math.min(newHitStop, hitStopCap); // 直接上書き（積み重ね防止）
 
   // ② 強攻撃・スマッシュヒット時: 相手を白フラッシュ + 一瞬拡大
   if (isStrong || isSpecial || isSmash) {
@@ -9189,7 +9189,8 @@ function updateBattle(dt) {
   battleTime += dt;
   cmdFrameCounter++; // コマンド入力用フレームカウンタ
 
-  // ヒットストップ処理
+  // ヒットストップ処理（絶対上限15F）
+  hitStopFrames = Math.min(hitStopFrames, 15);
   let inHitStop = false;
   if (hitStopFrames > 0) {
     hitStopFrames--;
@@ -14991,7 +14992,8 @@ function applyHostState(data) {
   }
   gameOver = data.gameOver;
   winner = data.winner;
-  hitStopFrames = data.hitStopFrames;
+  // ゲスト側: 受信値が現在値より大きい時だけ上書き（二重カウントダウン防止）
+  if (data.hitStopFrames > hitStopFrames) hitStopFrames = data.hitStopFrames;
   koSlowMotion.active = data.koSlowMotion.active;
   koSlowMotion.frames = data.koSlowMotion.frames;
   koSlowMotion.maxFrames = data.koSlowMotion.maxFrames;
