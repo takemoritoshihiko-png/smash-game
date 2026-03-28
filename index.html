@@ -5473,11 +5473,16 @@ const COMBO_ROUTES = {
     { name: 'カウンター連携', route: '空中回避→カウンター→横スマ→空中', dmgRange: '20〜60%', diff: 3, hits: 4 },
   ],
   27: [ // プル（重力）
-    { name: '重力コンボ', route: '弱→重力引き寄せ→横スマ→上スマ', dmgRange: '0〜50%', diff: 2, hits: 4 },
+    { name: '引力コンボA', route: '通常(引き寄せ)→引力フィールド→横強→上攻撃→空中下(メテオ)', dmgRange: '0〜50%', diff: 2, hits: 5 },
+    { name: '引力コンボB', route: '引力フィールド→グラビティスラム(叩きつけ)→バウンド追撃横スマ', dmgRange: '50〜80%', diff: 2, hits: 3 },
+    { name: '💀 重力葬A', route: '引力フィールド→グラビティスラム→重力反転→空中追撃→崖端下空中(メテオ)', dmgRange: '0%〜', diff: 3, hits: 5, instantKill: true },
+    { name: '💀 重力葬B', route: 'ブラックホール(引き寄せ爆発)→空中追撃→下空中(メテオ)', dmgRange: '80%〜', diff: 2, hits: 3, instantKill: true },
   ],
   28: [ // ムッシー（虫）
-    { name: '毒虫コンボ', route: '弱(毒付与)→弱→横強→上スマ', dmgRange: '0〜60%', diff: 2, hits: 4 },
-    { name: '虫群連携', route: '弱×3→空中→横スマ', dmgRange: '0〜50%', diff: 2, hits: 5 },
+    { name: '毒虫コンボA', route: '通常×2→ハチの針ラッシュ(多段)→毒付与→上強→上スマ', dmgRange: '0〜50%', diff: 2, hits: 6 },
+    { name: '毒虫コンボB', route: 'タマムシ飛行(突進)→横強→クワガタ大顎(回転KB)', dmgRange: '50〜80%', diff: 2, hits: 3 },
+    { name: '💀 毒牙葬A', route: '通常→下攻撃(毒付与)→横強→タマムシ飛行→クワガタ大顎(メテオ)', dmgRange: '0%〜', diff: 3, hits: 5, instantKill: true },
+    { name: '💀 毒牙葬B', route: '必殺(毒虫大群・毒付与)→クワガタ大顎(メテオ)', dmgRange: '80%〜', diff: 2, hits: 3, instantKill: true },
   ],
 };
 
@@ -7780,6 +7785,16 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   if (aci3 === 24 && isDownSmash && target.fearTimer > 0 && (isNearEdge || isOffStage)) {
     meteorTriggered = true;
     target.vx = 0; target.vy = Math.abs(weightedKb) * 1.6 + 5;
+  }
+  // プル(27): 下空中(divekick)、崖外
+  if (aci3 === 27 && isDownair && (isNearEdge || isOffStage)) {
+    meteorTriggered = true;
+    target.vx = 0; target.vy = Math.abs(weightedKb) * 1.5 + 5;
+  }
+  // ムッシー(28): クワガタ大顎(コマンド技cmd)、相手が毒状態+崖端
+  if (aci3 === 28 && hitType === 'cmd' && target.poisonTimer > 0 && (isNearEdge || isOffStage)) {
+    meteorTriggered = true;
+    target.vx = 0; target.vy = Math.abs(weightedKb) * 1.5 + 5;
   }
   // 汎用崖メテオ: 他キャラの下スマッシュ（崖端、ダメージ30%以上）
   if (!meteorTriggered && isDownSmash && target.damage >= 30 && (isNearEdge || isOffStage)) {
