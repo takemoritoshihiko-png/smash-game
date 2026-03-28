@@ -6958,6 +6958,7 @@ function createPlayer(id, charIdx, startX) {
     attacking: false, attackType: null, attackFrame: 0, attackData: null,
     hitTargets: [], lastHitFrame: -99,
     hitstun: 0, diFrame: 0, diBaseVx: 0, diBaseVy: 0, diShown: false, groundBounced: false, bounceStun: 0,
+    downThrowBounce: false, // 下投げバウンド状態（コンボ補正用）
     // Special attack states
     specialState: null,
     // Grab/throw state
@@ -7920,10 +7921,12 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   // ===== All-Star Brawl 2 エフェクト =====
 
   // ① ヒットストップ（0.1秒 = 6フレーム、強攻撃は長め）
+  // 下投げバウンド中の相手: ヒットストップ0.5倍（コンボが途切れにくい）
+  const hitStopMult = target.downThrowBounce ? 0.5 : 1.0;
   if (isStrong || isSpecial) {
-    hitStopFrames = Math.max(hitStopFrames, isSpecial ? 8 : 6);
+    hitStopFrames = Math.max(hitStopFrames, Math.floor((isSpecial ? 8 : 6) * hitStopMult));
   } else if (kb > 3) {
-    hitStopFrames = Math.max(hitStopFrames, 4);
+    hitStopFrames = Math.max(hitStopFrames, Math.floor(4 * hitStopMult));
   }
   // ドラゴンモード: ヒットストップ+2フレーム
   if (attacker.charIdx === 10 && attacker.dragonMode) hitStopFrames += 2;
@@ -8351,11 +8354,14 @@ function executeThrow(grabber, dirX, dirY) {
     throwAngle = -80; throwDir = 0;
     target.hitstun = Math.floor(15 + target.damage * 0.12);
   } else if (dirY > 0) {
-    // 下投げ: 低い角度20度（コンボ起点）
-    throwDmg = dmgTable.down * kumaPassive;
-    kbBase = 6; kbScale = 0.06;
-    throwAngle = namiDownAngle; throwDir = grabber.facingLeft ? -1 : 1;
-    target.hitstun = Math.floor(18 + target.damage * 0.12);
+    // 下投げ: 真下叩きつけ → 地面バウンド → コンボ起点
+    throwDmg = 6 * kumaPassive;
+    kbBase = 5; kbScale = 0.04;
+    throwAngle = 90; throwDir = 0; // 真下
+    target.hitstun = Math.floor(20 + target.damage * 0.15);
+    // 下投げ専用フラグ
+    target.downThrowBounce = true;
+    target.groundBounced = false; // バウンドを確実に発生させる
   } else if (dirX !== 0 && dirX !== (grabber.facingLeft ? -1 : 1)) {
     // 後ろ投げ: 斜め上30度（後方）
     throwDmg = dmgTable.back * kumaPassive;
@@ -8372,7 +8378,12 @@ function executeThrow(grabber, dirX, dirY) {
   {
     const kb = (kbBase + target.damage * kbScale) / targetWeight * kbMult * kumaPassive;
     const tRad = throwAngle * Math.PI / 180;
-    if (throwDir === 0) {
+    if (throwAngle === 90) {
+      // 下投げ: 真下に叩きつけ
+      target.vx = 0;
+      target.vy = kb * 1.5 + 8; // 確実に地面に到達する速度
+      target.grounded = false;
+    } else if (throwDir === 0) {
       // 上投げ: 真上
       target.vx = 0;
       target.vy = -kb * 1.3;
@@ -8384,9 +8395,20 @@ function executeThrow(grabber, dirX, dirY) {
 
   target.damage = Math.min(999, target.damage + throwDmg);
   target.damageTint = 12;
-  target.throwImmuneTimer = THROW_IMMUNE_FRAMES;
-  playHitSound('throw');
-  triggerScreenShake(4, 8);
+  // 下投げ: 投げ無敵なし（バウンド中のコンボ追撃のため）
+  target.throwImmuneTimer = target.downThrowBounce ? 0 : THROW_IMMUNE_FRAMES;
+
+  if (target.downThrowBounce) {
+    // 下投げ専用: 重い叩きつけSE + 大きな画面振動
+    playHitSound('strong');
+    triggerScreenShake(8, 12);
+    // 叩きつけエフェクト（持ち上げ→叩きつけの演出）
+    hitEffects.push({ x: target.x, y: target.y - 20, life: 12, maxLife: 12, color: '#FF6600', size: 35 });
+    cmdNameDisplay.push({ text: 'SLAM!', x: target.x, y: target.y - 80, life: 40, maxLife: 40, color: '#FF8844' });
+  } else {
+    playHitSound('throw');
+    triggerScreenShake(4, 8);
+  }
 
   // 衝撃波リングエフェクト
   hitEffects.push({ x: target.x, y: target.y - 40, life: 15, maxLife: 15, color: '#FFAA00', size: 40 });
@@ -9398,7 +9420,16 @@ function updateBattle(dt) {
       p.y += p.vy;
       landingCheck(p);
       blastCheck(p);
-      if (p.bounceStun <= 0) p.groundBounced = false;
+      if (p.bounceStun <= 0) {
+        p.groundBounced = false;
+        // 下投げバウンド終了: 着地硬直を追加してコンボ猶予を与える
+        if (p.downThrowBounce && p.grounded) {
+          p.landLag = Math.max(p.landLag || 0, 10);
+        }
+        p.downThrowBounce = false;
+      }
+      // 下投げバウンド中: 無敵フレームなし（コンボ追撃可能）
+      if (p.downThrowBounce) p.invincibleTimer = 0;
       continue;
     }
 
@@ -10482,19 +10513,42 @@ function landingCheck(p) {
         }
       }
     }
-    // スパイクバウンド: 下方向に高速で叩きつけられた時
-    if (landed && p.hitstun > 0 && prevVy > 8 && !p.groundBounced) {
+    // スパイクバウンド / 下投げバウンド: 下方向に叩きつけられた時
+    if (landed && p.hitstun > 0 && (prevVy > 8 || p.downThrowBounce) && !p.groundBounced) {
       p.groundBounced = true;
       p.grounded = false;
-      p.vy = -(prevVy * 0.5);
-      p.bounceStun = 18; // 0.3秒硬直
-      p.landSquash = 10; // 潰れアニメーション
+      // 下投げバウンド: ダメージ量でバウンド高さを変化
+      let bounceVy;
+      if (p.downThrowBounce) {
+        if (p.damage <= 40) {
+          bounceVy = -(3 + prevVy * 0.2);  // 低%: 低くバウンド → 上スマ/上強でコンボ
+        } else if (p.damage <= 80) {
+          bounceVy = -(5 + prevVy * 0.35); // 中%: 中バウンド → 空中攻撃で追撃
+        } else {
+          bounceVy = -(8 + prevVy * 0.5);  // 高%: 高バウンド → 撃墜コンボ
+        }
+        // コンボ補正: バウンド中の着地硬直+10F
+        p.landLag = (p.landLag || 0) + 10;
+      } else {
+        bounceVy = -(prevVy * 0.5); // 通常スパイクバウンド
+      }
+      p.vy = bounceVy;
+      p.bounceStun = p.downThrowBounce ? 12 : 18; // 下投げ: 短め硬直でコンボ繋がりやすく
+      p.landSquash = 10;
       // 衝撃波エフェクト
-      triggerScreenShake(8, 8);
-      hitEffects.push({ x: p.x, y: p.y, life: 14, maxLife: 14, color: '#FFAA44', size: 90, type: 'ring' });
-      hitEffects.push({ x: p.x, y: p.y, life: 10, maxLife: 10, color: '#FFFFFF', size: 60 });
+      const isDownThrow = p.downThrowBounce;
+      triggerScreenShake(isDownThrow ? 10 : 8, isDownThrow ? 10 : 8);
+      hitEffects.push({ x: p.x, y: p.y, life: 14, maxLife: 14, color: isDownThrow ? '#FF6600' : '#FFAA44', size: isDownThrow ? 110 : 90, type: 'ring' });
+      hitEffects.push({ x: p.x, y: p.y, life: 12, maxLife: 12, color: '#FFFFFF', size: isDownThrow ? 80 : 60 });
+      // 地面衝撃波（下投げ: 地面に広がる円形）
+      if (isDownThrow) {
+        hitEffects.push({ x: p.x, y: p.y, life: 16, maxLife: 16, color: '#DDCCAA', size: 120, type: 'shockwave' });
+        // 重い着地SE
+        playHitSound('ko');
+      }
       // 砂埃パーティクル
-      for (let i = 0; i < 12; i++) {
+      const dustCount = isDownThrow ? 16 : 12;
+      for (let i = 0; i < dustCount; i++) {
         const a = Math.PI + (Math.random() - 0.5) * Math.PI;
         sparks.push({ x: p.x + (Math.random()-0.5)*30, y: p.y, vx: Math.cos(a)*(3+Math.random()*5), vy: -1-Math.random()*3, life: 12+Math.random()*8, maxLife: 20, color: i%3===0?'#FFFFFF':'#FFCC88', size: 2+Math.random()*2, gravity: 0.15, drag: 0.95 });
       }
