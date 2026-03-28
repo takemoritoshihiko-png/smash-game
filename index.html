@@ -8282,23 +8282,14 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
 
   // ① ヒットストップ（上限付き）
   const hitStopMult = target.downThrowBounce ? 0.5 : 1.0;
+  // ヒットストップ: 短めに設定（ゲーム速度を維持）
   let newHitStop = 0;
-  if (isSmash) {
-    newHitStop = Math.floor(6 * hitStopMult); // スマッシュ: 6F
-  } else if (isStrong || isSpecial) {
-    newHitStop = Math.floor(5 * hitStopMult); // 強攻撃: 5F
-  } else if (kb > 3) {
-    newHitStop = Math.floor(3 * hitStopMult); // 弱攻撃: 3F
-  }
-  if (attacker.charIdx === 10 && attacker.dragonMode) newHitStop += 1;
-  // コンボ中はヒットストップ+1F（穏やかな延長）
-  if (attacker.id !== undefined) {
-    const atkCombo = comboDisplay[attacker.id];
-    if (atkCombo && atkCombo.count >= 2) newHitStop += 1;
-  }
-  // 上限: 弱6F、強8F、スマッシュ10F
-  const hitStopCap = isSmash ? 10 : (isStrong || isSpecial) ? 8 : 6;
-  // 前のヒットストップが終わってから次を開始（連続ヒットでの永久フリーズ防止）
+  if (isSmash) newHitStop = 4;       // スマッシュ: 4F
+  else if (isStrong || isSpecial) newHitStop = 3; // 強攻撃: 3F
+  else if (kb > 3) newHitStop = 2;   // 弱攻撃: 2F
+  // コンボ中・ドラゴンモードの追加なし（フリーズ感を排除）
+  // 上限: 弱3F、強4F、スマッシュ5F
+  const hitStopCap = isSmash ? 5 : (isStrong || isSpecial) ? 4 : 3;
   if (hitStopFrames <= 0) {
     hitStopFrames = Math.min(newHitStop, hitStopCap);
   }
