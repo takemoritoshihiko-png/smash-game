@@ -5892,10 +5892,10 @@ const THROW_TECH_WINDOW = 10;   // 投げ抜け受付フレーム（10F）
 
 // Guard system
 const GUARD_MAX_DURABILITY = 100;
-const GUARD_REGEN_RATE = 100 / 60 / 10; // 10% per second = 10/sec at 60fps ≈ 0.167/frame
-const GUARD_DAMAGE_REDUCTION = 0.5; // take 50% of damage (50% reduction)
-const GUARD_DURABILITY_COST = 0.8; // multiplier: damage * this = durability lost
-const GUARD_DECAY_RATE = 100 / 60 / (100/15); // 15% per second at 60fps ≈ 0.25/frame
+const GUARD_REGEN_RATE = 0.3; // 毎フレーム0.3ずつ自動回復
+const GUARD_DAMAGE_REDUCTION = 0; // 完全ガード: ダメージ0
+const GUARD_DURABILITY_COST = 1.5; // 攻撃力の1.5倍削れる
+const GUARD_DECAY_RATE = 100 / 60 / (100/15); // ガード維持中の自然減少
 const GUARD_BREAK_STUN = 120; // 2 seconds at 60fps
 const JUST_GUARD_WINDOW = 5; // frames of perfect guard at start
 const JUST_GUARD_STAGGER = 30; // frames attacker is staggered on just guard
@@ -6978,6 +6978,8 @@ function createPlayer(id, charIdx, startX) {
     guardDurability: GUARD_MAX_DURABILITY,
     guardBreakStun: 0, // frames of stun after guard break
     guardShrink: 0,    // ガード収縮アニメ残りフレーム
+    guardShrinkDir: 0, // ガードへこみ方向（-1左, 1右）
+    guardEndlag: 0,    // ガード解除後硬直
     justGuardTimer: 0, // counts down from JUST_GUARD_WINDOW when guard starts
     // Command cooldowns
     cd_cmd1: 0,
@@ -7185,46 +7187,59 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
       return;
     }
 
-    // Normal Guard: 80% damage reduction, reduced knockback, lose durability
-    // パッシブ: ジャッジマン(9) ガード強化 ガード中被ダメ-15%
+    // === 完全ガード: ダメージ0・ノックバック0 ===
     const gci = target.charIdx;
-    const guardPassive = gci === 6 ? 0.2 : (gci === 9 ? 0.85 : (gci === 5 ? 0.85 : 1.0)); // 熊太郎: 90%カット(0.2)
-    const reducedDamage = damage * GUARD_DAMAGE_REDUCTION * guardPassive;
+    // ダメージは完全にスキップ（0ダメージ）
     // シャうでん(8): ガード成功でゲージ+5%
     if (gci === 8 && target.ultimateGauge !== undefined) target.ultimateGauge = Math.min(100, target.ultimateGauge + 5);
-    target.damage = Math.min(999, target.damage + reducedDamage);
-    target.guardDurability -= damage * GUARD_DURABILITY_COST;
-    // Small pushback
+    // シールド耐久値を削る（攻撃力の1.5倍）
+    target.guardDurability -= damage * 1.5;
+    // ノックバック0（微小プッシュバックのみ）
     const dir = attacker.x < target.x ? 1 : -1;
-    target.vx = dir * 3;
-    playHitSound('guard');
-    // ガードヒット時のヒットストップ（2〜3F）
-    hitStopFrames = Math.max(hitStopFrames, 3);
-    // ガード収縮アニメーション（8F）
-    target.guardShrink = 8;
+    target.vx = dir * 2;
+    // ガード成功音（金属的な「キン」音）
+    playHitSound('justGuard');
+    // ヒットストップは適用（押された感触）
+    hitStopFrames = Math.max(hitStopFrames, 4);
+    // シールドが攻撃方向にへこむアニメ（4F）
+    target.guardShrink = 4;
+    target.guardShrinkDir = attacker.x < target.x ? -1 : 1;
+    // シールド光るエフェクト
+    hitEffects.push({
+      x: target.x + (attacker.x < target.x ? -15 : 15), y: target.y - 35,
+      life: 10, maxLife: 10, color: '#AAEEFF', size: 30
+    });
+    // ガードスパーク
+    for (let gi = 0; gi < 4; gi++) {
+      sparks.push({ x: target.x + dir * -15, y: target.y - 35 + (Math.random()-0.5)*20,
+        vx: dir * -(2+Math.random()*3), vy: (Math.random()-0.5)*3,
+        life: 8, maxLife: 8, color: gi%2===0?'#FFFFFF':'#88DDFF', size: 2+Math.random(), gravity: 0, drag: 0.92 });
+    }
     // Guard break check
     if (target.guardDurability <= 0) {
       target.guardDurability = 0;
       target.guarding = false;
       target.guardBreakStun = GUARD_BREAK_STUN;
-      // シールドブレイク演出強化: 砕けるパーティクル
-      hitEffects.push({ x: target.x, y: target.y - 40, life: 25, maxLife: 25, color: '#FF6600', size: 80 });
-      hitEffects.push({ x: target.x, y: target.y - 40, life: 20, maxLife: 20, color: '#FFFFFF', size: 100, type: 'ring' });
-      for (let si = 0; si < 12; si++) {
-        const sa = (si / 12) * Math.PI * 2;
-        sparks.push({ x: target.x + Math.cos(sa)*20, y: target.y - 35 + Math.sin(sa)*20,
-          vx: Math.cos(sa) * (3+Math.random()*4), vy: Math.sin(sa) * (3+Math.random()*4) - 2,
-          life: 15+Math.floor(Math.random()*10), maxLife: 25, color: si%3===0?'#44DDFF':si%3===1?'#FFFFFF':'#88EEFF',
-          size: 2+Math.random()*3, gravity: 0.08, drag: 0.96 });
+      // シールドブレイク演出: 砕けるパーティクル + 破裂エフェクト
+      hitEffects.push({ x: target.x, y: target.y - 40, life: 30, maxLife: 30, color: '#FF6600', size: 100 });
+      hitEffects.push({ x: target.x, y: target.y - 40, life: 25, maxLife: 25, color: '#FFFFFF', size: 120, type: 'ring' });
+      hitEffects.push({ x: target.x, y: target.y - 40, life: 20, maxLife: 20, color: '#FF4400', size: 80, type: 'ring' });
+      for (let si = 0; si < 16; si++) {
+        const sa = (si / 16) * Math.PI * 2;
+        sparks.push({ x: target.x + Math.cos(sa)*25, y: target.y - 35 + Math.sin(sa)*25,
+          vx: Math.cos(sa) * (4+Math.random()*5), vy: Math.sin(sa) * (4+Math.random()*5) - 3,
+          life: 18+Math.floor(Math.random()*12), maxLife: 30, color: si%4===0?'#44DDFF':si%4===1?'#FFFFFF':si%4===2?'#88EEFF':'#FF8844',
+          size: 2.5+Math.random()*3.5, gravity: 0.1, drag: 0.95 });
       }
       playHitSound('guardBreak');
-      triggerScreenShake(10, 20);
+      triggerScreenShake(12, 25);
+      // よろけアニメーション用
+      target.spinAngle = (Math.random() - 0.5) * 0.3;
     } else {
-      // Guard hit effect (shield spark)
+      // ガード成功エフェクト（シールドが光る）
       hitEffects.push({
-        x: target.x + (attacker.x < target.x ? -20 : 20), y: target.y - 35,
-        life: 8, maxLife: 8,
-        color: '#44DDFF', size: 20
+        x: target.x, y: target.y - 35,
+        life: 6, maxLife: 6, color: '#FFFFFF', size: 45, type: 'ring'
       });
     }
     // ガードフレームデータ: 攻撃側に硬直ペナルティ
@@ -9888,9 +9903,10 @@ function updateBattle(dt) {
         p.justGuardTimer = JUST_GUARD_WINDOW;
       }
     } else {
-      // ドスボス(19): ガード解除後の硬直が長い
-      if (p.guarding && !wantsGuard && p.charIdx === 19) {
-        p.dosbossGuardEndlag = 15; // 15F硬直（通常キャラは0）
+      if (p.guarding) {
+        // ガード解除後硬直6F（ドスボスは15F）
+        p.guardEndlag = p.charIdx === 19 ? 15 : 6;
+        if (p.charIdx === 19) p.dosbossGuardEndlag = 15;
       }
       p.guarding = false;
     }
@@ -9901,6 +9917,17 @@ function updateBattle(dt) {
     // Guard durability regen when not guarding
     if (!p.guarding && p.guardDurability < GUARD_MAX_DURABILITY) {
       p.guardDurability = Math.min(GUARD_MAX_DURABILITY, p.guardDurability + GUARD_REGEN_RATE);
+    }
+
+    // ガード解除後硬直
+    if (p.guardEndlag > 0) {
+      p.guardEndlag--;
+      p.vx *= 0.85;
+      p.vy += getGravity(p);
+      if (p.vy > MAX_FALL_SPEED) p.vy = MAX_FALL_SPEED;
+      p.y += p.vy;
+      landingCheck(p);
+      continue;
     }
 
     // Guarding state: no movement, stay grounded, gauge decays over time
@@ -9915,6 +9942,30 @@ function updateBattle(dt) {
         playHitSound('guardBreak');
         triggerScreenShake(6, 15);
       }
+
+      // === ガードキャンセル ===
+      // ガード中に↑ → ガードキャンセル上スマッシュ
+      let gcUp = false, gcJump = false;
+      if (p.id === 0) {
+        gcUp = (onlineMode && !isHost) ? !!remoteKeys.up : !!keys['ArrowUp'];
+      } else if (gameMode === 'cpu' || bossRushMode) {
+        gcUp = false; gcJump = false;
+      } else if (onlineMode && isHost) {
+        gcUp = !!remoteKeys.up;
+      } else {
+        gcUp = !!(keys['w'] || keys['W']);
+      }
+      if (gcUp) {
+        // ガードキャンセル上スマッシュ
+        p.guarding = false;
+        p.guardEndlag = 0;
+        startSmash(p, 'upSmash');
+        if (p.smashCharging) executeSmash(p); // 即発動
+        continue;
+      }
+      // ガード中にジャンプ → ガードキャンセルジャンプ
+      // (ジャンプ入力は↑キーと同じなので上の処理でカバー)
+
       p.vx = 0;
       p.vy += getGravity(p);
       if (p.vy > MAX_FALL_SPEED) p.vy = MAX_FALL_SPEED;
@@ -13467,8 +13518,10 @@ function drawGuardEffect(p) {
   const isJustGuard = p.justGuardTimer > 0;
 
   // Shield bubble (ガードヒット時に収縮アニメーション)
-  const shrinkMult = p.guardShrink > 0 ? 0.7 + 0.3 * (1 - p.guardShrink / 8) : 1.0;
+  const shrinkMult = p.guardShrink > 0 ? 0.75 + 0.25 * (1 - p.guardShrink / 4) : 1.0;
   const shieldRadius = 38 * shrinkMult;
+  // シールドが攻撃方向にへこむオフセット
+  const shrinkOfsX = p.guardShrink > 0 ? (p.guardShrinkDir || 0) * 5 * (p.guardShrink / 4) : 0;
   if (isJustGuard) {
     // Just guard: bright white shield
     ctx.strokeStyle = '#FFFFFF';
@@ -13487,7 +13540,7 @@ function drawGuardEffect(p) {
   }
 
   ctx.beginPath();
-  ctx.arc(p.x, p.y - 35, shieldRadius, 0, Math.PI * 2);
+  ctx.arc(p.x + shrinkOfsX, p.y - 35, shieldRadius, 0, Math.PI * 2);
   ctx.stroke();
 
   // Shield fill
