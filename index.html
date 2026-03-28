@@ -10497,7 +10497,7 @@ function updateBattle(dt) {
     // ボタン離し: jumpUsedリセット + フレームカウンタリセット
     if (!jumpPress) { p.jumpUsed = false; p.jumpHoldFrames = 0; }
     // 着地時リセット
-    if (p.grounded) { p.jumpHoldFrames = 0; p._doJump = false; }
+    if (p.grounded && !jumpPress && !p._doJump) { p.jumpHoldFrames = 0; }
 
     // スマブラ風重力: 上昇=弱、頂点=極弱、落下=強（重量で差別化）
     p.vy += getGravity(p);
