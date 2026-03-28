@@ -7320,6 +7320,20 @@ function createPlayer(id, charIdx, startX) {
     tensaiDragonGauge: 0,     // 天才: 龍気ゲージ(0-100、既存dragonMode/dragonTimerと連携）
     catbusTeleCharges: 3,     // Catbus: テレポートチャージ(0-3)
     catbusTeleRecharge: 0,    // Catbus: リチャージタイマー
+    kumaFury: 0,              // 熊太郎: テンション(0-100)
+    kumaFuryMode: 0,          // 熊太郎: 激怒モード残F
+    kumaFuryCooldown: 0,      // 熊太郎: 再発動不可タイマー
+    shawdenVoltage: 0,        // シャうでん: 電圧(0-100)
+    shawdenOvercharge: 0,     // シャうでん: 過電圧モード残F
+    tokkoPoisonGauge: 0,      // とっこ: 相手の毒蓄積(0-100)※攻撃側で管理
+    samFlightCharges: 3,      // サム: 飛翔チャージ(0-3)
+    samAirTimer: 0,           // サム: 空中滞在タイマー
+    senRank: 1,               // セン: 出世段階(1-5)
+    senRankHits: 0,           // セン: 段階内ヒット数
+    microBodies: 3,           // マイクロ: 合体数(1-3)
+    microRejoinTimer: 0,      // マイクロ: 離脱体復帰タイマー
+    dosbossArmor: 100,        // ドスボス: 装甲(0-100)
+    dosbossBroken: 0,         // ドスボス: 大破状態残F
   };
 }
 
@@ -7709,6 +7723,43 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   if (aci4 === 10) attacker.tensaiDragonGauge = Math.min(100, (attacker.tensaiDragonGauge || 0) + 5);
   if (target.charIdx === 10) target.tensaiDragonGauge = Math.min(100, (target.tensaiDragonGauge || 0) + 8);
   // Catbus: テレポートチャージ消費はtriggerAirDodgeで処理済み
+  // 熊太郎(6): テンション+10(攻撃)、+15(被ダメ)
+  if (aci4 === 6) attacker.kumaFury = Math.min(100, (attacker.kumaFury || 0) + 10);
+  if (target.charIdx === 6) target.kumaFury = Math.min(100, (target.kumaFury || 0) + 15);
+  // 熊太郎激怒モード: ダメージ×1.6
+  if (aci4 === 6 && attacker.kumaFuryMode > 0) target.damage = Math.min(999, target.damage + finalDamage * 0.6);
+  // シャうでん(8): 電圧+8
+  if (aci4 === 8) attacker.shawdenVoltage = Math.min(100, (attacker.shawdenVoltage || 0) + 8);
+  // とっこ(14): 相手毒蓄積+25（毒攻撃ヒット時）
+  if (aci4 === 14 && target.poisoned > 0) attacker.tokkoPoisonGauge = Math.min(100, (attacker.tokkoPoisonGauge || 0) + 25);
+  // とっこ重毒: ダメージ2倍
+  if (aci4 === 14 && attacker.tokkoPoisonGauge >= 100) target.damage = Math.min(999, target.damage + finalDamage);
+  // サム(15): 空中攻撃ヒットで飛翔+0.5
+  if (aci4 === 15 && !attacker.grounded) attacker.samFlightCharges = Math.min(3, (attacker.samFlightCharges || 0) + 0.5);
+  // セン(18): ヒットで出世カウント+1
+  if (aci4 === 18) {
+    attacker.senRankHits = (attacker.senRankHits || 0) + 1;
+    const hitsNeeded = [0, 8, 8, 10, 12][attacker.senRank - 1] || 10;
+    if (attacker.senRankHits >= hitsNeeded && attacker.senRank < 5) {
+      attacker.senRank++; attacker.senRankHits = 0;
+      const titles = ['','主任','課長','部長','社長'];
+      cmdNameDisplay.push({ text: '昇進! ' + titles[attacker.senRank - 1], x: attacker.x, y: attacker.y - 100, life: 60, maxLife: 60, color: '#FFD700' });
+    }
+  }
+  // セン出世ダメージボーナス
+  if (aci4 === 18 && attacker.senRank > 1) {
+    const senBonus = [0, 0, 0.1, 0.2, 0.3, 0.5][attacker.senRank] || 0;
+    target.damage = Math.min(999, target.damage + finalDamage * senBonus);
+  }
+  // マイクロ(20): 3体揃いでダメージ+20%
+  if (aci4 === 20 && attacker.microBodies >= 3) target.damage = Math.min(999, target.damage + finalDamage * 0.2);
+  // ドスボス(19): 被ダメで装甲減少
+  if (target.charIdx === 19) {
+    target.dosbossArmor = Math.max(0, (target.dosbossArmor || 100) - finalDamage * 0.5);
+    if (target.dosbossArmor <= 0 && !target.dosbossBroken) { target.dosbossBroken = 300; cmdNameDisplay.push({ text: '大破!', x: target.x, y: target.y - 100, life: 60, maxLife: 60, color: '#FF4444' }); }
+  }
+  // ドスボス装甲80%以上: 被ダメ-20%
+  if (target.charIdx === 19 && target.dosbossArmor >= 80) target.damage = Math.max(0, target.damage - finalDamage * 0.2);
 
   // === 固有ダメージ倍率（ゼン凍結×1.5、ジャッジ呪縛×2.0、波おじ全力×1.5） ===
   // 注: finalDamageは既に計算済みなので追加ダメージとして適用
@@ -9890,6 +9941,42 @@ function updateBattle(dt) {
         p.catbusTeleRecharge++;
         if (p.catbusTeleRecharge >= 480) { p.catbusTeleCharges++; p.catbusTeleRecharge = 0; }
       }
+    }
+
+    // 熊太郎(6): テンション自然減少・激怒モード
+    if (p.charIdx === 6) {
+      if (p.kumaFuryMode > 0) p.kumaFuryMode--;
+      if (p.kumaFuryCooldown > 0) p.kumaFuryCooldown--;
+      if (battleTime % 12 === 0 && p.kumaFury > 0 && !p.kumaFuryMode) p.kumaFury = Math.max(0, p.kumaFury - 1);
+      if (p.kumaFury >= 100 && !p.kumaFuryMode && p.kumaFuryCooldown <= 0) {
+        p.kumaFuryMode = 480; p.kumaFury = 0;
+        cmdNameDisplay.push({ text: '激怒モード!', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#FF4444' });
+      }
+    }
+    // シャうでん(8): 電圧自然減少・過電圧モード
+    if (p.charIdx === 8) {
+      if (p.shawdenOvercharge > 0) p.shawdenOvercharge--;
+      if (battleTime % 20 === 0 && p.shawdenVoltage > 0 && !p.shawdenOvercharge) p.shawdenVoltage = Math.max(0, p.shawdenVoltage - 1);
+      if (p.shawdenVoltage >= 100 && !p.shawdenOvercharge) {
+        p.shawdenOvercharge = 300; p.shawdenVoltage = 0;
+        cmdNameDisplay.push({ text: '過電圧!', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#FFFF44' });
+      }
+    }
+    // サム(15): 空中滞在タイマー
+    if (p.charIdx === 15) {
+      if (!p.grounded) { p.samAirTimer++; if (p.samAirTimer === 600) cmdNameDisplay.push({ text: 'AIR MASTER!!', x: p.x, y: p.y - 100, life: 90, maxLife: 90, color: '#FFD700' }); }
+      else p.samAirTimer = 0;
+    }
+    // セン(18): 出世は applyHit内で処理
+    // マイクロ(20): 離脱体復帰
+    if (p.charIdx === 20 && p.microBodies < 3) {
+      p.microRejoinTimer++;
+      if (p.microRejoinTimer >= 600) { p.microBodies = Math.min(3, p.microBodies + 1); p.microRejoinTimer = 0; }
+    }
+    // ドスボス(19): 装甲回復・大破
+    if (p.charIdx === 19) {
+      if (p.dosbossBroken > 0) { p.dosbossBroken--; if (p.dosbossBroken <= 0) { p.dosbossArmor = 100; cmdNameDisplay.push({ text: '修復完了', x: p.x, y: p.y - 100, life: 45, maxLife: 45, color: '#CC66FF' }); } }
+      else if (battleTime % 20 === 0 && p.dosbossArmor < 100) p.dosbossArmor = Math.min(100, p.dosbossArmor + 1);
     }
 
     // === 固有パッシブシステム更新 ===
@@ -14717,6 +14804,53 @@ function drawBattleHUD() {
       let chargeStr = '';
       for (let ci5 = 0; ci5 < 3; ci5++) chargeStr += ci5 < (gp.catbusTeleCharges || 0) ? '◆' : '◇';
       ctx.fillText('TELE ' + chargeStr, ggx + 40, ggy - 2);
+    }
+    // 熊太郎(6): テンション
+    if (gp.charIdx === 6) {
+      const r = (gp.kumaFury || 0) / 100;
+      ctx.fillStyle = '#1a0a0a'; ctx.fillRect(ggx, ggy, 80, 5);
+      ctx.fillStyle = gp.kumaFuryMode > 0 ? '#FF2222' : '#FF6644'; ctx.fillRect(ggx, ggy, 80 * r, 5);
+      ctx.fillStyle = '#FF4444'; ctx.fillText(gp.kumaFuryMode > 0 ? 'FURY!' : 'TENSION ' + Math.floor(gp.kumaFury || 0), ggx + 40, ggy - 2);
+    }
+    // シャうでん(8): 電圧
+    if (gp.charIdx === 8) {
+      const r = (gp.shawdenVoltage || 0) / 100;
+      ctx.fillStyle = '#1a1a0a'; ctx.fillRect(ggx, ggy, 80, 5);
+      ctx.fillStyle = gp.shawdenOvercharge > 0 ? '#FFFF00' : '#FFDD44'; ctx.fillRect(ggx, ggy, 80 * r, 5);
+      ctx.fillStyle = '#FFFF44'; ctx.fillText(gp.shawdenOvercharge > 0 ? 'OVERCHARGE!' : 'VOLT ' + Math.floor(gp.shawdenVoltage || 0), ggx + 40, ggy - 2);
+    }
+    // とっこ(14): 毒蓄積
+    if (gp.charIdx === 14) {
+      const r = (gp.tokkoPoisonGauge || 0) / 100;
+      ctx.fillStyle = '#0a1a0a'; ctx.fillRect(ggx, ggy, 80, 5);
+      ctx.fillStyle = r >= 1 ? '#00FF00' : '#44CC44'; ctx.fillRect(ggx, ggy, 80 * r, 5);
+      ctx.fillStyle = '#66CC44'; ctx.fillText(r >= 1 ? '重毒!' : 'POISON ' + Math.floor(gp.tokkoPoisonGauge || 0), ggx + 40, ggy - 2);
+    }
+    // サム(15): 飛翔チャージ
+    if (gp.charIdx === 15) {
+      ctx.fillStyle = '#88DDFF';
+      let fStr = ''; for (let fi2 = 0; fi2 < 3; fi2++) fStr += fi2 < Math.floor(gp.samFlightCharges || 0) ? '●' : '○';
+      ctx.fillText('FLY ' + fStr, ggx + 40, ggy - 2);
+    }
+    // セン(18): 出世
+    if (gp.charIdx === 18) {
+      const titles = ['平社員','主任','課長','部長','社長'];
+      ctx.fillStyle = gp.senRank >= 5 ? '#FFD700' : '#FF8844';
+      ctx.fillText(titles[(gp.senRank || 1) - 1] + ' Lv' + (gp.senRank || 1), ggx + 40, ggy - 2);
+    }
+    // マイクロ(20): 合体数
+    if (gp.charIdx === 20) {
+      ctx.fillStyle = '#44DDFF';
+      let bStr = ''; for (let bi = 0; bi < 3; bi++) bStr += bi < (gp.microBodies || 3) ? '■' : '□';
+      ctx.fillText('BODY ' + bStr, ggx + 40, ggy - 2);
+    }
+    // ドスボス(19): 装甲
+    if (gp.charIdx === 19) {
+      const r = (gp.dosbossArmor || 0) / 100;
+      ctx.fillStyle = '#1a0a1a'; ctx.fillRect(ggx, ggy, 80, 5);
+      ctx.fillStyle = gp.dosbossBroken > 0 ? '#FF4444' : (r > 0.5 ? '#CC66FF' : '#FF8844');
+      ctx.fillRect(ggx, ggy, 80 * r, 5);
+      ctx.fillStyle = '#CC66FF'; ctx.fillText(gp.dosbossBroken > 0 ? '大破!' : 'ARMOR ' + Math.floor(gp.dosbossArmor || 0), ggx + 40, ggy - 2);
     }
   }
 
