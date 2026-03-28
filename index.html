@@ -14716,7 +14716,7 @@ function setupPeerConnection(conn) {
     } else if (data.type === 'state') {
       // Guest receives authoritative state from host
       if (!isHost) {
-        applyHostState(data);
+        try { applyHostState(data); } catch(e) { console.error('[GUEST] applyHostState error:', e); }
       }
     }
   });
@@ -14835,6 +14835,10 @@ function serializePlayer(p) {
     frozen: p.frozen, burning: p.burning, poisoned: p.poisoned, stunned: p.stunned, cursed: p.cursed, confused: p.confused, paralyzed: p.paralyzed, feared2: p.feared2, sealMagic: p.sealMagic,
     ledgeGrab: p.ledgeGrab, ledgeSide: p.ledgeSide, ledgeTimer: p.ledgeTimer,
     autoBuff: p.autoBuff, autoBuffType: p.autoBuffType, consecutiveHits: p.consecutiveHits, dosbossComboCount: p.dosbossComboCount,
+    catbusVanishTimer: p.catbusVanishTimer || 0, microSplit: p.microSplit || false, mrtwoPersonality: p.mrtwoPersonality || 0,
+    rageActive: p.rageActive || false, rageGauge: p.rageGauge || 0, powerUpTimer: p.powerUpTimer || 0,
+    techState: p.techState || '', techTimer: p.techTimer || 0,
+    guardShrink: p.guardShrink || 0, bounceStun: p.bounceStun || 0, downThrowBounce: p.downThrowBounce || false,
   };
 }
 
@@ -14911,6 +14915,18 @@ function applyHostState(data) {
     target.senBuffTimer = src.senBuffTimer;
     target.dosbossRandomPattern = src.dosbossRandomPattern || 0; target.gravityDebuffTimer = src.gravityDebuffTimer || 0;
     target.cancelWindow = src.cancelWindow || 0; target.comboWindow = src.comboWindow || 0; target.airComboTimer = src.airComboTimer || 0;
+    // 追加同期フィールド
+    target.catbusVanishTimer = src.catbusVanishTimer || 0;
+    target.microSplit = src.microSplit || false;
+    target.mrtwoPersonality = src.mrtwoPersonality || 0;
+    target.rageActive = src.rageActive || false;
+    target.rageGauge = src.rageGauge || 0;
+    target.powerUpTimer = src.powerUpTimer || 0;
+    target.techState = src.techState || '';
+    target.techTimer = src.techTimer || 0;
+    target.guardShrink = src.guardShrink || 0;
+    target.bounceStun = src.bounceStun || 0;
+    target.downThrowBounce = src.downThrowBounce || false;
     // Restore attackData from attackType
     if (src.attacking && src.attackType) {
       const defs = (target.charIdx === 10 && target.dragonMode) ? dragonAttackDefs : attackDefs[target.charIdx];
@@ -17375,9 +17391,10 @@ function gameLoop(timestamp) {
     } else if (scene === 'battle') {
       if (onlineMode && !isHost) {
         // Guest: no game simulation, only update effects
-        updateGuestEffects(FIXED_DT);
-        // Guest側でも必殺技演出を更新（darken→text→video→damage→brighten）
-        if (ultimateActive) updateUltimate();
+        try {
+          updateGuestEffects(FIXED_DT);
+          if (ultimateActive) updateUltimate();
+        } catch(guestErr) { console.error('[GUEST] Update error:', guestErr); }
       } else if (koSlowMotion.active) {
         // ③ スローモーション: 3フレームに1回だけ更新
         koSlowMotion.frames++;
