@@ -10823,6 +10823,21 @@ function wallBounceCheck(p) {
 
 function landingCheck(p) {
   p.grounded = false;
+
+  // === ステージ壁判定: 床下からの横方向侵入防止 ===
+  // ノックバック中(hitstun>0)は壁を無視（崖外への吹っ飛び許可）
+  if (p.hitstun <= 0 && !p.grabbed) {
+    // 左壁: ステージ床レベルより下にいるキャラがSTAGE_LEFTを超えて右に入るのを防ぐ
+    if (p.y > STAGE_GROUND_Y + 5) {
+      if (p.x > STAGE_LEFT - 5 && p.x < STAGE_LEFT + 20 && p.vx > 0) {
+        p.x = STAGE_LEFT - 5; p.vx = 0;
+      }
+      if (p.x < STAGE_RIGHT + 5 && p.x > STAGE_RIGHT - 20 && p.vx < 0) {
+        p.x = STAGE_RIGHT + 5; p.vx = 0;
+      }
+    }
+  }
+
   if (p.vy >= 0) {
     const prevVy = p.vy; // 着地前の落下速度を保存
     let landed = false;
@@ -10893,6 +10908,17 @@ function landingCheck(p) {
     }
     // バウンド済みリセット（着地して通常着地の場合）
     if (landed && p.hitstun <= 0) p.groundBounced = false;
+  }
+
+  // === 天井判定: 下からステージ床にめり込むのを防止 ===
+  // 上昇中(vy < 0)にステージ床の下面に衝突
+  if (p.vy < 0 && p.x >= STAGE_LEFT && p.x <= STAGE_RIGHT) {
+    const headY = p.y - 70; // キャラの頭の位置（おおよそ）
+    if (headY < STAGE_GROUND_Y && p.y > STAGE_GROUND_Y) {
+      // 床の下にいて頭が床を突き抜けようとしている → 押し戻す
+      p.vy = Math.max(p.vy, 0);
+      p.y = STAGE_GROUND_Y + 1;
+    }
   }
 }
 
