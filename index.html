@@ -4669,6 +4669,8 @@ function drawTitle(dt) {
   const menuItems = [
     { label: 'ENTER  ゲーム開始', color: '#FFD700' },
     { label: 'O  オンライン対戦', color: '#44DDFF' },
+    { label: 'C  コンボリスト', color: '#FF88AA' },
+    { label: 'T  戦績', color: '#88FF88' },
   ];
   const menuStartY = 350;
   for (let i = 0; i < menuItems.length; i++) {
@@ -4842,6 +4844,7 @@ function drawSelect(dt) {
     ] : [
       { label: 'CPU 対戦', desc: 'CPUと対戦', icon: '🤖', color: '#FF8844', mode: 'cpu' },
       { label: 'BOSS RUSH', desc: 'ボス3連戦', icon: '👑', color: '#FF44CC', mode: 'bossrush' },
+      { label: 'TRAINING', desc: '練習モード', icon: '🎯', color: '#44FF88', mode: 'training' },
     ];
     const modeIdx = modes.findIndex(m => m.mode === gameMode);
     for (let i = 0; i < modes.length; i++) {
@@ -5267,6 +5270,115 @@ let gameSetPhase = 0;     // 0=inactive, 1=slowmo+flash, 2=GAME SET text, 3=GAME
 
 // デバッグモード（F3キーで切り替え）
 let debugHitboxes = false;
+
+// ========== コンボカウンター ==========
+let comboDisplay = [null, null]; // [P1, P2] { count, timer, maxTimer }
+function addComboHit(attackerId) {
+  if (!comboDisplay[attackerId]) comboDisplay[attackerId] = { count: 0, timer: 0, maxTimer: 0 };
+  comboDisplay[attackerId].count++;
+  comboDisplay[attackerId].timer = 90; // 1.5秒で消える
+  comboDisplay[attackerId].maxTimer = 90;
+}
+function resetCombo(attackerId) {
+  if (comboDisplay[attackerId] && comboDisplay[attackerId].count >= 2) {
+    // コンボ終了表示
+    cmdNameDisplay.push({ text: comboDisplay[attackerId].count + ' HIT COMBO!', x: 480, y: 200, life: 60, maxLife: 60, color: '#FFD700' });
+  }
+  comboDisplay[attackerId] = null;
+}
+
+// ========== 戦績システム ==========
+let battleStats = { totalGames: 0, totalWins: 0, charWins: {}, charGames: {}, vsRecord: {}, maxCombo: 0 };
+function loadBattleStats() {
+  try { const s = localStorage.getItem('smash_battle_stats'); if (s) battleStats = JSON.parse(s); } catch(e) {}
+}
+function saveBattleStats() {
+  try { localStorage.setItem('smash_battle_stats', JSON.stringify(battleStats)); } catch(e) {}
+}
+function recordBattleResult(myCharIdx, opCharIdx, won) {
+  battleStats.totalGames++;
+  if (won) battleStats.totalWins++;
+  const ck = 'c' + myCharIdx;
+  battleStats.charGames[ck] = (battleStats.charGames[ck] || 0) + 1;
+  if (won) battleStats.charWins[ck] = (battleStats.charWins[ck] || 0) + 1;
+  const vk = myCharIdx + 'v' + opCharIdx;
+  if (!battleStats.vsRecord[vk]) battleStats.vsRecord[vk] = { w: 0, l: 0 };
+  if (won) battleStats.vsRecord[vk].w++; else battleStats.vsRecord[vk].l++;
+  saveBattleStats();
+}
+loadBattleStats();
+
+// ========== アンロックシステム ==========
+let unlockData = { stages: [], chars: [], titles: [] };
+function loadUnlocks() {
+  try { const s = localStorage.getItem('smash_unlocks'); if (s) unlockData = JSON.parse(s); } catch(e) {}
+}
+function saveUnlocks() {
+  try { localStorage.setItem('smash_unlocks', JSON.stringify(unlockData)); } catch(e) {}
+}
+function checkBossRushUnlocks(bossesCleared, title) {
+  const newUnlocks = [];
+  if (bossesCleared >= 1 && !unlockData.stages.includes('night')) {
+    unlockData.stages.push('night'); newUnlocks.push({ type: 'stage', name: '夜の戦場' });
+  }
+  if (bossesCleared >= 2 && !unlockData.chars.includes(24)) {
+    unlockData.chars.push(24); newUnlocks.push({ type: 'char', name: '怖', charIdx: 24 });
+  }
+  if (bossesCleared >= 3 && !unlockData.stages.includes('makai')) {
+    unlockData.stages.push('makai'); newUnlocks.push({ type: 'stage', name: '魔界の頂上' });
+  }
+  if (title === '無傷の覇者' && !unlockData.chars.includes(25)) {
+    unlockData.chars.push(25); newUnlocks.push({ type: 'char', name: 'ヤッホ', charIdx: 25 });
+  }
+  if (title === '死線の覇者' && !unlockData.chars.includes(26)) {
+    unlockData.chars.push(26); newUnlocks.push({ type: 'char', name: 'ぽよ', charIdx: 26 });
+  }
+  if (newUnlocks.length > 0) { saveUnlocks(); unlockData._pending = newUnlocks; }
+  return newUnlocks;
+}
+loadUnlocks();
+
+// ========== フレームデータ表示 ==========
+let showFrameData = false;
+let trainingMode = false;
+let comboListCharIdx = 0;
+
+// ========== コンボルート定義 ==========
+const COMBO_ROUTES = {
+  0: [ // ゼン
+    { name: '居合コンボ', route: '通常→上強→上スマ', dmgRange: '0〜40%', diff: 2, hits: 3 },
+    { name: '凍結追撃', route: '凍結→横スマ', dmgRange: '40〜80%', diff: 1, hits: 2 },
+  ],
+  1: [ // ドン
+    { name: '下投げ追撃', route: '下投げ→上スマ', dmgRange: '0〜60%', diff: 1, hits: 2 },
+    { name: '重量級コンボ', route: '横スマ→下スマ', dmgRange: '60〜100%', diff: 2, hits: 2 },
+  ],
+  2: [ // サイソク
+    { name: '忍者ラッシュ', route: '通常×3→上強→空中→空中→上スマ', dmgRange: '0〜40%', diff: 3, hits: 7 },
+    { name: '高速連撃', route: '通常×3→横強→ダッシュ攻撃', dmgRange: '20〜60%', diff: 2, hits: 5 },
+  ],
+  3: [ // メテオ
+    { name: '格闘コンボ', route: '通常→上強→空中上→空中', dmgRange: '0〜50%', diff: 2, hits: 4 },
+    { name: '昇龍連携', route: '通常→昇龍拳→空中攻撃', dmgRange: '30〜70%', diff: 3, hits: 3 },
+  ],
+  6: [ // 熊太郎
+    { name: 'ぷにぷにコンボ', route: '通常×3→上投げ→空中→上スマ', dmgRange: '0〜40%', diff: 2, hits: 5 },
+  ],
+  13: [ // 波おじ
+    { name: 'ボクサーラッシュ', route: '弱×3→横強→上スマ', dmgRange: '0〜50%', diff: 2, hits: 5 },
+    { name: '根性コンボ', route: '弱×3→横強→横強→上スマ', dmgRange: '0〜30%', diff: 3, hits: 6 },
+  ],
+  9: [ // ジャッジマン
+    { name: '裁きの連携', route: '呪縛→横スマ→下スマ', dmgRange: '30〜80%', diff: 2, hits: 3 },
+  ],
+  10: [ // 天才
+    { name: '人型コンボ', route: '通常→横強→上強', dmgRange: '0〜50%', diff: 1, hits: 3 },
+    { name: '龍モード連撃', route: '龍通常→龍横→龍上→龍特殊', dmgRange: '0〜60%', diff: 3, hits: 4 },
+  ],
+  16: [ // キング
+    { name: 'スタンドラッシュ', route: 'Z→Z→Z→X→C', dmgRange: '0〜50%', diff: 3, hits: 5 },
+  ],
+};
 
 // Dynamic camera system
 const cam = {
@@ -7561,6 +7673,17 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
     if (realAttacker) {
       realAttacker.cancelWindow = 10;
       realAttacker.comboWindow = 20;
+      // コンボカウンター更新
+      addComboHit(realAttacker.id);
+      // コンボ補正: 技を重ねるごとにKB×0.7
+      const cc = comboDisplay[realAttacker.id];
+      if (cc && cc.count > 1) {
+        const comboKbMult = Math.pow(0.7, Math.min(cc.count - 1, 5));
+        target.vx *= comboKbMult;
+        target.vy *= comboKbMult;
+      }
+      // 最高コンボ記録
+      if (cc && cc.count > battleStats.maxCombo) { battleStats.maxCombo = cc.count; saveBattleStats(); }
     }
   }
   // ③ 空中コンボ: 空中の相手は落下速度低下で追撃しやすい
@@ -11110,6 +11233,8 @@ function blastCheck(p) {
       winner = p.id === 0 ? 1 : 0;
       gameSetTimer = 0; gameSetPhase = 1;
       koSlowMotion.active = true; koSlowMotion.frames = 30; koSlowMotion.maxFrames = 30;
+      // 戦績記録
+      if (!trainingMode) recordBattleResult(players[0].charIdx, players[1].charIdx, winner === 0);
     } else {
       p.respawnTimer = RESPAWN_TIME;
     }
@@ -13928,6 +14053,109 @@ function drawGrabEffect(p) {
   ctx.restore();
 }
 
+// ========== コンボリスト画面 ==========
+function drawComboList() {
+  ctx.fillStyle = '#0a0a1a'; ctx.fillRect(0, 0, 960, 640);
+  ctx.font = 'bold 24px sans-serif'; ctx.textAlign = 'center';
+  ctx.fillStyle = '#FFD700'; ctx.fillText('COMBO LIST', 480, 40);
+  ctx.font = 'bold 12px sans-serif'; ctx.fillStyle = '#888';
+  ctx.fillText('← → でキャラ切替  ESC で戻る', 480, 620);
+
+  // キャラ名
+  const ch = characters[comboListCharIdx];
+  ctx.font = 'bold 20px sans-serif'; ctx.fillStyle = ch.color;
+  ctx.fillText(ch.name, 480, 80);
+
+  // コンボルート表示
+  const routes = COMBO_ROUTES[comboListCharIdx] || [];
+  if (routes.length === 0) {
+    ctx.font = '14px sans-serif'; ctx.fillStyle = '#666';
+    ctx.fillText('コンボルート未設定', 480, 200);
+  }
+  for (let ri = 0; ri < routes.length; ri++) {
+    const r = routes[ri];
+    const ry = 120 + ri * 110;
+    // 背景
+    ctx.fillStyle = 'rgba(255,255,255,0.05)';
+    roundRect(ctx, 100, ry, 760, 95, 8); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.lineWidth = 1;
+    roundRect(ctx, 100, ry, 760, 95, 8); ctx.stroke();
+    // コンボ名
+    ctx.textAlign = 'left';
+    ctx.font = 'bold 16px sans-serif'; ctx.fillStyle = '#FFDD44';
+    ctx.fillText(r.name, 120, ry + 25);
+    // ルート
+    ctx.font = '14px sans-serif'; ctx.fillStyle = '#FFFFFF';
+    ctx.fillText(r.route, 120, ry + 48);
+    // 情報
+    ctx.font = '12px sans-serif'; ctx.fillStyle = '#AAAAAA';
+    ctx.fillText('ダメージ帯: ' + r.dmgRange + '  |  ' + r.hits + ' HIT', 120, ry + 72);
+    // 難易度星
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#FFD700';
+    ctx.fillText('★'.repeat(r.diff) + '☆'.repeat(3 - r.diff), 840, ry + 25);
+  }
+
+  // キャラアイコンバー（下部）
+  ctx.textAlign = 'center';
+  const iconY = 560;
+  const totalW = Math.min(characters.length * 30, 800);
+  const startX = (960 - totalW) / 2;
+  for (let i = 0; i < characters.length; i++) {
+    const ix = startX + i * (totalW / characters.length);
+    ctx.fillStyle = i === comboListCharIdx ? characters[i].color : '#333';
+    ctx.beginPath(); ctx.arc(ix, iconY, i === comboListCharIdx ? 10 : 6, 0, Math.PI * 2); ctx.fill();
+    if (i === comboListCharIdx) {
+      ctx.strokeStyle = '#FFF'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(ix, iconY, 12, 0, Math.PI * 2); ctx.stroke();
+    }
+  }
+}
+
+// ========== 戦績画面 ==========
+function drawStats() {
+  ctx.fillStyle = '#0a0a1a'; ctx.fillRect(0, 0, 960, 640);
+  ctx.font = 'bold 24px sans-serif'; ctx.textAlign = 'center';
+  ctx.fillStyle = '#88FF88'; ctx.fillText('BATTLE STATS', 480, 40);
+  ctx.font = 'bold 12px sans-serif'; ctx.fillStyle = '#888';
+  ctx.fillText('ESC で戻る', 480, 620);
+
+  const s = battleStats;
+  const winRate = s.totalGames > 0 ? Math.round(s.totalWins / s.totalGames * 100) : 0;
+
+  ctx.textAlign = 'left';
+  ctx.font = 'bold 16px sans-serif';
+  let sy = 80;
+  const row = (label, value, color) => {
+    ctx.fillStyle = '#AAA'; ctx.fillText(label, 120, sy);
+    ctx.fillStyle = color || '#FFF'; ctx.fillText(value, 450, sy);
+    sy += 30;
+  };
+
+  row('総対戦数', s.totalGames + ' 戦', '#FFFFFF');
+  row('総勝利数', s.totalWins + ' 勝', '#44FF88');
+  row('勝率', winRate + '%', winRate >= 50 ? '#FFD700' : '#FF6666');
+  row('最高コンボ', s.maxCombo + ' HIT', '#FFD700');
+
+  sy += 20;
+  ctx.fillStyle = '#FFD700'; ctx.font = 'bold 14px sans-serif';
+  ctx.fillText('キャラ別勝率', 120, sy); sy += 25;
+  ctx.font = '13px sans-serif';
+  for (let i = 0; i < characters.length; i++) {
+    const ck = 'c' + i;
+    const games = s.charGames[ck] || 0;
+    if (games === 0) continue;
+    const wins = s.charWins[ck] || 0;
+    const wr = Math.round(wins / games * 100);
+    ctx.fillStyle = characters[i].color;
+    ctx.fillText(characters[i].name, 140, sy);
+    ctx.fillStyle = '#FFF';
+    ctx.fillText(wins + '/' + games + ' (' + wr + '%)', 350, sy);
+    sy += 20;
+    if (sy > 580) break;
+  }
+}
+
 function drawBattleHUD() {
   // Timer
   const mins = Math.floor(battleTimer / 60);
@@ -13977,6 +14205,54 @@ function drawBattleHUD() {
       ctx.fillRect(gx, gy, gw * ratio, gh);
       ctx.strokeStyle = '#444'; ctx.lineWidth = 1;
       ctx.strokeRect(gx, gy, gw, gh);
+    }
+  }
+
+  // === コンボカウンター表示 ===
+  for (let ci4 = 0; ci4 < 2; ci4++) {
+    const cd = comboDisplay[ci4];
+    if (cd && cd.count >= 2 && cd.timer > 0) {
+      cd.timer--;
+      const cx4 = ci4 === 0 ? 60 : 900;
+      const alpha4 = Math.min(1, cd.timer / 20);
+      const scale4 = 1 + (cd.count >= 5 ? 0.3 : 0) + (cd.timer > 80 ? (90 - cd.timer) * 0.05 : 0);
+      ctx.save();
+      ctx.globalAlpha = alpha4;
+      ctx.font = `bold ${Math.floor(28 * scale4)}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.fillStyle = cd.count >= 8 ? '#FF4444' : cd.count >= 5 ? '#FFD700' : '#FFFFFF';
+      ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = 8;
+      ctx.fillText(cd.count + ' HIT', cx4, 80);
+      ctx.shadowBlur = 0;
+      ctx.font = 'bold 12px sans-serif';
+      ctx.fillStyle = '#FFAA44';
+      ctx.fillText('COMBO', cx4, 98);
+      ctx.restore();
+      if (cd.timer <= 0) resetCombo(ci4);
+    } else if (cd && cd.timer <= 0) {
+      resetCombo(ci4);
+    }
+  }
+
+  // === フレームデータ表示（トレーニングモード） ===
+  if (showFrameData && trainingMode) {
+    for (const p of players) {
+      if (p.attacking && p.attackData) {
+        const atk = p.attackData;
+        ctx.save();
+        ctx.font = 'bold 11px monospace'; ctx.textAlign = 'center';
+        ctx.fillStyle = '#00FF88'; ctx.globalAlpha = 0.9;
+        ctx.fillText(`発生:${atk.startup}F / 持続:${atk.active}F / 硬直:${atk.recovery}F`, p.x, p.y - 110);
+        // 現在のフェーズ表示
+        const af = p.attackFrame;
+        let phase = '';
+        if (af <= atk.startup) phase = `[発生中 ${af}/${atk.startup}F]`;
+        else if (af <= atk.startup + atk.active) phase = `[判定中 ${af - atk.startup}/${atk.active}F]`;
+        else phase = `[硬直中 ${af - atk.startup - atk.active}/${atk.recovery}F]`;
+        ctx.fillStyle = '#FFDD44';
+        ctx.fillText(phase, p.x, p.y - 125);
+        ctx.restore();
+      }
     }
   }
 }
@@ -16237,6 +16513,14 @@ function handleKeyDown(e) {
   if (scene === 'title') {
     if (e.key === 'Enter' || e.key === ' ') startTransition('select');
     if (e.key === 'o' || e.key === 'O') startTransition('online');
+    if (e.key === 'c' || e.key === 'C') startTransition('combolist');
+    if (e.key === 't' || e.key === 'T') startTransition('stats');
+  } else if (scene === 'combolist') {
+    if (e.key === 'Escape') startTransition('title');
+    if (e.key === 'ArrowLeft') { comboListCharIdx = (comboListCharIdx + characters.length - 1) % characters.length; }
+    if (e.key === 'ArrowRight') { comboListCharIdx = (comboListCharIdx + 1) % characters.length; }
+  } else if (scene === 'stats') {
+    if (e.key === 'Escape') startTransition('title');
   } else if (scene === 'online') {
     if (e.key === 'Escape') {
       if (peer) { peer.destroy(); peer = null; }
@@ -16274,8 +16558,8 @@ function handleKeyDown(e) {
         modeSelected = true;
         return;
       }
-      // オフライン: cpu / bossrush のみ、オンライン: vs のみ
-      const availModes = onlineMode ? ['vs'] : ['cpu', 'bossrush'];
+      // オフライン: cpu / bossrush / training のみ、オンライン: vs のみ
+      const availModes = onlineMode ? ['vs'] : ['cpu', 'bossrush', 'training'];
       const curIdx = availModes.indexOf(gameMode);
       if (e.key === 'ArrowLeft') {
         gameMode = availModes[(curIdx - 1 + availModes.length) % availModes.length];
@@ -16284,6 +16568,15 @@ function handleKeyDown(e) {
         gameMode = availModes[(curIdx + 1) % availModes.length];
       }
       if (e.key === 'Enter') {
+        if (gameMode === 'training') {
+          // Training mode: CPU doesn't move
+          trainingMode = true;
+          gameMode = 'cpu';
+          cpuDifficulty = 0; // CPUが動かない
+          modeSelected = true;
+          p1Confirmed = false; p2Confirmed = false;
+          return;
+        }
         if (gameMode === 'bossrush') {
           // Boss Rush: proceed to character select (P1 only)
           bossRushMode = true;
@@ -16446,6 +16739,8 @@ function handleKeyDown(e) {
             const remainStocks = players[0].stocks;
             bossRushTitle = remainStocks >= 3 ? '無傷の覇者' : (remainStocks >= 2 ? '鉄壁の覇者' : '死線の覇者');
             try { localStorage.setItem('smash_bossrush_title', bossRushTitle); } catch(e) {}
+            // アンロックチェック
+            checkBossRushUnlocks(3, bossRushTitle);
           } else {
             // Next boss
             bossRushPhase = 'intro';
@@ -16576,6 +16871,11 @@ function handleKeyDown(e) {
           triggerAirDodge(p1, keys);
         }
       }
+    }
+
+    // F key: トレーニングモードでフレームデータ表示切替
+    if ((e.key === 'f' || e.key === 'F') && trainingMode && !(gameMode === 'vs')) {
+      showFrameData = !showFrameData;
     }
 
     // P2 attacks: U I O (only in local VS mode, skip for online)
@@ -16771,6 +17071,10 @@ function gameLoop(timestamp) {
 
   if (scene === 'title') {
     drawTitle(FIXED_DT);
+  } else if (scene === 'combolist') {
+    drawComboList();
+  } else if (scene === 'stats') {
+    drawStats();
   } else if (scene === 'online') {
     drawOnlineLobby(FIXED_DT);
   } else if (scene === 'select') {
