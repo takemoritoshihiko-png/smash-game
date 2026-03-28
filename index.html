@@ -7756,11 +7756,11 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   if (aci4 === 6) attacker.kumaFury = Math.min(100, (attacker.kumaFury || 0) + 10);
   if (target.charIdx === 6) target.kumaFury = Math.min(100, (target.kumaFury || 0) + 15);
   // 熊太郎激怒モード: ダメージ×1.6
-  if (aci4 === 6 && attacker.kumaFuryMode > 0) target.damage = Math.min(999, target.damage + finalDamage * 0.6);
+  if (aci4 === 6 && attacker.kumaFuryMode > 0) target.damage = Math.min(999, target.damage + finalDamage * 0.5); // 激怒×1.5
   // シャうでん(8): 電圧+8
   if (aci4 === 8) attacker.shawdenVoltage = Math.min(100, (attacker.shawdenVoltage || 0) + 8);
   // とっこ(14): 相手毒蓄積+25（毒攻撃ヒット時）
-  if (aci4 === 14 && target.poisoned > 0) attacker.tokkoPoisonGauge = Math.min(100, (attacker.tokkoPoisonGauge || 0) + 25);
+  if (aci4 === 14 && target.poisoned > 0) attacker.tokkoPoisonGauge = Math.min(100, (attacker.tokkoPoisonGauge || 0) + 15); // +25→+15
   // とっこ重毒: ダメージ2倍
   if (aci4 === 14 && attacker.tokkoPoisonGauge >= 100) target.damage = Math.min(999, target.damage + finalDamage);
   // サム(15): 空中攻撃ヒットで飛翔+0.5
@@ -7777,7 +7777,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   }
   // セン出世ダメージボーナス
   if (aci4 === 18 && attacker.senRank > 1) {
-    const senBonus = [0, 0, 0.1, 0.2, 0.3, 0.5][attacker.senRank] || 0;
+    const senBonus = [0, 0, 0.1, 0.15, 0.25, 0.4][attacker.senRank] || 0; // 社長×1.4に抑制
     target.damage = Math.min(999, target.damage + finalDamage * senBonus);
   }
   // マイクロ(20): 3体揃いでダメージ+20%
@@ -7794,11 +7794,11 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   // メテオ業火: 燃焼中の相手60%以上でKB+30%
   if (aci4 === 3 && target.burning > 0 && target.damage >= 60) { target.vx *= 1.3; target.vy *= 1.3; }
   // ヤッホ(25): カオスゲージ+ランダム
-  if (aci4 === 25) attacker.yahoChaosGauge = Math.min(100, (attacker.yahoChaosGauge||0) + 5 + Math.floor(Math.random()*16));
+  if (aci4 === 25) attacker.yahoChaosGauge = Math.min(100, (attacker.yahoChaosGauge||0) + 5 + Math.floor(Math.random()*6)); // max+10に制限
   // ヤッホカオスイベント: ダメージ2倍(type0)
-  if (aci4 === 25 && attacker.yahoChaosEvent > 0 && attacker.yahoChaosType === 0) target.damage = Math.min(999, target.damage + finalDamage);
+  if (aci4 === 25 && attacker.yahoChaosEvent > 0 && attacker.yahoChaosType === 0) target.damage = Math.min(999, target.damage + finalDamage * 0.5); // ×2→×1.5
   // 怖(24): 恐怖ゲージ+30(恐怖付与時)
-  if (aci4 === 24 && target.fearTimer > 0) attacker.kowaiFearGauge2 = Math.min(100, (attacker.kowaiFearGauge2||0) + 30);
+  if (aci4 === 24 && target.fearTimer > 0) attacker.kowaiFearGauge2 = Math.min(100, (attacker.kowaiFearGauge2||0) + 15); // +30→+15
   // 怖悪夢モード: 恐怖中ダメ×2
   if (aci4 === 24 && attacker.kowaiFearGauge2 >= 80 && target.fearTimer > 0) target.damage = Math.min(999, target.damage + finalDamage);
   // サトル(23): 闘志+12(蹴り)、+8(空中)
@@ -7806,7 +7806,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   // サトルマスター: 蹴りダメ×2
   if (aci4 === 23 && attacker.satoruMasterMode > 0) target.damage = Math.min(999, target.damage + finalDamage);
   // プル(27): 引力ゲージ+15
-  if (aci4 === 27) attacker.pullGravGauge = Math.min(100, (attacker.pullGravGauge||0) + 15);
+  if (aci4 === 27) attacker.pullGravGauge = Math.min(100, (attacker.pullGravGauge||0) + 10); // +15→+10
   // ムッシー(28): 群れ+1(毒付与時)
   if (aci4 === 28 && target.poisonTimer > 0) attacker.mussySwarmCount = Math.min(5, (attacker.mussySwarmCount||1) + 1);
   // ムッシー大群: 毒ダメ×3(5匹)
@@ -7815,7 +7815,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   if (aci4 === 22) attacker.kinkinAssetGauge = Math.min(100, (attacker.kinkinAssetGauge||0) + 8);
   if (target.charIdx === 22) target.kinkinAssetGauge = Math.max(0, (target.kinkinAssetGauge||0) - 5);
   // 金金億万長者: ダメ×1.8
-  if (aci4 === 22 && attacker.kinkinGoldMode > 0) target.damage = Math.min(999, target.damage + finalDamage * 0.8);
+  if (aci4 === 22 && attacker.kinkinGoldMode > 0) target.damage = Math.min(999, target.damage + finalDamage * 0.5); // 億万長者×1.5
   // ロング(4): 穿孔+20(遠距離)、+5(近距離)
   if (aci4 === 4) { const d4 = Math.abs(target.x - attacker.x); attacker.longPierceGauge = Math.min(100, (attacker.longPierceGauge||0) + (d4 > 200 ? 20 : 5)); }
   // ロング龍槍: リーチ+50%はstartAttackで処理
@@ -7830,7 +7830,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   if (aci4 === 5) attacker.uruoWildGauge = Math.min(100, (attacker.uruoWildGauge||0) + 10);
   if (target.charIdx === 5) target.uruoWildGauge = Math.min(100, (target.uruoWildGauge||0) + 12);
   // うる男野性解放: KB×2
-  if (aci4 === 5 && attacker.uruoWildRelease > 0) { target.vx *= 2; target.vy *= 2; }
+  if (aci4 === 5 && attacker.uruoWildRelease > 0) { target.vx *= 1.5; target.vy *= 1.5; } // 野性解放KB×1.5
   // バレット(7): 魔法+8、混乱付与で+20
   if (aci4 === 7) { attacker.bulletMagicGauge = Math.min(100, (attacker.bulletMagicGauge||0) + 8); if (target.confused > 0) attacker.bulletMagicGauge = Math.min(100, attacker.bulletMagicGauge + 12); }
   // おんぱ(17): 周波数+10、気絶で+25
@@ -7843,10 +7843,14 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   // === 固有ダメージ倍率（ゼン凍結×1.5、ジャッジ呪縛×2.0、波おじ全力×1.5） ===
   // 注: finalDamageは既に計算済みなので追加ダメージとして適用
   if (aci4 === 0 && target.frozen > 0) target.damage = Math.min(999, target.damage + finalDamage * 0.5);
-  if (aci4 === 9 && target.cursed > 0) target.damage = Math.min(999, target.damage + finalDamage * 1.0);
+  if (aci4 === 9 && target.cursed > 0) target.damage = Math.min(999, target.damage + finalDamage * 0.5); // 呪縛×1.5
   if (aci4 === 13 && attacker.namiojiFullPower > 0) target.damage = Math.min(999, target.damage + finalDamage * 0.5);
   // キング時間停止中: KB×3
-  if (aci4 === 16 && attacker.kingTimeStop > 0) { target.vx *= 3; target.vy *= 3; }
+  // キング: 時間停止中KB×2.0、通常時KB×0.8
+  if (aci4 === 16) {
+    if (attacker.kingTimeStop > 0) { target.vx *= 2.0; target.vy *= 2.0; }
+    else { target.vx *= 0.8; target.vy *= 0.8; }
+  }
   // ジャッジマン最終審判: ダメージ×1.4
   if (aci4 === 9 && attacker.judgeFinalMode > 0) target.damage = Math.min(999, target.damage + finalDamage * 0.4);
 
@@ -10050,7 +10054,7 @@ function updateBattle(dt) {
     // マイクロ(20): 離脱体復帰
     if (p.charIdx === 20 && p.microBodies < 3) {
       p.microRejoinTimer++;
-      if (p.microRejoinTimer >= 600) { p.microBodies = Math.min(3, p.microBodies + 1); p.microRejoinTimer = 0; }
+      if (p.microRejoinTimer >= 420) { p.microBodies = Math.min(3, p.microBodies + 1); p.microRejoinTimer = 0; } // 10秒→7秒
     }
     // ドスボス(19): 装甲回復・大破
     if (p.charIdx === 19) {
@@ -10143,7 +10147,7 @@ function updateBattle(dt) {
     // タンク(12): 弾薬補充(20秒=1200F)
     if (p.charIdx === 12 && p.tankAmmo < 5) {
       p.tankReloadTimer++;
-      if (p.tankReloadTimer >= 1200) { p.tankAmmo++; p.tankReloadTimer = 0; }
+      if (p.tankReloadTimer >= 720) { p.tankAmmo++; p.tankReloadTimer = 0; } // 20秒→12秒
     }
     // おんぱ(17): 周波数自然減少
     if (p.charIdx === 17) {
