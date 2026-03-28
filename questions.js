@@ -280,14 +280,14 @@ const questions = {
 
 // ===== ENEMY DATA (rebalanced: 4-6 hits to defeat) =====
 const enemies = [
-  {name:"Slime",   emoji:"\uD83D\uDFE2", hp:22, atk:3,  def:1, gold:10},
-  {name:"Bat",     emoji:"\uD83E\uDD87", hp:26, atk:4,  def:1, gold:14},
-  {name:"Goblin",  emoji:"\uD83D\uDC7A", hp:32, atk:5,  def:2, gold:20},
-  {name:"Orc",     emoji:"\uD83D\uDC79", hp:40, atk:6,  def:3, gold:28},
-  {name:"Wolf",    emoji:"\uD83D\uDC3A", hp:36, atk:7,  def:2, gold:26},
-  {name:"Wizard",  emoji:"\uD83E\uDDD9", hp:34, atk:8,  def:3, gold:35},
-  {name:"Golem",   emoji:"\uD83D\uDDFF", hp:55, atk:5,  def:6, gold:40},
-  {name:"Dragon",  emoji:"\uD83D\uDC09", hp:70, atk:10, def:5, gold:60}
+  {name:"Slime",   emoji:"\uD83D\uDFE2", hp:10, atk:2,  def:0, gold:5,  minLv:1},
+  {name:"Goblin",  emoji:"\uD83D\uDC7A", hp:16, atk:4,  def:1, gold:10, minLv:1},
+  {name:"Bat",     emoji:"\uD83E\uDD87", hp:14, atk:3,  def:1, gold:8,  minLv:3},
+  {name:"Orc",     emoji:"\uD83D\uDC79", hp:24, atk:7,  def:2, gold:18, minLv:6},
+  {name:"Wolf",    emoji:"\uD83D\uDC3A", hp:20, atk:6,  def:2, gold:15, minLv:6},
+  {name:"Wizard",  emoji:"\uD83E\uDDD9", hp:20, atk:9,  def:2, gold:22, minLv:11},
+  {name:"Golem",   emoji:"\uD83D\uDDFF", hp:30, atk:5,  def:5, gold:25, minLv:11},
+  {name:"Dragon",  emoji:"\uD83D\uDC09", hp:40, atk:14, def:4, gold:40, minLv:21}
 ];
 
 // ===== SHOP ITEMS =====

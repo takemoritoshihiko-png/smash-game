@@ -1,8 +1,8 @@
 // ===== GAME STATE =====
 const defaultState = {
   monsterName: "",
-  hp: 10,
-  atk: 5,
+  hp: 30,
+  atk: 6,
   def: 3,
   gold: 0,
   vocabCorrect: 0,
@@ -827,20 +827,15 @@ function goBattle() {
   const playerLevel = getPlayerLevel();
   const playerPower = gameState.hp + getEffectiveAtk() + getEffectiveDef();
 
-  // Select enemy pool based on player power
-  let pool;
-  if (playerPower < 25) pool = enemies.slice(0, 2);
-  else if (playerPower < 40) pool = enemies.slice(0, 4);
-  else if (playerPower < 60) pool = enemies.slice(0, 6);
-  else pool = enemies;
-
+  // Select enemy pool based on player level (minLv gating)
+  const pool = enemies.filter(e => playerLevel >= (e.minLv || 1));
   const baseEnemy = pool[Math.floor(Math.random() * pool.length)];
 
-  // Scale enemy stats with player level (moderate scaling)
-  const scaledHp = baseEnemy.hp + Math.floor(playerLevel * 1.5);
-  const scaledAtk = Math.floor(baseEnemy.atk + playerLevel * 0.8);
-  const scaledDef = baseEnemy.def + Math.floor(playerLevel * 0.3);
-  const scaledGold = baseEnemy.gold + Math.floor(playerLevel * 2);
+  // Scale enemy stats gently with player level
+  const scaledHp = baseEnemy.hp + Math.floor(playerLevel * 1.0);
+  const scaledAtk = Math.floor(baseEnemy.atk + playerLevel * 0.5);
+  const scaledDef = baseEnemy.def + Math.floor(playerLevel * 0.2);
+  const scaledGold = baseEnemy.gold + Math.floor(playerLevel * 1.5);
 
   const enemy = {
     name: baseEnemy.name,
