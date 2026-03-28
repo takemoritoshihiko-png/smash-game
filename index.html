@@ -8280,21 +8280,25 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
 
   // ===== All-Star Brawl 2 エフェクト =====
 
-  // ① ヒットストップ（強攻撃・スマッシュは1.5倍延長）
+  // ① ヒットストップ（上限付き）
   const hitStopMult = target.downThrowBounce ? 0.5 : 1.0;
+  let newHitStop = 0;
   if (isSmash) {
-    hitStopFrames = Math.max(hitStopFrames, Math.floor(10 * hitStopMult)); // 弱4 → スマ10
+    newHitStop = Math.floor(6 * hitStopMult); // スマッシュ: 6F
   } else if (isStrong || isSpecial) {
-    hitStopFrames = Math.max(hitStopFrames, Math.floor(8 * hitStopMult));  // 弱4 → 強8
+    newHitStop = Math.floor(5 * hitStopMult); // 強攻撃: 5F
   } else if (kb > 3) {
-    hitStopFrames = Math.max(hitStopFrames, Math.floor(4 * hitStopMult));  // 弱攻撃は変更なし
+    newHitStop = Math.floor(3 * hitStopMult); // 弱攻撃: 3F
   }
-  if (attacker.charIdx === 10 && attacker.dragonMode) hitStopFrames += 2;
-  // コンボ中はヒットストップ+3F（コンボ接続性向上）
+  if (attacker.charIdx === 10 && attacker.dragonMode) newHitStop += 1;
+  // コンボ中はヒットストップ+1F（穏やかな延長）
   if (attacker.id !== undefined) {
     const atkCombo = comboDisplay[attacker.id];
-    if (atkCombo && atkCombo.count >= 2) hitStopFrames += 3;
+    if (atkCombo && atkCombo.count >= 2) newHitStop += 1;
   }
+  // 上限: 弱6F、強8F、スマッシュ10F
+  const hitStopCap = isSmash ? 10 : (isStrong || isSpecial) ? 8 : 6;
+  hitStopFrames = Math.max(hitStopFrames, Math.min(newHitStop, hitStopCap));
 
   // ② 強攻撃・スマッシュヒット時: 相手を白フラッシュ + 一瞬拡大
   if (isStrong || isSpecial || isSmash) {
