@@ -7308,6 +7308,18 @@ function createPlayer(id, charIdx, startX) {
     kingStartupBonus: 2,     // キング: 発生2F早い
     yahoPassiveDisplay: '',  // ヤッホ: パッシブ表示テキスト
     _wasGrounded2: false,    // 着地検出用
+    // === 固有個性システム ===
+    zenIceGauge: 0,           // ゼン: 氷ゲージ(0-100)
+    namiojiStamina: 100,      // 波おじ: スタミナ(0-100)
+    namiojiFullPower: 0,      // 波おじ: 全力パンチモード残りフレーム
+    namiojiExhausted: 0,      // 波おじ: スタミナ切れ残りフレーム
+    kingClockGauge: 0,        // キング: 時計ゲージ(0-100)
+    kingTimeStop: 0,          // キング: 時間停止残りフレーム
+    judgeMarks: 0,            // ジャッジマン: 審判マーク(0-5)
+    judgeFinalMode: 0,        // ジャッジマン: 最終審判モード残りフレーム
+    tensaiDragonGauge: 0,     // 天才: 龍気ゲージ(0-100、既存dragonMode/dragonTimerと連携）
+    catbusTeleCharges: 3,     // Catbus: テレポートチャージ(0-3)
+    catbusTeleRecharge: 0,    // Catbus: リチャージタイマー
   };
 }
 
@@ -7674,6 +7686,40 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   }
 
   target.damage = Math.min(999, target.damage + finalDamage);
+
+  // === 固有個性ゲージ更新（ヒット時） ===
+  const aci4 = attacker.charIdx;
+  // ゼン: 氷ゲージ+8、被ダメ-5
+  if (aci4 === 0) attacker.zenIceGauge = Math.min(100, (attacker.zenIceGauge || 0) + 8);
+  if (target.charIdx === 0) target.zenIceGauge = Math.max(0, (target.zenIceGauge || 0) - 5);
+  // 波おじ: 攻撃でスタミナ-8
+  if (aci4 === 13) attacker.namiojiStamina = Math.max(0, (attacker.namiojiStamina || 100) - 8);
+  // キング: 時計ゲージ+10
+  if (aci4 === 16) attacker.kingClockGauge = Math.min(100, (attacker.kingClockGauge || 0) + 10);
+  // ジャッジマン: 審判マーク+1（呪縛付与時は+2、applyHitの呪縛セクションで処理）
+  if (aci4 === 9) {
+    attacker.judgeMarks = Math.min(5, (attacker.judgeMarks || 0) + 1);
+    if (attacker.judgeMarks >= 5 && !attacker.judgeFinalMode) {
+      attacker.judgeFinalMode = 600; // 10秒
+      attacker.judgeMarks = 0;
+      cmdNameDisplay.push({ text: '最終審判!', x: attacker.x, y: attacker.y - 100, life: 60, maxLife: 60, color: '#9966DD' });
+    }
+  }
+  // 天才: 龍気ゲージ+5（攻撃）、+8（被ダメ）
+  if (aci4 === 10) attacker.tensaiDragonGauge = Math.min(100, (attacker.tensaiDragonGauge || 0) + 5);
+  if (target.charIdx === 10) target.tensaiDragonGauge = Math.min(100, (target.tensaiDragonGauge || 0) + 8);
+  // Catbus: テレポートチャージ消費はtriggerAirDodgeで処理済み
+
+  // === 固有ダメージ倍率（ゼン凍結×1.5、ジャッジ呪縛×2.0、波おじ全力×1.5） ===
+  // 注: finalDamageは既に計算済みなので追加ダメージとして適用
+  if (aci4 === 0 && target.frozen > 0) target.damage = Math.min(999, target.damage + finalDamage * 0.5);
+  if (aci4 === 9 && target.cursed > 0) target.damage = Math.min(999, target.damage + finalDamage * 1.0);
+  if (aci4 === 13 && attacker.namiojiFullPower > 0) target.damage = Math.min(999, target.damage + finalDamage * 0.5);
+  // キング時間停止中: KB×3
+  if (aci4 === 16 && attacker.kingTimeStop > 0) { target.vx *= 3; target.vy *= 3; }
+  // ジャッジマン最終審判: ダメージ×1.4
+  if (aci4 === 9 && attacker.judgeFinalMode > 0) target.damage = Math.min(999, target.damage + finalDamage * 0.4);
+
   // 必殺技ゲージ蓄積
   const atkGaugeBonus = (attacker.charIdx === 25 && attacker.yahoPassive === 4) ? 2 : 0; // ヤッホ: ゲージ加速
   // ゲージ蓄積（×0.5に減速）
@@ -9809,6 +9855,43 @@ function updateBattle(dt) {
       continue; // 崖つかまり中は通常処理スキップ
     }
 
+    // === 固有個性システム更新 ===
+    // ゼン(0): 氷ゲージ自然減少（毎秒-3 = 毎20Fに-1）
+    if (p.charIdx === 0 && battleTime % 20 === 0 && p.zenIceGauge > 0) p.zenIceGauge = Math.max(0, p.zenIceGauge - 1);
+    // 波おじ(13): スタミナ回復（毎秒+5 = 毎12Fに+1）
+    if (p.charIdx === 13) {
+      if (p.namiojiExhausted > 0) { p.namiojiExhausted--; }
+      else if (battleTime % 12 === 0 && p.namiojiStamina < 100) p.namiojiStamina = Math.min(100, p.namiojiStamina + 1);
+      if (p.namiojiFullPower > 0) p.namiojiFullPower--;
+    }
+    // キング(16): 時間停止タイマー・速度ボーナス
+    if (p.charIdx === 16) {
+      if (p.kingTimeStop > 0) {
+        p.kingTimeStop--;
+        // 時間停止中: 相手を完全停止
+        for (const t of players) {
+          if (t.id !== p.id && t.alive) { t.vx = 0; t.vy = 0; t.hitstun = Math.max(t.hitstun, 2); }
+        }
+      }
+    }
+    // ジャッジマン(9): 最終審判モードタイマー
+    if (p.charIdx === 9 && p.judgeFinalMode > 0) p.judgeFinalMode--;
+    // 天才(10): 龍気ゲージ消費（龍モード中毎秒-10 = 毎6Fに-1）
+    if (p.charIdx === 10 && p.dragonMode && battleTime % 6 === 0) {
+      p.tensaiDragonGauge = Math.max(0, p.tensaiDragonGauge - 1);
+      if (p.tensaiDragonGauge <= 0) {
+        p.dragonMode = false; p.dragonCooldown = 600; p.weight = 0.8;
+        cmdNameDisplay.push({ text: 'HUMAN MODE', x: p.x, y: p.y - 120, life: 60, maxLife: 60, color: '#FF8833' });
+      }
+    }
+    // Catbus(11): テレポートリチャージ（8秒ごと = 480F）
+    if (p.charIdx === 11) {
+      if (p.catbusTeleCharges < 3) {
+        p.catbusTeleRecharge++;
+        if (p.catbusTeleRecharge >= 480) { p.catbusTeleCharges++; p.catbusTeleRecharge = 0; }
+      }
+    }
+
     // === 固有パッシブシステム更新 ===
     const ci = p.charIdx;
     // ドン(1): 着地時スタン + 地震エフェクト
@@ -11135,13 +11218,16 @@ function getWeightMaxFall(p) {
 function getGravity(p) {
   if (p.grounded) return GRAVITY;
   const wm = getWeightGravityMult(p);
-  // Apex: 頂点付近の滞空を長く（重力×0.7）
+  // Apex: 頂点付近の滞空を長く
   if (Math.abs(p.vy) < APEX_THRESHOLD) {
-    const apexMult = wm < 1.0 ? 0.7 : 0.75; // 軽量:0.7, 標準以上:0.75
+    let apexMult = wm < 1.0 ? 0.7 : 0.75;
+    if (p.charIdx === 0) apexMult *= 0.6; // ゼン: 頂点で一瞬滞空
+    if (p.charIdx === 11) apexMult *= 0.7; // Catbus: ふわふわ
     return GRAVITY_APEX * wm * apexMult;
   }
-  if (p.vy < 0) return GRAVITY_RISE * wm;
-  return GRAVITY_FALL * wm;
+  let grav = p.vy < 0 ? GRAVITY_RISE : GRAVITY_FALL;
+  if (p.charIdx === 11) grav *= 0.7; // Catbus: 空中重力0.7倍
+  return grav * wm;
 }
 
 // 慣性付き速度更新
@@ -14576,6 +14662,61 @@ function drawBattleHUD() {
       ctx.fillStyle = '#FFD700'; ctx.globalAlpha = 0.6;
       ctx.fillRect(gx, gy - 3, gw * puRatio, 2);
       ctx.globalAlpha = 1;
+    }
+  }
+
+  // === 固有個性ゲージ表示 ===
+  for (let gi = 0; gi < players.length; gi++) {
+    const gp = players[gi];
+    if (!gp || !gp.alive) continue;
+    const ggx = gi === 0 ? 120 : 600;
+    const ggy = 510; // ゲージバーの上
+    ctx.font = 'bold 8px sans-serif'; ctx.textAlign = 'center';
+    // ゼン: 氷ゲージ
+    if (gp.charIdx === 0) {
+      const r = (gp.zenIceGauge || 0) / 100;
+      ctx.fillStyle = '#0a0a2a'; ctx.fillRect(ggx, ggy, 80, 5);
+      ctx.fillStyle = r >= 1 ? '#AAEEFF' : '#44AADD'; ctx.fillRect(ggx, ggy, 80 * r, 5);
+      ctx.fillStyle = '#88DDFF'; ctx.fillText('ICE ' + Math.floor(gp.zenIceGauge || 0) + '%', ggx + 40, ggy - 2);
+    }
+    // 波おじ: スタミナ
+    if (gp.charIdx === 13) {
+      const r = (gp.namiojiStamina || 0) / 100;
+      ctx.fillStyle = '#1a1a0a'; ctx.fillRect(ggx, ggy, 80, 5);
+      ctx.fillStyle = r > 0.5 ? '#FF8844' : r > 0.2 ? '#FFAA00' : '#FF4444';
+      ctx.fillRect(ggx, ggy, 80 * r, 5);
+      ctx.fillStyle = '#FFAA44'; ctx.fillText('STA ' + Math.floor(gp.namiojiStamina || 0), ggx + 40, ggy - 2);
+      if (gp.namiojiFullPower > 0) { ctx.fillStyle = '#FFD700'; ctx.fillText('FULL POWER!', ggx + 40, ggy - 12); }
+    }
+    // キング: 時計ゲージ
+    if (gp.charIdx === 16) {
+      const r = (gp.kingClockGauge || 0) / 100;
+      ctx.fillStyle = '#1a1a0a'; ctx.fillRect(ggx, ggy, 80, 5);
+      ctx.fillStyle = '#FFD700'; ctx.fillRect(ggx, ggy, 80 * r, 5);
+      ctx.fillStyle = '#FFD700'; ctx.fillText('CLOCK ' + Math.floor(gp.kingClockGauge || 0) + '%', ggx + 40, ggy - 2);
+      if (gp.kingTimeStop > 0) { ctx.fillStyle = '#FF4444'; ctx.fillText('TIME STOP!', ggx + 40, ggy - 12); }
+    }
+    // ジャッジマン: 審判マーク
+    if (gp.charIdx === 9) {
+      ctx.fillStyle = '#9966DD';
+      let markStr = '';
+      for (let mi2 = 0; mi2 < 5; mi2++) markStr += mi2 < (gp.judgeMarks || 0) ? '▲' : '△';
+      ctx.fillText(markStr, ggx + 40, ggy - 2);
+      if (gp.judgeFinalMode > 0) { ctx.fillStyle = '#CC44FF'; ctx.fillText('FINAL JUDGE!', ggx + 40, ggy - 12); }
+    }
+    // 天才: 龍気ゲージ
+    if (gp.charIdx === 10) {
+      const r = (gp.tensaiDragonGauge || 0) / 100;
+      ctx.fillStyle = '#1a1a0a'; ctx.fillRect(ggx, ggy, 80, 5);
+      ctx.fillStyle = gp.dragonMode ? '#FF6600' : '#FFD700'; ctx.fillRect(ggx, ggy, 80 * r, 5);
+      ctx.fillStyle = '#FFD700'; ctx.fillText('DRAGON ' + Math.floor(gp.tensaiDragonGauge || 0) + '%', ggx + 40, ggy - 2);
+    }
+    // Catbus: テレポートチャージ
+    if (gp.charIdx === 11) {
+      ctx.fillStyle = '#44DDFF';
+      let chargeStr = '';
+      for (let ci5 = 0; ci5 < 3; ci5++) chargeStr += ci5 < (gp.catbusTeleCharges || 0) ? '◆' : '◇';
+      ctx.fillText('TELE ' + chargeStr, ggx + 40, ggy - 2);
     }
   }
 
