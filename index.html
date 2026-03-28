@@ -14860,6 +14860,9 @@ function sendHostState() {
       color: pr.color, pcolor: pr.pcolor,
       shape: pr.shape, time: pr.time, ownerCharIdx: pr.ownerCharIdx,
     })),
+    // コンボカウンター同期
+    combo0: comboDisplay[0] ? { count: comboDisplay[0].count, timer: comboDisplay[0].timer, maxTimer: comboDisplay[0].maxTimer } : null,
+    combo1: comboDisplay[1] ? { count: comboDisplay[1].count, timer: comboDisplay[1].timer, maxTimer: comboDisplay[1].maxTimer } : null,
   };
   peerConn.send(stateData);
 }
@@ -14927,6 +14930,21 @@ function applyHostState(data) {
     target.guardShrink = src.guardShrink || 0;
     target.bounceStun = src.bounceStun || 0;
     target.downThrowBounce = src.downThrowBounce || false;
+    // ゲージ同期
+    target.ultimateGauge = src.ultimateGauge || 0;
+    target.dSkillCooldown = src.dSkillCooldown || 0;
+    target.dSkillActive = src.dSkillActive || false;
+    target.dSkillBuff = src.dSkillBuff || null;
+    // 状態異常同期
+    target.frozen = src.frozen || 0;
+    target.burning = src.burning || 0;
+    target.poisoned = src.poisoned || 0;
+    target.stunned = src.stunned || 0;
+    target.cursed = src.cursed || 0;
+    target.confused = src.confused || 0;
+    target.paralyzed = src.paralyzed || 0;
+    target.feared2 = src.feared2 || 0;
+    target.sealMagic = src.sealMagic || 0;
     // Restore attackData from attackType
     if (src.attacking && src.attackType) {
       const defs = (target.charIdx === 10 && target.dragonMode) ? dragonAttackDefs : attackDefs[target.charIdx];
@@ -14964,6 +14982,10 @@ function applyHostState(data) {
       projectiles.push(pr);
     }
   }
+
+  // コンボカウンター同期
+  comboDisplay[0] = data.combo0 ? { count: data.combo0.count, timer: data.combo0.timer, maxTimer: data.combo0.maxTimer } : null;
+  comboDisplay[1] = data.combo1 ? { count: data.combo1.count, timer: data.combo1.timer, maxTimer: data.combo1.maxTimer } : null;
 
   // Generate local effects on damage/stock changes
   for (let i = 0; i < 2; i++) {
