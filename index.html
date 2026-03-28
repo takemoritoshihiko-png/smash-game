@@ -6795,7 +6795,7 @@ const attackDefs = {
               specialType:'cmdCharge', chargeSpeed:14 },
     special:{ name:'フルスピードダッシュ', startup:4, active:16, recovery:16, damage:14, kbBase:5, kbScale:0.10, kbAngle:-12, hx:16, hy:-35, hw:60, hh:45, color:'#FFBB44', effect:'dash',
               specialType:'shadowDash', dashSpeed:18 },
-    aerial: { name:'空中体当たり', startup:3, active:10, recovery:10, damage:9, kbBase:4, kbScale:0.07, kbAngle:50, hx:10, hy:5, hw:50, hh:45, color:'#DD8822', effect:'airknee',
+    aerial: { name:'空中体当たり', startup:3, active:4, recovery:10, damage:9, kbBase:4, kbScale:0.07, kbAngle:50, hx:10, hy:5, hw:50, hh:45, color:'#DD8822', effect:'airknee',
               specialType:'divekick', diveSpeed:12 },
     down:   { name:'急ブレーキ', startup:4, active:8, recovery:14, damage:10, kbBase:5, kbScale:0.08, kbAngle:-60, hx:0, hy:-25, hw:70, hh:50, color:'#FFBB44', effect:'shockwave', centerHit:true },
     up:     { name:'ジャンプ体当たり', startup:4, active:10, recovery:14, damage:11, kbBase:5, kbScale:0.09, kbAngle:-88, hx:3, hy:-55, hw:45, hh:55, color:'#DD8822', effect:'upslash',
@@ -9371,10 +9371,11 @@ function updateBattle(dt) {
       const ph = getPlayerHitbox(p);
       if (hitboxCollides(pr.x - pr.w/2, pr.y - pr.h/2, pr.w, pr.h, ph.x, ph.y, ph.w, ph.h)) {
         const owner = players.find(pl => pl.id === pr.ownerId);
-        const fakeAttacker = { x: pr.x - pr.vx * 5, charIdx: pr.ownerCharIdx, senBuffTimer: owner ? owner.senBuffTimer : 0,
+        const fakeAttacker = { id: pr.ownerId, x: pr.x - pr.vx * 5, charIdx: pr.ownerCharIdx, senBuffTimer: owner ? owner.senBuffTimer : 0,
           damage: owner ? owner.damage : 0, stocks: owner ? owner.stocks : 3, dashing: false, autoBuff: owner ? owner.autoBuff : 0,
           autoBuffType: owner ? owner.autoBuffType : null, comboWindow: owner ? owner.comboWindow : 0, consecutiveHits: owner ? owner.consecutiveHits : 0,
-          dSkillBuff: owner ? owner.dSkillBuff : null, dSkillCooldown: owner ? owner.dSkillCooldown : 0 };
+          dSkillBuff: owner ? owner.dSkillBuff : null, dSkillCooldown: owner ? owner.dSkillCooldown : 0,
+          attackData: owner ? owner.attackData : null };
         // 自己バフ: ロング「狙撃」距離比例ダメ増 / バレット「精密射撃」遠距離1.2倍
         let projDmg = pr.damage;
         if (owner) {
@@ -14850,11 +14851,14 @@ function applyHostState(data) {
         const speed = 2 + Math.random() * (isHuge ? 7 : isBig ? 5 : 4);
         sparks.push({ x: p.x, y: p.y - 35, vx: Math.cos(a)*speed, vy: Math.sin(a)*speed - 1, life: 12+Math.random()*12, maxLife: 24, color: s%3===0?'#FFFFFF':sColors[s%sColors.length], size: 1.5+Math.random()*(isHuge?4:2.5), gravity: 0.1+Math.random()*0.08, drag: 0.97 });
       }
-      // HIT! テキストエフェクト
-      hitMissDisplays.push({
-        text: 'HIT!', x: p.x, y: p.y - 70,
-        life: 30, maxLife: 30, isHit: true,
-      });
+      // HIT! テキストエフェクト（重複防止: 同プレイヤーの直近HITから8F以内はスキップ）
+      const recentHit = hitMissDisplays.find(h => h.isHit && Math.abs(h.x - p.x) < 40 && h.life > 22);
+      if (!recentHit) {
+        hitMissDisplays.push({
+          text: 'HIT!', x: p.x, y: p.y - 70,
+          life: 30, maxLife: 30, isHit: true,
+        });
+      }
       // Hit sound
       if (isHuge) playHitSound('special');
       else if (isBig) playHitSound('strong');
