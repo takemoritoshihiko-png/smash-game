@@ -5792,39 +5792,39 @@ const GRAB_HOLD_FRAMES = 20;    // (legacy, unused)
 const GRAB_DURATION = 90;       // max frames holding grabbed opponent
 const THROW_BASE_KB = 8;
 const THROW_KB_SCALE = 0.10;
-const THROW_GRAB_FRAMES = 10;   // 掴みモーション デフォルト（10F）
-const THROW_EXEC_FRAMES = 10;   // 投げ実行モーション（10F）※旧15Fから5F短縮
-// キャラ別掴み発生フレーム数
+const THROW_GRAB_FRAMES = 20;   // 掴みモーション デフォルト（20F）※10F→20Fに延長
+const THROW_EXEC_FRAMES = 10;   // 投げ実行モーション（10F）
+// キャラ別掴み拘束フレーム数（2倍に延長）
 const CHAR_GRAB_FRAMES = [
-  13, // 0:ゼン (バランス型)
-  17, // 1:ドン (パワー型)
-   9, // 2:サイソク (スピード型)
-  15, // 3:メテオ (テクニック型→遠距離/特殊)
-  15, // 4:ロング (機械槍型→遠距離/特殊)
-  15, // 5:うる男 (ディフェンス型→遠距離/特殊)
-  13, // 6:熊太郎 (テクニック型→バランス)
-  15, // 7:バレット (完全遠距離型→遠距離/特殊)
-   9, // 8:シャうでん (スピード型)
-  13, // 9:ジャッジマン (バランス型)
-  15, // 10:天才 (変形型→遠距離/特殊)
-   9, // 11:Catbus (スピード型)
-  17, // 12:タンク (パワー型)
-  13, // 13:波おじ (テクニック型→バランス)
-   9, // 14:とっこ (超攻撃型→スピード)
-   9, // 15:サム (空中戦型→スピード)
-  13, // 16:キング (上級者型→バランス)
-  15, // 17:おんぱ (音波型→遠距離/特殊)
-  13, // 18:セン (テクニック型→バランス)
-  17, // 19:ドスボス (トリッキー型→パワー)
-  13, // 20:マイクロ (バランス型)
-  15, // 21:ミスターツー (超能力型→遠距離/特殊)
-  17, // 22:金金 (パワー型)
-  13, // 23:サトル (テクニック型→バランス)
-  15, // 24:怖 (ホラー型→遠距離/特殊)
-  13, // 25:ヤッホ (ふざけ型→バランス)
-  13, // 26:ぽよ (初心者型→バランス)
-  15, // 27:プル (重力操作型→遠距離/特殊)
-   9, // 28:ムッシー (虫合体型→スピード)
+  26, // 0:ゼン (バランス型)
+  34, // 1:ドン (パワー型)
+  18, // 2:サイソク (スピード型)
+  30, // 3:メテオ (テクニック型→遠距離/特殊)
+  30, // 4:ロング (機械槍型→遠距離/特殊)
+  30, // 5:うる男 (ディフェンス型→遠距離/特殊)
+  26, // 6:熊太郎 (テクニック型→バランス)
+  30, // 7:バレット (完全遠距離型→遠距離/特殊)
+  18, // 8:シャうでん (スピード型)
+  26, // 9:ジャッジマン (バランス型)
+  30, // 10:天才 (変形型→遠距離/特殊)
+  18, // 11:Catbus (スピード型)
+  34, // 12:タンク (パワー型)
+  26, // 13:波おじ (テクニック型→バランス)
+  18, // 14:とっこ (超攻撃型→スピード)
+  18, // 15:サム (空中戦型→スピード)
+  26, // 16:キング (上級者型→バランス)
+  30, // 17:おんぱ (音波型→遠距離/特殊)
+  26, // 18:セン (テクニック型→バランス)
+  34, // 19:ドスボス (トリッキー型→パワー)
+  26, // 20:マイクロ (バランス型)
+  30, // 21:ミスターツー (超能力型→遠距離/特殊)
+  34, // 22:金金 (パワー型)
+  26, // 23:サトル (テクニック型→バランス)
+  30, // 24:怖 (ホラー型→遠距離/特殊)
+  26, // 25:ヤッホ (ふざけ型→バランス)
+  26, // 26:ぽよ (初心者型→バランス)
+  30, // 27:プル (重力操作型→遠距離/特殊)
+  18, // 28:ムッシー (虫合体型→スピード)
 ];
 function getGrabFrames(charIdx) {
   return CHAR_GRAB_FRAMES[charIdx] || THROW_GRAB_FRAMES;
@@ -8345,9 +8345,9 @@ function executeThrow(grabber, dirX, dirY) {
   // 波おじ: 下投げを低めに
   const namiDownAngle = grabber.charIdx === 13 ? -15 : -20;
   if (dirY < 0) {
-    // 上投げ: 真上80度
+    // 上投げ: 真上80度（飛距離0.65倍）
     throwDmg = dmgTable.up * kumaPassive;
-    kbBase = 9; kbScale = 0.09;
+    kbBase = 9 * 0.65; kbScale = 0.09 * 0.65;
     throwAngle = -80; throwDir = 0;
     target.hitstun = Math.floor(15 + target.damage * 0.12);
   } else if (dirY > 0) {
@@ -9145,34 +9145,41 @@ function updateBattle(dt) {
       p.y += p.vy;
       landingCheck(p);
 
-      // フェーズ1: 掴みモーション（10F）
+      // フェーズ1: 掴み拘束中 → 方向キー入力で即投げ or タイマー切れで前投げ
       if (p.throwPhase === 1) {
         p.throwPhaseTimer--;
-        if (p.throwPhaseTimer <= 0) {
-          // 掴みモーション完了 → 方向入力を読み取って投げ実行フェーズへ
-          let dx = 0, dy = 0;
-          if (p.id === 0) {
-            if (onlineMode && !isHost) {
-              if (remoteKeys.left) dx = -1; if (remoteKeys.right) dx = 1;
-              if (remoteKeys.up) dy = -1; if (remoteKeys.down) dy = 1;
-            } else {
-              if (keys['ArrowLeft']) dx = -1; if (keys['ArrowRight']) dx = 1;
-              if (keys['ArrowUp']) dy = -1; if (keys['ArrowDown']) dy = 1;
-            }
-          } else if (gameMode === 'cpu' || bossRushMode) {
-            // CPU投げ方向: ランダム
-            const r = Math.random();
-            if (r < 0.3) dy = -1;       // 上投げ
-            else if (r < 0.5) dy = 1;   // 下投げ
-            else dx = p.facingLeft ? -1 : 1; // 前投げ
-          } else if (onlineMode && isHost) {
+        // 方向キー入力を毎フレーム読み取り
+        let dx = 0, dy = 0;
+        if (p.id === 0) {
+          if (onlineMode && !isHost) {
             if (remoteKeys.left) dx = -1; if (remoteKeys.right) dx = 1;
             if (remoteKeys.up) dy = -1; if (remoteKeys.down) dy = 1;
           } else {
-            if (keys['a'] || keys['A']) dx = -1; if (keys['d'] || keys['D']) dx = 1;
-            if (keys['w'] || keys['W']) dy = -1; if (keys['s'] || keys['S']) dy = 1;
+            if (keys['ArrowLeft']) dx = -1; if (keys['ArrowRight']) dx = 1;
+            if (keys['ArrowUp']) dy = -1; if (keys['ArrowDown']) dy = 1;
           }
+        } else if (gameMode === 'cpu' || bossRushMode) {
+          // CPU投げ方向: 拘束時間の半分経過後にランダム決定
+          if (p.throwPhaseTimer <= getGrabFrames(p.charIdx) / 2) {
+            const r = Math.random();
+            if (r < 0.3) dy = -1;
+            else if (r < 0.5) dy = 1;
+            else dx = p.facingLeft ? -1 : 1;
+          }
+        } else if (onlineMode && isHost) {
+          if (remoteKeys.left) dx = -1; if (remoteKeys.right) dx = 1;
+          if (remoteKeys.up) dy = -1; if (remoteKeys.down) dy = 1;
+        } else {
+          if (keys['a'] || keys['A']) dx = -1; if (keys['d'] || keys['D']) dx = 1;
+          if (keys['w'] || keys['W']) dy = -1; if (keys['s'] || keys['S']) dy = 1;
+        }
+        // 方向キー入力があれば即座に投げ実行（Xキー不要）
+        if (dx !== 0 || dy !== 0) {
           startThrowExec(p, dx, dy);
+        }
+        // タイマー切れ: 方向入力がなければ前投げ（後方互換）
+        else if (p.throwPhaseTimer <= 0) {
+          startThrowExec(p, p.facingLeft ? -1 : 1, 0); // デフォルト前投げ
         }
       }
       // フェーズ2: 投げ実行モーション（15F）
