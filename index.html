@@ -7245,6 +7245,9 @@ function createPlayer(id, charIdx, startX) {
     landLag: 0,            // 着地硬直フレーム
     // D技（固有追加技）
     dHoldTimer: 0,          // Dキー長押しフレーム
+    gaugeBurstCount: 0,    // ゲージバースト使用回数（最大3）
+    airDashUsed: false,    // エアダッシュ使用済み
+    powerUpTimer: 0,       // 攻撃強化残りフレーム
     ultimateGauge: 0,       // 必殺技ゲージ (0-100)
     // 固有システム
     rageGauge: 0, rageActive: false, rageTimer: 0, // うる男
@@ -7572,6 +7575,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   if (target.dSkillBuff === 'killIntent') finalDamage *= 1.2;   // とっこ 被ダメ1.2倍
   // D技バフ: 与ダメ増加
   if (attacker.dSkillBuff === 'tensaiBoost') finalDamage *= 1.5; // 天才 覚醒
+  if (attacker.powerUpTimer > 0) finalDamage *= 1.3; // ゲージ攻撃強化
   if (attacker.charIdx === 10 && attacker.dragonMode) finalDamage *= 1.5; // 天才 ドラゴンモード攻撃力1.5倍
   if (attacker.bossBuffed) finalDamage *= 1.3; // ボスラッシュ: ボス攻撃力1.3倍（1.6→1.3）
   if (attacker.dSkillBuff === 'killIntent') finalDamage *= 1.5;  // とっこ 殺意
@@ -7699,6 +7703,8 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   if (attacker.charIdx === 17 && attacker.consecutiveHits > 0) weightedKb *= (1 + Math.min(attacker.consecutiveHits * 0.05, 0.25));
   // ドラゴンモード: 横スマッシュKB1.2倍
   if (attacker.charIdx === 10 && attacker.dragonMode && hitType === 'smash') weightedKb *= 1.2;
+  // ゲージ攻撃強化中: KB×1.2
+  if (attacker.powerUpTimer > 0) weightedKb *= 1.2;
   // 崖外復帰阻止ボーナス: ステージ外の相手には1.3倍KB
   if (target.x < STAGE_LEFT - 30 || target.x > STAGE_RIGHT + 30) weightedKb *= 1.3;
   // --- ノックバック角度補正 ---
@@ -9510,23 +9516,92 @@ function updateBattle(dt) {
     } else {
       dKeyHeld = !!(keys['r'] || keys['R']); // P2ローカル: Rキー
     }
-    if (dKeyHeld && !p.dSkillActive && p.alive && p.hitstun <= 0 && !p.grabbed && !ultimateActive && p.sealMagic <= 0) {
-      p.dHoldTimer++;
-      if (p.dHoldTimer >= D_SKILL_HOLD_FRAMES) {
-        // ゲージMAX → 必殺技、それ以外 → 通常D技
-        if (p.ultimateGauge >= 100) {
-          triggerUltimate(p);
-        } else if (p.dSkillCooldown <= 0) {
-          triggerDSkill(p);
-        } else {
-          // クールダウン中: 弾くSE
-          playHitSound('guard');
+    // 攻撃強化タイマー更新
+    if (p.powerUpTimer > 0) p.powerUpTimer--;
+
+    if (dKeyHeld && p.alive && !ultimateActive && p.sealMagic <= 0) {
+      // === 優先順位2: 攻撃中にD → ゲージキャンセル（30%消費） ===
+      if ((p.attacking || p.guardPenalty > 0) && p.dHoldTimer === 0 && p.ultimateGauge >= 30) {
+        p.ultimateGauge -= 30;
+        p.attacking = false; p.specialState = null; p.attackFrame = 0;
+        p.guardPenalty = 0; p.landLag = 0;
+        // キャンセルエフェクト
+        hitEffects.push({ x: p.x, y: p.y - 35, life: 8, maxLife: 8, color: '#44DDFF', size: 35, type: 'ring' });
+        playHitSound('justGuard');
+        p.dHoldTimer = -1; // この入力を消費済みマーク
+      }
+      // === 優先順位3: 被攻撃中にD → ゲージバースト（50%消費） ===
+      else if (p.hitstun > 0 && p.dHoldTimer === 0 && p.ultimateGauge >= 50 && p.gaugeBurstCount < 3) {
+        p.ultimateGauge -= 50;
+        p.gaugeBurstCount++;
+        p.hitstun = 0; p.vx = 0; p.vy = 0; p.spinAngle = 0;
+        // 衝撃波で相手を押しのける
+        for (const t of players) {
+          if (t.id !== p.id && t.alive && Math.hypot(t.x - p.x, t.y - p.y) < 120) {
+            const bDir = t.x > p.x ? 1 : -1;
+            t.vx = bDir * 8; t.vy = -4;
+            t.hitstun = 10;
+            t.damage = Math.min(999, t.damage + 5);
+          }
         }
-        p.dHoldTimer = 0;
+        hitEffects.push({ x: p.x, y: p.y - 35, life: 15, maxLife: 15, color: '#FFFFFF', size: 80, type: 'ring' });
+        hitEffects.push({ x: p.x, y: p.y - 35, life: 12, maxLife: 12, color: '#FFD700', size: 60 });
+        hitFlash.alpha = 0.3; hitFlash.color = '#FFFFFF';
+        triggerScreenShake(8, 12);
+        playHitSound('ko');
+        cmdNameDisplay.push({ text: 'BURST!', x: p.x, y: p.y - 90, life: 45, maxLife: 45, color: '#FFD700' });
+        p.dHoldTimer = -1;
+      }
+      // === 優先順位4: 空中で方向+D → エアダッシュ（25%消費） ===
+      else if (!p.grounded && !p.airDashUsed && p.dHoldTimer === 0 && p.ultimateGauge >= 25 && p.hitstun <= 0 && !p.grabbed) {
+        let adx = 0, ady = 0;
+        if (p.id === 0) {
+          if (onlineMode && !isHost) { if (remoteKeys.left) adx=-1; if (remoteKeys.right) adx=1; if (remoteKeys.up) ady=-1; if (remoteKeys.down) ady=1; }
+          else { if (keys['ArrowLeft']) adx=-1; if (keys['ArrowRight']) adx=1; if (keys['ArrowUp']) ady=-1; if (keys['ArrowDown']) ady=1; }
+        } else {
+          if (onlineMode && isHost) { if (remoteKeys.left) adx=-1; if (remoteKeys.right) adx=1; if (remoteKeys.up) ady=-1; if (remoteKeys.down) ady=1; }
+          else { if (keys['a']||keys['A']) adx=-1; if (keys['d']||keys['D']) adx=1; if (keys['w']||keys['W']) ady=-1; if (keys['s']||keys['S']) ady=1; }
+        }
+        if (adx !== 0 || ady !== 0) {
+          p.ultimateGauge -= 25;
+          p.airDashUsed = true;
+          const adLen = Math.sqrt(adx*adx + ady*ady) || 1;
+          p.vx = (adx/adLen) * 18; p.vy = (ady/adLen) * 18;
+          p.invincibleTimer = Math.max(p.invincibleTimer, 6);
+          // 残像エフェクト
+          for (let adi = 0; adi < 4; adi++) {
+            sparks.push({ x: p.x - p.vx*adi*0.3, y: p.y - 35 - p.vy*adi*0.3, vx: 0, vy: 0, life: 6, maxLife: 6, color: '#44DDFF', size: 10, gravity: 0, drag: 1, type: 'charGhost' });
+          }
+          playHitSound('jump');
+          p.dHoldTimer = -1;
+        }
+      }
+      // === 優先順位1&5: 長押し → 必殺技(100%) or 攻撃強化(50%) ===
+      else if (!p.dSkillActive && p.hitstun <= 0 && !p.grabbed) {
+        if (p.dHoldTimer >= 0) p.dHoldTimer++;
+        if (p.dHoldTimer >= D_SKILL_HOLD_FRAMES) {
+          if (p.ultimateGauge >= 100) {
+            triggerUltimate(p);
+          } else if (p.ultimateGauge >= 50 && p.powerUpTimer <= 0) {
+            // 攻撃強化（50%消費、5秒間）
+            p.ultimateGauge -= 50;
+            p.powerUpTimer = 300; // 5秒
+            hitEffects.push({ x: p.x, y: p.y - 35, life: 15, maxLife: 15, color: '#FFD700', size: 50, type: 'ring' });
+            cmdNameDisplay.push({ text: 'POWER UP!', x: p.x, y: p.y - 90, life: 60, maxLife: 60, color: '#FFD700' });
+            playHitSound('cmd');
+          } else if (p.dSkillCooldown <= 0) {
+            triggerDSkill(p);
+          } else {
+            playHitSound('guard');
+          }
+          p.dHoldTimer = 0;
+        }
       }
     } else {
       p.dHoldTimer = 0;
     }
+    // 着地時にエアダッシュリセット
+    if (p.grounded) p.airDashUsed = false;
 
     // 天才: ドラゴンモード処理
     if (p.charIdx === 10) {
@@ -14468,6 +14543,24 @@ function drawBattleHUD() {
       ctx.fillRect(gx, gy, gw * ratio, gh);
       ctx.strokeStyle = '#444'; ctx.lineWidth = 1;
       ctx.strokeRect(gx, gy, gw, gh);
+    }
+    // ゲージ目盛り（25%/30%/50%）
+    ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 1;
+    for (const tick of [0.25, 0.30, 0.50]) {
+      const tx = gx + gw * tick;
+      ctx.beginPath(); ctx.moveTo(tx, gy); ctx.lineTo(tx, gy + gh); ctx.stroke();
+    }
+    // 攻撃強化中のオーラ表示
+    if (p.powerUpTimer > 0) {
+      ctx.globalAlpha = 0.4 + Math.sin(battleTime * 0.12) * 0.2;
+      ctx.strokeStyle = '#FFD700'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(p.x, p.y - 35, 30, 0, Math.PI * 2); ctx.stroke();
+      ctx.globalAlpha = 1;
+      // 残り時間をゲージ上に表示
+      const puRatio = p.powerUpTimer / 300;
+      ctx.fillStyle = '#FFD700'; ctx.globalAlpha = 0.6;
+      ctx.fillRect(gx, gy - 3, gw * puRatio, 2);
+      ctx.globalAlpha = 1;
     }
   }
 
