@@ -5385,6 +5385,90 @@ const COMBO_ROUTES = {
     { name: '💀 黄金即死A', route: '時間停止→横スマ×2→上スマ→空中→下スマ(メテオ)', dmgRange: '0%〜', diff: 3, hits: 6, instantKill: true },
     { name: '💀 黄金即死B', route: '時間停止→下スマ(メテオ)', dmgRange: '80%〜', diff: 3, hits: 2, instantKill: true },
   ],
+  // === 軽量級（5〜8連） ===
+  7: [ // バレット（魔法少女）
+    { name: 'スターラッシュ', route: '弱→弱→横強→空中→空中→上スマ', dmgRange: '0〜50%', diff: 2, hits: 6 },
+    { name: '2連射コンボ', route: '弱(2連射)→横強→空中→上スマ', dmgRange: '0〜40%', diff: 2, hits: 5 },
+  ],
+  8: [ // シャうでん（電撃）
+    { name: '電撃ラッシュ', route: '弱→弱→上強→空中→上スマ', dmgRange: '0〜60%', diff: 2, hits: 5 },
+    { name: '感電コンボ', route: '感電付与→弱→横強→上スマ', dmgRange: '20〜70%', diff: 2, hits: 4 },
+  ],
+  11: [ // Catbus（瞬間移動）
+    { name: '瞬間消滅コンボ', route: '瞬間移動→背後弱→横強→空中→上スマ', dmgRange: '0〜50%', diff: 3, hits: 5 },
+    { name: '高速追撃', route: '弱→弱→横強→空中→横スマ', dmgRange: '0〜40%', diff: 2, hits: 5 },
+  ],
+  15: [ // サム（鳥）
+    { name: '3段ジャンプコンボ', route: '弱→上強→空中→空中→横スマ', dmgRange: '0〜60%', diff: 2, hits: 5 },
+    { name: '空中連撃', route: '空中→空中→空中→上スマ', dmgRange: '0〜50%', diff: 3, hits: 4 },
+  ],
+  // === 中量級（3〜5連） ===
+  4: [ // ロング（槍）
+    { name: '槍リーチコンボ', route: '横強(槍最大)→上強→空中→横スマ', dmgRange: '0〜50%', diff: 2, hits: 4 },
+    { name: '槍突進連携', route: 'ダッシュ攻撃→上強→上スマ', dmgRange: '20〜60%', diff: 1, hits: 3 },
+  ],
+  14: [ // とっこ（毒刀）
+    { name: '毒刃コンボ', route: '弱(毒付与)→毒蓄積→横強→上スマ', dmgRange: '0〜70%', diff: 2, hits: 3 },
+    { name: '三刀流連撃', route: '弱→弱→横強→空中→横スマ', dmgRange: '0〜50%', diff: 2, hits: 5 },
+  ],
+  17: [ // おんぱ（音波）
+    { name: '音波共鳴コンボ', route: '弱→音波気絶→横スマ→上スマ', dmgRange: '0〜60%', diff: 2, hits: 4 },
+    { name: '共鳴追撃', route: '弱→弱→上強→空中→横スマ', dmgRange: '0〜50%', diff: 2, hits: 5 },
+  ],
+  18: [ // セン（米サラリーマン）
+    { name: '満腹コンボ', route: '弱→横強→上強→上スマ', dmgRange: '0〜50%', diff: 1, hits: 4 },
+    { name: '逆境強化連携', route: '(高%時)弱→横強→横スマ', dmgRange: '80%〜', diff: 2, hits: 3 },
+  ],
+  20: [ // マイクロ（3体合体）
+    { name: '合体ラッシュ', route: '弱×3→上強→空中→横スマ', dmgRange: '0〜60%', diff: 2, hits: 6 },
+    { name: '分離→合体コンボ', route: '分離弱→合体→横強→上スマ', dmgRange: '0〜40%', diff: 3, hits: 4 },
+  ],
+  21: [ // ミスターツー（双頭）
+    { name: '二重人格コンボ', route: '左右同時攻撃→横強→上スマ→空中', dmgRange: '0〜50%', diff: 2, hits: 4 },
+    { name: '爆炎連携', route: '爆弾攻撃→炎攻撃→横スマ', dmgRange: '30〜70%', diff: 2, hits: 3 },
+  ],
+  // === 重量級（2〜4連） ===
+  22: [ // 金金（黄金竜巻）
+    { name: '黄金コンボ', route: '横強→引き寄せ→上スマ→空中追撃', dmgRange: '0〜60%', diff: 2, hits: 4 },
+    { name: 'コイン回収連携', route: '弱→横強→上スマ(コイン飛散)', dmgRange: '0〜50%', diff: 1, hits: 3 },
+  ],
+  // === 超重量級（2〜3連） ===
+  5: [ // うる男（獣鎧）
+    { name: '獣の猛攻', route: '横強→下スマ→上スマ', dmgRange: '0〜40%', diff: 1, hits: 3 },
+    { name: '怒りコンボ', route: '(怒り中)弱→横スマ→上スマ', dmgRange: '0〜60%', diff: 2, hits: 3 },
+  ],
+  12: [ // タンク（戦車）
+    { name: '砲撃コンボ', route: '横強(砲撃)→爆風追撃→上スマ', dmgRange: '0〜40%', diff: 1, hits: 3 },
+    { name: '要塞連携', route: '下強→横スマ', dmgRange: '40〜80%', diff: 1, hits: 2 },
+  ],
+  19: [ // ドスボス（紫戦車）
+    { name: 'トリッキーコンボ', route: '横強→麻痺付与→麻痺中上スマ', dmgRange: '0〜50%', diff: 2, hits: 3 },
+    { name: 'デコイ連携', route: 'デコイ設置→横スマ→爆発追撃', dmgRange: '20〜60%', diff: 3, hits: 3 },
+  ],
+  // === 隠しキャラ ===
+  24: [ // 怖（恐怖）
+    { name: '恐怖のコンボ', route: '弱→恐怖付与→逃げる相手に横スマ→上スマ', dmgRange: '0〜50%', diff: 2, hits: 4 },
+    { name: '暗闇追撃', route: '恐怖付与→横強→下スマ', dmgRange: '30〜70%', diff: 2, hits: 3 },
+  ],
+  25: [ // ヤッホ（ランダム）
+    { name: 'ランダムコンボ', route: '弱→ランダム状態異常→横強→上スマ', dmgRange: '0〜60%', diff: 2, hits: 4 },
+    { name: '?ラッシュ', route: '弱×3→横強→空中→横スマ', dmgRange: '0〜50%', diff: 2, hits: 6 },
+  ],
+  26: [ // ぽよ（スライム）
+    { name: 'バウンドコンボ', route: '弱×4→上強→上スマ', dmgRange: '0〜60%', diff: 2, hits: 6 },
+    { name: 'スライム連打', route: '弱×3→横強→横スマ', dmgRange: '0〜50%', diff: 1, hits: 5 },
+  ],
+  23: [ // サトル（テコンドー魚）
+    { name: '水流蹴りコンボ', route: '前蹴り→回転蹴り→上段蹴り→ジャンプ蹴り→上スマ', dmgRange: '0〜50%', diff: 3, hits: 5 },
+    { name: 'カウンター連携', route: '空中回避→カウンター→横スマ→空中', dmgRange: '20〜60%', diff: 3, hits: 4 },
+  ],
+  27: [ // プル（重力）
+    { name: '重力コンボ', route: '弱→重力引き寄せ→横スマ→上スマ', dmgRange: '0〜50%', diff: 2, hits: 4 },
+  ],
+  28: [ // ムッシー（虫）
+    { name: '毒虫コンボ', route: '弱(毒付与)→弱→横強→上スマ', dmgRange: '0〜60%', diff: 2, hits: 4 },
+    { name: '虫群連携', route: '弱×3→空中→横スマ', dmgRange: '0〜50%', diff: 2, hits: 5 },
+  ],
 };
 
 // Dynamic camera system
