@@ -8283,9 +8283,9 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
 
   // ① ヒットストップ設定（前のヒットストップが終わった時のみ）
   if (hitStopFrames <= 0) {
-    if (isSmash) hitStopFrames = 8;
-    else if (isStrong || isSpecial) hitStopFrames = 6;
-    else if (kb > 3) hitStopFrames = 4;
+    if (isSmash) hitStopFrames = 4;
+    else if (isStrong || isSpecial) hitStopFrames = 3;
+    else if (kb > 3) hitStopFrames = 2;
   }
 
   // ② 強攻撃・スマッシュヒット時: 相手を白フラッシュ + 一瞬拡大
