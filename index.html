@@ -5349,6 +5349,8 @@ const COMBO_ROUTES = {
   0: [ // ゼン
     { name: '居合コンボ', route: '通常→上強→上スマ', dmgRange: '0〜40%', diff: 2, hits: 3 },
     { name: '凍結追撃', route: '凍結→横スマ', dmgRange: '40〜80%', diff: 1, hits: 2 },
+    { name: '💀 蒼龍氷葬A', route: '通常→上強→必殺(凍結)→凍結中上スマ→空中→横スマ', dmgRange: '0%〜', diff: 3, hits: 6, instantKill: true },
+    { name: '💀 蒼龍氷葬B', route: '必殺(凍結)→凍結中上スマ', dmgRange: '80%〜', diff: 3, hits: 2, instantKill: true },
   ],
   1: [ // ドン
     { name: '下投げ追撃', route: '下投げ→上スマ', dmgRange: '0〜60%', diff: 1, hits: 2 },
@@ -5357,10 +5359,14 @@ const COMBO_ROUTES = {
   2: [ // サイソク
     { name: '忍者ラッシュ', route: '通常×3→上強→空中→空中→上スマ', dmgRange: '0〜40%', diff: 3, hits: 7 },
     { name: '高速連撃', route: '通常×3→横強→ダッシュ攻撃', dmgRange: '20〜60%', diff: 2, hits: 5 },
+    { name: '💀 光速即死A', route: '弱×3→上強→空中×2→上スマ→撃墜', dmgRange: '0%〜', diff: 3, hits: 8, instantKill: true },
+    { name: '💀 光速即死B', route: '必殺(感電)→感電中横スマ', dmgRange: '80%〜', diff: 3, hits: 2, instantKill: true },
   ],
   3: [ // メテオ
     { name: '格闘コンボ', route: '通常→上強→空中上→空中', dmgRange: '0〜50%', diff: 2, hits: 4 },
     { name: '昇龍連携', route: '通常→昇龍拳→空中攻撃', dmgRange: '30〜70%', diff: 3, hits: 3 },
+    { name: '💀 黄金業火葬A', route: '通常→上強→必殺(燃焼)→燃焼中横スマ→上スマ→空中', dmgRange: '0%〜', diff: 3, hits: 6, instantKill: true },
+    { name: '💀 黄金業火葬B', route: '必殺(燃焼)→燃焼中上スマ', dmgRange: '80%〜', diff: 3, hits: 2, instantKill: true },
   ],
   6: [ // 熊太郎
     { name: 'ぷにぷにコンボ', route: '通常×3→上投げ→空中→上スマ', dmgRange: '0〜40%', diff: 2, hits: 5 },
@@ -5393,6 +5399,8 @@ const COMBO_ROUTES = {
   8: [ // シャうでん（電撃）
     { name: '電撃ラッシュ', route: '弱→弱→上強→空中→上スマ', dmgRange: '0〜60%', diff: 2, hits: 5 },
     { name: '感電コンボ', route: '感電付与→弱→横強→上スマ', dmgRange: '20〜70%', diff: 2, hits: 4 },
+    { name: '💀 超電磁即死A', route: '弱×2→上強→必殺(感電+吸収)→感電中横スマ→上スマ', dmgRange: '0%〜', diff: 3, hits: 6, instantKill: true },
+    { name: '💀 超電磁即死B', route: '必殺(感電)→感電スタン中上スマ', dmgRange: '80%〜', diff: 3, hits: 2, instantKill: true },
   ],
   11: [ // Catbus（瞬間移動）
     { name: '瞬間消滅コンボ', route: '瞬間移動→背後弱→横強→空中→上スマ', dmgRange: '0〜50%', diff: 3, hits: 5 },
@@ -5449,6 +5457,8 @@ const COMBO_ROUTES = {
   24: [ // 怖（恐怖）
     { name: '恐怖のコンボ', route: '弱→恐怖付与→逃げる相手に横スマ→上スマ', dmgRange: '0〜50%', diff: 2, hits: 4 },
     { name: '暗闇追撃', route: '恐怖付与→横強→下スマ', dmgRange: '30〜70%', diff: 2, hits: 3 },
+    { name: '💀 恐怖即死A', route: '弱→必殺(恐怖)→追撃横強→横スマ→上スマ→空中', dmgRange: '0%〜', diff: 3, hits: 6, instantKill: true },
+    { name: '💀 恐怖即死B', route: '必殺(恐怖)→パニック中横スマ', dmgRange: '80%〜', diff: 3, hits: 2, instantKill: true },
   ],
   25: [ // ヤッホ（ランダム）
     { name: 'ランダムコンボ', route: '弱→ランダム状態異常→横強→上スマ', dmgRange: '0〜60%', diff: 2, hits: 4 },
@@ -7727,10 +7737,32 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   const isNearEdge = (target.x < STAGE_LEFT + 80 || target.x > STAGE_RIGHT - 80);
   const isOffStage = (target.x < STAGE_LEFT || target.x > STAGE_RIGHT);
 
-  // キング(16): 下スマッシュ、相手が空中、崖端
-  if (aci3 === 16 && isDownSmash && !target.grounded && (isNearEdge || isOffStage)) {
+  // ゼン(0): 下スマッシュ、相手が凍結中+崖端
+  if (aci3 === 0 && isDownSmash && target.frozen > 0 && (isNearEdge || isOffStage)) {
+    meteorTriggered = true;
+    target.vx = 0; target.vy = Math.abs(weightedKb) * 1.6 + 5;
+  }
+  // サイソク(2): 空中下攻撃、相手が感電中（スタン中）
+  if (aci3 === 2 && isDownair && target.stunned > 0) {
     meteorTriggered = true;
     target.vx = 0; target.vy = Math.abs(weightedKb) * 1.5 + 5;
+  }
+  // メテオ(3): 下スマッシュ、相手が燃焼中+崖端
+  if (aci3 === 3 && isDownSmash && target.burning > 0 && (isNearEdge || isOffStage)) {
+    meteorTriggered = true;
+    target.vx = 0; target.vy = Math.abs(weightedKb) * 1.5 + 5;
+  }
+  // シャうでん(8): 空中下攻撃、相手が感電中
+  if (aci3 === 8 && isDownair && target.stunned > 0) {
+    meteorTriggered = true;
+    const meteorAngle8 = 265 * Math.PI / 180;
+    target.vx = Math.cos(meteorAngle8) * weightedKb * 0.2;
+    target.vy = Math.abs(weightedKb) * 1.4 + 5;
+  }
+  // ジャッジマン(9): 下スマッシュ、相手が空中+呪縛状態
+  if (aci3 === 9 && isDownSmash && !target.grounded && target.cursed > 0) {
+    meteorTriggered = true;
+    target.vx = 0; target.vy = Math.abs(weightedKb) * 1.8 + 6;
   }
   // 波おじ(13): 空中下攻撃（崖外問わず）
   if (aci3 === 13 && isDownair) {
@@ -7739,10 +7771,15 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
     target.vx = Math.cos(meteorAngle) * weightedKb * 0.3;
     target.vy = Math.abs(weightedKb) * 1.3 + 4;
   }
-  // ジャッジマン(9): 下スマッシュ、相手が空中+呪縛状態
-  if (aci3 === 9 && isDownSmash && !target.grounded && target.cursed > 0) {
+  // キング(16): 下スマッシュ、相手が空中、崖端
+  if (aci3 === 16 && isDownSmash && !target.grounded && (isNearEdge || isOffStage)) {
     meteorTriggered = true;
-    target.vx = 0; target.vy = Math.abs(weightedKb) * 1.8 + 6; // 威力1.3倍
+    target.vx = 0; target.vy = Math.abs(weightedKb) * 1.5 + 5;
+  }
+  // 怖(24): 下スマッシュ、相手が恐怖状態+崖端
+  if (aci3 === 24 && isDownSmash && target.fearTimer > 0 && (isNearEdge || isOffStage)) {
+    meteorTriggered = true;
+    target.vx = 0; target.vy = Math.abs(weightedKb) * 1.6 + 5;
   }
   // 汎用崖メテオ: 他キャラの下スマッシュ（崖端、ダメージ30%以上）
   if (!meteorTriggered && isDownSmash && target.damage >= 30 && (isNearEdge || isOffStage)) {
