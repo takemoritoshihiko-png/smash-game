@@ -9114,6 +9114,7 @@ function updateBattle(dt) {
     // ガード硬直カウントダウン
     if (p.guardPenalty > 0) { p.guardPenalty--; p.vx *= 0.9; }
     if (p.guardShrink > 0) p.guardShrink--;
+    if (p.guardEndlag > 0) p.guardEndlag--;
     // スマッシュ溜め更新
     if (p.smashCharging) {
       p.smashChargeTime++;
@@ -10146,11 +10147,6 @@ function updateBattle(dt) {
         p.justGuardTimer = JUST_GUARD_WINDOW;
       }
     } else {
-      if (p.guarding) {
-        // ガード解除後硬直3F（ドスボスは15F）
-        p.guardEndlag = p.charIdx === 19 ? 15 : 3;
-        if (p.charIdx === 19) p.dosbossGuardEndlag = 15;
-      }
       p.guarding = false;
     }
 
@@ -10160,21 +10156,6 @@ function updateBattle(dt) {
     // Guard durability regen when not guarding
     if (!p.guarding && p.guardDurability < GUARD_MAX_DURABILITY) {
       p.guardDurability = Math.min(GUARD_MAX_DURABILITY, p.guardDurability + GUARD_REGEN_RATE);
-    }
-
-    // ガード解除後硬直
-    if (p.guardEndlag > 0) {
-      p.guardEndlag--;
-      p.vx *= 0.85;
-      p.vy += getGravity(p);
-      if (p.vy > MAX_FALL_SPEED) p.vy = MAX_FALL_SPEED;
-      p.y += p.vy;
-      landingCheck(p);
-      // ガード解除硬直中もジャンプでキャンセル可能
-      if (jumpPress && !p.jumpUsed && p.jumps > 0) {
-        p.guardEndlag = 0;
-      }
-      // continueしない: 後続処理を通常通り実行
     }
 
     // Guarding state: no movement, stay grounded, gauge decays over time
