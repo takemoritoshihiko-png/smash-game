@@ -7676,8 +7676,9 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   target.damage = Math.min(999, target.damage + finalDamage);
   // 必殺技ゲージ蓄積
   const atkGaugeBonus = (attacker.charIdx === 25 && attacker.yahoPassive === 4) ? 2 : 0; // ヤッホ: ゲージ加速
-  if (attacker.ultimateGauge !== undefined) attacker.ultimateGauge = Math.min(100, attacker.ultimateGauge + 3 + atkGaugeBonus);
-  if (target.ultimateGauge !== undefined) target.ultimateGauge = Math.min(100, target.ultimateGauge + 5 + (target.damage >= 50 ? 2 : 0));
+  // ゲージ蓄積（×0.5に減速）
+  if (attacker.ultimateGauge !== undefined) attacker.ultimateGauge = Math.min(100, attacker.ultimateGauge + 1.5 + atkGaugeBonus * 0.5);
+  if (target.ultimateGauge !== undefined) target.ultimateGauge = Math.min(100, target.ultimateGauge + 2.5 + (target.damage >= 50 ? 1 : 0));
   playHitSE();
   const kb = calcKnockback(target.damage, kbBase, finalKbScale);
   // 体重補正: 重量級は飛びにくく、軽量級は少し飛びやすい（緩やかな補正）
@@ -8796,18 +8797,21 @@ function executeThrow(grabber, dirX, dirY) {
     target.hitstun = Math.floor(10 + target.damage * 0.1);
   }
   {
-    const kb = (kbBase + target.damage * kbScale) / targetWeight * kbMult * kumaPassive;
+    let kb = (kbBase + target.damage * kbScale) / targetWeight * kbMult * kumaPassive;
     const tRad = throwAngle * Math.PI / 180;
     if (throwAngle === 90) {
-      // 下投げ: 真下に叩きつけ
+      // 下投げ: 真下に叩きつけ（そのまま）
       target.vx = 0;
-      target.vy = kb * 1.5 + 8; // 確実に地面に到達する速度
+      target.vy = kb * 1.5 + 8;
       target.grounded = false;
     } else if (throwDir === 0) {
-      // 上投げ: 真上
+      // 上投げ: KB×0.5 + 上限15
+      kb = Math.min(kb * 0.5, 15);
       target.vx = 0;
       target.vy = -kb * 1.3;
     } else {
+      // 前投げ・後ろ投げ: KB×0.45 + 上限15
+      kb = Math.min(kb * 0.45, 15);
       target.vx = Math.cos(tRad) * kb * throwDir;
       target.vy = Math.sin(tRad) * kb;
     }
