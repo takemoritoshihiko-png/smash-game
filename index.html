@@ -10145,7 +10145,12 @@ function updateBattle(dt) {
       if (p.vy > MAX_FALL_SPEED) p.vy = MAX_FALL_SPEED;
       p.y += p.vy;
       landingCheck(p);
-      continue;
+      // ガード解除硬直中もジャンプでキャンセル可能
+      if (jumpPress && !p.jumpUsed && p.jumps > 0) {
+        p.guardEndlag = 0;
+      } else {
+        continue;
+      }
     }
 
     // Guarding state: no movement, stay grounded, gauge decays over time
@@ -10342,7 +10347,13 @@ function updateBattle(dt) {
       if (p.vy > MAX_FALL_SPEED) p.vy = MAX_FALL_SPEED;
       p.y += p.vy;
       landingCheck(p);
-      continue;
+      // 着地硬直中でもジャンプ入力は受け付ける（硬直キャンセルジャンプ）
+      if (jumpPress && !p.jumpUsed && p.jumps > 0) {
+        p.landLag = 0; // 硬直キャンセル
+        // ジャンプは下のジャンプ処理で実行される（continueしない）
+      } else {
+        continue;
+      }
     }
 
     applyMovement(p, moveX, ch);
