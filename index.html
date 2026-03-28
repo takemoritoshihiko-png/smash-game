@@ -8280,19 +8280,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
 
   // ===== All-Star Brawl 2 エフェクト =====
 
-  // ① ヒットストップ（上限付き）
-  const hitStopMult = target.downThrowBounce ? 0.5 : 1.0;
-  // ヒットストップ: 短めに設定（ゲーム速度を維持）
-  let newHitStop = 0;
-  if (isSmash) newHitStop = 4;       // スマッシュ: 4F
-  else if (isStrong || isSpecial) newHitStop = 3; // 強攻撃: 3F
-  else if (kb > 3) newHitStop = 2;   // 弱攻撃: 2F
-  // コンボ中・ドラゴンモードの追加なし（フリーズ感を排除）
-  // 上限: 弱3F、強4F、スマッシュ5F
-  const hitStopCap = isSmash ? 5 : (isStrong || isSpecial) ? 4 : 3;
-  if (hitStopFrames <= 0) {
-    hitStopFrames = Math.min(newHitStop, hitStopCap);
-  }
+  // ① ヒットストップ: 削除済み（フリーズバグ防止）
 
   // ② 強攻撃・スマッシュヒット時: 相手を白フラッシュ + 一瞬拡大
   if (isStrong || isSpecial || isSmash) {
@@ -9183,18 +9171,8 @@ function updateBattle(dt) {
   battleTime += dt;
   cmdFrameCounter++; // コマンド入力用フレームカウンタ
 
-  // ヒットストップ処理
-  let inHitStop = false;
-  if (hitStopFrames > 0) {
-    hitStopFrames--;
-    inHitStop = true;
-    if (hitStopFrames > 0) {
-      screenShake.x = (Math.random() - 0.5) * 3;
-      screenShake.y = (Math.random() - 0.5) * 3;
-    } else {
-      screenShake.x = 0; screenShake.y = 0;
-    }
-  }
+  // ヒットストップ: 削除済み（hitStopFramesは常に0）
+  hitStopFrames = 0;
 
   if (battleCountdown > 0) { battleCountdown--; return; }
   battleStarted = true;
@@ -9431,27 +9409,7 @@ function updateBattle(dt) {
 
   // Update players
   for (const p of players) {
-    // ヒットストップ中: ガード状態の入力だけ更新し、物理はスキップ
-    if (inHitStop && p.alive && !p.respawnTimer) {
-      // ガードボタンの状態だけ更新（ガード解除を検出するため）
-      let hsGuard = false;
-      if (p.id === 0) { hsGuard = (onlineMode && !isHost) ? !!remoteKeys.s : !!(keys['s'] || keys['S']); }
-      else if (p.id === 1 && (gameMode === 'cpu' || bossRushMode)) { hsGuard = getCpuGuard(p, players[0]); }
-      else if (onlineMode && isHost) { hsGuard = !!remoteKeys.s; }
-      else { hsGuard = !!(keys['p'] || keys['P']); }
-      if (!hsGuard && p.guarding) { p.guarding = false; p.guardEndlag = p.charIdx === 19 ? 15 : 3; }
-      if (p.guardShrink > 0) p.guardShrink--;
-      // ヒットストップ中もattackFrameを進める（hitbox消失→再ヒットループ防止）
-      if (p.attacking && p.attackData) {
-        p.attackFrame++;
-        const ad = p.attackData;
-        const totalF = (ad.startupFrames || ad.startup || 0) + (ad.activeFrames || ad.active || 0) + (ad.endlagFrames || ad.recovery || 0);
-        if (p.attackFrame >= totalF) {
-          p.attacking = false; p.specialState = null; p.attackFrame = 0; p.hitTargets = [];
-        }
-      }
-      continue;
-    }
+    // ヒットストップ: 削除済み（inHitStopは常にfalse）
     if (p.respawnTimer > 0) {
       p.respawnTimer--;
       if (p.respawnTimer === 0) {
