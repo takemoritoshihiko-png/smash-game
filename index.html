@@ -9445,7 +9445,7 @@ function updateBattle(dt) {
       if (p.attacking && p.attackData) {
         p.attackFrame++;
         const ad = p.attackData;
-        const totalF = (ad.startup || 0) + (ad.active || 0) + (ad.recovery || 0);
+        const totalF = (ad.startupFrames || ad.startup || 0) + (ad.activeFrames || ad.active || 0) + (ad.endlagFrames || ad.recovery || 0);
         if (p.attackFrame >= totalF) {
           p.attacking = false; p.specialState = null; p.attackFrame = 0; p.hitTargets = [];
         }
