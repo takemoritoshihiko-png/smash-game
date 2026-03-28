@@ -7391,6 +7391,10 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   if (target.invincibleTimer > 0 || target.airDodgeTimer > 0) return;
   // hitType: 'normal', 'strong', 'special', 'cmd', 'aerial', 'down', 'projectile'
   if (!hitType) hitType = 'normal';
+  // 攻撃種別フラグ（関数全体で使用）
+  const isStrong = hitType === 'strong' || hitType === 'cmd';
+  const isSpecial = hitType === 'special' || hitType === 'cmd';
+  const isSmash = hitType === 'smash';
 
   // Guard check
   if (target.guarding) {
@@ -7996,10 +8000,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   // --- Hit effects vary by attack type ---
   const charColor = characters[attacker.charIdx] ? characters[attacker.charIdx].accent : '#FFFFFF';
   const charMainColor = characters[attacker.charIdx] ? characters[attacker.charIdx].color : '#FFFFFF';
-  const isStrong = hitType === 'strong' || hitType === 'cmd';
-  const isSpecial = hitType === 'special' || hitType === 'cmd';
-
-  const isSmash = hitType === 'smash';
+  // isStrong/isSpecial/isSmash は関数先頭で宣言済み
   if (isStrong || isSpecial || isSmash) {
     // Strong/Special/Smash: エフェクトサイズ1.5倍 + 表示時間1.5倍
     const effectSize = (isSmash ? Math.min(120, 52 + kb * 4.5) : Math.min(90, 37 + kb * 3.75));
