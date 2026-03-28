@@ -7206,12 +7206,10 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
     // ノックバック0（微小プッシュバックのみ）
     const dir = attacker.x < target.x ? 1 : -1;
     target.vx = dir * 2;
-    // ガード成功音（金属的な「キン」音）
+    // ガード成功音
     playHitSound('guard');
-    // ヒットストップ: 単発攻撃のみ適用（多段攻撃中は連続フリーズ防止）
-    if (!attacker.attackData || !attacker.attackData.multiHit) {
-      hitStopFrames = Math.max(hitStopFrames, 3);
-    }
+    // ガードヒットではヒットストップを発生させない（連続ガード時のフリーズ防止）
+    // hitStopFrames は通常ヒット時のみ適用
     // シールドが攻撃方向にへこむアニメ（4F）
     target.guardShrink = 4;
     target.guardShrinkDir = attacker.x < target.x ? -1 : 1;
