@@ -13305,8 +13305,9 @@ function drawBattle(dt) {
 
 function drawAttackEffect(p) {
   const atk = p.attackData;
+  if (!atk) return; // null/undefinedチェック
   const frame = p.attackFrame;
-  const inActive = frame > atk.startup && frame <= atk.startup + atk.active;
+  const inActive = frame > (atk.startup||0) && frame <= (atk.startup||0) + (atk.active||0);
   if (!inActive && atk.specialType !== 'jumpSlam') return;
 
   const dir = p.facingLeft ? -1 : 1;
@@ -16141,7 +16142,7 @@ function updateUltimate() {
 }
 
 function drawInstantKillOverlay() {
-  if (!instantKillDisplay.active) return;
+  if (!instantKillDisplay || !instantKillDisplay.active) return;
   instantKillDisplay.timer--;
   if (instantKillDisplay.timer <= 0) { instantKillDisplay.active = false; return; }
   const t = 1 - instantKillDisplay.timer / instantKillDisplay.maxTimer;
