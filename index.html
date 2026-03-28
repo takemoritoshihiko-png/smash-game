@@ -5342,6 +5342,7 @@ loadUnlocks();
 let showFrameData = false;
 let trainingMode = false;
 let comboListCharIdx = 0;
+let instantKillDisplay = { active: false, timer: 0, maxTimer: 0 };
 
 // ========== コンボルート定義 ==========
 const COMBO_ROUTES = {
@@ -5367,9 +5368,13 @@ const COMBO_ROUTES = {
   13: [ // 波おじ
     { name: 'ボクサーラッシュ', route: '弱×3→横強→上スマ', dmgRange: '0〜50%', diff: 2, hits: 5 },
     { name: '根性コンボ', route: '弱×3→横強→横強→上スマ', dmgRange: '0〜30%', diff: 3, hits: 6 },
+    { name: '💀 怒涛の即死A', route: '弱×5→横強→上スマ→空中→空中下(メテオ)', dmgRange: '0%〜', diff: 3, hits: 9, instantKill: true },
+    { name: '💀 怒涛の即死B', route: '横強→崖端追い込み→空中下(メテオ)', dmgRange: '80%〜', diff: 3, hits: 3, instantKill: true },
   ],
   9: [ // ジャッジマン
     { name: '裁きの連携', route: '呪縛→横スマ→下スマ', dmgRange: '30〜80%', diff: 2, hits: 3 },
+    { name: '💀 暗黒審判A', route: '通常→呪縛付与→横スマ連続→下スマ(メテオ)', dmgRange: '0%〜', diff: 3, hits: 5, instantKill: true },
+    { name: '💀 暗黒審判B', route: '呪縛付与→下スマ(メテオ)', dmgRange: '80%〜', diff: 3, hits: 2, instantKill: true },
   ],
   10: [ // 天才
     { name: '人型コンボ', route: '通常→横強→上強', dmgRange: '0〜50%', diff: 1, hits: 3 },
@@ -5377,6 +5382,8 @@ const COMBO_ROUTES = {
   ],
   16: [ // キング
     { name: 'スタンドラッシュ', route: 'Z→Z→Z→X→C', dmgRange: '0〜50%', diff: 3, hits: 5 },
+    { name: '💀 黄金即死A', route: '時間停止→横スマ×2→上スマ→空中→下スマ(メテオ)', dmgRange: '0%〜', diff: 3, hits: 6, instantKill: true },
+    { name: '💀 黄金即死B', route: '時間停止→下スマ(メテオ)', dmgRange: '80%〜', diff: 3, hits: 2, instantKill: true },
   ],
 };
 
@@ -7628,34 +7635,58 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   target.vx = Math.cos(rad) * weightedKb * dir;
   target.vy = Math.sin(rad) * weightedKb * 1.1; // 上方向の吹っ飛び倍率を緩和（1.3→1.1）
 
-  // === 崖メテオ: 崖端で下スマッシュが当たった場合、真下に叩き落とす ===
-  if (hitType === 'smash' && attacker.attackData && attacker.attackData.smashType === 'downSmash'
-      && target.damage >= 30) {
-    const isNearEdge = (target.x < STAGE_LEFT + 80 || target.x > STAGE_RIGHT - 80);
-    const isOffStage = (target.x < STAGE_LEFT || target.x > STAGE_RIGHT);
-    if (isNearEdge || isOffStage) {
-      // 崖メテオ発動！真下方向に1.5倍ノックバック
-      target.vx = 0;
-      target.vy = Math.abs(weightedKb) * 1.5 + 5;
-      // 演出: 大爆発エフェクト
-      hitEffects.push({ x: target.x, y: target.y - 35, life: 20, maxLife: 20, color: '#FF6600', size: 60 });
-      hitEffects.push({ x: target.x, y: target.y - 35, life: 18, maxLife: 18, color: '#FF4400', size: 90, type: 'ring' });
-      hitEffects.push({ x: target.x, y: target.y - 35, life: 15, maxLife: 15, color: '#FFAA00', size: 120, type: 'ring' });
-      // 火花パーティクル
-      for (let mi = 0; mi < 10; mi++) {
-        sparks.push({ x: target.x + (Math.random()-0.5)*20, y: target.y - 30,
-          vx: (Math.random()-0.5)*6, vy: 2+Math.random()*4,
-          life: 12+Math.random()*8, maxLife: 20, color: mi%3===0?'#FFFFFF':'#FF8844',
-          size: 2+Math.random()*3, gravity: 0.15, drag: 0.96 });
-      }
-      // METEOR!テキスト
-      cmdNameDisplay.push({ text: 'METEOR!', x: target.x, y: target.y - 100, life: 120, maxLife: 120, color: '#FF6600' });
-      // 重い低音SE
-      playHitSound('ko');
-      // 大きな画面振動 + カメラ下パン
-      triggerScreenShake(14, 20);
-      hitFlash.alpha = 0.4; hitFlash.color = '#FF4400';
+  // === メテオシステム ===
+  let meteorTriggered = false;
+  const aci3 = attacker.charIdx;
+  const isDownSmash = hitType === 'smash' && attacker.attackData && attacker.attackData.smashType === 'downSmash';
+  const isDownair = hitType === 'downair';
+  const isNearEdge = (target.x < STAGE_LEFT + 80 || target.x > STAGE_RIGHT - 80);
+  const isOffStage = (target.x < STAGE_LEFT || target.x > STAGE_RIGHT);
+
+  // キング(16): 下スマッシュ、相手が空中、崖端
+  if (aci3 === 16 && isDownSmash && !target.grounded && (isNearEdge || isOffStage)) {
+    meteorTriggered = true;
+    target.vx = 0; target.vy = Math.abs(weightedKb) * 1.5 + 5;
+  }
+  // 波おじ(13): 空中下攻撃（崖外問わず）
+  if (aci3 === 13 && isDownair) {
+    meteorTriggered = true;
+    const meteorAngle = 260 * Math.PI / 180;
+    target.vx = Math.cos(meteorAngle) * weightedKb * 0.3;
+    target.vy = Math.abs(weightedKb) * 1.3 + 4;
+  }
+  // ジャッジマン(9): 下スマッシュ、相手が空中+呪縛状態
+  if (aci3 === 9 && isDownSmash && !target.grounded && target.cursed > 0) {
+    meteorTriggered = true;
+    target.vx = 0; target.vy = Math.abs(weightedKb) * 1.8 + 6; // 威力1.3倍
+  }
+  // 汎用崖メテオ: 他キャラの下スマッシュ（崖端、ダメージ30%以上）
+  if (!meteorTriggered && isDownSmash && target.damage >= 30 && (isNearEdge || isOffStage)) {
+    meteorTriggered = true;
+    target.vx = 0; target.vy = Math.abs(weightedKb) * 1.5 + 5;
+  }
+
+  // メテオ演出（共通）
+  if (meteorTriggered) {
+    hitEffects.push({ x: target.x, y: target.y - 35, life: 20, maxLife: 20, color: '#FF6600', size: 60 });
+    hitEffects.push({ x: target.x, y: target.y - 35, life: 18, maxLife: 18, color: '#FF4400', size: 90, type: 'ring' });
+    hitEffects.push({ x: target.x, y: target.y - 35, life: 15, maxLife: 15, color: '#FFAA00', size: 120, type: 'ring' });
+    for (let mi = 0; mi < 10; mi++) {
+      sparks.push({ x: target.x + (Math.random()-0.5)*20, y: target.y - 30,
+        vx: (Math.random()-0.5)*6, vy: 2+Math.random()*4,
+        life: 12+Math.random()*8, maxLife: 20, color: mi%3===0?'#FFFFFF':'#FF8844',
+        size: 2+Math.random()*3, gravity: 0.15, drag: 0.96 });
     }
+    // 落下軌跡エフェクト
+    for (let ti = 0; ti < 5; ti++) {
+      sparks.push({ x: target.x + (Math.random()-0.5)*10, y: target.y - 20 - ti * 15,
+        vx: 0, vy: 3+Math.random()*2, life: 8+ti*2, maxLife: 18,
+        color: '#FF4400', size: 3+Math.random()*2, gravity: 0.2, drag: 0.97, type: 'fireball' });
+    }
+    cmdNameDisplay.push({ text: 'METEOR!!', x: target.x, y: target.y - 100, life: 120, maxLife: 120, color: '#FF6600' });
+    playHitSound('ko');
+    triggerScreenShake(14, 20);
+    hitFlash.alpha = 0.4; hitFlash.color = '#FF4400';
   }
 
   // ベク変用: 吹っ飛び初速を記録
@@ -11233,6 +11264,24 @@ function blastCheck(p) {
       winner = p.id === 0 ? 1 : 0;
       gameSetTimer = 0; gameSetPhase = 1;
       koSlowMotion.active = true; koSlowMotion.frames = 30; koSlowMotion.maxFrames = 30;
+      // 即死コンボ判定: コンボ3HIT以上で撃墜
+      const killerIdx = winner;
+      const killerCombo = comboDisplay[killerIdx];
+      if (killerCombo && killerCombo.count >= 3) {
+        // INSTANT KILL演出
+        instantKillDisplay = { active: true, timer: 120, maxTimer: 120 };
+        hitFlash.alpha = 0.6; hitFlash.color = '#000000'; // 一瞬暗転
+        setTimeout(() => { hitFlash.alpha = 0.5; hitFlash.color = '#FFFFFF'; }, 50); // 直後に白フラッシュ
+        triggerScreenShake(20, 30);
+        try { // 重い爆発SE
+          const ac = getAudioCtx(); const now = ac.currentTime;
+          const bo = ac.createOscillator(); const bg = ac.createGain();
+          bo.type = 'sawtooth'; bo.frequency.setValueAtTime(40, now);
+          bo.frequency.exponentialRampToValueAtTime(20, now + 0.3);
+          bg.gain.setValueAtTime(0.25, now); bg.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+          bo.connect(bg); bg.connect(ac.destination); bo.start(now); bo.stop(now + 0.3);
+        } catch(e) {}
+      }
       // 戦績記録
       if (!trainingMode) recordBattleResult(players[0].charIdx, players[1].charIdx, winner === 0);
     } else {
@@ -14082,17 +14131,24 @@ function drawComboList() {
     roundRect(ctx, 100, ry, 760, 95, 8); ctx.stroke();
     // コンボ名
     ctx.textAlign = 'left';
-    ctx.font = 'bold 16px sans-serif'; ctx.fillStyle = '#FFDD44';
+    ctx.font = 'bold 16px sans-serif';
+    ctx.fillStyle = r.instantKill ? '#FF2200' : '#FFDD44';
     ctx.fillText(r.name, 120, ry + 25);
     // ルート
     ctx.font = '14px sans-serif'; ctx.fillStyle = '#FFFFFF';
     ctx.fillText(r.route, 120, ry + 48);
     // 情報
     ctx.font = '12px sans-serif'; ctx.fillStyle = '#AAAAAA';
-    ctx.fillText('ダメージ帯: ' + r.dmgRange + '  |  ' + r.hits + ' HIT', 120, ry + 72);
+    let infoText = 'ダメージ帯: ' + r.dmgRange + '  |  ' + r.hits + ' HIT';
+    if (r.instantKill) infoText += '  |  INSTANT KILL!';
+    ctx.fillText(infoText, 120, ry + 72);
+    if (r.instantKill) {
+      ctx.fillStyle = '#FF4444'; ctx.font = 'bold 10px sans-serif';
+      ctx.fillText('このコンボを決めると INSTANT KILL!', 120, ry + 88);
+    }
     // 難易度星
     ctx.textAlign = 'right';
-    ctx.fillStyle = '#FFD700';
+    ctx.fillStyle = r.instantKill ? '#FF4444' : '#FFD700';
     ctx.fillText('★'.repeat(r.diff) + '☆'.repeat(3 - r.diff), 840, ry + 25);
   }
 
@@ -15758,6 +15814,42 @@ function updateUltimate() {
   }
 }
 
+function drawInstantKillOverlay() {
+  if (!instantKillDisplay.active) return;
+  instantKillDisplay.timer--;
+  if (instantKillDisplay.timer <= 0) { instantKillDisplay.active = false; return; }
+  const t = 1 - instantKillDisplay.timer / instantKillDisplay.maxTimer;
+  ctx.save();
+  // 暗転背景
+  if (t < 0.05) {
+    ctx.fillStyle = 'rgba(0,0,0,0.8)'; ctx.fillRect(0, 0, 960, 640);
+  }
+  // テキスト（ズームイン）
+  if (t > 0.03 && t < 0.85) {
+    const textT = Math.min(1, (t - 0.03) / 0.15);
+    const scale = 0.3 + textT * 0.7; // 0.3→1.0
+    const alpha = t < 0.7 ? 1 : Math.max(0, (0.85 - t) / 0.15);
+    ctx.globalAlpha = alpha;
+    ctx.translate(480, 280);
+    ctx.scale(scale, scale);
+    ctx.font = 'bold 52px sans-serif'; ctx.textAlign = 'center';
+    // 赤→金グラデーション
+    const grad = ctx.createLinearGradient(-200, -20, 200, 20);
+    grad.addColorStop(0, '#FF2200'); grad.addColorStop(0.5, '#FFD700'); grad.addColorStop(1, '#FF4400');
+    ctx.fillStyle = grad;
+    ctx.shadowColor = '#FF0000'; ctx.shadowBlur = 20;
+    ctx.fillText('INSTANT KILL!', 0, 0);
+    ctx.shadowBlur = 0;
+    // 爆発リング
+    if (textT < 0.5) {
+      ctx.strokeStyle = '#FF4400'; ctx.lineWidth = 3 * (1 - textT * 2);
+      ctx.globalAlpha = alpha * (1 - textT * 2);
+      ctx.beginPath(); ctx.arc(0, 0, 100 + textT * 300, 0, Math.PI * 2); ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
+
 function drawUltimateOverlay() {
   if (!ultimateActive) return;
   if (ultimatePhase === 'startup') {
@@ -17088,6 +17180,7 @@ function gameLoop(timestamp) {
   } else if (scene === 'battle') {
     drawBattle(FIXED_DT);
     drawUltimateOverlay();
+    drawInstantKillOverlay();
   }
 
   drawTransition();
