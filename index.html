@@ -10189,12 +10189,13 @@ function updateBattle(dt) {
       // ガード中にジャンプ → ガードキャンセルジャンプ
       // (ジャンプ入力は↑キーと同じなので上の処理でカバー)
 
-      p.vx = 0;
+      // ガード中は減速のみ（完全停止しない）
+      p.vx *= 0.7;
       p.vy += getGravity(p);
       if (p.vy > MAX_FALL_SPEED) p.vy = MAX_FALL_SPEED;
       p.y += p.vy;
       landingCheck(p);
-      continue;
+      // continueしない: 後続の描画・アニメ処理を通常通り実行
     }
 
     // --- Air dodge update ---
