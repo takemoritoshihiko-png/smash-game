@@ -10148,9 +10148,8 @@ function updateBattle(dt) {
       // ガード解除硬直中もジャンプでキャンセル可能
       if (jumpPress && !p.jumpUsed && p.jumps > 0) {
         p.guardEndlag = 0;
-      } else {
-        continue;
       }
+      // continueしない: 後続処理を通常通り実行
     }
 
     // Guarding state: no movement, stay grounded, gauge decays over time
@@ -10184,7 +10183,7 @@ function updateBattle(dt) {
         p.guardEndlag = 0;
         startSmash(p, 'upSmash');
         if (p.smashCharging) executeSmash(p); // 即発動
-        continue;
+        // continueしない: 後続処理で攻撃状態が正しく処理される
       }
       // ガード中にジャンプ → ガードキャンセルジャンプ
       // (ジャンプ入力は↑キーと同じなので上の処理でカバー)
