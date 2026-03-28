@@ -8434,14 +8434,8 @@ function getCpuGuard(cpu, target) {
 function getCpuInput(cpu, target) {
   const result = { moveX: 0, jump: false, attack: null, grab: false, throwDir: null };
   if (!target.alive || !cpu.alive) return result;
-  // CPU崖つかまり処理
-  if (cpu.ledgeGrab) {
-    const choices = cpuDifficulty >= 2 ? ['normal','attack','dodge'] : ['normal','normal','dodge'];
-    if (cpu.ledgeTimer > 30 || Math.random() < 0.03) {
-      releaseLedge(cpu, choices[Math.floor(Math.random() * choices.length)]);
-    }
-    return result;
-  }
+  // CPU崖つかまり処理はupdateBattle内のledgeGrabブロックで実行済み
+  if (cpu.ledgeGrab) return result;
 
   const dx = target.x - cpu.x;
   const dy = target.y - cpu.y;
@@ -9198,7 +9192,20 @@ function updateBattle(dt) {
 
     // 崖つかまり更新
     updateLedge(p);
-    if (p.ledgeGrab) continue; // 崖つかまり中は通常処理スキップ
+    if (p.ledgeGrab) {
+      // CPU崖上がりAI: 崖つかまり中に自動で行動を選択
+      if (p.id === 1 && (gameMode === 'cpu' || bossRushMode)) {
+        const ledgeWait = cpuDifficulty >= 3 ? 15 : (cpuDifficulty >= 2 ? 25 : 40);
+        if (p.ledgeTimer > ledgeWait || (p.ledgeInvincible <= 0 && Math.random() < 0.05)) {
+          // 難易度に応じた崖上がり選択
+          const choices = cpuDifficulty >= 2
+            ? ['normal','attack','dodge'] : ['normal','normal','dodge'];
+          releaseLedge(p, choices[Math.floor(Math.random() * choices.length)]);
+          continue; // releaseLedge後は通常処理へ
+        }
+      }
+      continue; // 崖つかまり中は通常処理スキップ
+    }
 
     // === 固有パッシブシステム更新 ===
     const ci = p.charIdx;
