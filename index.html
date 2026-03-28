@@ -10139,8 +10139,8 @@ function updateBattle(dt) {
       wantsGuard = !!(keys['p'] || keys['P']);
     }
 
-    // Can only guard if grounded, not attacking, not grabbing/grabbed
-    if (wantsGuard && p.grounded && !p.attacking && !p.grabbing && !p.grabbed && p.guardDurability > 0) {
+    // Can only guard if grounded, not attacking, not grabbing/grabbed, not invincible
+    if (wantsGuard && p.grounded && !p.attacking && !p.grabbing && !p.grabbed && p.guardDurability > 0 && p.invincibleTimer <= 0) {
       if (!p.guarding) {
         // Start guarding - set just guard window
         p.guarding = true;
@@ -16545,7 +16545,7 @@ function handleKeyDown(e) {
     // P1 Guard (ground) / Air Dodge (air) - S key
     if (e.key === 's' || e.key === 'S') {
       if (p1.grounded) {
-        if (!p1.attacking && !p1.guarding && p1.guardDurability > 0 && p1.guardBreakStun <= 0) {
+        if (!p1.attacking && !p1.guarding && p1.guardDurability > 0 && p1.guardBreakStun <= 0 && p1.invincibleTimer <= 0) {
           p1.guarding = true;
           p1.justGuardTimer = typeof JUST_GUARD_WINDOW !== 'undefined' ? JUST_GUARD_WINDOW : 6;
         }
