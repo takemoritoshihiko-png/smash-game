@@ -13794,6 +13794,12 @@ function applyHostState(data) {
   battleTimer = data.battleTimer;
   battleStarted = data.battleStarted;
   battleCountdown = data.battleCountdown;
+  // ゲスト側: gameOverがfalse→trueに変わったらGAME SET演出を開始
+  if (data.gameOver && !gameOver && data.winner >= 0) {
+    gameSetTimer = 0;
+    gameSetPhase = 1;
+    stopBGM();
+  }
   gameOver = data.gameOver;
   winner = data.winner;
   hitStopFrames = data.hitStopFrames;
@@ -13876,6 +13882,11 @@ function applyHostState(data) {
         const speed = 2 + Math.random() * (isHuge ? 7 : isBig ? 5 : 4);
         sparks.push({ x: p.x, y: p.y - 35, vx: Math.cos(a)*speed, vy: Math.sin(a)*speed - 1, life: 12+Math.random()*12, maxLife: 24, color: s%3===0?'#FFFFFF':sColors[s%sColors.length], size: 1.5+Math.random()*(isHuge?4:2.5), gravity: 0.1+Math.random()*0.08, drag: 0.97 });
       }
+      // HIT! テキストエフェクト
+      hitMissDisplays.push({
+        text: 'HIT!', x: p.x, y: p.y - 70,
+        life: 30, maxLife: 30, isHit: true,
+      });
       // Hit sound
       if (isHuge) playHitSound('special');
       else if (isBig) playHitSound('strong');
