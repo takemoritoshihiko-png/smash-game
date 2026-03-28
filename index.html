@@ -8281,7 +8281,12 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
 
   // ===== All-Star Brawl 2 エフェクト =====
 
-  // ① ヒットストップ: 削除済み（フリーズバグ防止）
+  // ① ヒットストップ設定（前のヒットストップが終わった時のみ）
+  if (hitStopFrames <= 0) {
+    if (isSmash) hitStopFrames = 8;
+    else if (isStrong || isSpecial) hitStopFrames = 6;
+    else if (kb > 3) hitStopFrames = 4;
+  }
 
   // ② 強攻撃・スマッシュヒット時: 相手を白フラッシュ + 一瞬拡大
   if (isStrong || isSpecial || isSmash) {
@@ -9172,8 +9177,9 @@ function updateBattle(dt) {
   battleTime += dt;
   cmdFrameCounter++; // コマンド入力用フレームカウンタ
 
-  // ヒットストップ: 削除済み（hitStopFramesは常に0）
-  hitStopFrames = 0;
+  // ヒットストップ処理
+  if (hitStopFrames > 0) hitStopFrames--;
+  const inHitStop = hitStopFrames > 0;
 
   if (battleCountdown > 0) { battleCountdown--; return; }
   battleStarted = true;
@@ -9410,7 +9416,26 @@ function updateBattle(dt) {
 
   // Update players
   for (const p of players) {
-    // ヒットストップ: 削除済み（inHitStopは常にfalse）
+    // ヒットストップ中: 攻撃フレームは進め、ガード解除だけ処理、物理はスキップ
+    if (inHitStop && p.alive && !p.respawnTimer) {
+      // 攻撃フレームを進める（hitbox消失→再ヒットループ防止）
+      if (p.attacking && p.attackData) {
+        p.attackFrame++;
+        const ad = p.attackData;
+        const totalF = (ad.startup || 0) + (ad.active || 0) + (ad.recovery || 0);
+        if (p.attackFrame >= totalF) {
+          p.attacking = false; p.specialState = null; p.attackFrame = 0; p.hitTargets = [];
+        }
+      }
+      // ガード解除だけ処理
+      let hsGuard = false;
+      if (p.id === 0) { hsGuard = (onlineMode && !isHost) ? !!remoteKeys.s : !!(keys['s'] || keys['S']); }
+      else if (p.id === 1 && (gameMode === 'cpu' || bossRushMode)) { hsGuard = false; }
+      else if (onlineMode && isHost) { hsGuard = !!remoteKeys.s; }
+      else { hsGuard = !!(keys['p'] || keys['P']); }
+      if (!hsGuard && p.guarding) { p.guarding = false; }
+      continue;
+    }
     if (p.respawnTimer > 0) {
       p.respawnTimer--;
       if (p.respawnTimer === 0) {
