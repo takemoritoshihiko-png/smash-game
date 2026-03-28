@@ -6962,6 +6962,11 @@ function createPlayer(id, charIdx, startX) {
     hitTargets: [], lastHitFrame: -99,
     hitstun: 0, diFrame: 0, diBaseVx: 0, diBaseVy: 0, diShown: false, groundBounced: false, bounceStun: 0,
     downThrowBounce: false, // 下投げバウンド状態（コンボ補正用）
+    // テクニングシステム
+    techWindow: 0,          // テクニング受付残りフレーム（Sキー押下後10Fカウントダウン）
+    techState: '',          // '' | 'neutral' | 'forward' | 'backward' | 'down'
+    techTimer: 0,           // テクニング/ダウン状態の残りフレーム
+    techRollVx: 0,          // ロール中の移動速度
     // Special attack states
     specialState: null,
     // Grab/throw state
@@ -9451,6 +9456,40 @@ function updateBattle(dt) {
       continue;
     }
 
+    // テクニング状態処理
+    if (p.techState) {
+      p.techTimer--;
+      if (p.techState === 'neutral') {
+        // その場テクニング: 無敵20F、起き上がり硬直10F
+        if (p.techTimer > 10) p.invincibleTimer = Math.max(p.invincibleTimer, 1);
+        p.vx *= 0.85;
+        p.vy += getGravity(p); if (p.vy > MAX_FALL_SPEED) p.vy = MAX_FALL_SPEED;
+        p.y += p.vy; landingCheck(p);
+      } else if (p.techState === 'forward' || p.techState === 'backward') {
+        // ロールテクニング: 無敵18F、移動中
+        if (p.techTimer > 12) p.invincibleTimer = Math.max(p.invincibleTimer, 1);
+        p.vx = p.techRollVx * (p.techTimer > 5 ? 1 : p.techTimer / 5);
+        p.vy += getGravity(p); if (p.vy > MAX_FALL_SPEED) p.vy = MAX_FALL_SPEED;
+        p.x += p.vx; p.y += p.vy; landingCheck(p);
+        // ロール残像エフェクト
+        if (p.techTimer % 3 === 0) {
+          sparks.push({ x: p.x, y: p.y - 35, vx: 0, vy: 0, life: 6, maxLife: 6, color: '#FFFFFF', size: 12, gravity: 0, drag: 1, type: 'charGhost' });
+        }
+      } else if (p.techState === 'down') {
+        // ダウン状態: 40F起き上がり、攻撃を受けられる
+        p.vx *= 0.9;
+        p.vy += getGravity(p); if (p.vy > MAX_FALL_SPEED) p.vy = MAX_FALL_SPEED;
+        p.x += p.vx; p.y += p.vy; landingCheck(p);
+      }
+      if (p.techTimer <= 0) {
+        p.techState = '';
+        p.techTimer = 0;
+        p.techRollVx = 0;
+      }
+      blastCheck(p);
+      continue;
+    }
+
     // Hitstun - 自然な放物線＋回転＋壁バウンド
     if (p.hitstun > 0) {
       p.hitstun--;
@@ -9537,7 +9576,76 @@ function updateBattle(dt) {
           size: 3 + Math.random() * 5,
         });
       }
+      // === テクニング入力受付 ===
+      // ガードボタン（S）を押したらテクニング受付開始（10F）
+      let techPress = false;
+      if (p.id === 0) {
+        techPress = (onlineMode && !isHost) ? !!remoteKeys.s : !!(keys['s'] || keys['S']);
+      } else if (gameMode === 'cpu' || bossRushMode) {
+        // CPU: 難易度に応じたテクニング確率
+        techPress = Math.random() < (cpuDifficulty >= 3 ? 0.06 : cpuDifficulty >= 2 ? 0.03 : 0.01);
+      } else if (onlineMode && isHost) {
+        techPress = !!remoteKeys.s;
+      } else {
+        techPress = !!(keys['p'] || keys['P']);
+      }
+      if (techPress && p.techWindow <= 0) p.techWindow = 10;
+      if (p.techWindow > 0) p.techWindow--;
+
+      // テクニング猶予中の白い光（視覚フィードバック）
+      if (p.techWindow > 0 && battleTime % 2 === 0) {
+        p.damageTint = Math.max(p.damageTint, 2);
+      }
+
       landingCheck(p);
+      // 着地判定: テクニング or ダウン
+      if (p.grounded && p.hitstun > 0) {
+        // 方向入力を読み取り
+        let techDirX = 0;
+        if (p.id === 0) {
+          if (onlineMode && !isHost) { if (remoteKeys.left) techDirX = -1; if (remoteKeys.right) techDirX = 1; }
+          else { if (keys['ArrowLeft']) techDirX = -1; if (keys['ArrowRight']) techDirX = 1; }
+        } else if (gameMode === 'cpu' || bossRushMode) {
+          techDirX = Math.random() < 0.5 ? -1 : 1; // CPUはランダム方向
+        } else if (onlineMode && isHost) {
+          if (remoteKeys.left) techDirX = -1; if (remoteKeys.right) techDirX = 1;
+        } else {
+          if (keys['a'] || keys['A']) techDirX = -1; if (keys['d'] || keys['D']) techDirX = 1;
+        }
+
+        if (p.techWindow > 0) {
+          // テクニング成功！
+          p.hitstun = 0; p.spinAngle = 0; p.vx = 0; p.vy = 0;
+          p.techWindow = 0;
+          if (techDirX > 0) {
+            p.techState = 'forward'; p.techTimer = 30; p.techRollVx = 5;
+            p.facingLeft = false;
+          } else if (techDirX < 0) {
+            p.techState = 'backward'; p.techTimer = 30; p.techRollVx = -5;
+            p.facingLeft = true;
+          } else {
+            p.techState = 'neutral'; p.techTimer = 30;
+          }
+          // 成功エフェクト
+          hitEffects.push({ x: p.x, y: p.y - 35, life: 10, maxLife: 10, color: '#FFFFFF', size: 40 });
+          hitEffects.push({ x: p.x, y: p.y, life: 8, maxLife: 8, color: '#88DDFF', size: 50, type: 'ring' });
+          cmdNameDisplay.push({ text: 'TECH!', x: p.x, y: p.y - 80, life: 30, maxLife: 30, color: '#88DDFF' });
+          playHitSound('justGuard');
+          continue;
+        } else {
+          // テクニング失敗 → ダウン状態
+          p.hitstun = 0; p.spinAngle = 0;
+          p.techState = 'down'; p.techTimer = 40;
+          p.vx *= 0.3; p.vy = 0;
+          // 失敗エフェクト
+          playHitSound('miss');
+          for (let di3 = 0; di3 < 4; di3++) {
+            sparks.push({ x: p.x + (Math.random()-0.5)*20, y: p.y, vx: (Math.random()-0.5)*3, vy: -1-Math.random(), life: 8, maxLife: 8, color: '#BBAA99', size: 2+Math.random(), type: 'dust', gravity: 0.08, drag: 0.93 });
+          }
+          continue;
+        }
+      }
+
       wallBounceCheck(p);
       blastCheck(p);
       continue;
