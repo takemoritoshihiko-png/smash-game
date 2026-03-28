@@ -7207,9 +7207,11 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
     const dir = attacker.x < target.x ? 1 : -1;
     target.vx = dir * 2;
     // ガード成功音（金属的な「キン」音）
-    playHitSound('justGuard');
-    // ヒットストップは適用（押された感触）
-    hitStopFrames = Math.max(hitStopFrames, 4);
+    playHitSound('guard');
+    // ヒットストップ: 単発攻撃のみ適用（多段攻撃中は連続フリーズ防止）
+    if (!attacker.attackData || !attacker.attackData.multiHit) {
+      hitStopFrames = Math.max(hitStopFrames, 3);
+    }
     // シールドが攻撃方向にへこむアニメ（4F）
     target.guardShrink = 4;
     target.guardShrinkDir = attacker.x < target.x ? -1 : 1;
@@ -10122,8 +10124,8 @@ function updateBattle(dt) {
       }
     } else {
       if (p.guarding) {
-        // ガード解除後硬直6F（ドスボスは15F）
-        p.guardEndlag = p.charIdx === 19 ? 15 : 6;
+        // ガード解除後硬直3F（ドスボスは15F）
+        p.guardEndlag = p.charIdx === 19 ? 15 : 3;
         if (p.charIdx === 19) p.dosbossGuardEndlag = 15;
       }
       p.guarding = false;
