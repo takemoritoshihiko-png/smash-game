@@ -6964,7 +6964,7 @@ function createPlayer(id, charIdx, startX) {
     downThrowBounce: false, // 下投げバウンド状態（コンボ補正用）
     // テクニングシステム
     techWindow: 0,          // テクニング受付残りフレーム（Sキー押下後10Fカウントダウン）
-    techState: '',          // '' | 'neutral' | 'forward' | 'backward' | 'down'
+    techState: '',          // '' | 'neutral' | 'forward' | 'backward' | 'down' | 'getup' | 'rollup' | 'downattack'
     techTimer: 0,           // テクニング/ダウン状態の残りフレーム
     techRollVx: 0,          // ロール中の移動速度
     // Special attack states
@@ -7515,6 +7515,37 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   // 吹っ飛び軌道を高くする (上方向成分を1.3倍)
   target.vx = Math.cos(rad) * weightedKb * dir;
   target.vy = Math.sin(rad) * weightedKb * 1.3;
+
+  // === 崖メテオ: 崖端で下スマッシュが当たった場合、真下に叩き落とす ===
+  if (hitType === 'smash' && attacker.attackData && attacker.attackData.smashType === 'downSmash'
+      && target.damage >= 30) {
+    const isNearEdge = (target.x < STAGE_LEFT + 80 || target.x > STAGE_RIGHT - 80);
+    const isOffStage = (target.x < STAGE_LEFT || target.x > STAGE_RIGHT);
+    if (isNearEdge || isOffStage) {
+      // 崖メテオ発動！真下方向に1.5倍ノックバック
+      target.vx = 0;
+      target.vy = Math.abs(weightedKb) * 1.5 + 5;
+      // 演出: 大爆発エフェクト
+      hitEffects.push({ x: target.x, y: target.y - 35, life: 20, maxLife: 20, color: '#FF6600', size: 60 });
+      hitEffects.push({ x: target.x, y: target.y - 35, life: 18, maxLife: 18, color: '#FF4400', size: 90, type: 'ring' });
+      hitEffects.push({ x: target.x, y: target.y - 35, life: 15, maxLife: 15, color: '#FFAA00', size: 120, type: 'ring' });
+      // 火花パーティクル
+      for (let mi = 0; mi < 10; mi++) {
+        sparks.push({ x: target.x + (Math.random()-0.5)*20, y: target.y - 30,
+          vx: (Math.random()-0.5)*6, vy: 2+Math.random()*4,
+          life: 12+Math.random()*8, maxLife: 20, color: mi%3===0?'#FFFFFF':'#FF8844',
+          size: 2+Math.random()*3, gravity: 0.15, drag: 0.96 });
+      }
+      // METEOR!テキスト
+      cmdNameDisplay.push({ text: 'METEOR!', x: target.x, y: target.y - 100, life: 120, maxLife: 120, color: '#FF6600' });
+      // 重い低音SE
+      playHitSound('ko');
+      // 大きな画面振動 + カメラ下パン
+      triggerScreenShake(14, 20);
+      hitFlash.alpha = 0.4; hitFlash.color = '#FF4400';
+    }
+  }
+
   // ベク変用: 吹っ飛び初速を記録
   target.diFrame = 0;
   target.diBaseVx = target.vx;
@@ -9445,8 +9476,13 @@ function updateBattle(dt) {
       blastCheck(p);
       if (p.bounceStun <= 0) {
         p.groundBounced = false;
-        // 下投げバウンド終了: 着地硬直を追加してコンボ猶予を与える
-        if (p.downThrowBounce && p.grounded) {
+        // バウンド終了後: 80%以上なら転倒、それ以外は着地硬直
+        if (p.grounded && p.damage >= 80) {
+          p.techState = 'down'; p.techTimer = 60;
+          p.vx *= 0.2; p.vy = 0;
+          playHitSound('miss');
+        } else if (p.downThrowBounce && p.grounded) {
+          // 下投げバウンド終了（80%未満）: 着地硬直のみ
           p.landLag = Math.max(p.landLag || 0, 10);
         }
         p.downThrowBounce = false;
@@ -9476,10 +9512,80 @@ function updateBattle(dt) {
           sparks.push({ x: p.x, y: p.y - 35, vx: 0, vy: 0, life: 6, maxLife: 6, color: '#FFFFFF', size: 12, gravity: 0, drag: 1, type: 'charGhost' });
         }
       } else if (p.techState === 'down') {
-        // ダウン状態: 40F起き上がり、攻撃を受けられる
+        // ダウン状態: 攻撃を受けられる、各種起き上がりが可能
         p.vx *= 0.9;
         p.vy += getGravity(p); if (p.vy > MAX_FALL_SPEED) p.vy = MAX_FALL_SPEED;
         p.x += p.vx; p.y += p.vy; landingCheck(p);
+        // ダウン中の入力読み取り
+        let downInputX = 0, downInputAtk = false, downInputUp = false;
+        if (p.id === 0) {
+          if (onlineMode && !isHost) {
+            if (remoteKeys.left) downInputX = -1; if (remoteKeys.right) downInputX = 1;
+            downInputAtk = !!(remoteKeys.z || remoteKeys.x || remoteKeys.c);
+            downInputUp = !!remoteKeys.up;
+          } else {
+            if (keys['ArrowLeft']) downInputX = -1; if (keys['ArrowRight']) downInputX = 1;
+            downInputAtk = !!(keys['z']||keys['Z']||keys['x']||keys['X']||keys['c']||keys['C']);
+            downInputUp = !!keys['ArrowUp'];
+          }
+        } else if (gameMode === 'cpu' || bossRushMode) {
+          // CPU: ダウンから素早く起き上がる
+          if (p.techTimer < 45) { downInputUp = Math.random() < 0.1; downInputX = Math.random() < 0.3 ? (Math.random() < 0.5 ? -1 : 1) : 0; }
+        } else if (onlineMode && isHost) {
+          if (remoteKeys.left) downInputX = -1; if (remoteKeys.right) downInputX = 1;
+          downInputAtk = !!(remoteKeys.z || remoteKeys.x || remoteKeys.c);
+          downInputUp = !!remoteKeys.up;
+        } else {
+          if (keys['a']||keys['A']) downInputX = -1; if (keys['d']||keys['D']) downInputX = 1;
+          downInputAtk = !!(keys['u']||keys['U']||keys['i']||keys['I']||keys['o']||keys['O']);
+          downInputUp = !!(keys['w']||keys['W']);
+        }
+        // ダウン攻撃: 攻撃ボタンで寝たまま周囲攻撃
+        if (downInputAtk && p.techTimer < 50) {
+          p.techState = 'downattack'; p.techTimer = 20;
+          p.attacking = false; // startAttackは使わず独自処理
+        }
+        // 素早い起き上がり: ↑ or 攻撃ボタン
+        else if (downInputUp && p.techTimer < 50) {
+          p.techState = 'getup'; p.techTimer = 20;
+          p.invincibleTimer = 15; // 起き上がり無敵15F
+        }
+        // 転がり起き上がり: ← or →
+        else if (downInputX !== 0 && p.techTimer < 50) {
+          p.techState = 'rollup'; p.techTimer = 20;
+          p.techRollVx = downInputX * 3;
+          p.invincibleTimer = 15;
+          if (downInputX > 0) p.facingLeft = false; else p.facingLeft = true;
+        }
+      } else if (p.techState === 'getup') {
+        // 素早い起き上がり: 無敵15F
+        p.vx *= 0.85;
+        p.vy += getGravity(p); if (p.vy > MAX_FALL_SPEED) p.vy = MAX_FALL_SPEED;
+        p.y += p.vy; landingCheck(p);
+      } else if (p.techState === 'rollup') {
+        // 転がり起き上がり
+        p.vx = p.techRollVx * (p.techTimer > 5 ? 1 : p.techTimer / 5);
+        p.vy += getGravity(p); if (p.vy > MAX_FALL_SPEED) p.vy = MAX_FALL_SPEED;
+        p.x += p.vx; p.y += p.vy; landingCheck(p);
+        if (p.techTimer % 4 === 0) {
+          sparks.push({ x: p.x, y: p.y - 20, vx: 0, vy: 0, life: 5, maxLife: 5, color: '#FFFFFF', size: 10, gravity: 0, drag: 1, type: 'charGhost' });
+        }
+      } else if (p.techState === 'downattack') {
+        // ダウン攻撃: 発生10F目に周囲ヒットボックス
+        p.vx *= 0.9;
+        if (p.techTimer === 10) {
+          const daHitbox = { x: p.x - 40, y: p.y - 30, w: 80, h: 40 };
+          for (const t of players) {
+            if (t.id === p.id || !t.alive || t.invincibleTimer > 0) continue;
+            const th = getPlayerHitbox(t);
+            if (hitboxCollides(daHitbox.x, daHitbox.y, daHitbox.w, daHitbox.h, th.x, th.y, th.w, th.h)) {
+              applyHit(p, t, 5, 3, 0.04, -30, 'normal');
+              showHitDisplay(t.x, t.y, true);
+            }
+          }
+          hitEffects.push({ x: p.x, y: p.y - 15, life: 8, maxLife: 8, color: '#FFAA44', size: 40, type: 'ring' });
+          playHitSound('normal');
+        }
       }
       if (p.techTimer <= 0) {
         p.techState = '';
@@ -9633,9 +9739,9 @@ function updateBattle(dt) {
           playHitSound('justGuard');
           continue;
         } else {
-          // テクニング失敗 → ダウン状態
+          // テクニング失敗 → ダウン状態（60F自動起き上がり）
           p.hitstun = 0; p.spinAngle = 0;
-          p.techState = 'down'; p.techTimer = 40;
+          p.techState = 'down'; p.techTimer = 60;
           p.vx *= 0.3; p.vy = 0;
           // 失敗エフェクト
           playHitSound('miss');
