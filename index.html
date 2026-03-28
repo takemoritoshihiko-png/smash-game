@@ -7705,6 +7705,12 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   if (attacker.charIdx === 10 && attacker.dragonMode && hitType === 'smash') weightedKb *= 1.2;
   // ゲージ攻撃強化中: KB×1.2
   if (attacker.powerUpTimer > 0) weightedKb *= 1.2;
+  // === コンボ接続性向上: 低%ではKBを抑制（スマッシュ除外） ===
+  if (!isSmash) {
+    if (target.damage <= 40) weightedKb *= 0.55;
+    else if (target.damage <= 80) weightedKb *= 0.75;
+    // 81%以上はそのまま
+  }
   // 崖外復帰阻止ボーナス: ステージ外の相手には1.3倍KB
   if (target.x < STAGE_LEFT - 30 || target.x > STAGE_RIGHT + 30) weightedKb *= 1.3;
   // --- ノックバック角度補正 ---
@@ -7714,7 +7720,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   if (hitType === 'normal') finalAngle = isAir ? -45 : -35;
   else if (hitType === 'strong') finalAngle = isAir ? -60 : -50;
   else if (hitType === 'special') finalAngle = isAir ? -65 : -55;
-  else if (hitType === 'aerial') finalAngle = -45;
+  else if (hitType === 'aerial') finalAngle = -30; // 空中攻撃: 水平寄り(-45→-30)でコンボ追撃しやすく
   else if (hitType === 'downair') finalAngle = 90; // スパイク（真下）
   else if (hitType === 'up') finalAngle = -85;
   else if (hitType === 'side') finalAngle = -30;
@@ -8284,6 +8290,11 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
     hitStopFrames = Math.max(hitStopFrames, Math.floor(4 * hitStopMult));  // 弱攻撃は変更なし
   }
   if (attacker.charIdx === 10 && attacker.dragonMode) hitStopFrames += 2;
+  // コンボ中はヒットストップ+3F（コンボ接続性向上）
+  if (attacker.id !== undefined) {
+    const atkCombo = comboDisplay[attacker.id];
+    if (atkCombo && atkCombo.count >= 2) hitStopFrames += 3;
+  }
 
   // ② 強攻撃・スマッシュヒット時: 相手を白フラッシュ + 一瞬拡大
   if (isStrong || isSpecial || isSmash) {
@@ -8612,10 +8623,17 @@ function startAttack(p, type) {
 
     // 強攻撃・スマッシュ: startup 1.5倍、active 1.3倍、recovery 1.3倍
     if (isHeavy || isSmashAtk) {
-      startupMod = Math.floor(atk.startup * 0.5); // 1.5倍 = 元の0.5倍を加算
+      startupMod = Math.floor(atk.startup * 0.5);
       activeMod = 1.3;
       recoveryMod = 1.3;
       modNeeded = true;
+    }
+    // 空中攻撃のendlag短縮（コンボ接続性向上）
+    if (!p.grounded && !isHeavy && !isSmashAtk) {
+      if (actualType === 'aerial') recoveryMod = 0.7;
+      else if (actualType === 'up' || actualType === 'side') recoveryMod = 0.75;
+      // downairはメテオなので変更なし
+      if (recoveryMod !== 1.0) modNeeded = true;
     }
 
     if (modNeeded || startupMod !== 0) {
@@ -11166,8 +11184,9 @@ const CHAR_MOVE = [
 ];
 function applyMovement(p, moveX, ch) {
   const cm = CHAR_MOVE[p.charIdx] || [0.70,0.75,0.45,0.88];
-  // 空中慣性強化: airAccel×0.4, airFriction×0.6（慣性が残る）
-  const accel = p.grounded ? cm[0] : cm[2] * 0.4;
+  // 空中慣性強化: airAccel×0.4（コンボ中は×1.4で追撃しやすく）
+  const comboAirBoost = (!p.grounded && comboDisplay[p.id] && comboDisplay[p.id].count >= 1) ? 1.4 : 1.0;
+  const accel = p.grounded ? cm[0] : cm[2] * 0.4 * comboAirBoost;
   let friction = p.grounded ? cm[1] * STAGE_FRICTION : 1 - (1 - cm[3]) * 0.6;
   const senSpeedMult = (p.charIdx === 18 && p.senBuffTimer > 0) ? 1.3 : 1;
   const gravDebuffMult = (p.gravityDebuffTimer > 0) ? 0.5 : 1;
@@ -11328,7 +11347,7 @@ function landingCheck(p) {
         bounceVy = -(prevVy * 0.5); // 通常スパイクバウンド
       }
       p.vy = bounceVy;
-      p.bounceStun = p.downThrowBounce ? 12 : 18; // 下投げ: 短め硬直でコンボ繋がりやすく
+      p.bounceStun = p.downThrowBounce ? 18 : 27; // バウンド硬直×1.5（着地追撃の猶予増加）
       p.landSquash = 10;
       // 衝撃波エフェクト
       const isDownThrow = p.downThrowBounce;
