@@ -9683,11 +9683,35 @@ function updateBattle(dt) {
       if (p.id === 1 && (gameMode === 'cpu' || bossRushMode)) {
         const ledgeWait = cpuDifficulty >= 3 ? 15 : (cpuDifficulty >= 2 ? 25 : 40);
         if (p.ledgeTimer > ledgeWait || (p.ledgeInvincible <= 0 && Math.random() < 0.05)) {
-          // 難易度に応じた崖上がり選択
           const choices = cpuDifficulty >= 2
             ? ['normal','attack','dodge'] : ['normal','normal','dodge'];
           releaseLedge(p, choices[Math.floor(Math.random() * choices.length)]);
-          continue; // releaseLedge後は通常処理へ
+          continue;
+        }
+      }
+      // オンライン崖上がり: remoteKeysで崖離し入力を処理
+      if (onlineMode) {
+        let ledgeKeys = null;
+        if (p.id === 0 && !isHost) ledgeKeys = remoteKeys; // ゲストがP1を操作
+        else if (p.id === 1 && isHost) ledgeKeys = remoteKeys; // ホストがP2のリモート入力
+        if (ledgeKeys) {
+          if (ledgeKeys.up) {
+            if (ledgeKeys.z || ledgeKeys.x) releaseLedge(p, 'attack');
+            else if (ledgeKeys.s) releaseLedge(p, 'dodge');
+            else releaseLedge(p, 'normal');
+            continue;
+          }
+          if (ledgeKeys.down) { releaseLedge(p, 'drop'); continue; }
+        }
+        // ホスト自身のP1崖上がり
+        if (p.id === 0 && isHost) {
+          if (keys['ArrowUp']) {
+            if (keys['z']||keys['Z']||keys['x']||keys['X']) releaseLedge(p, 'attack');
+            else if (keys['s']||keys['S']) releaseLedge(p, 'dodge');
+            else releaseLedge(p, 'normal');
+            continue;
+          }
+          if (keys['ArrowDown']) { releaseLedge(p, 'drop'); continue; }
         }
       }
       continue; // 崖つかまり中は通常処理スキップ
