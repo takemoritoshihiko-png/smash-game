@@ -8812,6 +8812,19 @@ function updateBattle(dt) {
   battleTime += dt;
   cmdFrameCounter++; // コマンド入力用フレームカウンタ
 
+  // ヒットストップ処理
+  let inHitStop = false;
+  if (hitStopFrames > 0) {
+    hitStopFrames--;
+    inHitStop = true;
+    if (hitStopFrames > 0) {
+      screenShake.x = (Math.random() - 0.5) * 3;
+      screenShake.y = (Math.random() - 0.5) * 3;
+    } else {
+      screenShake.x = 0; screenShake.y = 0;
+    }
+  }
+
   if (battleCountdown > 0) { battleCountdown--; return; }
   battleStarted = true;
 
@@ -9046,6 +9059,18 @@ function updateBattle(dt) {
 
   // Update players
   for (const p of players) {
+    // ヒットストップ中: ガード状態の入力だけ更新し、物理はスキップ
+    if (inHitStop && p.alive && !p.respawnTimer) {
+      // ガードボタンの状態だけ更新（ガード解除を検出するため）
+      let hsGuard = false;
+      if (p.id === 0) { hsGuard = (onlineMode && !isHost) ? !!remoteKeys.s : !!(keys['s'] || keys['S']); }
+      else if (p.id === 1 && (gameMode === 'cpu' || bossRushMode)) { hsGuard = getCpuGuard(p, players[0]); }
+      else if (onlineMode && isHost) { hsGuard = !!remoteKeys.s; }
+      else { hsGuard = !!(keys['p'] || keys['P']); }
+      if (!hsGuard && p.guarding) { p.guarding = false; p.guardEndlag = p.charIdx === 19 ? 15 : 3; }
+      if (p.guardShrink > 0) p.guardShrink--;
+      continue;
+    }
     if (p.respawnTimer > 0) {
       p.respawnTimer--;
       if (p.respawnTimer === 0) {
@@ -16629,15 +16654,6 @@ function gameLoop(timestamp) {
         updateGuestEffects(FIXED_DT);
         // Guest側でも必殺技演出を更新（darken→text→video→damage→brighten）
         if (ultimateActive) updateUltimate();
-      } else if (hitStopFrames > 0) {
-        hitStopFrames--;
-        // ヒットストップ中のカメラ微振動（1〜2px）
-        if (hitStopFrames > 0) {
-          screenShake.x = (Math.random() - 0.5) * 3;
-          screenShake.y = (Math.random() - 0.5) * 3;
-        } else {
-          screenShake.x = 0; screenShake.y = 0;
-        }
       } else if (koSlowMotion.active) {
         // ③ スローモーション: 3フレームに1回だけ更新
         koSlowMotion.frames++;
