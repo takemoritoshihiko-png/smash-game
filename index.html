@@ -8298,7 +8298,10 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   }
   // 上限: 弱6F、強8F、スマッシュ10F
   const hitStopCap = isSmash ? 10 : (isStrong || isSpecial) ? 8 : 6;
-  hitStopFrames = Math.min(newHitStop, hitStopCap); // 直接上書き（積み重ね防止）
+  // 前のヒットストップが終わってから次を開始（連続ヒットでの永久フリーズ防止）
+  if (hitStopFrames <= 0) {
+    hitStopFrames = Math.min(newHitStop, hitStopCap);
+  }
 
   // ② 強攻撃・スマッシュヒット時: 相手を白フラッシュ + 一瞬拡大
   if (isStrong || isSpecial || isSmash) {
@@ -9189,8 +9192,7 @@ function updateBattle(dt) {
   battleTime += dt;
   cmdFrameCounter++; // コマンド入力用フレームカウンタ
 
-  // ヒットストップ処理（絶対上限15F）
-  hitStopFrames = Math.min(hitStopFrames, 15);
+  // ヒットストップ処理
   let inHitStop = false;
   if (hitStopFrames > 0) {
     hitStopFrames--;
