@@ -9441,6 +9441,14 @@ function updateBattle(dt) {
       else { hsGuard = !!(keys['p'] || keys['P']); }
       if (!hsGuard && p.guarding) { p.guarding = false; p.guardEndlag = p.charIdx === 19 ? 15 : 3; }
       if (p.guardShrink > 0) p.guardShrink--;
+      // ヒットストップ中もattackFrameを進める（hitbox消失→再ヒットループ防止）
+      if (p.attacking && p.attackData) {
+        p.attackFrame++;
+        const totalF = (p.attackData.startup || 0) + (p.attackData.active || 0) + (p.attackData.recovery || 0);
+        if (p.attackFrame >= totalF) {
+          p.attacking = false; p.specialState = null; p.hitTargets = [];
+        }
+      }
       continue;
     }
     if (p.respawnTimer > 0) {
