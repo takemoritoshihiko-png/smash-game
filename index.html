@@ -7349,6 +7349,20 @@ function createPlayer(id, charIdx, startX) {
     kinkinGoldMode: 0,        // 金金: 億万長者モード残F
     longPierceGauge: 0,       // ロング: 穿孔ゲージ(0-100)
     longDragonSpear: 0,       // ロング: 龍槍モード残F
+    donEarthGauge: 0,         // ドン: 大地ゲージ(0-100)
+    saisokuAccelGauge: 0,     // サイソク: 加速(0-100)
+    saisokuLightSpeed: 0,     // サイソク: 光速モード残F
+    uruoWildGauge: 0,         // うる男: 野性(0-100)
+    uruoWildRelease: 0,       // うる男: 野性解放残F
+    bulletMagicGauge: 0,      // バレット: 魔法(0-100)
+    bulletAwaken: 0,          // バレット: 魔法少女覚醒残F
+    onpaFreqGauge: 0,         // おんぱ: 周波数(0-100)
+    onpaResonance: 0,         // おんぱ: 共鳴モード残F
+    mrtwoDualL: 0,            // ミスターツー: 左炎(0-100)
+    mrtwoDualR: 0,            // ミスターツー: 右炎(0-100)
+    mrtwoDualBlast: 0,        // ミスターツー: 爆炎融合残F
+    tankAmmo: 5,              // タンク: 弾薬(0-5)
+    tankReloadTimer: 0,       // タンク: 補充タイマー
   };
 }
 
@@ -7805,6 +7819,26 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   // ロング(4): 穿孔+20(遠距離)、+5(近距離)
   if (aci4 === 4) { const d4 = Math.abs(target.x - attacker.x); attacker.longPierceGauge = Math.min(100, (attacker.longPierceGauge||0) + (d4 > 200 ? 20 : 5)); }
   // ロング龍槍: リーチ+50%はstartAttackで処理
+  // ドン(1): 大地+10(攻撃)、+8(被ダメ)
+  if (aci4 === 1) attacker.donEarthGauge = Math.min(100, (attacker.donEarthGauge||0) + 10);
+  if (target.charIdx === 1) target.donEarthGauge = Math.min(100, (target.donEarthGauge||0) + 8);
+  // ドン地震モード: KB×1.4
+  if (aci4 === 1 && attacker.donEarthGauge >= 80) { target.vx *= 1.4; target.vy *= 1.4; }
+  // サイソク(2): 加速+5
+  if (aci4 === 2) attacker.saisokuAccelGauge = Math.min(100, (attacker.saisokuAccelGauge||0) + 5);
+  // うる男(5): 野性+10(攻撃)、+12(被ダメ)
+  if (aci4 === 5) attacker.uruoWildGauge = Math.min(100, (attacker.uruoWildGauge||0) + 10);
+  if (target.charIdx === 5) target.uruoWildGauge = Math.min(100, (target.uruoWildGauge||0) + 12);
+  // うる男野性解放: KB×2
+  if (aci4 === 5 && attacker.uruoWildRelease > 0) { target.vx *= 2; target.vy *= 2; }
+  // バレット(7): 魔法+8、混乱付与で+20
+  if (aci4 === 7) { attacker.bulletMagicGauge = Math.min(100, (attacker.bulletMagicGauge||0) + 8); if (target.confused > 0) attacker.bulletMagicGauge = Math.min(100, attacker.bulletMagicGauge + 12); }
+  // おんぱ(17): 周波数+10、気絶で+25
+  if (aci4 === 17) { attacker.onpaFreqGauge = Math.min(100, (attacker.onpaFreqGauge||0) + 10); if (target.stunned > 0) attacker.onpaFreqGauge = Math.min(100, attacker.onpaFreqGauge + 15); }
+  // ミスターツー(21): 左右ゲージ交互+10
+  if (aci4 === 21) { if (attacker.mrtwoPersonality === 0) attacker.mrtwoDualL = Math.min(100, (attacker.mrtwoDualL||0) + 10); else attacker.mrtwoDualR = Math.min(100, (attacker.mrtwoDualR||0) + 10); }
+  // ミスターツー爆炎融合: ダメ×1.5
+  if (aci4 === 21 && attacker.mrtwoDualBlast > 0) target.damage = Math.min(999, target.damage + finalDamage * 0.5);
 
   // === 固有ダメージ倍率（ゼン凍結×1.5、ジャッジ呪縛×2.0、波おじ全力×1.5） ===
   // 注: finalDamageは既に計算済みなので追加ダメージとして適用
@@ -10072,6 +10106,60 @@ function updateBattle(dt) {
       if (p.longPierceGauge >= 100 && !p.longDragonSpear) {
         p.longDragonSpear = 360; p.longPierceGauge = 0;
         cmdNameDisplay.push({ text: 'DRAGON SPEAR!!', x: p.x, y: p.y - 100, life: 90, maxLife: 90, color: '#44FFCC' });
+      }
+    }
+
+    // ドン(1): 大地ゲージ自然減少
+    if (p.charIdx === 1 && battleTime % 30 === 0 && p.donEarthGauge > 0) p.donEarthGauge = Math.max(0, p.donEarthGauge - 1);
+    // サイソク(2): 加速ゲージ（移動で蓄積、静止で急減）
+    if (p.charIdx === 2) {
+      if (p.saisokuLightSpeed > 0) p.saisokuLightSpeed--;
+      const spd = Math.abs(p.vx);
+      if (spd > 1) p.saisokuAccelGauge = Math.min(100, (p.saisokuAccelGauge||0) + spd * 0.05);
+      else if (battleTime % 6 === 0) p.saisokuAccelGauge = Math.max(0, (p.saisokuAccelGauge||0) - 1);
+      if (p.saisokuAccelGauge >= 100 && !p.saisokuLightSpeed) {
+        p.saisokuLightSpeed = 300; p.saisokuAccelGauge = 0;
+        cmdNameDisplay.push({ text: 'LIGHT SPEED!!', x: p.x, y: p.y - 100, life: 90, maxLife: 90, color: '#FFFFFF' });
+      }
+    }
+    // うる男(5): 野性ゲージ自然減少
+    if (p.charIdx === 5) {
+      if (p.uruoWildRelease > 0) p.uruoWildRelease--;
+      if (battleTime % 20 === 0 && p.uruoWildGauge > 0 && !p.uruoWildRelease) p.uruoWildGauge = Math.max(0, p.uruoWildGauge - 1);
+      if (p.uruoWildGauge >= 100 && !p.uruoWildRelease) {
+        p.uruoWildRelease = 420; p.uruoWildGauge = 0;
+        cmdNameDisplay.push({ text: 'WILD RELEASE!!', x: p.x, y: p.y - 100, life: 90, maxLife: 90, color: '#88CCFF' });
+      }
+    }
+    // バレット(7): 魔法ゲージ自然減少
+    if (p.charIdx === 7) {
+      if (p.bulletAwaken > 0) p.bulletAwaken--;
+      if (battleTime % 20 === 0 && p.bulletMagicGauge > 0 && !p.bulletAwaken) p.bulletMagicGauge = Math.max(0, p.bulletMagicGauge - 1);
+      if (p.bulletMagicGauge >= 100 && !p.bulletAwaken) {
+        p.bulletAwaken = 480; p.bulletMagicGauge = 0;
+        cmdNameDisplay.push({ text: 'MAGICAL BURST!!', x: p.x, y: p.y - 100, life: 90, maxLife: 90, color: '#FF66AA' });
+      }
+    }
+    // タンク(12): 弾薬補充(20秒=1200F)
+    if (p.charIdx === 12 && p.tankAmmo < 5) {
+      p.tankReloadTimer++;
+      if (p.tankReloadTimer >= 1200) { p.tankAmmo++; p.tankReloadTimer = 0; }
+    }
+    // おんぱ(17): 周波数自然減少
+    if (p.charIdx === 17) {
+      if (p.onpaResonance > 0) p.onpaResonance--;
+      if (battleTime % 15 === 0 && p.onpaFreqGauge > 0 && !p.onpaResonance) p.onpaFreqGauge = Math.max(0, p.onpaFreqGauge - 1);
+      if (p.onpaFreqGauge >= 100 && !p.onpaResonance) {
+        p.onpaResonance = 360; p.onpaFreqGauge = 0;
+        cmdNameDisplay.push({ text: 'RESONANCE!!', x: p.x, y: p.y - 100, life: 90, maxLife: 90, color: '#88FFFF' });
+      }
+    }
+    // ミスターツー(21): 爆炎融合
+    if (p.charIdx === 21) {
+      if (p.mrtwoDualBlast > 0) p.mrtwoDualBlast--;
+      if (p.mrtwoDualL >= 80 && p.mrtwoDualR >= 80 && !p.mrtwoDualBlast) {
+        p.mrtwoDualBlast = 360; p.mrtwoDualL = 0; p.mrtwoDualR = 0;
+        cmdNameDisplay.push({ text: 'DUAL BLAST!!', x: p.x, y: p.y - 100, life: 90, maxLife: 90, color: '#FF6688' });
       }
     }
 
@@ -15000,6 +15088,47 @@ function drawBattleHUD() {
       ctx.fillStyle = '#0a1a1a'; ctx.fillRect(ggx, ggy, 80, 5);
       ctx.fillStyle = gp.longDragonSpear > 0 ? '#44FFCC' : '#4488AA'; ctx.fillRect(ggx, ggy, 80 * r, 5);
       ctx.fillStyle = '#44FFCC'; ctx.fillText(gp.longDragonSpear > 0 ? 'DRAGON SPEAR!' : 'PIERCE ' + Math.floor(gp.longPierceGauge || 0), ggx + 40, ggy - 2);
+    }
+    // ドン(1): 大地
+    if (gp.charIdx === 1) {
+      const r = (gp.donEarthGauge||0)/100; ctx.fillStyle='#1a0a00'; ctx.fillRect(ggx,ggy,80,5);
+      ctx.fillStyle = r>=0.8?'#AA6622':'#886644'; ctx.fillRect(ggx,ggy,80*r,5);
+      ctx.fillStyle='#AA6622'; ctx.fillText(r>=0.8?'EARTHQUAKE!':'EARTH '+Math.floor(gp.donEarthGauge||0),ggx+40,ggy-2);
+    }
+    // サイソク(2): 加速
+    if (gp.charIdx === 2) {
+      const r = (gp.saisokuAccelGauge||0)/100; ctx.fillStyle='#0a0a0a'; ctx.fillRect(ggx,ggy,80,5);
+      ctx.fillStyle = gp.saisokuLightSpeed>0?'#FFFFFF':'#CCDDFF'; ctx.fillRect(ggx,ggy,80*r,5);
+      ctx.fillStyle='#FFFFFF'; ctx.fillText(gp.saisokuLightSpeed>0?'LIGHT SPEED!':'ACCEL '+Math.floor(gp.saisokuAccelGauge||0),ggx+40,ggy-2);
+    }
+    // うる男(5): 野性
+    if (gp.charIdx === 5) {
+      const r = (gp.uruoWildGauge||0)/100; ctx.fillStyle='#0a0a1a'; ctx.fillRect(ggx,ggy,80,5);
+      ctx.fillStyle = gp.uruoWildRelease>0?'#88CCFF':'#4488AA'; ctx.fillRect(ggx,ggy,80*r,5);
+      ctx.fillStyle='#88CCFF'; ctx.fillText(gp.uruoWildRelease>0?'WILD!':'WILD '+Math.floor(gp.uruoWildGauge||0),ggx+40,ggy-2);
+    }
+    // バレット(7): 魔法
+    if (gp.charIdx === 7) {
+      const r = (gp.bulletMagicGauge||0)/100; ctx.fillStyle='#1a0a1a'; ctx.fillRect(ggx,ggy,80,5);
+      ctx.fillStyle = gp.bulletAwaken>0?'#FF66AA':'#CC3366'; ctx.fillRect(ggx,ggy,80*r,5);
+      ctx.fillStyle='#FF66AA'; ctx.fillText(gp.bulletAwaken>0?'MAGICAL!':'MAGIC '+Math.floor(gp.bulletMagicGauge||0),ggx+40,ggy-2);
+    }
+    // タンク(12): 弾薬
+    if (gp.charIdx === 12) {
+      ctx.fillStyle='#888888'; let amStr=''; for(let ai=0;ai<5;ai++) amStr+=ai<(gp.tankAmmo||0)?'●':'○';
+      ctx.fillText('AMMO '+amStr,ggx+40,ggy-2);
+      if(gp.tankAmmo>=5){ctx.fillStyle='#FFD700';ctx.fillText('FULL LOAD!',ggx+40,ggy-12);}
+    }
+    // おんぱ(17): 周波数
+    if (gp.charIdx === 17) {
+      const r = (gp.onpaFreqGauge||0)/100; ctx.fillStyle='#0a1a1a'; ctx.fillRect(ggx,ggy,80,5);
+      ctx.fillStyle = gp.onpaResonance>0?'#88FFFF':'#44AAAA'; ctx.fillRect(ggx,ggy,80*r,5);
+      ctx.fillStyle='#88FFFF'; ctx.fillText(gp.onpaResonance>0?'RESONANCE!':'FREQ '+Math.floor(gp.onpaFreqGauge||0),ggx+40,ggy-2);
+    }
+    // ミスターツー(21): 双炎
+    if (gp.charIdx === 21) {
+      ctx.fillStyle='#FF8844'; ctx.fillText('L:'+Math.floor(gp.mrtwoDualL||0)+' R:'+Math.floor(gp.mrtwoDualR||0),ggx+40,ggy-2);
+      if(gp.mrtwoDualBlast>0){ctx.fillStyle='#FF4444';ctx.fillText('DUAL BLAST!',ggx+40,ggy-12);}
     }
   }
 
