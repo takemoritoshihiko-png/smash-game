@@ -6952,6 +6952,9 @@ function createPlayer(id, charIdx, startX) {
     vx: 0, vy: 0,
     facingLeft: id === 1,
     grounded: false, jumps: charIdx === 15 ? 3 : 2, jumpUsed: false,
+    jumpHoldFrames: 0, // ショートホップ判定用: ジャンプボタン押下フレーム数
+    jumpPending: false, // ジャンプ保留中フラグ（ボタン離しで高さ確定）
+    wasAirAttacking: false, // 空中攻撃着地硬直判定用
     damage: 0, stocks: MAX_STOCKS,
     respawnTimer: 0, invincibleTimer: 0, alive: true,
     // Attack state
@@ -10212,23 +10215,38 @@ function updateBattle(dt) {
       }
     }
 
-    if (jumpPress && !p.jumpUsed && p.jumps > 0) {
-      let jumpMult = 1.15; // ジャンプ初速を旧値より15%アップ
-      // パッシブ: 天才(10) 復帰強化 ジャンプ力+10%（ドラゴン時+15%）
+    // === ショートホップ + 通常ジャンプシステム ===
+    // ジャンプボタン押下中: フレームカウント
+    if (jumpPress && !p.jumpPending && !p.jumpUsed && p.jumps > 0) {
+      p.jumpHoldFrames++;
+      // 6Fを超えたら通常ジャンプ確定（即座にジャンプ実行）
+      if (p.jumpHoldFrames > 6) {
+        p.jumpPending = true;
+        p._shortHop = false; // 通常ジャンプ
+      }
+    }
+    // ジャンプボタンを離した瞬間: 6F以内ならショートホップ
+    if (!jumpPress && p.jumpHoldFrames > 0 && !p.jumpPending && p.jumps > 0) {
+      p.jumpPending = true;
+      p._shortHop = (p.jumpHoldFrames <= 6); // 6F以内 = ショートホップ
+    }
+    // ジャンプ実行
+    if (p.jumpPending && p.jumps > 0) {
+      let jumpMult = 1.15;
       if (p.charIdx === 10) jumpMult *= p.dragonMode ? 1.15 : 1.1;
-      // ボスラッシュ: ボスジャンプ力+20%
       if (p.bossBuffed) jumpMult *= 1.1;
-      // パッシブ: サム(15) 3段ジャンプ強化 3回目+15%
       if (p.charIdx === 15 && p.jumps === 1) jumpMult *= 1.15;
-      // ヤッホ(25): ランダムパッシブ - 超ジャンプ
       if (p.charIdx === 25 && p.yahoPassive === 5) jumpMult *= 1.15;
-      // 重量別ジャンプ力調整: 軽量×0.85, 中量×0.88, 重量そのまま
       const wJump = ch.weight || 1.0;
       const jumpWeightMult = wJump >= 1.0 ? 1.0 : (wJump >= 0.8 ? 0.88 : 0.85);
-      p.vy = ch.jumpPower * jumpMult * jumpWeightMult;
+      // ショートホップ: 高さ0.55倍、上昇速度0.75倍
+      const shortHopMult = p._shortHop ? 0.55 : 1.0;
+      const shortHopSpeedMult = p._shortHop ? 0.75 : 1.0;
+      p.vy = ch.jumpPower * jumpMult * jumpWeightMult * shortHopMult * shortHopSpeedMult;
       p.jumps--; p.jumpUsed = true; p.grounded = false;
-      p.fastFalling = false; // ジャンプ時に急降下リセット
-      p.jumpSquash = 6; // jump anticipation squash
+      p.jumpPending = false; p.jumpHoldFrames = 0; p._shortHop = false;
+      p.fastFalling = false;
+      p.jumpSquash = 6;
       playHitSound('jump');
       // サム(15): 3回目ジャンプ時の羽ばたきエフェクト
       if (p.charIdx === 15 && p.jumps === 0) {
@@ -10239,7 +10257,9 @@ function updateBattle(dt) {
         hitEffects.push({ x: p.x, y: p.y - 30, life: 8, maxLife: 8, color: '#EEEEFF', size: 25 });
       }
     }
-    if (!jumpPress) p.jumpUsed = false;
+    if (!jumpPress) { p.jumpUsed = false; if (!p.jumpPending) p.jumpHoldFrames = 0; }
+    // 着地時にジャンプ保留リセット
+    if (p.grounded) { p.jumpPending = false; p.jumpHoldFrames = 0; }
 
     // スマブラ風重力: 上昇=弱、頂点=極弱、落下=強（重量で差別化）
     p.vy += getGravity(p);
@@ -10250,6 +10270,13 @@ function updateBattle(dt) {
     if (p.vy > effectiveMaxFall) p.vy = effectiveMaxFall;
     p.x += p.vx;
     p.y += p.vy;
+    // 空中攻撃状態を着地前に記録
+    if (!p.grounded && (p.attacking || p.attackFrame > 0)) {
+      const at = p.attackType;
+      if (at === 'aerial' || at === 'downair' || at === 'up' || at === 'side' || at === 'normal') {
+        if (!p.grounded) p.wasAirAttacking = at;
+      }
+    }
     const wasGroundedBefore = p.grounded;
     landingCheck(p);
     wallBounceCheck(p);
@@ -10265,10 +10292,26 @@ function updateBattle(dt) {
       // パッシブ: Catbus(11) 着地強化 着地硬直-15%
       const landLagPassive = p.charIdx === 11 ? 0.85 : 1.0;
       p.landSquash = Math.floor((8 + impactStrength * 4) * landLagPassive);
-      // 着地硬直フレーム（シャうでん「水流」: 空中攻撃後の着地硬直ゼロ）
-      const baseLandLag = p.fastFalling ? LAND_LAG_FASTFALL : LAND_LAG_NORMAL;
+      // === 空中攻撃着地硬直システム ===
       const shaudenZero = (p.charIdx === 8 && p.attacking) ? 0 : 1;
-      p.landLag = Math.floor(baseLandLag * landLagPassive * shaudenZero);
+      let airAtkLandLag = 0;
+      if (p.wasAirAttacking && shaudenZero) {
+        // 空中攻撃の種類に応じた着地硬直
+        const aat = p.wasAirAttacking;
+        if (aat === 'downair') airAtkLandLag = 16;
+        else if (aat === 'up') airAtkLandLag = 12;
+        else if (aat === 'side' || aat === 'aerial') airAtkLandLag = 10;
+        else airAtkLandLag = 8; // 空中通常攻撃
+        airAtkLandLag = Math.floor(airAtkLandLag * landLagPassive);
+        // 空中攻撃着地時の土煙エフェクト（大きめ）
+        for (let ali = 0; ali < 6; ali++) {
+          const aside = ali % 2 === 0 ? -1 : 1;
+          sparks.push({ x: p.x + (Math.random()-0.5)*15, y: p.y, vx: aside * (2+Math.random()*3), vy: -1-Math.random()*1.5, life: 10+Math.floor(Math.random()*6), maxLife: 16, color: '#BBAA99', size: 2+Math.random()*2, type: 'dust', gravity: 0.08, drag: 0.92 });
+        }
+      }
+      const baseLandLag = p.fastFalling ? LAND_LAG_FASTFALL : LAND_LAG_NORMAL;
+      p.landLag = Math.max(Math.floor(baseLandLag * landLagPassive * shaudenZero), airAtkLandLag);
+      p.wasAirAttacking = false; // リセット
       p.fastFalling = false;
       p.dashing = false;
 
