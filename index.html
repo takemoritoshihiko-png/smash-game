@@ -2611,8 +2611,8 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
       sw = origW * 0.45;
       sh = origH * 0.95;
     }
-    if (charIndex === 25) {
-      // ヤッホ: 横長画像の中央キャラをクロップ
+    if (charIndex === 25 && img === yahoImg) {
+      // ヤッホ: 元画像のみクロップ（スプライト時はスキップ）
       const origW = img.naturalWidth, origH = img.naturalHeight;
       sx = origW * 0.2;
       sy = origH * 0.0;
