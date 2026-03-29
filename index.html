@@ -461,6 +461,11 @@ const pullSprites = {};
 });
 const mussyImg = new Image();
 mussyImg.src = 'images/mussy.png';
+const mussySprites = {};
+['idle','walk','jump','attack_n','attack_side','attack_up','attack_down','attack_air','special','damage','down','win'].forEach(k => {
+  mussySprites[k] = new Image();
+  mussySprites[k].src = 'images/musshi/' + k + '.png';
+});
 const bgImg = new Image();
 bgImg.src = 'images/bg.png';
 const bg2Img = new Image();
@@ -2559,7 +2564,7 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
     0: zenSprites, 1: donSprites, 2: saisokuSprites,
     3: meteoSprites, 4: longSprites, 5: uruoSprites,
     6: kumatarouSprites, 7: bulletSprites, 8: shawdenSprites,
-    9: judgemanSprites, 11: catbusSprites, 12: tankSprites, 13: namiojiSprites, 14: tokkoSprites, 15: samSprites, 16: kingSprites, 17: onpaSprites, 18: senSprites, 19: dosbossSprites, 20: microSprites, 21: mrtwoSprites, 22: kinkinSprites, 23: satoruSprites, 24: kowaiSprites, 25: yahoSprites, 26: poyoSprites, 27: pullSprites,
+    9: judgemanSprites, 11: catbusSprites, 12: tankSprites, 13: namiojiSprites, 14: tokkoSprites, 15: samSprites, 16: kingSprites, 17: onpaSprites, 18: senSprites, 19: dosbossSprites, 20: microSprites, 21: mrtwoSprites, 22: kinkinSprites, 23: satoruSprites, 24: kowaiSprites, 25: yahoSprites, 26: poyoSprites, 27: pullSprites, 28: mussySprites,
   };
   // Tensai: switch sprite set based on dragonMode
   if (charIndex === 10 && animData) {
@@ -2642,8 +2647,8 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
       const origW = img.naturalWidth, origH = img.naturalHeight;
       sx = origW * 0.2; sy = origH * 0.05; sw = origW * 0.55; sh = origH * 0.85;
     }
-    if (charIndex === 28) {
-      // ムッシー: 横長画像クロップ
+    if (charIndex === 28 && img === mussyImg) {
+      // ムッシー: 元画像のみクロップ（スプライト時はスキップ）
       const origW = img.naturalWidth, origH = img.naturalHeight;
       sx = origW * 0.1; sy = origH * 0.05; sw = origW * 0.8; sh = origH * 0.88;
     }
