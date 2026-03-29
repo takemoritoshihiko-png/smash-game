@@ -5467,6 +5467,7 @@ const COMBO_ROUTES = {
   26: [ // ぽよ（スライム）
     { name: 'バウンドコンボ', route: '弱×4→上強→上スマ', dmgRange: '0〜60%', diff: 2, hits: 6 },
     { name: 'スライム連打', route: '弱×3→横強→横スマ', dmgRange: '0〜50%', diff: 1, hits: 5 },
+    { name: 'ダブルスライムコンボ', route: '(ダブルスライム中)弱(2hit)→弱(2hit)→上強(2hit)→上スマ(2hit)', dmgRange: '0〜50%', diff: 1, hits: 8 },
   ],
   23: [ // サトル（テコンドー魚）
     { name: '水流蹴りコンボ', route: '前蹴り→回転蹴り→上段蹴り→ジャンプ蹴り→上スマ', dmgRange: '0〜50%', diff: 3, hits: 5 },
@@ -7363,6 +7364,11 @@ function createPlayer(id, charIdx, startX) {
     mrtwoDualBlast: 0,        // ミスターツー: 爆炎融合残F
     tankAmmo: 5,              // タンク: 弾薬(0-5)
     tankReloadTimer: 0,       // タンク: 補充タイマー
+    poyoSlimeGauge: 0,        // ぽよ: スライムゲージ(0-100)
+    poyoDoubleSlime: 0,       // ぽよ: ダブルスライム残F
+    poyoDoubleHitTimer: 0,    // ぽよ: 2回目攻撃発動タイマー
+    poyoDoubleHitData: null,  // ぽよ: 2回目攻撃データ
+    poyoDoubleHitTarget: null,// ぽよ: 2回目攻撃対象
   };
 }
 
@@ -7818,6 +7824,17 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   if (aci4 === 22 && attacker.kinkinGoldMode > 0) target.damage = Math.min(999, target.damage + finalDamage * 0.5); // 億万長者×1.5
   // ロング(4): 穿孔+20(遠距離)、+5(近距離)
   if (aci4 === 4) { const d4 = Math.abs(target.x - attacker.x); attacker.longPierceGauge = Math.min(100, (attacker.longPierceGauge||0) + (d4 > 200 ? 20 : 5)); }
+  // ぽよ(26): スライムゲージ+10(攻撃)、+8(被ダメ)
+  if (aci4 === 26) attacker.poyoSlimeGauge = Math.min(100, (attacker.poyoSlimeGauge||0) + 10);
+  if (target.charIdx === 26) target.poyoSlimeGauge = Math.min(100, (target.poyoSlimeGauge||0) + 8);
+  // ぽよスライムコーティング(50%以上): 被ダメ-10%
+  if (target.charIdx === 26 && (target.poyoSlimeGauge||0) >= 50) target.damage = Math.max(0, target.damage - finalDamage * 0.1);
+  // ぽよダブルスライム: 2回目攻撃を6F後に予約
+  if (aci4 === 26 && attacker.poyoDoubleSlime > 0 && attacker.poyoDoubleHitTimer <= 0) {
+    attacker.poyoDoubleHitTimer = 6;
+    attacker.poyoDoubleHitData = { damage: damage, kbBase: kbBase, kbScale: kbScale, kbAngle: kbAngle, hitType: hitType };
+    attacker.poyoDoubleHitTarget = target.id;
+  }
   // ロング龍槍: リーチ+50%はstartAttackで処理
   // ドン(1): 大地+10(攻撃)、+8(被ダメ)
   if (aci4 === 1) attacker.donEarthGauge = Math.min(100, (attacker.donEarthGauge||0) + 10);
@@ -10164,6 +10181,31 @@ function updateBattle(dt) {
       if (p.mrtwoDualL >= 80 && p.mrtwoDualR >= 80 && !p.mrtwoDualBlast) {
         p.mrtwoDualBlast = 360; p.mrtwoDualL = 0; p.mrtwoDualR = 0;
         cmdNameDisplay.push({ text: 'DUAL BLAST!!', x: p.x, y: p.y - 100, life: 90, maxLife: 90, color: '#FF6688' });
+      }
+    }
+
+    // ぽよ(26): スライムゲージ自然減少・ダブルスライム
+    if (p.charIdx === 26) {
+      if (p.poyoDoubleSlime > 0) p.poyoDoubleSlime--;
+      if (battleTime % 15 === 0 && p.poyoSlimeGauge > 0 && !p.poyoDoubleSlime) p.poyoSlimeGauge = Math.max(0, p.poyoSlimeGauge - 1);
+      if (p.poyoSlimeGauge >= 100 && !p.poyoDoubleSlime) {
+        p.poyoDoubleSlime = 480; p.poyoSlimeGauge = 0; // 8秒
+        cmdNameDisplay.push({ text: 'DOUBLE SLIME!!', x: p.x, y: p.y - 100, life: 90, maxLife: 90, color: '#FF88CC' });
+        hitEffects.push({ x: p.x, y: p.y - 35, life: 15, maxLife: 15, color: '#FF88CC', size: 50, type: 'ring' });
+        playHitSound('justGuard');
+      }
+      // ダブルスライム: 2回目攻撃の自動発動
+      if (p.poyoDoubleHitTimer > 0) {
+        p.poyoDoubleHitTimer--;
+        if (p.poyoDoubleHitTimer <= 0 && p.poyoDoubleHitData && p.poyoDoubleHitTarget !== null) {
+          const t2 = players.find(pp => pp.id === p.poyoDoubleHitTarget);
+          if (t2 && t2.alive && t2.invincibleTimer <= 0) {
+            const d2 = p.poyoDoubleHitData;
+            applyHit(p, t2, d2.damage * 0.6, d2.kbBase * 0.5, d2.kbScale * 0.5, d2.kbAngle, d2.hitType);
+            sparks.push({ x: t2.x, y: t2.y - 35, vx: (Math.random()-0.5)*3, vy: -1, life: 8, maxLife: 8, color: '#FF88CC', size: 3, gravity: 0.05, drag: 0.95 });
+          }
+          p.poyoDoubleHitData = null; p.poyoDoubleHitTarget = null;
+        }
       }
     }
 
@@ -15138,6 +15180,17 @@ function drawBattleHUD() {
     if (gp.charIdx === 21) {
       ctx.fillStyle='#FF8844'; ctx.fillText('L:'+Math.floor(gp.mrtwoDualL||0)+' R:'+Math.floor(gp.mrtwoDualR||0),ggx+40,ggy-2);
       if(gp.mrtwoDualBlast>0){ctx.fillStyle='#FF4444';ctx.fillText('DUAL BLAST!',ggx+40,ggy-12);}
+    }
+    // ぽよ(26): スライムゲージ
+    if (gp.charIdx === 26) {
+      const r = (gp.poyoSlimeGauge || 0) / 100;
+      // ぷるぷるアニメーション
+      const wobble = Math.sin(battleTime * 0.15) * 2;
+      ctx.fillStyle = '#1a0a1a'; ctx.fillRect(ggx, ggy + wobble * 0.3, 80, 5);
+      ctx.fillStyle = gp.poyoDoubleSlime > 0 ? '#FF44AA' : (r >= 0.5 ? '#FF88CC' : '#CC6699');
+      ctx.fillRect(ggx, ggy + wobble * 0.3, 80 * r, 5);
+      ctx.fillStyle = '#FF88CC';
+      ctx.fillText(gp.poyoDoubleSlime > 0 ? 'DOUBLE SLIME!' : (r >= 0.5 ? 'COATING!' : 'SLIME ' + Math.floor(gp.poyoSlimeGauge || 0)), ggx + 40, ggy - 2 + wobble * 0.5);
     }
   }
 
