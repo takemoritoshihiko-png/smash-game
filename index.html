@@ -9630,7 +9630,7 @@ function updateBattle(dt) {
       }
       // ガード解除だけ処理
       let hsGuard = false;
-      if (p.id === 0) { hsGuard = (onlineMode && !isHost) ? !!remoteKeys.s : !!(keys['s'] || keys['S']); }
+      if (p.id === 0) { hsGuard = (onlineMode && !isHost) ? !!remoteKeys.s : !!keys['Shift']; }
       else if (p.id === 1 && (gameMode === 'cpu' || bossRushMode)) { hsGuard = false; }
       else if (onlineMode && isHost) { hsGuard = !!remoteKeys.s; }
       else { hsGuard = !!(keys['p'] || keys['P']); }
@@ -10575,7 +10575,7 @@ function updateBattle(dt) {
       // ガードボタン（S）を押したらテクニング受付開始（10F）
       let techPress = false;
       if (p.id === 0) {
-        techPress = (onlineMode && !isHost) ? !!remoteKeys.s : !!(keys['s'] || keys['S']);
+        techPress = (onlineMode && !isHost) ? !!remoteKeys.s : !!keys['Shift'];
       } else if (gameMode === 'cpu' || bossRushMode) {
         // CPU: 難易度に応じたテクニング確率
         techPress = Math.random() < (cpuDifficulty >= 3 ? 0.06 : cpuDifficulty >= 2 ? 0.03 : 0.01);
@@ -10989,7 +10989,7 @@ function updateBattle(dt) {
     // --- Guard handling ---
     let wantsGuard = false;
     if (p.id === 0) {
-      wantsGuard = (onlineMode && !isHost) ? !!remoteKeys.s : !!(keys['s'] || keys['S']);
+      wantsGuard = (onlineMode && !isHost) ? !!remoteKeys.s : !!keys['Shift'];
     } else if (p.id === 1 && (gameMode === 'cpu' || bossRushMode)) {
       const cpuTarget = players[0];
       wantsGuard = getCpuGuard(p, cpuTarget);
@@ -15421,7 +15421,7 @@ function sendGuestInput() {
     z: !!(keys['z'] || keys['Z']),
     x: !!(keys['x'] || keys['X']),
     c: !!(keys['c'] || keys['C']),
-    s: !!(keys['s'] || keys['S']),
+    s: !!keys['Shift'], // ガード/回避はShiftキー
     a: !!(keys['a'] || keys['A']),
     d: !!(keys['d'] || keys['D']),
   };
@@ -17846,7 +17846,7 @@ function handleKeyDown(e) {
     if (p1 && p1.ledgeGrab) {
       if (e.key === 'ArrowUp') {
         if (keys['z'] || keys['Z'] || keys['x'] || keys['X']) releaseLedge(p1, 'attack');
-        else if (keys['s'] || keys['S']) releaseLedge(p1, 'dodge');
+        else if (keys['Shift']) releaseLedge(p1, 'dodge');
         else releaseLedge(p1, 'normal');
       }
       if (e.key === 'ArrowDown') releaseLedge(p1, 'drop');
@@ -17930,8 +17930,8 @@ function handleKeyDown(e) {
         startAttack(p1, 'special');
       }
     }
-    // P1 Guard (ground) / Air Dodge (air) - S key
-    if (e.key === 's' || e.key === 'S') {
+    // P1 Guard (ground) / Air Dodge (air) - Shift key
+    if (e.key === 'Shift') {
       if (p1.grounded) {
         if (!p1.attacking && !p1.guarding && p1.guardDurability > 0 && p1.guardBreakStun <= 0 && p1.invincibleTimer <= 0) {
           p1.guarding = true;
