@@ -13696,10 +13696,14 @@ function drawBattle(dt) {
 
 function drawAttackEffect(p) {
   const atk = p.attackData;
-  if (!atk) return; // null/undefinedチェック
+  if (!atk) return;
   const frame = p.attackFrame;
   const inActive = frame > (atk.startup||0) && frame <= (atk.startup||0) + (atk.active||0);
   if (!inActive && atk.specialType !== 'jumpSlam') return;
+
+  // 負の半径エラー防止: ctx.arcをラップ
+  const _origArc = ctx.arc.bind(ctx);
+  ctx.arc = function(x, y, r, s, e, ccw) { _origArc(x, y, Math.max(0.1, r), s, e, ccw); };
 
   const dir = p.facingLeft ? -1 : 1;
   const cx = p.x;
@@ -14674,6 +14678,7 @@ function drawAttackEffect(p) {
   }
 
   ctx.restore();
+  ctx.arc = _origArc; // arcラップを解除
 }
 
 // --- Draw guard state ---
