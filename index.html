@@ -440,6 +440,11 @@ const kowaiSprites = {};
 // idle は元の kowaiImg を使用（立ち姿を元に戻す）
 const yahoImg = new Image();
 yahoImg.src = 'images/yaho.png?v=3';
+const yahoSprites = {};
+['idle','walk','jump','attack_n','attack_side','attack_up','attack_down','attack_air','special','damage','down','win'].forEach(k => {
+  yahoSprites[k] = new Image();
+  yahoSprites[k].src = 'images/yaho/' + k + '.png';
+});
 const poyoImg = new Image();
 poyoImg.src = 'images/poyo.png';
 const pullImg = new Image();
@@ -2544,7 +2549,7 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
     0: zenSprites, 1: donSprites, 2: saisokuSprites,
     3: meteoSprites, 4: longSprites, 5: uruoSprites,
     6: kumatarouSprites, 7: bulletSprites, 8: shawdenSprites,
-    9: judgemanSprites, 11: catbusSprites, 12: tankSprites, 13: namiojiSprites, 14: tokkoSprites, 15: samSprites, 16: kingSprites, 17: onpaSprites, 18: senSprites, 19: dosbossSprites, 20: microSprites, 21: mrtwoSprites, 22: kinkinSprites, 23: satoruSprites, 24: kowaiSprites,
+    9: judgemanSprites, 11: catbusSprites, 12: tankSprites, 13: namiojiSprites, 14: tokkoSprites, 15: samSprites, 16: kingSprites, 17: onpaSprites, 18: senSprites, 19: dosbossSprites, 20: microSprites, 21: mrtwoSprites, 22: kinkinSprites, 23: satoruSprites, 24: kowaiSprites, 25: yahoSprites,
   };
   // Tensai: switch sprite set based on dragonMode
   if (charIndex === 10 && animData) {
