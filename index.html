@@ -447,6 +447,11 @@ const yahoSprites = {};
 });
 const poyoImg = new Image();
 poyoImg.src = 'images/poyo.png';
+const poyoSprites = {};
+['idle','walk','jump','attack_n','attack_side','attack_up','attack_down','attack_air','special','damage','down','win'].forEach(k => {
+  poyoSprites[k] = new Image();
+  poyoSprites[k].src = 'images/poyo/' + k + '.png';
+});
 const pullImg = new Image();
 pullImg.src = 'images/pull.png?v=2';
 const mussyImg = new Image();
@@ -2549,7 +2554,7 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
     0: zenSprites, 1: donSprites, 2: saisokuSprites,
     3: meteoSprites, 4: longSprites, 5: uruoSprites,
     6: kumatarouSprites, 7: bulletSprites, 8: shawdenSprites,
-    9: judgemanSprites, 11: catbusSprites, 12: tankSprites, 13: namiojiSprites, 14: tokkoSprites, 15: samSprites, 16: kingSprites, 17: onpaSprites, 18: senSprites, 19: dosbossSprites, 20: microSprites, 21: mrtwoSprites, 22: kinkinSprites, 23: satoruSprites, 24: kowaiSprites, 25: yahoSprites,
+    9: judgemanSprites, 11: catbusSprites, 12: tankSprites, 13: namiojiSprites, 14: tokkoSprites, 15: samSprites, 16: kingSprites, 17: onpaSprites, 18: senSprites, 19: dosbossSprites, 20: microSprites, 21: mrtwoSprites, 22: kinkinSprites, 23: satoruSprites, 24: kowaiSprites, 25: yahoSprites, 26: poyoSprites,
   };
   // Tensai: switch sprite set based on dragonMode
   if (charIndex === 10 && animData) {
@@ -2619,8 +2624,8 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
       sw = origW * 0.55;
       sh = origH * 0.92;
     }
-    if (charIndex === 26) {
-      // ぽよ: 横長画像の中央スライムをクロップ
+    if (charIndex === 26 && img === poyoImg) {
+      // ぽよ: 元画像のみクロップ（スプライト時はスキップ）
       const origW = img.naturalWidth, origH = img.naturalHeight;
       sx = origW * 0.15;
       sy = origH * 0.05;
