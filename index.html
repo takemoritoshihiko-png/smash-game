@@ -11007,7 +11007,7 @@ function updateBattle(dt) {
         // ガードキャンセル上スマッシュ
         p.guarding = false;
         p.guardEndlag = 0;
-        startSmash(p, 'upSmash');
+        startSmashAttack(p, 'upSmash');
         if (p.smashCharging) executeSmash(p); // 即発動
         // continueしない: 後続処理で攻撃状態が正しく処理される
       }
