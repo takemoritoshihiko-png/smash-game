@@ -433,10 +433,11 @@ const satoruSprites = {};
 const kowaiImg = new Image();
 kowaiImg.src = 'images/kowai.png';
 const kowaiSprites = {};
-['idle','walk','jump','attack_n','attack_side','attack_up','attack_down','attack_air','special','damage','down','win'].forEach(k => {
+['walk','jump','attack_n','attack_side','attack_up','attack_down','attack_air','special','damage','down','win'].forEach(k => {
   kowaiSprites[k] = new Image();
   kowaiSprites[k].src = 'images/kowai/' + k + '.png';
 });
+// idle は元の kowaiImg を使用（立ち姿を元に戻す）
 const yahoImg = new Image();
 yahoImg.src = 'images/yaho.png?v=3';
 const poyoImg = new Image();
