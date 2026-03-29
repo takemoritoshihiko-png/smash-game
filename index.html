@@ -16397,7 +16397,8 @@ function executeSmash(p) {
 
 // --- 崖つかまりシステム ---
 const LEDGE_GRAB_RANGE = 30;      // 崖端からの判定幅
-const LEDGE_Y_RANGE = 50;         // 崖Y座標からの判定高さ
+const LEDGE_Y_ABOVE = 20;        // 崖上端より上の判定範囲
+const LEDGE_Y_BELOW = 80;        // 崖上端より下の判定範囲
 const LEDGE_MAX_TIME = 180;       // 最大つかまり時間(3秒)
 const LEDGE_COOLDOWN = 60;        // 連続つかまり制限(1秒)
 
@@ -16407,16 +16408,17 @@ function checkLedgeGrab(p) {
   // 上方向に移動中 or 落下速度が遅い時のみ
   if (p.vy > 4) return;
   const gy = STAGE_GROUND_Y;
-  // 崖より下にいる
-  if (p.y < gy - LEDGE_Y_RANGE) return;
+  // 崖より上すぎる場合はスキップ
+  if (p.y < gy - LEDGE_Y_ABOVE) return;
+  // 崖より下すぎる場合もスキップ
+  if (p.y > gy + LEDGE_Y_BELOW) return;
   // 左崖
-  if (p.x >= STAGE_LEFT - LEDGE_GRAB_RANGE && p.x <= STAGE_LEFT + 15 && p.y >= gy - LEDGE_Y_RANGE && p.y <= gy + LEDGE_Y_RANGE) {
-    // 他のプレイヤーが同じ崖を掴んでいない
+  if (p.x >= STAGE_LEFT - LEDGE_GRAB_RANGE && p.x <= STAGE_LEFT + 15 && p.y >= gy - LEDGE_Y_ABOVE && p.y <= gy + LEDGE_Y_BELOW) {
     if (players.some(pp => pp.id !== p.id && pp.ledgeGrab && pp.ledgeSide === -1)) return;
     grabLedge(p, -1);
   }
   // 右崖
-  if (p.x >= STAGE_RIGHT - 15 && p.x <= STAGE_RIGHT + LEDGE_GRAB_RANGE && p.y >= gy - LEDGE_Y_RANGE && p.y <= gy + LEDGE_Y_RANGE) {
+  if (p.x >= STAGE_RIGHT - 15 && p.x <= STAGE_RIGHT + LEDGE_GRAB_RANGE && p.y >= gy - LEDGE_Y_ABOVE && p.y <= gy + LEDGE_Y_BELOW) {
     if (players.some(pp => pp.id !== p.id && pp.ledgeGrab && pp.ledgeSide === 1)) return;
     grabLedge(p, 1);
   }
