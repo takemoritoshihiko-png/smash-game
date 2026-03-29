@@ -12668,6 +12668,9 @@ function drawBattle(dt) {
   // Players
   for (const p of players) {
     if (!p.alive) continue;
+    // 描画補間: renderX/renderYを使用（物理位置を一時退避）
+    const _physX = p.x, _physY = p.y;
+    if (p.renderX !== undefined) { p.x = p.renderX; p.y = p.renderY; }
     ctx.save();
 
     // Catbus(11): 瞬間消滅中は半透明
@@ -13023,6 +13026,8 @@ function drawBattle(dt) {
     ctx.lineTo(p.x - 6, arrowY - 4);
     ctx.lineTo(p.x + 6, arrowY - 4);
     ctx.closePath(); ctx.fill();
+    // 描画補間: 物理位置を復元
+    p.x = _physX; p.y = _physY;
   }
 
   // 金金(22): コイン描画
@@ -18035,6 +18040,10 @@ function gameLoop(timestamp) {
   // Fixed timestep updates for consistent physics
   let updated = false;
   while (accumulator >= FIXED_DT) {
+    // 描画補間用: 前フレーム位置を保存
+    if (scene === 'battle' && players && players.length >= 2) {
+      for (const p of players) { if (p) { p.prevX = p.x; p.prevY = p.y; } }
+    }
     if (scene === 'vsintro') {
       vsIntroTime++;
       if (vsIntroTime >= VS_INTRO_DURATION && !transitioning) {
@@ -18129,6 +18138,19 @@ function gameLoop(timestamp) {
   if (onlineMode && scene === 'battle') {
     if (isHost) sendHostState();
     else sendGuestInput();
+  }
+
+  // 描画補間: 物理更新と描画のフレーム間を補間
+  const renderAlpha = accumulator / FIXED_DT;
+  if (scene === 'battle' && players && players.length >= 2) {
+    for (const p of players) {
+      if (p && p.prevX !== undefined) {
+        p.renderX = p.prevX + (p.x - p.prevX) * renderAlpha;
+        p.renderY = p.prevY + (p.y - p.prevY) * renderAlpha;
+      } else if (p) {
+        p.renderX = p.x; p.renderY = p.y;
+      }
+    }
   }
 
   // Render every frame for smooth visuals
