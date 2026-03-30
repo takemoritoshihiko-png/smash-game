@@ -7284,7 +7284,7 @@ function createPlayer(id, charIdx, startX) {
     dHoldTimer: 0,          // Dキー長押しフレーム
     gaugeBurstCount: 0,    // ゲージバースト使用回数（最大3）
     airDashUsed: false,    // エアダッシュ使用済み
-    powerUpTimer: 0,       // 攻撃強化残りフレーム
+    powerUpTimer: 0,       // （未使用・互換性のため残す）
     ultimateGauge: 0,       // 必殺技ゲージ (0-100)
     // 固有システム
     rageGauge: 0, rageActive: false, rageTimer: 0, // うる男
@@ -7676,7 +7676,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   if (target.dSkillBuff === 'killIntent') finalDamage *= 1.2;   // とっこ 被ダメ1.2倍
   // D技バフ: 与ダメ増加
   if (attacker.dSkillBuff === 'tensaiBoost') finalDamage *= 1.5; // 天才 覚醒
-  if (attacker.powerUpTimer > 0) finalDamage *= 1.3; // ゲージ攻撃強化
+  // ゲージ攻撃強化: 削除済み
   if (attacker.charIdx === 10 && attacker.dragonMode) finalDamage *= 1.5; // 天才 ドラゴンモード攻撃力1.5倍
   if (attacker.bossBuffed) finalDamage *= 1.3; // ボスラッシュ: ボス攻撃力1.3倍（1.6→1.3）
   if (attacker.dSkillBuff === 'killIntent') finalDamage *= 1.5;  // とっこ 殺意
@@ -7941,8 +7941,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   if (attacker.charIdx === 17 && attacker.consecutiveHits > 0) weightedKb *= (1 + Math.min(attacker.consecutiveHits * 0.05, 0.25));
   // ドラゴンモード: 横スマッシュKB1.2倍
   if (attacker.charIdx === 10 && attacker.dragonMode && hitType === 'smash') weightedKb *= 1.2;
-  // ゲージ攻撃強化中: KB×1.2
-  if (attacker.powerUpTimer > 0) weightedKb *= 1.2;
+  // ゲージ攻撃強化: 削除済み
   // === コンボ接続性向上: 低%ではKBを抑制（スマッシュ除外） ===
   if (!isSmash) {
     if (target.damage <= 40) weightedKb *= 0.55;
@@ -9762,8 +9761,7 @@ function updateBattle(dt) {
     } else {
       dKeyHeld = !!(keys['r'] || keys['R']); // P2ローカル: Rキー
     }
-    // 攻撃強化タイマー更新
-    if (p.powerUpTimer > 0) p.powerUpTimer--;
+    // 攻撃強化: 削除済み
 
     if (dKeyHeld && p.alive && !ultimateActive && p.sealMagic <= 0) {
       // === 優先順位2: 攻撃中にD → ゲージキャンセル（30%消費） ===
@@ -9822,19 +9820,12 @@ function updateBattle(dt) {
           p.dHoldTimer = -1;
         }
       }
-      // === 優先順位1&5: 長押し → 必殺技(100%) or 攻撃強化(50%) ===
+      // === 優先順位1: 長押し → 必殺技(100%) or D技 ===
       else if (!p.dSkillActive && p.hitstun <= 0 && !p.grabbed) {
         if (p.dHoldTimer >= 0) p.dHoldTimer++;
         if (p.dHoldTimer >= D_SKILL_HOLD_FRAMES) {
           if (p.ultimateGauge >= 100) {
             triggerUltimate(p);
-          } else if (p.ultimateGauge >= 50 && p.powerUpTimer <= 0) {
-            // 攻撃強化（50%消費、5秒間）
-            p.ultimateGauge -= 50;
-            p.powerUpTimer = 300; // 5秒
-            hitEffects.push({ x: p.x, y: p.y - 35, life: 15, maxLife: 15, color: '#FFD700', size: 50, type: 'ring' });
-            cmdNameDisplay.push({ text: 'POWER UP!', x: p.x, y: p.y - 90, life: 60, maxLife: 60, color: '#FFD700' });
-            playHitSound('cmd');
           } else if (p.dSkillCooldown <= 0) {
             triggerDSkill(p);
           } else {
@@ -15014,8 +15005,8 @@ function drawBattleHUD() {
       const tx = gx + gw * tick;
       ctx.beginPath(); ctx.moveTo(tx, gy); ctx.lineTo(tx, gy + gh); ctx.stroke();
     }
-    // 攻撃強化中のオーラ表示
-    if (p.powerUpTimer > 0) {
+    // 攻撃強化: 削除済み
+    if (false) {
       ctx.globalAlpha = 0.4 + Math.sin(battleTime * 0.12) * 0.2;
       ctx.strokeStyle = '#FFD700'; ctx.lineWidth = 1.5;
       ctx.beginPath(); ctx.arc(p.x, p.y - 35, 30, 0, Math.PI * 2); ctx.stroke();
