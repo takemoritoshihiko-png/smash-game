@@ -5379,6 +5379,40 @@ let showFrameData = false;
 let trainingMode = false;
 let comboListCharIdx = 0;
 let instantKillDisplay = { active: false, timer: 0, maxTimer: 0 };
+
+// === 復帰技データ（全28キャラ） ===
+// height: 上昇px, angle: 角度(度,-90=真上), frames: 持続F, dmg: ダメージ, color: エフェクト色, status: 状態異常
+const RECOVERY_MOVES = {
+  0:  { name:'氷柱昇天',     height:280, angle:-90, frames:20, dmg:8, color:'#88DDFF', status:'frozen' },
+  1:  { name:'大地跳躍',     height:200, angle:-90, frames:16, dmg:10, color:'#AA6622', status:null },
+  2:  { name:'光速昇撃',     height:380, angle:-45, frames:14, dmg:6, color:'#FFFFFF', status:null },
+  3:  { name:'炎上昇',       height:280, angle:-90, frames:18, dmg:7, color:'#FF6600', status:'burning' },
+  4:  { name:'天穿突き',     height:280, angle:-90, frames:18, dmg:9, color:'#44FFCC', status:null },
+  5:  { name:'獣跳び',       height:280, angle:-90, frames:16, dmg:8, color:'#4169E1', status:null },
+  6:  { name:'くまロケット', height:200, angle:-90, frames:20, dmg:6, color:'#FF6B6B', status:null },
+  7:  { name:'虹色上昇',     height:280, angle:-90, frames:18, dmg:5, color:'#FF66AA', status:'confused' },
+  8:  { name:'電磁射出',     height:380, angle:-50, frames:14, dmg:7, color:'#FFFF44', status:null },
+  9:  { name:'暗黒浮遊',     height:380, angle:-90, frames:30, dmg:4, color:'#9400D3', status:'cursed' },
+  10: { name:'龍翔',         height:200, angle:-90, frames:16, dmg:8, color:'#FFD700', status:null },
+  11: { name:'バリケードジャンプ', height:380, angle:-90, frames:4, dmg:6, color:'#66DDFF', status:null },
+  12: { name:'砲台反動',     height:200, angle:-60, frames:16, dmg:10, color:'#888888', status:null },
+  13: { name:'アッパーカット昇天', height:200, angle:-90, frames:14, dmg:10, color:'#FF4444', status:null },
+  14: { name:'毒霧跳躍',     height:280, angle:-90, frames:18, dmg:5, color:'#44CC44', status:'poisoned' },
+  15: { name:'羽ばたき急上昇', height:380, angle:-90, frames:22, dmg:4, color:'#EEEEFF', status:null },
+  16: { name:'時間跳躍',     height:380, angle:-90, frames:16, dmg:0, color:'#FFD700', status:null },
+  17: { name:'音速上昇',     height:280, angle:-90, frames:18, dmg:6, color:'#88FFFF', status:'stunned' },
+  18: { name:'出世エレベーター', height:200, angle:-90, frames:20, dmg:4, color:'#FF8844', status:null },
+  19: { name:'戦車砲上昇',   height:200, angle:-60, frames:16, dmg:10, color:'#CC66FF', status:null },
+  20: { name:'三体分離上昇', height:280, angle:-90, frames:18, dmg:6, color:'#44DDFF', status:null },
+  21: { name:'双頭噴射',     height:280, angle:-90, frames:18, dmg:7, color:'#FF6688', status:'burning' },
+  22: { name:'マネーローンチ', height:200, angle:-90, frames:16, dmg:5, color:'#FFD700', status:null },
+  23: { name:'飛び上がり回転蹴り', height:280, angle:-90, frames:16, dmg:9, color:'#FF0000', status:null },
+  24: { name:'恐怖浮遊',     height:380, angle:-90, frames:30, dmg:3, color:'#800080', status:null },
+  25: { name:'カオス跳躍',   height:150+Math.floor(Math.random()*230), angle:-90+Math.floor(Math.random()*50-25), frames:16, dmg:6, color:'#FF1493', status:null },
+  26: { name:'スライムバウンド', height:280, angle:-90, frames:16, dmg:6, color:'#FFB6C1', status:null },
+  27: { name:'重力反転',     height:380, angle:-90, frames:20, dmg:5, color:'#4B0082', status:null },
+  28: { name:'羽虫大群昇',   height:280, angle:-90, frames:18, dmg:5, color:'#228B22', status:'poisoned' },
+};
 // ゲージMAXエフェクト
 let gaugeMaxEffect = { active: false, timer: 0, playerId: -1, color: '#FFD700', text: '' };
 // ゲージ増減ポップアップ
@@ -7281,6 +7315,8 @@ function createPlayer(id, charIdx, startX) {
     sniperCooldown: 0,
     inkBlindTimer: 0,
     strongLocked: false, // locked until landing after aerial strong
+    recoveryUsed: false, // 復帰技使用済みフラグ
+    recoveryActive: 0,   // 復帰技アクティブ残りフレーム
     // Dragon mode (天才 only)
     dragonMode: false, dragonTimer: 0, dragonCooldown: 0,
     dragonTransforming: false, dragonTransformTimer: 0,
@@ -8830,6 +8866,32 @@ function tryCancelAttack(p, type) {
   p.cancelWindow = 0;
   startAttack(p, type);
   return p.attacking; // startAttack が成功したか
+}
+
+// === 復帰技実行 ===
+function executeRecovery(p) {
+  if (p.recoveryUsed || p.attacking || p.hitstun > 0 || !p.alive) return false;
+  const rec = RECOVERY_MOVES[p.charIdx];
+  if (!rec) return false;
+  p.recoveryUsed = true;
+  p.recoveryActive = rec.frames;
+  // 上昇速度計算
+  const rad = (rec.angle || -90) * Math.PI / 180;
+  const speed = rec.height / rec.frames;
+  p.vx = Math.cos(rad) * speed;
+  p.vy = Math.sin(rad) * speed;
+  p.grounded = false;
+  // 崖外からの復帰: 無敵5F
+  if (p.x < STAGE_LEFT || p.x > STAGE_RIGHT) p.invincibleTimer = Math.max(p.invincibleTimer, 5);
+  // エフェクト
+  hitEffects.push({ x: p.x, y: p.y - 35, life: 12, maxLife: 12, color: rec.color, size: 40, type: 'ring' });
+  cmdNameDisplay.push({ text: rec.name, x: p.x, y: p.y - 100, life: 40, maxLife: 40, color: rec.color });
+  playHitSound('jump');
+  // 天才龍モード: 上昇距離1.5倍
+  if (p.charIdx === 10 && p.dragonMode) { p.vx *= 1.5; p.vy *= 1.5; }
+  // ぽよダブルスライム: 2回バウンド
+  if (p.charIdx === 26 && p.poyoDoubleSlime > 0) { p.vy *= 1.4; }
+  return true;
 }
 
 function startAttack(p, type) {
@@ -10737,6 +10799,40 @@ function updateBattle(dt) {
       continue;
     }
 
+    // 復帰技アクティブ中
+    if (p.recoveryActive > 0) {
+      p.recoveryActive--;
+      const rec2 = RECOVERY_MOVES[p.charIdx];
+      // 上昇中は重力無視
+      // エフェクトパーティクル
+      if (rec2 && battleTime % 3 === 0) {
+        sparks.push({ x: p.x + (Math.random()-0.5)*15, y: p.y, vx: (Math.random()-0.5)*2, vy: 1+Math.random(), life: 8, maxLife: 8, color: rec2.color, size: 2+Math.random()*2, gravity: 0.05, drag: 0.95 });
+      }
+      // ヒットボックス
+      if (rec2 && rec2.dmg > 0) {
+        const rHb = { x: p.x - 30, y: p.y - 50, w: 60, h: 60 };
+        for (const t of players) {
+          if (t.id === p.id || !t.alive || t.invincibleTimer > 0) continue;
+          const th = getPlayerHitbox(t);
+          if (hitboxCollides(rHb.x, rHb.y, rHb.w, rHb.h, th.x, th.y, th.w, th.h)) {
+            applyHit(p, t, rec2.dmg, 4, 0.06, -60, 'special');
+            showHitDisplay(t.x, t.y, true);
+            // 状態異常付与
+            if (rec2.status === 'frozen') t.frozen = Math.max(t.frozen, 60);
+            else if (rec2.status === 'burning') { t.burning = Math.max(t.burning, 120); t.burnDmg = 2; }
+            else if (rec2.status === 'poisoned') { t.poisoned = Math.max(t.poisoned, 120); t.poisonDmg = 2; }
+            else if (rec2.status === 'stunned') t.stunned = Math.max(t.stunned, 30);
+            else if (rec2.status === 'cursed') t.cursed = Math.max(t.cursed, 60);
+            else if (rec2.status === 'confused') t.confused = Math.max(t.confused, 60);
+          }
+        }
+      }
+      p.x += p.vx; p.y += p.vy;
+      if (p.recoveryActive <= 0) { p.vx *= 0.3; p.vy = 0; } // 上昇完了→通常落下へ
+      landingCheck(p); blastCheck(p);
+      continue;
+    }
+
     // Attack update
     if (p.attacking) {
       p.attackFrame++;
@@ -11794,7 +11890,7 @@ function landingCheck(p) {
     if (p.x >= STAGE_LEFT && p.x <= STAGE_RIGHT) {
       if (p.y >= STAGE_GROUND_Y && p.y - p.vy < STAGE_GROUND_Y + 8) {
         p.y = STAGE_GROUND_Y; p.vy = 0; p.grounded = true; landed = true;
-        p.jumps = p.charIdx === 15 ? 3 : 2; p.strongLocked = false;
+        p.jumps = p.charIdx === 15 ? 3 : 2; p.strongLocked = false; p.recoveryUsed = false;
         p.airDodgeUsed = false; p.airDodging = false; p.airDodgeTimer = 0; p.airDodgeEndlag = 0;
         if (p.attacking && p.attackData && p.attackData.specialType === 'divekick') {
           p.attacking = false; p.specialState = null; p.attackFrame = 0;
@@ -11806,7 +11902,7 @@ function landingCheck(p) {
         if (p.x >= plat.x && p.x <= plat.x + plat.w) {
           if (p.y >= plat.y && p.y - prevVy < plat.y + 8) {
             p.y = plat.y; p.vy = 0; p.grounded = true; landed = true;
-            p.jumps = p.charIdx === 15 ? 3 : 2; p.strongLocked = false;
+            p.jumps = p.charIdx === 15 ? 3 : 2; p.strongLocked = false; p.recoveryUsed = false;
             p.airDodgeUsed = false; p.airDodging = false; p.airDodgeTimer = 0; p.airDodgeEndlag = 0;
             if (p.attacking && p.attackData && p.attackData.specialType === 'divekick') {
               p.attacking = false; p.specialState = null; p.attackFrame = 0;
@@ -18091,7 +18187,10 @@ function handleKeyDown(e) {
       }
     }
     if (e.key === 'x' || e.key === 'X') {
-      if (!tryCancelAttack(p1, 'strong')) {
+      // ↑+X で復帰技（空中のみ）
+      if (keys['ArrowUp'] && !p1.grounded && !p1.recoveryUsed) {
+        executeRecovery(p1);
+      } else if (!tryCancelAttack(p1, 'strong')) {
         startAttack(p1, 'strong');
       }
     }
