@@ -5379,6 +5379,19 @@ let showFrameData = false;
 let trainingMode = false;
 let comboListCharIdx = 0;
 let instantKillDisplay = { active: false, timer: 0, maxTimer: 0 };
+// ゲージMAXエフェクト
+let gaugeMaxEffect = { active: false, timer: 0, playerId: -1, color: '#FFD700', text: '' };
+// ゲージ増減ポップアップ
+let gaugePopups = []; // {x, y, text, life, color}
+function addGaugePopup(x, y, amount, color) {
+  gaugePopups.push({ x: x, y: y - 60, text: (amount > 0 ? '+' : '') + amount, life: 30, maxLife: 30, color: color || '#FFD700' });
+}
+function triggerGaugeMaxEffect(p, text, color) {
+  gaugeMaxEffect = { active: true, timer: 90, playerId: p.id, color: color, text: text };
+  hitEffects.push({ x: p.x, y: p.y - 35, life: 20, maxLife: 20, color: color, size: 80, type: 'ring' });
+  hitEffects.push({ x: p.x, y: p.y - 35, life: 15, maxLife: 15, color: '#FFFFFF', size: 50 });
+  triggerScreenShake(3, 5);
+}
 
 // ========== コンボルート定義 ==========
 const COMBO_ROUTES = {
@@ -7893,7 +7906,13 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   // ミスターツー爆炎融合: ダメ×1.5
   if (aci4 === 21 && attacker.mrtwoDualBlast > 0) target.damage = Math.min(999, target.damage + finalDamage * 0.5);
 
-  // === 固有ダメージ倍率（ゼン凍結×1.5、ジャッジ呪縛×2.0、波おじ全力×1.5） ===
+  // ゲージ増減ポップアップ（攻撃側の固有ゲージ+Nを表示）
+  if (attacker.id !== undefined && attacker.x) {
+    const ch7 = characters[attacker.charIdx];
+    if (ch7) addGaugePopup(attacker.x, attacker.y, '+', ch7.accent);
+  }
+
+  // === 固有ダメージ倍率（ゼン凍結×1.5、ジャッジ呪縛×1.5、波おじ全力×1.5） ===
   // 注: finalDamageは既に計算済みなので追加ダメージとして適用
   if (aci4 === 0 && target.frozen > 0) target.damage = Math.min(999, target.damage + finalDamage * 0.5);
   if (aci4 === 9 && target.cursed > 0) target.damage = Math.min(999, target.damage + finalDamage * 0.5); // 呪縛×1.5
@@ -10234,6 +10253,28 @@ function updateBattle(dt) {
           p.poyoDoubleHitData = null; p.poyoDoubleHitTarget = null;
         }
       }
+    }
+
+    // 強化モード発動チェック（発動1F目にエフェクト）
+    const ch6 = characters[p.charIdx];
+    const modeCheck = [
+      { t: p.kumaFuryMode, prev: '_prevKumaFury' },
+      { t: p.saisokuLightSpeed, prev: '_prevSaisokuLS' },
+      { t: p.uruoWildRelease, prev: '_prevUruoWR' },
+      { t: p.bulletAwaken, prev: '_prevBulletAw' },
+      { t: p.shawdenOvercharge, prev: '_prevShawdenOC' },
+      { t: p.onpaResonance, prev: '_prevOnpaRes' },
+      { t: p.kinkinGoldMode, prev: '_prevKinkinGM' },
+      { t: p.longDragonSpear, prev: '_prevLongDS' },
+      { t: p.pullCollapseMode, prev: '_prevPullCM' },
+      { t: p.satoruMasterMode, prev: '_prevSatoruMM' },
+      { t: p.poyoDoubleSlime, prev: '_prevPoyoDS' },
+    ];
+    for (const mc of modeCheck) {
+      if (mc.t > 0 && !p[mc.prev]) {
+        triggerGaugeMaxEffect(p, '', ch6 ? ch6.accent : '#FFD700');
+      }
+      p[mc.prev] = mc.t > 0;
     }
 
     // === 固有パッシブシステム更新 ===
@@ -13110,23 +13151,27 @@ function drawBattle(dt) {
   }
   ctx.restore();
 
-  // 状態異常エフェクト描画
+  // 状態異常エフェクト描画（大きく+テキスト付き）
   for (const p of players) {
     if (!p.alive) continue;
-    const sx2 = p.x, sy2 = p.y - 70;
-    ctx.font = '14px sans-serif'; ctx.textAlign = 'center';
+    const sx2 = p.x, sy2 = p.y - 75;
+    ctx.font = '18px sans-serif'; ctx.textAlign = 'center';
     if (p.frozen > 0) {
       ctx.globalAlpha = 0.4; ctx.fillStyle = '#88DDFF';
       ctx.fillRect(p.x - 18, p.y - 60, 36, 60);
       ctx.globalAlpha = 1; ctx.fillText('🧊', sx2, sy2);
+      ctx.font = 'bold 10px sans-serif'; ctx.fillStyle = '#88DDFF'; ctx.fillText('凍結!', sx2, sy2 + 14);
+      ctx.font = '18px sans-serif';
     }
-    if (p.burning > 0) { ctx.fillText('🔥', sx2, sy2 - (p.frozen > 0 ? 16 : 0)); }
+    if (p.burning > 0) { ctx.fillText('🔥', sx2, sy2 - (p.frozen > 0 ? 18 : 0)); ctx.font = 'bold 10px sans-serif'; ctx.fillStyle = '#FF6600'; ctx.fillText('燃焼!', sx2, sy2 + 14 - (p.frozen > 0 ? 18 : 0)); ctx.font = '18px sans-serif'; }
     if (p.poisoned > 0) {
       ctx.globalAlpha = 0.3; ctx.fillStyle = '#44CC44';
       ctx.beginPath(); ctx.arc(p.x, p.y - 35, 20, 0, Math.PI * 2); ctx.fill();
-      ctx.globalAlpha = 1; ctx.fillText('💀', sx2 + 14, sy2);
+      ctx.globalAlpha = 1; ctx.fillText('☠️', sx2 + 14, sy2);
+      ctx.font = 'bold 10px sans-serif'; ctx.fillStyle = '#44CC44'; ctx.fillText('毒!', sx2 + 14, sy2 + 14);
+      ctx.font = '18px sans-serif';
     }
-    if (p.stunned > 0) { ctx.fillText('⚡', sx2 - 14, sy2); }
+    if (p.stunned > 0) { ctx.fillText('⚡', sx2 - 14, sy2); ctx.font = 'bold 10px sans-serif'; ctx.fillStyle = '#FFFF44'; ctx.fillText('感電!', sx2 - 14, sy2 + 14); ctx.font = '18px sans-serif'; }
     if (p.cursed > 0) {
       ctx.globalAlpha = 0.25; ctx.fillStyle = '#9944CC';
       ctx.beginPath(); ctx.arc(p.x, p.y - 35, 22, 0, Math.PI * 2); ctx.fill();
@@ -15024,8 +15069,33 @@ function drawBattleHUD() {
     const gp = players[gi];
     if (!gp || !gp.alive) continue;
     const ggx = gi === 0 ? 120 : 600;
-    const ggy = 510; // ゲージバーの上
+    const ggy = 510;
     ctx.font = 'bold 8px sans-serif'; ctx.textAlign = 'center';
+
+    // 強化モード中: 常時パーティクル + 残り秒数表示
+    const ch5 = characters[gp.charIdx];
+    const modeTimers = [
+      gp.kumaFuryMode, gp.saisokuLightSpeed, gp.uruoWildRelease, gp.bulletAwaken,
+      gp.shawdenOvercharge, gp.judgeFinalMode, gp.onpaResonance, gp.mrtwoDualBlast,
+      gp.kinkinGoldMode, gp.longDragonSpear, gp.pullCollapseMode, gp.satoruMasterMode,
+      gp.poyoDoubleSlime, gp.kingTimeStop
+    ];
+    const activeMode = modeTimers.find(t => t > 0);
+    if (activeMode) {
+      // パーティクル（テーマカラー）
+      if (battleTime % 4 === 0) {
+        const a = Math.random() * Math.PI * 2;
+        sparks.push({ x: gp.x + Math.cos(a)*20, y: gp.y - 35 + Math.sin(a)*20,
+          vx: Math.cos(a)*1.5, vy: Math.sin(a)*1.5 - 1, life: 10, maxLife: 10,
+          color: ch5 ? ch5.accent : '#FFD700', size: 2, gravity: -0.02, drag: 0.95 });
+      }
+      // 残り秒数
+      const secLeft = Math.ceil(activeMode / 60);
+      ctx.fillStyle = '#FFD700'; ctx.globalAlpha = 0.8;
+      ctx.font = 'bold 10px sans-serif';
+      ctx.fillText(secLeft + '秒', ggx + 60, ggy - 10);
+      ctx.globalAlpha = 1;
+    }
     // ゼン: 氷ゲージ
     if (gp.charIdx === 0) {
       const r = (gp.zenIceGauge || 0) / 100;
@@ -15224,6 +15294,33 @@ function drawBattleHUD() {
       ctx.fillStyle = '#FF88CC';
       ctx.fillText(gp.poyoDoubleSlime > 0 ? 'DOUBLE SLIME!' : (r >= 0.5 ? 'COATING!' : 'SLIME ' + Math.floor(gp.poyoSlimeGauge || 0)), ggx + 40, ggy - 2 + wobble * 0.5);
     }
+  }
+
+  // === ゲージMAXエフェクト ===
+  if (gaugeMaxEffect.active) {
+    gaugeMaxEffect.timer--;
+    if (gaugeMaxEffect.timer <= 0) gaugeMaxEffect.active = false;
+    const gmt = 1 - gaugeMaxEffect.timer / 90;
+    // 画面端から光が走る
+    if (gmt < 0.3) {
+      ctx.globalAlpha = (0.3 - gmt) * 2;
+      ctx.fillStyle = gaugeMaxEffect.color;
+      const lw = 960 * gmt / 0.3;
+      ctx.fillRect(480 - lw / 2, 0, lw, 640);
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  // === ゲージ増減ポップアップ ===
+  for (let gpi = gaugePopups.length - 1; gpi >= 0; gpi--) {
+    const gp2 = gaugePopups[gpi];
+    gp2.life--; gp2.y -= 1;
+    if (gp2.life <= 0) { gaugePopups.splice(gpi, 1); continue; }
+    ctx.globalAlpha = Math.min(1, gp2.life / 10);
+    ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillStyle = gp2.color;
+    ctx.fillText(gp2.text, gp2.x, gp2.y);
+    ctx.globalAlpha = 1;
   }
 
   // === コンボカウンター表示 ===
