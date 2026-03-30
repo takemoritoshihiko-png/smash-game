@@ -5383,35 +5383,36 @@ let instantKillDisplay = { active: false, timer: 0, maxTimer: 0 };
 // === 復帰技データ（全28キャラ） ===
 // height: 上昇px, angle: 角度(度,-90=真上), frames: 持続F, dmg: ダメージ, color: エフェクト色, status: 状態異常
 const RECOVERY_MOVES = {
-  0:  { name:'氷柱昇天',     height:280, angle:-90, frames:20, dmg:8, color:'#88DDFF', status:'frozen' },
-  1:  { name:'大地跳躍',     height:200, angle:-90, frames:16, dmg:10, color:'#AA6622', status:null },
-  2:  { name:'光速昇撃',     height:380, angle:-45, frames:14, dmg:6, color:'#FFFFFF', status:null },
-  3:  { name:'炎上昇',       height:280, angle:-90, frames:18, dmg:7, color:'#FF6600', status:'burning' },
-  4:  { name:'天穿突き',     height:280, angle:-90, frames:18, dmg:9, color:'#44FFCC', status:null },
-  5:  { name:'獣跳び',       height:280, angle:-90, frames:16, dmg:8, color:'#4169E1', status:null },
-  6:  { name:'くまロケット', height:200, angle:-90, frames:20, dmg:6, color:'#FF6B6B', status:null },
-  7:  { name:'虹色上昇',     height:280, angle:-90, frames:18, dmg:5, color:'#FF66AA', status:'confused' },
-  8:  { name:'電磁射出',     height:380, angle:-50, frames:14, dmg:7, color:'#FFFF44', status:null },
-  9:  { name:'暗黒浮遊',     height:380, angle:-90, frames:30, dmg:4, color:'#9400D3', status:'cursed' },
-  10: { name:'龍翔',         height:200, angle:-90, frames:16, dmg:8, color:'#FFD700', status:null },
-  11: { name:'バリケードジャンプ', height:380, angle:-90, frames:4, dmg:6, color:'#66DDFF', status:null },
-  12: { name:'砲台反動',     height:200, angle:-60, frames:16, dmg:10, color:'#888888', status:null },
-  13: { name:'アッパーカット昇天', height:200, angle:-90, frames:14, dmg:10, color:'#FF4444', status:null },
-  14: { name:'毒霧跳躍',     height:280, angle:-90, frames:18, dmg:5, color:'#44CC44', status:'poisoned' },
-  15: { name:'羽ばたき急上昇', height:380, angle:-90, frames:22, dmg:4, color:'#EEEEFF', status:null },
-  16: { name:'時間跳躍',     height:380, angle:-90, frames:16, dmg:0, color:'#FFD700', status:null },
-  17: { name:'音速上昇',     height:280, angle:-90, frames:18, dmg:6, color:'#88FFFF', status:'stunned' },
-  18: { name:'出世エレベーター', height:200, angle:-90, frames:20, dmg:4, color:'#FF8844', status:null },
-  19: { name:'戦車砲上昇',   height:200, angle:-60, frames:16, dmg:10, color:'#CC66FF', status:null },
-  20: { name:'三体分離上昇', height:280, angle:-90, frames:18, dmg:6, color:'#44DDFF', status:null },
-  21: { name:'双頭噴射',     height:280, angle:-90, frames:18, dmg:7, color:'#FF6688', status:'burning' },
-  22: { name:'マネーローンチ', height:200, angle:-90, frames:16, dmg:5, color:'#FFD700', status:null },
-  23: { name:'飛び上がり回転蹴り', height:280, angle:-90, frames:16, dmg:9, color:'#FF0000', status:null },
-  24: { name:'恐怖浮遊',     height:380, angle:-90, frames:30, dmg:3, color:'#800080', status:null },
-  25: { name:'カオス跳躍',   height:150+Math.floor(Math.random()*230), angle:-90+Math.floor(Math.random()*50-25), frames:16, dmg:6, color:'#FF1493', status:null },
-  26: { name:'スライムバウンド', height:280, angle:-90, frames:16, dmg:6, color:'#FFB6C1', status:null },
-  27: { name:'重力反転',     height:380, angle:-90, frames:20, dmg:5, color:'#4B0082', status:null },
-  28: { name:'羽虫大群昇',   height:280, angle:-90, frames:18, dmg:5, color:'#228B22', status:'poisoned' },
+  // ダメ×0.4、高さ×0.65(超重量級除く)、角度を-80〜-90に統一
+  0:  { name:'氷柱昇天',     height:182, angle:-85, frames:20, dmg:3, color:'#88DDFF', status:'frozen' },
+  1:  { name:'大地跳躍',     height:200, angle:-90, frames:16, dmg:4, color:'#AA6622', status:null }, // 超重量級そのまま
+  2:  { name:'光速昇撃',     height:247, angle:-80, frames:14, dmg:2, color:'#FFFFFF', status:null },
+  3:  { name:'炎上昇',       height:182, angle:-85, frames:18, dmg:3, color:'#FF6600', status:'burning' },
+  4:  { name:'天穿突き',     height:182, angle:-85, frames:18, dmg:4, color:'#44FFCC', status:null },
+  5:  { name:'獣跳び',       height:280, angle:-90, frames:16, dmg:3, color:'#4169E1', status:null }, // 超重量級そのまま
+  6:  { name:'くまロケット', height:130, angle:-90, frames:20, dmg:2, color:'#FF6B6B', status:null },
+  7:  { name:'虹色上昇',     height:182, angle:-85, frames:18, dmg:2, color:'#FF66AA', status:'confused' },
+  8:  { name:'電磁射出',     height:247, angle:-80, frames:14, dmg:3, color:'#FFFF44', status:null },
+  9:  { name:'暗黒浮遊',     height:247, angle:-90, frames:30, dmg:2, color:'#9400D3', status:'cursed' },
+  10: { name:'龍翔',         height:130, angle:-85, frames:16, dmg:3, color:'#FFD700', status:null },
+  11: { name:'バリケードジャンプ', height:247, angle:-90, frames:4, dmg:2, color:'#66DDFF', status:null },
+  12: { name:'砲台反動',     height:200, angle:-80, frames:16, dmg:4, color:'#888888', status:null }, // 超重量級そのまま
+  13: { name:'アッパーカット昇天', height:130, angle:-90, frames:14, dmg:4, color:'#FF4444', status:null },
+  14: { name:'毒霧跳躍',     height:182, angle:-85, frames:18, dmg:2, color:'#44CC44', status:'poisoned' },
+  15: { name:'羽ばたき急上昇', height:247, angle:-90, frames:22, dmg:2, color:'#EEEEFF', status:null },
+  16: { name:'時間跳躍',     height:247, angle:-90, frames:16, dmg:0, color:'#FFD700', status:null },
+  17: { name:'音速上昇',     height:182, angle:-85, frames:18, dmg:2, color:'#88FFFF', status:'stunned' },
+  18: { name:'出世エレベーター', height:130, angle:-90, frames:20, dmg:2, color:'#FF8844', status:null },
+  19: { name:'戦車砲上昇',   height:200, angle:-80, frames:16, dmg:4, color:'#CC66FF', status:null }, // 超重量級そのまま
+  20: { name:'三体分離上昇', height:182, angle:-85, frames:18, dmg:2, color:'#44DDFF', status:null },
+  21: { name:'双頭噴射',     height:182, angle:-85, frames:18, dmg:3, color:'#FF6688', status:'burning' },
+  22: { name:'マネーローンチ', height:130, angle:-85, frames:16, dmg:2, color:'#FFD700', status:null },
+  23: { name:'飛び上がり回転蹴り', height:182, angle:-85, frames:16, dmg:4, color:'#FF0000', status:null },
+  24: { name:'恐怖浮遊',     height:247, angle:-90, frames:30, dmg:1, color:'#800080', status:null },
+  25: { name:'カオス跳躍',   height:100+Math.floor(Math.random()*150), angle:-85, frames:16, dmg:2, color:'#FF1493', status:null },
+  26: { name:'スライムバウンド', height:182, angle:-90, frames:16, dmg:2, color:'#FFB6C1', status:null },
+  27: { name:'重力反転',     height:247, angle:-90, frames:20, dmg:2, color:'#4B0082', status:null },
+  28: { name:'羽虫大群昇',   height:182, angle:-85, frames:18, dmg:2, color:'#228B22', status:'poisoned' },
 };
 // ゲージMAXエフェクト
 let gaugeMaxEffect = { active: false, timer: 0, playerId: -1, color: '#FFD700', text: '' };
@@ -10815,7 +10816,7 @@ function updateBattle(dt) {
           if (t.id === p.id || !t.alive || t.invincibleTimer > 0) continue;
           const th = getPlayerHitbox(t);
           if (hitboxCollides(rHb.x, rHb.y, rHb.w, rHb.h, th.x, th.y, th.w, th.h)) {
-            applyHit(p, t, rec2.dmg, 4, 0.06, -60, 'special');
+            applyHit(p, t, rec2.dmg, 3, 0.04, -85, 'special'); // KB小さめ・真上方向
             showHitDisplay(t.x, t.y, true);
             // 状態異常付与
             if (rec2.status === 'frozen') t.frozen = Math.max(t.frozen, 60);
