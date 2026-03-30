@@ -5386,6 +5386,21 @@ let gaugePopups = []; // {x, y, text, life, color}
 function addGaugePopup(x, y, amount, color) {
   gaugePopups.push({ x: x, y: y - 60, text: (amount > 0 ? '+' : '') + amount, life: 30, maxLife: 30, color: color || '#FFD700' });
 }
+// キャラ別強化モードグローカラー
+const POWER_GLOW = {0:'#00BFFF',1:'#8B4513',2:'#FFFFFF',3:'#FF4500',4:'#00CED1',5:'#4169E1',6:'#FF4400',7:'#FF69B4',8:'#FFFF00',9:'#9400D3',10:'#FF8C00',11:'#66DDFF',12:'#808080',13:'#FF6600',14:'#00FF00',15:'#00FF7F',16:'#FFD700',17:'#7CFC00',18:'#FFD700',19:'#9400D3',20:'#DA70D6',21:'#FF6347',22:'#FFD700',23:'#FF0000',24:'#800080',25:'#FF1493',26:'#FFB6C1',27:'#4B0082',28:'#228B22'};
+// 強化モード名マップ
+const POWER_NAMES = {0:'氷結強化',1:'地震モード',2:'光速モード',3:'業火モード',4:'龍槍モード',5:'野性解放',6:'激怒モード',7:'覚醒モード',8:'過電圧',9:'最終審判',10:'龍モード',11:'テレポ',12:'FULL LOAD',13:'全力パンチ',14:'重毒',15:'AIR MASTER',16:'時間停止',17:'共鳴モード',18:'社長',19:'装甲',20:'三体合体',21:'爆炎融合',22:'億万長者',23:'テコンドーマスター',24:'悪夢',25:'カオス',26:'ダブルスライム',27:'重力崩壊',28:'大群'};
+const POWER_DESCS = {0:'凍結ダメ×1.5',1:'KB×1.4',2:'速度×2',3:'燃焼確率+60%',4:'リーチ1.5倍',5:'KB×1.5',6:'ダメ×1.5',7:'混乱確定',8:'感電確定',9:'ダメ×1.4',10:'ダメ×1.5',12:'威力2倍',13:'ダメ×1.5',14:'毒ダメ2倍',17:'画面端攻撃',21:'ダメ×1.5',22:'ダメ×1.5',23:'蹴りダメ×2',26:'全攻撃2回',27:'引力×3',28:'毒ダメ×3'};
+function getActivePowerMode(p) {
+  const timers = [
+    [p.kumaFuryMode,6],[p.saisokuLightSpeed,2],[p.uruoWildRelease,5],[p.bulletAwaken,7],
+    [p.shawdenOvercharge,8],[p.judgeFinalMode,9],[p.onpaResonance,17],[p.mrtwoDualBlast,21],
+    [p.kinkinGoldMode,22],[p.longDragonSpear,4],[p.pullCollapseMode,27],[p.satoruMasterMode,23],
+    [p.poyoDoubleSlime,26],[p.kingTimeStop,16],[p.meteoBurnGauge>=70?1:0,3],[p.donEarthGauge>=80?1:0,1],
+  ];
+  for (const [t, ci2] of timers) { if (t > 0) return { timer: t, charIdx: ci2 }; }
+  return null;
+}
 function triggerGaugeMaxEffect(p, text, color) {
   gaugeMaxEffect = { active: true, timer: 90, playerId: p.id, color: color, text: text };
   hitEffects.push({ x: p.x, y: p.y - 35, life: 20, maxLife: 20, color: color, size: 80, type: 'ring' });
@@ -7906,10 +7921,18 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   // ミスターツー爆炎融合: ダメ×1.5
   if (aci4 === 21 && attacker.mrtwoDualBlast > 0) target.damage = Math.min(999, target.damage + finalDamage * 0.5);
 
-  // ゲージ増減ポップアップ（攻撃側の固有ゲージ+Nを表示）
+  // ゲージ増減ポップアップ
   if (attacker.id !== undefined && attacker.x) {
     const ch7 = characters[attacker.charIdx];
     if (ch7) addGaugePopup(attacker.x, attacker.y, '+', ch7.accent);
+  }
+  // 強化モード中のヒットエフェクト強化（サイズ2倍・テーマカラー）
+  if (attacker.id !== undefined) {
+    const _apm = getActivePowerMode(attacker);
+    if (_apm) {
+      const gc3 = POWER_GLOW[attacker.charIdx] || '#FFD700';
+      hitEffects.push({ x: target.x, y: target.y - 35, life: 18, maxLife: 18, color: gc3, size: 50, type: 'ring' });
+    }
   }
 
   // === 固有ダメージ倍率（ゼン凍結×1.5、ジャッジ呪縛×1.5、波おじ全力×1.5） ===
@@ -12739,6 +12762,15 @@ function drawBattle(dt) {
     // 描画補間: renderX/renderYを使用（物理位置を一時退避）
     const _physX = p.x, _physY = p.y;
     if (p.renderX !== undefined) { p.x = p.renderX; p.y = p.renderY; }
+    // 強化モード中: グロー + サイズ×1.1
+    const _pm = getActivePowerMode(p);
+    if (_pm) {
+      const gc = POWER_GLOW[p.charIdx] || '#FFD700';
+      ctx.shadowColor = gc; ctx.shadowBlur = 20;
+      ctx.translate(p.x, p.y - 55);
+      ctx.scale(1.1, 1.1);
+      ctx.translate(-p.x, -(p.y - 55));
+    }
     ctx.save();
 
     // Catbus(11): 瞬間消滅中は半透明
@@ -13094,6 +13126,8 @@ function drawBattle(dt) {
     ctx.lineTo(p.x - 6, arrowY - 4);
     ctx.lineTo(p.x + 6, arrowY - 4);
     ctx.closePath(); ctx.fill();
+    // 強化モードグロー解除
+    if (_pm) { ctx.shadowBlur = 0; }
     // 描画補間: 物理位置を復元
     p.x = _physX; p.y = _physY;
   }
@@ -15293,6 +15327,29 @@ function drawBattleHUD() {
       ctx.fillRect(ggx, ggy + wobble * 0.3, 80 * r, 5);
       ctx.fillStyle = '#FF88CC';
       ctx.fillText(gp.poyoDoubleSlime > 0 ? 'DOUBLE SLIME!' : (r >= 0.5 ? 'COATING!' : 'SLIME ' + Math.floor(gp.poyoSlimeGauge || 0)), ggx + 40, ggy - 2 + wobble * 0.5);
+    }
+  }
+
+  // === 強化モードバナー ===
+  for (const bp of players) {
+    if (!bp || !bp.alive) continue;
+    const bpm = getActivePowerMode(bp);
+    if (bpm && bpm.timer > 0) {
+      const sec = Math.ceil(bpm.timer / 60);
+      const gc2 = POWER_GLOW[bp.charIdx] || '#FFD700';
+      const mName = POWER_NAMES[bp.charIdx] || '強化中';
+      const mDesc = POWER_DESCS[bp.charIdx] || '';
+      const bx = bp.id === 0 ? 180 : 780;
+      // 半透明帯
+      ctx.globalAlpha = sec <= 3 && battleTime % 10 < 5 ? 0.4 : 0.7; // 3秒前点滅
+      ctx.fillStyle = 'rgba(0,0,0,0.6)';
+      roundRect(ctx, bx - 120, 60, 240, 24, 6); ctx.fill();
+      ctx.strokeStyle = gc2; ctx.lineWidth = 1.5;
+      roundRect(ctx, bx - 120, 60, 240, 24, 6); ctx.stroke();
+      ctx.globalAlpha = 1;
+      ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillStyle = gc2;
+      ctx.fillText('💥 ' + mName + (mDesc ? ' ' + mDesc : '') + '  ▶ ' + sec + '秒', bx, 77);
     }
   }
 
