@@ -12840,36 +12840,44 @@ function drawBattle(dt) {
 
   // Screen shake
   updateScreenShake();
+
+  // ① canvas全体を背景色で塗りつぶし（黒い隙間防止）
+  const curStage = stages[selectedStage];
+  if (curStage.id === 'mahoujin') {
+    ctx.fillStyle = '#0a0518';
+  } else if (curStage.id === 'seijaku') {
+    ctx.fillStyle = '#0a0a1a';
+  } else {
+    ctx.fillStyle = '#87CEEB';
+  }
+  ctx.fillRect(0, 0, 960, 640);
+
   ctx.save();
   if (screenShake.duration > 0) {
     ctx.translate(screenShake.x, screenShake.y);
   }
 
-  // ===== 背景画像 =====
-  const curStage = stages[selectedStage];
+  // ② 背景画像（余白込みで少し大きめに描画して隙間を完全カバー）
+  const bgMargin = 40; // シェイク+カメラ移動の余白
   if (curStage.id === 'mahoujin') {
-    ctx.drawImage(bg3Img, 0, 0, 960, 640);
+    ctx.drawImage(bg3Img, -bgMargin, -bgMargin, 960 + bgMargin * 2, 640 + bgMargin * 2);
   } else if (curStage.id === 'seijaku') {
-    ctx.drawImage(bg2Img, 0, 0, 960, 640);
+    ctx.drawImage(bg2Img, -bgMargin, -bgMargin, 960 + bgMargin * 2, 640 + bgMargin * 2);
   } else {
     if (bgImg.complete && bgImg.naturalWidth > 0) {
-      ctx.drawImage(bgImg, 0, 0, 960, 640);
-    } else {
-      ctx.fillStyle = '#87CEEB';
-      ctx.fillRect(0, 0, 960, 640);
+      ctx.drawImage(bgImg, -bgMargin, -bgMargin, 960 + bgMargin * 2, 640 + bgMargin * 2);
     }
   }
 
-  // === 背景に奥行きグラデーション ===
+  // ③ 背景に奥行きグラデーション（余白込み）
   {
-    // 上部（奥）: 暗め
-    const depthGrad = ctx.createLinearGradient(0, 0, 0, 640);
+    const depthGrad = ctx.createLinearGradient(0, -bgMargin, 0, 640 + bgMargin);
     depthGrad.addColorStop(0, 'rgba(0,0,0,0.3)');
     depthGrad.addColorStop(0.45, 'rgba(0,0,0,0)');
     depthGrad.addColorStop(0.7, 'rgba(0,0,0,0)');
     depthGrad.addColorStop(1, 'rgba(255,255,255,0.05)');
     ctx.fillStyle = depthGrad;
-    ctx.fillRect(0, 0, 960, 640);
+    ctx.fillRect(-bgMargin, -bgMargin, 960 + bgMargin * 2, 640 + bgMargin * 2);
   }
 
   // === Apply dynamic camera transform ===
