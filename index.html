@@ -5314,13 +5314,18 @@ function addComboHit(attackerId) {
   comboDisplay[attackerId].count++;
   comboDisplay[attackerId].timer = 90; // 1.5秒で消える
   comboDisplay[attackerId].maxTimer = 90;
+  // 観客リアクション
+  playAudienceCheer(comboDisplay[attackerId].count);
 }
 function resetCombo(attackerId) {
+  const droppedCount = comboDisplay[attackerId] ? comboDisplay[attackerId].count : 0;
   if (comboDisplay[attackerId] && comboDisplay[attackerId].count >= 2) {
     // コンボ終了表示
     cmdNameDisplay.push({ text: comboDisplay[attackerId].count + ' HIT COMBO!', x: 480, y: 200, life: 60, maxLife: 60, color: '#FFD700' });
   }
   comboDisplay[attackerId] = null;
+  // 観客の残念リアクション
+  playAudienceComboDropped(droppedCount);
 }
 
 // ========== 戦績システム ==========
@@ -5643,204 +5648,110 @@ function playHitSound(type) {
   try {
     const ac = getAudioCtx();
     const now = ac.currentTime;
-    // ヘルパー: ノイズバッファ生成
-    function mkNoiseBuf(dur, vol) {
-      const buf = ac.createBuffer(1, ac.sampleRate * dur, ac.sampleRate);
-      const d = buf.getChannelData(0);
-      for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * vol;
-      const src = ac.createBufferSource(); src.buffer = buf;
-      const ng = ac.createGain(); ng.gain.setValueAtTime(vol, now);
-      ng.gain.exponentialRampToValueAtTime(0.001, now + dur);
-      src.connect(ng); ng.connect(ac.destination);
-      return { src, g: ng };
+    // ヘルパー: オシレーター+ゲイン生成 → dest接続
+    function mkOsc(waveType, f0, f1, dur, vol, dest) {
+      const o = ac.createOscillator(); const g = ac.createGain();
+      o.type = waveType; o.frequency.setValueAtTime(f0, now); o.frequency.exponentialRampToValueAtTime(Math.max(1,f1), now + dur);
+      g.gain.setValueAtTime(vol, now); g.gain.exponentialRampToValueAtTime(0.001, now + dur);
+      o.connect(g); g.connect(dest); o.start(now); o.stop(now + dur);
     }
+    // ヘルパー: ノイズ → dest接続
+    function mkNoise(dur, vol, dest) {
+      const buf = ac.createBuffer(1, Math.floor(ac.sampleRate * dur), ac.sampleRate);
+      const d = buf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = (Math.random()*2-1);
+      const src = ac.createBufferSource(); src.buffer = buf;
+      const g = ac.createGain(); g.gain.setValueAtTime(vol, now); g.gain.exponentialRampToValueAtTime(0.001, now + dur);
+      src.connect(g); g.connect(dest); src.start(now); src.stop(now + dur);
+    }
+    // マスター出力
+    const master = ac.createGain(); master.gain.value = 0.8; master.connect(ac.destination);
 
     if (type === 'normal') {
-      // 弱攻撃: 低音「ドッ」+ 高音「パッ」
-      const o = ac.createOscillator(); const g = ac.createGain();
-      o.type = 'sine';
-      o.frequency.setValueAtTime(180, now);
-      o.frequency.exponentialRampToValueAtTime(80, now + 0.08);
-      g.gain.setValueAtTime(0.5, now);
-      g.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-      o.connect(g); g.connect(ac.destination);
-      o.start(now); o.stop(now + 0.12);
-      // 高音「パッ」
-      const o2 = ac.createOscillator(); const g2 = ac.createGain();
-      o2.type = 'sine'; o2.frequency.setValueAtTime(800, now); o2.frequency.exponentialRampToValueAtTime(400, now + 0.05);
-      g2.gain.setValueAtTime(0.3, now); g2.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
-      o2.connect(g2); g2.connect(ac.destination); o2.start(now); o2.stop(now + 0.05);
+      // 弱攻撃「ポカッ」3層
+      mkOsc('sine', 200, 60, 0.1, 0.9, master);       // 衝撃
+      mkOsc('triangle', 1000, 500, 0.08, 0.4, master); // 明るさ
+      mkOsc('sine', 400, 200, 0.15, 0.2, master);      // 残響
 
     } else if (type === 'strong') {
-      // 強攻撃: 重い「ドォン」+ ノイズ
-      const o = ac.createOscillator(); const g = ac.createGain();
-      o.type = 'sine';
-      o.frequency.setValueAtTime(120, now);
-      o.frequency.exponentialRampToValueAtTime(50, now + 0.15);
-      g.gain.setValueAtTime(0.8, now);
-      g.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
-      o.connect(g); g.connect(ac.destination);
-      o.start(now); o.stop(now + 0.2);
-      // ノイズ衝撃
-      const ns = mkNoiseBuf(0.08, 0.15);
-      ns.src.start(now); ns.src.stop(now + 0.08);
+      // 強攻撃「バコッ」3層+コンプ
+      const comp = ac.createDynamicsCompressor();
+      comp.threshold.value = -6; comp.ratio.value = 4; comp.connect(master);
+      mkOsc('sine', 150, 40, 0.2, 1.0, comp);     // 重い衝撃
+      mkOsc('square', 600, 200, 0.1, 0.5, comp);   // パンチ感
+      mkNoise(0.12, 0.25, comp);                     // 空気感
 
     } else if (type === 'special') {
-      // スマッシュ: 「ドゴォン！」低音+中音+ノイズ
-      const o = ac.createOscillator(); const g = ac.createGain();
-      o.type = 'sine'; o.frequency.setValueAtTime(80, now); o.frequency.exponentialRampToValueAtTime(30, now + 0.25);
-      g.gain.setValueAtTime(1.0, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
-      o.connect(g); g.connect(ac.destination); o.start(now); o.stop(now + 0.25);
-      // 中音
-      const o2 = ac.createOscillator(); const g2 = ac.createGain();
-      o2.type = 'sine'; o2.frequency.setValueAtTime(300, now); o2.frequency.exponentialRampToValueAtTime(100, now + 0.15);
-      g2.gain.setValueAtTime(0.5, now); g2.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
-      o2.connect(g2); g2.connect(ac.destination); o2.start(now); o2.stop(now + 0.15);
-      // ノイズ
-      const ns = mkNoiseBuf(0.15, 0.3); ns.src.start(now); ns.src.stop(now + 0.15);
+      // スマッシュ「ドゴォン!!!」4層+コンプ
+      const comp = ac.createDynamicsCompressor();
+      comp.threshold.value = -3; comp.ratio.value = 8; comp.attack.value = 0.001; comp.connect(master);
+      const sm = ac.createGain(); sm.gain.value = 1.4; sm.connect(comp); // マスター1.4倍
+      mkOsc('sine', 100, 20, 0.4, 1.0, sm);       // 超低音
+      mkOsc('sawtooth', 400, 80, 0.25, 0.7, sm);  // 破壊感
+      mkNoise(0.2, 0.4, sm);                        // 爆発ノイズ
+      mkOsc('triangle', 2000, 800, 0.15, 0.3, sm); // 金属音
 
     } else if (type === 'cmd') {
-      // ④ Even flashier explosion for command attacks
-      // Deep boom
-      const o = ac.createOscillator(); const g = ac.createGain();
-      o.type = 'sawtooth';
-      o.frequency.setValueAtTime(250, now);
-      o.frequency.exponentialRampToValueAtTime(35, now + 0.3);
-      g.gain.setValueAtTime(0.25, now);
-      g.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
-      o.connect(g); g.connect(ac.destination);
-      o.start(now); o.stop(now + 0.4);
-      // Rising shimmer
-      const o2 = ac.createOscillator(); const g2 = ac.createGain();
-      o2.type = 'sine';
-      o2.frequency.setValueAtTime(400, now);
-      o2.frequency.exponentialRampToValueAtTime(1800, now + 0.1);
-      o2.frequency.exponentialRampToValueAtTime(500, now + 0.3);
-      g2.gain.setValueAtTime(0.15, now);
-      g2.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-      o2.connect(g2); g2.connect(ac.destination);
-      o2.start(now); o2.stop(now + 0.35);
-      // Sub bass
-      const o3 = ac.createOscillator(); const g3 = ac.createGain();
-      o3.type = 'sine';
-      o3.frequency.setValueAtTime(60, now);
-      o3.frequency.exponentialRampToValueAtTime(25, now + 0.35);
-      g3.gain.setValueAtTime(0.2, now);
-      g3.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
-      o3.connect(g3); g3.connect(ac.destination);
-      o3.start(now); o3.stop(now + 0.4);
-      // Long noise
-      const n = makeNoise(ac, 0.15, 0.22);
-      n.src.start(now); n.src.stop(now + 0.15);
+      // 必殺技「ズドォォン!!!」スマッシュ×1.3+宇宙感
+      const comp = ac.createDynamicsCompressor();
+      comp.threshold.value = -3; comp.ratio.value = 8; comp.attack.value = 0.001; comp.connect(master);
+      const sm = ac.createGain(); sm.gain.value = 1.5; sm.connect(comp);
+      mkOsc('sine', 100, 20, 0.6, 1.0, sm);
+      mkOsc('sawtooth', 400, 80, 0.375, 0.7, sm);
+      mkNoise(0.3, 0.4, sm);
+      mkOsc('triangle', 2000, 800, 0.225, 0.3, sm);
+      mkOsc('sine', 800, 200, 0.5, 0.4, sm);       // 宇宙感
 
     } else if (type === 'guard') {
-      // ガード: 「キンッ」金属音
-      const o = ac.createOscillator(); const g = ac.createGain();
-      o.type = 'square'; o.frequency.setValueAtTime(1200, now); o.frequency.exponentialRampToValueAtTime(800, now + 0.1);
-      g.gain.setValueAtTime(0.5, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
-      o.connect(g); g.connect(ac.destination); o.start(now); o.stop(now + 0.1);
-      // リバーブ感
-      const o2 = ac.createOscillator(); const g2 = ac.createGain();
-      o2.type = 'sine';
-      o2.frequency.setValueAtTime(2200, now);
-      o2.frequency.exponentialRampToValueAtTime(1800, now + 0.08);
-      g2.gain.setValueAtTime(0.08, now);
-      g2.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
-      o2.connect(g2); g2.connect(ac.destination);
-      o2.start(now); o2.stop(now + 0.1);
-      // Short noise
-      const n = makeNoise(ac, 0.02, 0.1);
-      n.src.start(now); n.src.stop(now + 0.02);
+      // ガード「キンッ」金属3層
+      mkOsc('square', 1200, 800, 0.1, 0.5, master);
+      mkOsc('sine', 2200, 1800, 0.08, 0.3, master);
+      mkNoise(0.03, 0.1, master);
 
     } else if (type === 'guardBreak') {
-      // Glass shatter
-      const o = ac.createOscillator(); const g = ac.createGain();
-      o.type = 'sawtooth';
-      o.frequency.setValueAtTime(1500, now);
-      o.frequency.exponentialRampToValueAtTime(80, now + 0.3);
-      g.gain.setValueAtTime(0.22, now);
-      g.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
-      o.connect(g); g.connect(ac.destination);
-      o.start(now); o.stop(now + 0.4);
-      // Shatter noise
-      const n = makeNoise(ac, 0.15, 0.25);
-      n.src.start(now); n.src.stop(now + 0.15);
+      // ガードブレイク「ガシャーン！」3層+コンプ
+      const comp = ac.createDynamicsCompressor();
+      comp.threshold.value = -6; comp.ratio.value = 6; comp.connect(master);
+      mkOsc('sawtooth', 1500, 80, 0.3, 0.7, comp);    // ガラス割れ下降
+      mkOsc('square', 2000, 400, 0.15, 0.4, comp);     // 高音の割れ
+      mkNoise(0.2, 0.5, comp);                           // シャター破片
 
     } else if (type === 'justGuard') {
-      // Perfect parry - bright metallic ping
-      const o = ac.createOscillator(); const g = ac.createGain();
-      o.type = 'sine';
-      o.frequency.setValueAtTime(1800, now);
-      o.frequency.exponentialRampToValueAtTime(2400, now + 0.04);
-      o.frequency.exponentialRampToValueAtTime(1500, now + 0.15);
-      g.gain.setValueAtTime(0.16, now);
-      g.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
-      o.connect(g); g.connect(ac.destination);
-      o.start(now); o.stop(now + 0.2);
-      // High ring
-      const o2 = ac.createOscillator(); const g2 = ac.createGain();
-      o2.type = 'sine';
-      o2.frequency.setValueAtTime(3000, now);
-      g2.gain.setValueAtTime(0.06, now);
-      g2.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-      o2.connect(g2); g2.connect(ac.destination);
-      o2.start(now); o2.stop(now + 0.12);
+      // ジャストガード「キィン！」3層 - 金属的で爽快
+      mkOsc('sine', 1800, 2400, 0.08, 0.5, master);     // 上昇金属音
+      mkOsc('sine', 3000, 2500, 0.12, 0.25, master);    // 高音リング
+      mkOsc('triangle', 1200, 1800, 0.06, 0.3, master); // 明るさ補強
 
     } else if (type === 'ko') {
-      // 撃墜: 「シュゴォン」爽快音 + キラキラ
-      const o = ac.createOscillator(); const g = ac.createGain();
-      o.type = 'sine'; o.frequency.setValueAtTime(400, now); o.frequency.exponentialRampToValueAtTime(50, now + 0.5);
-      g.gain.setValueAtTime(1.0, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
-      o.connect(g); g.connect(ac.destination); o.start(now); o.stop(now + 0.5);
-      // キラキラ高音
-      const o2 = ac.createOscillator(); const g2 = ac.createGain();
-      o2.type = 'sine'; o2.frequency.setValueAtTime(2000, now); o2.frequency.exponentialRampToValueAtTime(800, now + 0.3);
-      g2.gain.setValueAtTime(0.4, now); g2.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-      o2.connect(g2); g2.connect(ac.destination); o2.start(now); o2.stop(now + 0.3);
-      // ノイズ
-      const ns = mkNoiseBuf(0.15, 0.2); ns.src.start(now); ns.src.stop(now + 0.15);
+      // 撃墜「ズゴォォン！！」4層+コンプ - 最大級の爽快感
+      const comp = ac.createDynamicsCompressor();
+      comp.threshold.value = -3; comp.ratio.value = 8; comp.attack.value = 0.001; comp.connect(master);
+      const sm = ac.createGain(); sm.gain.value = 1.5; sm.connect(comp);
+      mkOsc('sine', 400, 50, 0.5, 1.0, sm);            // 重低音ドーン
+      mkOsc('sine', 2000, 800, 0.3, 0.5, sm);           // キラキラ高音
+      mkNoise(0.2, 0.35, sm);                            // 爆発ノイズ
+      mkOsc('triangle', 1200, 600, 0.4, 0.3, sm);       // 残響
 
     } else if (type === 'jump') {
-      // ⑤ Light bounce - ぴょん
-      const o = ac.createOscillator(); const g = ac.createGain();
-      o.type = 'sine';
-      o.frequency.setValueAtTime(350, now);
-      o.frequency.exponentialRampToValueAtTime(700, now + 0.06);
-      o.frequency.exponentialRampToValueAtTime(500, now + 0.1);
-      g.gain.setValueAtTime(0.1, now);
-      g.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-      o.connect(g); g.connect(ac.destination);
-      o.start(now); o.stop(now + 0.12);
+      // ジャンプ「ぴょん」2層 - 軽快
+      mkOsc('sine', 350, 700, 0.08, 0.12, master);      // 上昇音
+      mkOsc('triangle', 500, 900, 0.06, 0.06, master);  // 明るさ
 
     } else if (type === 'grab') {
-      const o = ac.createOscillator(); const g = ac.createGain();
-      o.type = 'square';
-      o.frequency.setValueAtTime(250, now);
-      o.frequency.exponentialRampToValueAtTime(180, now + 0.05);
-      g.gain.setValueAtTime(0.1, now);
-      g.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
-      o.connect(g); g.connect(ac.destination);
-      o.start(now); o.stop(now + 0.07);
+      // 掴み「ガシッ」3層
+      mkOsc('square', 250, 180, 0.05, 0.15, master);    // 掴む感触
+      mkOsc('sine', 400, 300, 0.04, 0.08, master);      // 肉感
+      mkNoise(0.03, 0.06, master);                        // 摩擦音
 
     } else if (type === 'throw') {
-      const o = ac.createOscillator(); const g = ac.createGain();
-      o.type = 'sawtooth';
-      o.frequency.setValueAtTime(300, now);
-      o.frequency.exponentialRampToValueAtTime(100, now + 0.12);
-      g.gain.setValueAtTime(0.18, now);
-      g.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
-      o.connect(g); g.connect(ac.destination);
-      o.start(now); o.stop(now + 0.15);
+      // 投げ「ブォン！」3層
+      mkOsc('sawtooth', 300, 100, 0.12, 0.25, master);  // 風切り
+      mkOsc('sine', 200, 80, 0.15, 0.15, master);       // 重さ
+      mkNoise(0.08, 0.1, master);                         // 空気感
+
     } else if (type === 'miss') {
-      // Whiff sound - airy swoosh
-      const o = ac.createOscillator(); const g = ac.createGain();
-      o.type = 'sine';
-      o.frequency.setValueAtTime(250, now);
-      o.frequency.exponentialRampToValueAtTime(120, now + 0.06);
-      g.gain.setValueAtTime(0.04, now);
-      g.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
-      o.connect(g); g.connect(ac.destination);
-      o.start(now); o.stop(now + 0.08);
+      // 空振り「ヒュッ」2層 - 軽い風切り
+      mkOsc('sine', 250, 120, 0.06, 0.06, master);      // 風切り
+      mkNoise(0.04, 0.03, master);                        // 空気
     }
   } catch (e) { /* ignore audio errors */ }
 }
@@ -5946,6 +5857,7 @@ function stopBGM() {
   currentBgmAudio.pause();
   currentBgmAudio.currentTime = 0;
   bgmPlaying = false;
+  stopAudienceBase();
 }
 
 let bgmFadeInterval = null;
@@ -6022,6 +5934,312 @@ function playKOSE() {
     // Noise burst
     const n = makeNoise(ac, 0.2, 0.18);
     n.src.start(now); n.src.stop(now + 0.2);
+  } catch(e) {}
+}
+
+// ============ 観客音響システム ============
+let audienceBaseSource = null;
+let audienceBaseGain = null;
+let audienceBaseFilter = null;
+let audienceActive = false;
+let audienceLastCombo = [0, 0]; // 前フレームのコンボ数を記録
+let audienceCountdownStarted = false;
+
+function startAudienceBase() {
+  try {
+    const ac = getAudioCtx();
+    if (audienceActive) return;
+    const bufferSize = 2 * ac.sampleRate;
+    const buffer = ac.createBuffer(1, bufferSize, ac.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+    audienceBaseSource = ac.createBufferSource();
+    audienceBaseSource.buffer = buffer;
+    audienceBaseSource.loop = true;
+    audienceBaseFilter = ac.createBiquadFilter();
+    audienceBaseFilter.type = 'lowpass';
+    audienceBaseFilter.frequency.value = 600;
+    audienceBaseGain = ac.createGain();
+    audienceBaseGain.gain.value = 0.05;
+    audienceBaseSource.connect(audienceBaseFilter);
+    audienceBaseFilter.connect(audienceBaseGain);
+    audienceBaseGain.connect(ac.destination);
+    audienceBaseSource.start();
+    audienceActive = true;
+    audienceCountdownStarted = false;
+  } catch(e) {}
+}
+
+function stopAudienceBase() {
+  try {
+    if (audienceBaseSource) { audienceBaseSource.stop(); audienceBaseSource.disconnect(); }
+  } catch(e) {}
+  audienceBaseSource = null; audienceBaseGain = null; audienceBaseFilter = null;
+  audienceActive = false; audienceCountdownStarted = false;
+}
+
+function setAudienceBaseLevel(gain) {
+  try {
+    if (audienceBaseGain) {
+      const ac = getAudioCtx();
+      audienceBaseGain.gain.cancelScheduledValues(ac.currentTime);
+      audienceBaseGain.gain.setTargetAtTime(Math.max(0.05, Math.min(0.35, gain)), ac.currentTime, 0.3);
+    }
+  } catch(e) {}
+}
+
+// 歓声バースト（コンボ数に応じた観客リアクション）
+function playAudienceCheer(comboCount) {
+  try {
+    const ac = getAudioCtx();
+    const now = ac.currentTime;
+    let gain, dur, filterFreq, baseLevel;
+
+    if (comboCount <= 1) return;
+    else if (comboCount === 2) {
+      gain = 0.15; dur = 0.3; filterFreq = 800; baseLevel = 0.07;
+    } else if (comboCount <= 4) {
+      gain = 0.25; dur = 0.5; filterFreq = 1000; baseLevel = 0.10;
+    } else if (comboCount <= 7) {
+      gain = 0.45; dur = 0.7; filterFreq = 1400; baseLevel = 0.15;
+    } else if (comboCount <= 11) {
+      gain = 0.65; dur = 1.0; filterFreq = 1800; baseLevel = 0.25;
+    } else {
+      gain = 0.85; dur = 1.5; filterFreq = 2200; baseLevel = 0.35;
+    }
+
+    // ノイズバースト（歓声本体）
+    const bufLen = Math.floor(ac.sampleRate * dur);
+    const buf = ac.createBuffer(1, bufLen, ac.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < bufLen; i++) d[i] = Math.random() * 2 - 1;
+    const src = ac.createBufferSource(); src.buffer = buf;
+    const flt = ac.createBiquadFilter(); flt.type = 'lowpass'; flt.frequency.value = filterFreq;
+    const g = ac.createGain();
+    g.gain.setValueAtTime(0.001, now);
+    g.gain.linearRampToValueAtTime(gain, now + 0.05); // 立ち上がり
+    g.gain.exponentialRampToValueAtTime(gain * 0.6, now + dur * 0.4);
+    g.gain.exponentialRampToValueAtTime(0.001, now + dur);
+    src.connect(flt); flt.connect(g); g.connect(ac.destination);
+    src.start(now); src.stop(now + dur);
+
+    // 5HIT以上: 高揚感のある音程上昇
+    if (comboCount >= 5) {
+      const o = ac.createOscillator(); const og = ac.createGain();
+      o.type = 'sine';
+      const baseF = 300 + Math.min(comboCount, 15) * 30;
+      o.frequency.setValueAtTime(baseF, now);
+      o.frequency.linearRampToValueAtTime(baseF * 1.5, now + dur * 0.6);
+      o.frequency.exponentialRampToValueAtTime(baseF, now + dur);
+      og.gain.setValueAtTime(0.001, now);
+      og.gain.linearRampToValueAtTime(gain * 0.2, now + 0.08);
+      og.gain.exponentialRampToValueAtTime(0.001, now + dur * 0.8);
+      o.connect(og); og.connect(ac.destination); o.start(now); o.stop(now + dur);
+    }
+
+    // 12HIT以上: 会場が揺れる低音
+    if (comboCount >= 12) {
+      const bo = ac.createOscillator(); const bg = ac.createGain();
+      bo.type = 'sine'; bo.frequency.value = 60;
+      bg.gain.setValueAtTime(0.001, now);
+      bg.gain.linearRampToValueAtTime(0.4, now + 0.1);
+      bg.gain.exponentialRampToValueAtTime(0.001, now + dur);
+      bo.connect(bg); bg.connect(ac.destination); bo.start(now); bo.stop(now + dur);
+    }
+
+    // ベース音量も上げる
+    setAudienceBaseLevel(baseLevel);
+  } catch(e) {}
+}
+
+// 撃墜歓声 + 拍手
+function playAudienceKO() {
+  try {
+    const ac = getAudioCtx();
+    const now = ac.currentTime;
+    // 歓声ノイズ
+    const bufLen = Math.floor(ac.sampleRate * 1.2);
+    const buf = ac.createBuffer(1, bufLen, ac.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < bufLen; i++) d[i] = Math.random() * 2 - 1;
+    const src = ac.createBufferSource(); src.buffer = buf;
+    const flt = ac.createBiquadFilter(); flt.type = 'lowpass'; flt.frequency.value = 1600;
+    const g = ac.createGain();
+    g.gain.setValueAtTime(0.001, now);
+    g.gain.linearRampToValueAtTime(0.7, now + 0.05);
+    g.gain.exponentialRampToValueAtTime(0.3, now + 0.5);
+    g.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+    src.connect(flt); flt.connect(g); g.connect(ac.destination);
+    src.start(now); src.stop(now + 1.2);
+    // 拍手: 高周波ノイズバースト×5
+    for (let i = 0; i < 5; i++) {
+      const cLen = Math.floor(ac.sampleRate * 0.06);
+      const cBuf = ac.createBuffer(1, cLen, ac.sampleRate);
+      const cd = cBuf.getChannelData(0);
+      for (let j = 0; j < cLen; j++) cd[j] = Math.random() * 2 - 1;
+      const cs = ac.createBufferSource(); cs.buffer = cBuf;
+      const cf = ac.createBiquadFilter(); cf.type = 'highpass'; cf.frequency.value = 3000;
+      const cg = ac.createGain();
+      const t = now + 0.3 + i * 0.1;
+      cg.gain.setValueAtTime(0.001, t);
+      cg.gain.linearRampToValueAtTime(0.35, t + 0.01);
+      cg.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
+      cs.connect(cf); cf.connect(cg); cg.connect(ac.destination);
+      cs.start(t); cs.stop(t + 0.06);
+    }
+    setAudienceBaseLevel(0.20);
+  } catch(e) {}
+}
+
+// 即死コンボ: 最大歓声 + 低音 + 長拍手
+function playAudienceInstantKill() {
+  try {
+    const ac = getAudioCtx();
+    const now = ac.currentTime;
+    // 最大歓声
+    const bufLen = Math.floor(ac.sampleRate * 2.0);
+    const buf = ac.createBuffer(1, bufLen, ac.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < bufLen; i++) d[i] = Math.random() * 2 - 1;
+    const src = ac.createBufferSource(); src.buffer = buf;
+    const flt = ac.createBiquadFilter(); flt.type = 'lowpass'; flt.frequency.value = 2200;
+    const g = ac.createGain();
+    g.gain.setValueAtTime(0.001, now);
+    g.gain.linearRampToValueAtTime(1.0, now + 0.06);
+    g.gain.exponentialRampToValueAtTime(0.5, now + 0.8);
+    g.gain.exponentialRampToValueAtTime(0.001, now + 2.0);
+    src.connect(flt); flt.connect(g); g.connect(ac.destination);
+    src.start(now); src.stop(now + 2.0);
+    // 会場が揺れる低音
+    const bo = ac.createOscillator(); const bg = ac.createGain();
+    bo.type = 'sine'; bo.frequency.value = 60;
+    bg.gain.setValueAtTime(0.001, now);
+    bg.gain.linearRampToValueAtTime(0.6, now + 0.1);
+    bg.gain.setTargetAtTime(0.3, now + 0.5, 0.5);
+    bg.gain.exponentialRampToValueAtTime(0.001, now + 2.0);
+    bo.connect(bg); bg.connect(ac.destination); bo.start(now); bo.stop(now + 2.0);
+    // 長い拍手（3秒間、0.1秒間隔=30回）
+    for (let i = 0; i < 30; i++) {
+      const cLen = Math.floor(ac.sampleRate * 0.06);
+      const cBuf = ac.createBuffer(1, cLen, ac.sampleRate);
+      const cd = cBuf.getChannelData(0);
+      for (let j = 0; j < cLen; j++) cd[j] = Math.random() * 2 - 1;
+      const cs = ac.createBufferSource(); cs.buffer = cBuf;
+      const cf = ac.createBiquadFilter(); cf.type = 'highpass'; cf.frequency.value = 3000;
+      const cg = ac.createGain();
+      const t = now + 0.5 + i * 0.1;
+      const vol = 0.4 - i * 0.01; // 徐々に小さく
+      cg.gain.setValueAtTime(0.001, t);
+      cg.gain.linearRampToValueAtTime(Math.max(0.05, vol), t + 0.01);
+      cg.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
+      cs.connect(cf); cf.connect(cg); cg.connect(ac.destination);
+      cs.start(t); cs.stop(t + 0.06);
+    }
+    setAudienceBaseLevel(0.35);
+  } catch(e) {}
+}
+
+// 必殺技発動: 期待の声
+function playAudienceSpecialMove() {
+  try {
+    const ac = getAudioCtx();
+    const now = ac.currentTime;
+    const bufLen = Math.floor(ac.sampleRate * 0.5);
+    const buf = ac.createBuffer(1, bufLen, ac.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < bufLen; i++) d[i] = Math.random() * 2 - 1;
+    const src = ac.createBufferSource(); src.buffer = buf;
+    const flt = ac.createBiquadFilter(); flt.type = 'lowpass'; flt.frequency.value = 1000;
+    const g = ac.createGain();
+    g.gain.setValueAtTime(0.001, now);
+    g.gain.linearRampToValueAtTime(0.3, now + 0.04);
+    g.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+    src.connect(flt); flt.connect(g); g.connect(ac.destination);
+    src.start(now); src.stop(now + 0.5);
+    // 上昇する音程（期待感）
+    const o = ac.createOscillator(); const og = ac.createGain();
+    o.type = 'sine'; o.frequency.setValueAtTime(400, now); o.frequency.linearRampToValueAtTime(600, now + 0.3);
+    og.gain.setValueAtTime(0.001, now); og.gain.linearRampToValueAtTime(0.12, now + 0.05);
+    og.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+    o.connect(og); og.connect(ac.destination); o.start(now); o.stop(now + 0.4);
+  } catch(e) {}
+}
+
+// ガードブレイク: 驚きの声
+function playAudienceGuardBreak() {
+  try {
+    const ac = getAudioCtx();
+    const now = ac.currentTime;
+    const bufLen = Math.floor(ac.sampleRate * 0.4);
+    const buf = ac.createBuffer(1, bufLen, ac.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < bufLen; i++) d[i] = Math.random() * 2 - 1;
+    const src = ac.createBufferSource(); src.buffer = buf;
+    const flt = ac.createBiquadFilter(); flt.type = 'bandpass'; flt.frequency.value = 1500; flt.Q.value = 1.5;
+    const g = ac.createGain();
+    g.gain.setValueAtTime(0.001, now);
+    g.gain.linearRampToValueAtTime(0.4, now + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+    src.connect(flt); flt.connect(g); g.connect(ac.destination);
+    src.start(now); src.stop(now + 0.4);
+  } catch(e) {}
+}
+
+// コンボが途切れた: 残念な声
+function playAudienceComboDropped(comboCount) {
+  if (comboCount < 3) return; // 2HIT以下は反応なし
+  try {
+    const ac = getAudioCtx();
+    const now = ac.currentTime;
+    const dur = 0.5;
+    // 下降するノイズ（あぁ〜）
+    const bufLen = Math.floor(ac.sampleRate * dur);
+    const buf = ac.createBuffer(1, bufLen, ac.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < bufLen; i++) d[i] = Math.random() * 2 - 1;
+    const src = ac.createBufferSource(); src.buffer = buf;
+    const flt = ac.createBiquadFilter(); flt.type = 'lowpass';
+    flt.frequency.setValueAtTime(1200, now);
+    flt.frequency.exponentialRampToValueAtTime(300, now + dur); // 周波数下降
+    const g = ac.createGain();
+    g.gain.setValueAtTime(0.001, now);
+    g.gain.linearRampToValueAtTime(0.2, now + 0.04);
+    g.gain.exponentialRampToValueAtTime(0.001, now + dur);
+    src.connect(flt); flt.connect(g); g.connect(ac.destination);
+    src.start(now); src.stop(now + dur);
+    // 下降音程
+    const o = ac.createOscillator(); const og = ac.createGain();
+    o.type = 'sine'; o.frequency.setValueAtTime(500, now); o.frequency.exponentialRampToValueAtTime(200, now + dur);
+    og.gain.setValueAtTime(0.001, now); og.gain.linearRampToValueAtTime(0.08, now + 0.03);
+    og.gain.exponentialRampToValueAtTime(0.001, now + dur * 0.7);
+    o.connect(og); og.connect(ac.destination); o.start(now); o.stop(now + dur);
+    // ベース音量を戻す
+    setAudienceBaseLevel(0.05);
+  } catch(e) {}
+}
+
+// 残り10秒カウントダウン手拍子
+function playAudienceCountdown() {
+  try {
+    const ac = getAudioCtx();
+    const now = ac.currentTime;
+    for (let i = 0; i < 10; i++) {
+      const cLen = Math.floor(ac.sampleRate * 0.08);
+      const cBuf = ac.createBuffer(1, cLen, ac.sampleRate);
+      const cd = cBuf.getChannelData(0);
+      for (let j = 0; j < cLen; j++) cd[j] = Math.random() * 2 - 1;
+      const cs = ac.createBufferSource(); cs.buffer = cBuf;
+      const cf = ac.createBiquadFilter(); cf.type = 'highpass'; cf.frequency.value = 2500;
+      const cg = ac.createGain();
+      const t = now + i * 0.5;
+      cg.gain.setValueAtTime(0.001, t);
+      cg.gain.linearRampToValueAtTime(0.3, t + 0.01);
+      cg.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+      cs.connect(cf); cf.connect(cg); cg.connect(ac.destination);
+      cs.start(t); cs.stop(t + 0.08);
+    }
+    // ベースも盛り上げる
+    setAudienceBaseLevel(0.20);
   } catch(e) {}
 }
 
@@ -7517,6 +7735,7 @@ function initBattle() {
     }
   }
   startBGM();
+  startAudienceBase();
 }
 
 // --- Knockback calculation ---
@@ -7608,6 +7827,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
           size: 2.5+Math.random()*3.5, gravity: 0.1, drag: 0.95 });
       }
       playHitSound('guardBreak');
+      playAudienceGuardBreak();
       triggerScreenShake(12, 25);
       // よろけアニメーション用
       target.spinAngle = (Math.random() - 0.5) * 0.3;
@@ -9507,6 +9727,12 @@ function updateBattle(dt) {
   battleFrameAcc++;
   if (battleFrameAcc >= 60) { battleFrameAcc = 0; if (battleTimer > 0) battleTimer--; }
 
+  // 残り10秒で観客カウントダウン手拍子
+  if (battleTimer === 10 && battleFrameAcc === 0 && !audienceCountdownStarted) {
+    audienceCountdownStarted = true;
+    playAudienceCountdown();
+  }
+
   if (battleTimer <= 0 && !gameOver) {
     gameOver = true;
     stopBGM();
@@ -11197,6 +11423,7 @@ function updateBattle(dt) {
         p.guardBreakStun = GUARD_BREAK_STUN;
         hitEffects.push({ x: p.x, y: p.y - 40, life: 25, maxLife: 25, color: '#FF6600', size: 60 });
         playHitSound('guardBreak');
+        playAudienceGuardBreak();
         triggerScreenShake(6, 15);
       }
 
@@ -12024,6 +12251,7 @@ function blastCheck(p) {
     }
     p.stocks--;
     playKOSE();
+    playAudienceKO();
     p.alive = false;
     p.damage = 0;
     p.guardBreakStun = 0;
@@ -12131,6 +12359,9 @@ function blastCheck(p) {
           bg.gain.setValueAtTime(0.25, now); bg.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
           bo.connect(bg); bg.connect(ac.destination); bo.start(now); bo.stop(now + 0.3);
         } catch(e) {}
+        playAudienceInstantKill();
+      } else {
+        playAudienceKO(); // 通常撃墜でも歓声
       }
       // 戦績記録
       if (!trainingMode) recordBattleResult(players[0].charIdx, players[1].charIdx, winner === 0);
@@ -16650,6 +16881,7 @@ function executeSmash(p) {
   }
   triggerScreenShake(2 + chargeRatio * 3, 6);
   playHitSound('cmd');
+  playAudienceSpecialMove();
 }
 
 // --- 崖つかまりシステム ---
