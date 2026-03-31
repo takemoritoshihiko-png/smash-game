@@ -12560,6 +12560,63 @@ function updateCamera() {
   cam.y = Math.max(viewMinY + halfH, Math.min(viewMaxY - halfH, cam.y));
 }
 
+// === 2.5D遠近感ヘルパー ===
+// Y座標（高さ）に基づく遠近スケール: 地上=1.0, 最高点=0.88
+function getDepthScale(y) {
+  const groundY = STAGE_GROUND_Y;
+  const maxHeight = 400; // 地上からの最大高さ想定
+  const heightRatio = Math.max(0, Math.min(1, (groundY - y) / maxHeight));
+  return 1.0 - heightRatio * 0.12; // 1.0 → 0.88
+}
+
+// キャラの影を描画
+function drawCharacterShadow(p) {
+  const groundY = STAGE_GROUND_Y;
+  const airHeight = Math.max(0, groundY - p.y);
+  const maxAirH = 350;
+  const t = Math.min(1, airHeight / maxAirH); // 0=地上, 1=最高
+
+  const shadowAlpha = 0.35 - t * 0.30; // 0.35 → 0.05
+  const shadowScale = 1.0 - t * 0.7;   // 1.0 → 0.3
+  if (shadowAlpha < 0.02) return;
+
+  const bodyScale = (characters[p.charIdx] && characters[p.charIdx].bodyScale) || 1.0;
+  const rx = 18 * shadowScale * bodyScale;
+  const ry = 5 * shadowScale;
+
+  ctx.save();
+  ctx.globalAlpha = shadowAlpha;
+  ctx.fillStyle = '#000000';
+  ctx.beginPath();
+  ctx.ellipse(p.x, groundY + 2, rx, ry, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+// 台形ステージ描画ヘルパー
+function drawTrapezoidStage(leftTop, rightTop, leftBot, rightBot, topY, botY, topGrad, sideColor) {
+  // 上面（台形）
+  ctx.fillStyle = topGrad;
+  ctx.beginPath();
+  ctx.moveTo(leftTop, topY);
+  ctx.lineTo(rightTop, topY);
+  ctx.lineTo(rightBot, botY);
+  ctx.lineTo(leftBot, botY);
+  ctx.closePath();
+  ctx.fill();
+
+  // 側面（厚み）
+  const sideH = 22;
+  ctx.fillStyle = sideColor;
+  ctx.beginPath();
+  ctx.moveTo(leftBot, botY);
+  ctx.lineTo(rightBot, botY);
+  ctx.lineTo(rightBot + 3, botY + sideH);
+  ctx.lineTo(leftBot - 3, botY + sideH);
+  ctx.closePath();
+  ctx.fill();
+}
+
 function drawBattle(dt) {
   // Update camera
   updateCamera();
@@ -12586,76 +12643,128 @@ function drawBattle(dt) {
     }
   }
 
+  // === 背景に奥行きグラデーション ===
+  {
+    // 上部（奥）: 暗め
+    const depthGrad = ctx.createLinearGradient(0, 0, 0, 640);
+    depthGrad.addColorStop(0, 'rgba(0,0,0,0.3)');
+    depthGrad.addColorStop(0.45, 'rgba(0,0,0,0)');
+    depthGrad.addColorStop(0.7, 'rgba(0,0,0,0)');
+    depthGrad.addColorStop(1, 'rgba(255,255,255,0.05)');
+    ctx.fillStyle = depthGrad;
+    ctx.fillRect(0, 0, 960, 640);
+  }
+
   // === Apply dynamic camera transform ===
   ctx.save();
   ctx.translate(960 / 2, 640 / 2);
   ctx.scale(cam.zoom, cam.zoom);
   ctx.translate(-cam.x, -cam.y);
 
-  // ===== ステージ足場 =====
+  // ===== ステージ足場 (2.5D台形) =====
   const stageW = STAGE_RIGHT - STAGE_LEFT;
   const stageH = 18;
   const stageY = STAGE_GROUND_Y;
+  // 2.5D台形パラメータ
+  const perspNear = 1.2;   // 手前の辺: ×1.2
+  const perspFar = 0.75;   // 奥の辺: ×0.75
+  const farYOffset = 35;   // 奥のY: 床より35px上
+  const stageCx = STAGE_LEFT + stageW / 2;
+  const nearHalfW = stageW * perspNear / 2;
+  const farHalfW = stageW * perspFar / 2;
+  const nearLeft = stageCx - nearHalfW;
+  const nearRight = stageCx + nearHalfW;
+  const farLeft = stageCx - farHalfW;
+  const farRight = stageCx + farHalfW;
 
   if (curStage.id === 'mahoujin') {
-    // 魔法陣の間: メインプラットフォーム（紫の魔法石床）
+    // 魔法陣の間: メインプラットフォーム（2.5D台形）
     ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
     ctx.beginPath();
-    ctx.ellipse(STAGE_LEFT + stageW / 2, stageY + 28, stageW * 0.42, 8, 0, 0, Math.PI * 2);
+    ctx.ellipse(stageCx, stageY + 28, nearHalfW * 0.75, 8, 0, 0, Math.PI * 2);
     ctx.fill();
-    const magicPlatGrad = ctx.createLinearGradient(0, stageY - 4, 0, stageY + stageH + 20);
-    magicPlatGrad.addColorStop(0, '#2a1a3a');
-    magicPlatGrad.addColorStop(0.4, '#1a0a2a');
-    magicPlatGrad.addColorStop(1, '#0d0518');
-    ctx.fillStyle = magicPlatGrad;
+    // 上面（台形・奥暗め→手前明るめ）
+    const magicTopGrad = ctx.createLinearGradient(0, stageY - farYOffset, 0, stageY);
+    magicTopGrad.addColorStop(0, '#0d0518'); // 奥（暗い）
+    magicTopGrad.addColorStop(1, '#2a1a3a'); // 手前（少し明るい）
+    ctx.fillStyle = magicTopGrad;
     ctx.beginPath();
-    ctx.moveTo(STAGE_LEFT, stageY);
-    ctx.lineTo(STAGE_RIGHT, stageY);
-    ctx.lineTo(STAGE_RIGHT + 8, stageY + stageH + 20);
-    ctx.lineTo(STAGE_LEFT - 8, stageY + stageH + 20);
+    ctx.moveTo(farLeft, stageY - farYOffset);
+    ctx.lineTo(farRight, stageY - farYOffset);
+    ctx.lineTo(nearRight, stageY);
+    ctx.lineTo(nearLeft, stageY);
     ctx.closePath();
     ctx.fill();
-    // 魔法陣ライン（上面）
+    // 側面（厚み）
+    const magicSideH = 22;
+    ctx.fillStyle = '#0d0518';
+    ctx.beginPath();
+    ctx.moveTo(nearLeft, stageY);
+    ctx.lineTo(nearRight, stageY);
+    ctx.lineTo(nearRight + 3, stageY + magicSideH);
+    ctx.lineTo(nearLeft - 3, stageY + magicSideH);
+    ctx.closePath();
+    ctx.fill();
+    // 魔法陣ライン（手前エッジ）
     ctx.shadowColor = '#AA77FF';
     ctx.shadowBlur = 6;
     ctx.strokeStyle = 'rgba(170, 120, 255, 0.5)';
     ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(STAGE_LEFT, stageY - 1); ctx.lineTo(STAGE_RIGHT, stageY - 1); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(nearLeft, stageY); ctx.lineTo(nearRight, stageY); ctx.stroke();
+    // 奥エッジライン
+    ctx.strokeStyle = 'rgba(170, 120, 255, 0.25)';
+    ctx.beginPath(); ctx.moveTo(farLeft, stageY - farYOffset); ctx.lineTo(farRight, stageY - farYOffset); ctx.stroke();
     ctx.shadowBlur = 0;
-    // 魔法の紋様ライン
-    ctx.strokeStyle = 'rgba(200, 170, 255, 0.2)';
+    // 魔法の紋様ライン（台形に沿って）
+    ctx.strokeStyle = 'rgba(200, 170, 255, 0.15)';
     ctx.lineWidth = 1;
-    for (let lx = STAGE_LEFT + 60; lx < STAGE_RIGHT; lx += 60) {
-      ctx.beginPath(); ctx.moveTo(lx, stageY - 3); ctx.lineTo(lx, stageY + 2); ctx.stroke();
+    for (let i = 1; i < 8; i++) {
+      const t = i / 8;
+      const lx1 = farLeft + (farRight - farLeft) * t;
+      const lx2 = nearLeft + (nearRight - nearLeft) * t;
+      ctx.beginPath(); ctx.moveTo(lx1, stageY - farYOffset); ctx.lineTo(lx2, stageY); ctx.stroke();
     }
-    // 薄い光のエフェクト（メイン足場上）
-    const mainGlow = ctx.createLinearGradient(STAGE_LEFT, stageY - 30, STAGE_LEFT, stageY);
+    // 薄い光のエフェクト
+    const mainGlow = ctx.createLinearGradient(0, stageY - farYOffset - 20, 0, stageY - farYOffset);
     mainGlow.addColorStop(0, 'rgba(170, 120, 255, 0)');
     mainGlow.addColorStop(1, 'rgba(170, 120, 255, 0.06)');
     ctx.fillStyle = mainGlow;
-    ctx.fillRect(STAGE_LEFT, stageY - 30, stageW, 30);
+    ctx.fillRect(farLeft, stageY - farYOffset - 20, farRight - farLeft, 20);
 
-    // 中段・上段プラットフォーム描画
+    // 中段・上段プラットフォーム描画 (2.5D台形)
     for (const plat of platforms) {
       // 浮遊の揺れ
       const floatOfs = Math.sin(battleTime * 0.02 + plat.x * 0.01) * 2;
       const py = plat.y + floatOfs;
+      const pScale = getDepthScale(py);
+      const pCx = plat.x + plat.w / 2;
+      const pNearW = plat.w * 1.05;
+      const pFarW = plat.w * 0.85;
+      const pFarOfs = 8; // 奥のY距離
       // 影
       ctx.fillStyle = 'rgba(100, 60, 180, 0.15)';
       ctx.beginPath();
-      ctx.ellipse(plat.x + plat.w / 2, py + 15, plat.w * 0.35, 4, 0, 0, Math.PI * 2);
+      ctx.ellipse(pCx, py + 15, pNearW * 0.35, 4, 0, 0, Math.PI * 2);
       ctx.fill();
-      // 石板本体
-      const subGrad = ctx.createLinearGradient(0, py - 3, 0, py + 12);
-      subGrad.addColorStop(0, '#3a2050');
-      subGrad.addColorStop(0.5, '#2a1040');
-      subGrad.addColorStop(1, '#1a0828');
-      ctx.fillStyle = subGrad;
+      // 上面（台形: 奥暗め→手前明るめ）
+      const subTopGrad = ctx.createLinearGradient(0, py - pFarOfs, 0, py);
+      subTopGrad.addColorStop(0, '#1a0828'); // 奥
+      subTopGrad.addColorStop(1, '#3a2050'); // 手前
+      ctx.fillStyle = subTopGrad;
       ctx.beginPath();
-      ctx.moveTo(plat.x, py);
-      ctx.lineTo(plat.x + plat.w, py);
-      ctx.lineTo(plat.x + plat.w + 4, py + 12);
-      ctx.lineTo(plat.x - 4, py + 12);
+      ctx.moveTo(pCx - pFarW / 2, py - pFarOfs);
+      ctx.lineTo(pCx + pFarW / 2, py - pFarOfs);
+      ctx.lineTo(pCx + pNearW / 2, py);
+      ctx.lineTo(pCx - pNearW / 2, py);
+      ctx.closePath();
+      ctx.fill();
+      // 側面（暗め）
+      ctx.fillStyle = '#0d0418';
+      ctx.beginPath();
+      ctx.moveTo(pCx - pNearW / 2, py);
+      ctx.lineTo(pCx + pNearW / 2, py);
+      ctx.lineTo(pCx + pNearW / 2 + 2, py + 8);
+      ctx.lineTo(pCx - pNearW / 2 - 2, py + 8);
       ctx.closePath();
       ctx.fill();
       // 金色の縁ライン
@@ -12682,93 +12791,117 @@ function drawBattle(dt) {
       }
     }
   } else if (curStage.id === 'seijaku') {
-    // 夜のパリ: 石畳風プラットフォーム
+    // 夜のパリ: 石畳風プラットフォーム (2.5D台形)
     // Platform shadow
     ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
     ctx.beginPath();
-    ctx.ellipse(STAGE_LEFT + stageW / 2, stageY + 28, stageW * 0.42, 8, 0, 0, Math.PI * 2);
+    ctx.ellipse(stageCx, stageY + 28, nearHalfW * 0.75, 8, 0, 0, Math.PI * 2);
     ctx.fill();
-    // Platform body (石畳風)
-    const stonePlatGrad = ctx.createLinearGradient(0, stageY - 4, 0, stageY + stageH + 20);
-    stonePlatGrad.addColorStop(0, '#2a2a2a');
-    stonePlatGrad.addColorStop(0.4, '#222222');
-    stonePlatGrad.addColorStop(1, '#1a1a1a');
-    ctx.fillStyle = stonePlatGrad;
+    // 上面（台形・奥暗め→手前明るめ）
+    const stoneTopGrad = ctx.createLinearGradient(0, stageY - farYOffset, 0, stageY);
+    stoneTopGrad.addColorStop(0, '#1a1a1a'); // 奥
+    stoneTopGrad.addColorStop(1, '#3a3a3a'); // 手前
+    ctx.fillStyle = stoneTopGrad;
     ctx.beginPath();
-    ctx.moveTo(STAGE_LEFT, stageY);
-    ctx.lineTo(STAGE_RIGHT, stageY);
-    ctx.lineTo(STAGE_RIGHT + 8, stageY + stageH + 20);
-    ctx.lineTo(STAGE_LEFT - 8, stageY + stageH + 20);
+    ctx.moveTo(farLeft, stageY - farYOffset);
+    ctx.lineTo(farRight, stageY - farYOffset);
+    ctx.lineTo(nearRight, stageY);
+    ctx.lineTo(nearLeft, stageY);
     ctx.closePath();
     ctx.fill();
-    // Top surface (石畳ライン)
-    const stoneTopGrad = ctx.createLinearGradient(STAGE_LEFT, stageY - 4, STAGE_RIGHT, stageY - 4);
-    stoneTopGrad.addColorStop(0, '#3a3a3a');
-    stoneTopGrad.addColorStop(0.5, '#4a4a4a');
-    stoneTopGrad.addColorStop(1, '#3a3a3a');
-    ctx.fillStyle = stoneTopGrad;
-    ctx.fillRect(STAGE_LEFT, stageY - 4, stageW, 6);
-    // 石畳の目地ライン
-    ctx.strokeStyle = 'rgba(80, 80, 80, 0.3)';
+    // 石畳の目地ライン（台形に沿って）
+    ctx.strokeStyle = 'rgba(80, 80, 80, 0.25)';
     ctx.lineWidth = 1;
-    for (let lx = STAGE_LEFT + 50; lx < STAGE_RIGHT; lx += 50) {
-      ctx.beginPath(); ctx.moveTo(lx, stageY - 4); ctx.lineTo(lx, stageY + 2); ctx.stroke();
+    for (let i = 1; i < 10; i++) {
+      const t = i / 10;
+      const lx1 = farLeft + (farRight - farLeft) * t;
+      const lx2 = nearLeft + (nearRight - nearLeft) * t;
+      ctx.beginPath(); ctx.moveTo(lx1, stageY - farYOffset); ctx.lineTo(lx2, stageY); ctx.stroke();
     }
-    // Edge accent (細い青白ライン)
+    // 側面（厚み）
+    const stoneSideH = 22;
+    const stoneSideGrad = ctx.createLinearGradient(0, stageY, 0, stageY + stoneSideH);
+    stoneSideGrad.addColorStop(0, '#2a2a2a');
+    stoneSideGrad.addColorStop(1, '#1a1a1a');
+    ctx.fillStyle = stoneSideGrad;
+    ctx.beginPath();
+    ctx.moveTo(nearLeft, stageY);
+    ctx.lineTo(nearRight, stageY);
+    ctx.lineTo(nearRight + 3, stageY + stoneSideH);
+    ctx.lineTo(nearLeft - 3, stageY + stoneSideH);
+    ctx.closePath();
+    ctx.fill();
+    // Edge accent (手前)
     ctx.shadowColor = '#445566';
     ctx.shadowBlur = 4;
     ctx.strokeStyle = '#556677';
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.moveTo(STAGE_LEFT, stageY - 1);
-    ctx.lineTo(STAGE_RIGHT, stageY - 1);
+    ctx.moveTo(nearLeft, stageY);
+    ctx.lineTo(nearRight, stageY);
+    ctx.stroke();
+    // 奥エッジ
+    ctx.strokeStyle = 'rgba(85, 102, 119, 0.3)';
+    ctx.beginPath();
+    ctx.moveTo(farLeft, stageY - farYOffset);
+    ctx.lineTo(farRight, stageY - farYOffset);
     ctx.stroke();
     ctx.shadowBlur = 0;
   } else {
-    // 桜ノ舞台: 和風プラットフォーム
+    // 桜ノ舞台: 和風プラットフォーム (2.5D台形)
     // Platform shadow
     ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
     ctx.beginPath();
-    ctx.ellipse(STAGE_LEFT + stageW / 2, stageY + 30, stageW * 0.45, 10, 0, 0, Math.PI * 2);
+    ctx.ellipse(stageCx, stageY + 30, nearHalfW * 0.8, 10, 0, 0, Math.PI * 2);
     ctx.fill();
-    // Platform body (木目風)
-    const platGrad = ctx.createLinearGradient(0, stageY - 4, 0, stageY + stageH + 20);
-    platGrad.addColorStop(0, '#8B5A2B');
-    platGrad.addColorStop(0.3, '#7A4A1E');
-    platGrad.addColorStop(1, '#4A2A0E');
-    ctx.fillStyle = platGrad;
+    // 上面（台形・グラデーション: 奥暗め→手前明るめ）
+    const platTopGrad = ctx.createLinearGradient(0, stageY - farYOffset, 0, stageY);
+    platTopGrad.addColorStop(0, '#5A3A1B'); // 奥（暗め）
+    platTopGrad.addColorStop(1, '#A0784A'); // 手前（明るめ）
+    ctx.fillStyle = platTopGrad;
     ctx.beginPath();
-    ctx.moveTo(STAGE_LEFT, stageY);
-    ctx.lineTo(STAGE_RIGHT, stageY);
-    ctx.lineTo(STAGE_RIGHT + 10, stageY + stageH + 20);
-    ctx.lineTo(STAGE_LEFT - 10, stageY + stageH + 20);
+    ctx.moveTo(farLeft, stageY - farYOffset);
+    ctx.lineTo(farRight, stageY - farYOffset);
+    ctx.lineTo(nearRight, stageY);
+    ctx.lineTo(nearLeft, stageY);
     ctx.closePath();
     ctx.fill();
-    // Top surface (畳風ライン)
-    const topGrad = ctx.createLinearGradient(STAGE_LEFT, stageY - 4, STAGE_RIGHT, stageY - 4);
-    topGrad.addColorStop(0, '#A0784A');
-    topGrad.addColorStop(0.5, '#B8905A');
-    topGrad.addColorStop(1, '#A0784A');
-    ctx.fillStyle = topGrad;
-    ctx.fillRect(STAGE_LEFT, stageY - 4, stageW, 6);
-    // 畳 grid lines
-    ctx.strokeStyle = 'rgba(60, 40, 20, 0.4)';
+    // 畳 grid lines (台形に沿って)
+    ctx.strokeStyle = 'rgba(60, 40, 20, 0.3)';
     ctx.lineWidth = 1;
-    for (let lx = STAGE_LEFT + 40; lx < STAGE_RIGHT; lx += 40) {
-      ctx.beginPath(); ctx.moveTo(lx, stageY - 4); ctx.lineTo(lx, stageY + 2); ctx.stroke();
+    for (let i = 0; i <= 10; i++) {
+      const t = i / 10;
+      const lx1 = farLeft + (farRight - farLeft) * t;
+      const lx2 = nearLeft + (nearRight - nearLeft) * t;
+      ctx.beginPath(); ctx.moveTo(lx1, stageY - farYOffset); ctx.lineTo(lx2, stageY); ctx.stroke();
     }
-    // Center line
-    ctx.strokeStyle = 'rgba(80, 50, 25, 0.5)';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.moveTo(STAGE_LEFT, stageY - 1); ctx.lineTo(STAGE_RIGHT, stageY - 1); ctx.stroke();
+    // 側面（厚み・暗め）
+    const sideH = 22;
+    const sideGrad = ctx.createLinearGradient(0, stageY, 0, stageY + sideH);
+    sideGrad.addColorStop(0, '#7A4A1E');
+    sideGrad.addColorStop(1, '#4A2A0E');
+    ctx.fillStyle = sideGrad;
+    ctx.beginPath();
+    ctx.moveTo(nearLeft, stageY);
+    ctx.lineTo(nearRight, stageY);
+    ctx.lineTo(nearRight + 3, stageY + sideH);
+    ctx.lineTo(nearLeft - 3, stageY + sideH);
+    ctx.closePath();
+    ctx.fill();
     // Edge accent
     ctx.shadowColor = '#CC8844';
     ctx.shadowBlur = 6;
     ctx.strokeStyle = '#CC9955';
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.moveTo(STAGE_LEFT, stageY - 1);
-    ctx.lineTo(STAGE_RIGHT, stageY - 1);
+    ctx.moveTo(nearLeft, stageY);
+    ctx.lineTo(nearRight, stageY);
+    ctx.stroke();
+    // 奥のエッジライン
+    ctx.strokeStyle = 'rgba(160, 120, 74, 0.4)';
+    ctx.beginPath();
+    ctx.moveTo(farLeft, stageY - farYOffset);
+    ctx.lineTo(farRight, stageY - farYOffset);
     ctx.stroke();
     ctx.shadowBlur = 0;
   }
@@ -12809,10 +12942,15 @@ function drawBattle(dt) {
     ctx.restore();
   }
 
-  // Hit effects (enhanced)
+  // Hit effects (enhanced) - 2.5D遠近感適用
   for (const e of hitEffects) {
     const t = 1 - e.life / e.maxLife;
     ctx.save();
+    // 空中エフェクトは少し小さく
+    const effDepth = getDepthScale(e.y);
+    ctx.translate(e.x, e.y);
+    ctx.scale(effDepth, effDepth);
+    ctx.translate(-e.x, -e.y);
 
     if (e.type === 'ring') {
       // 衝撃波リング - 円形に広がる
@@ -13186,6 +13324,15 @@ function drawBattle(dt) {
     ctx.restore();
   }
 
+  // Character shadows (2.5D)
+  for (const p of players) {
+    if (!p.alive) continue;
+    const _sx = p.x, _sy = p.y;
+    if (p.renderX !== undefined) { p.x = p.renderX; p.y = p.renderY; }
+    drawCharacterShadow(p);
+    p.x = _sx; p.y = _sy;
+  }
+
   // Players
   for (const p of players) {
     if (!p.alive) continue;
@@ -13273,21 +13420,25 @@ function drawBattle(dt) {
       else if (edgeR < 30 && !p.facingLeft) ctx.translate(4, 0);
     }
 
+    // 2.5D遠近感スケール
+    const depthS = getDepthScale(p.y);
+
     // ⑤ コマンド技スケールエフェクト & ドラゴンモード拡大
     const dragonScale = (p.charIdx === 10 && p.dragonMode) ? 1.3 : 1.0;
     if (cmdScaleEffect.playerId === p.id && cmdScaleEffect.life > 0) {
       const scaleT = cmdScaleEffect.life / 12;
-      const s = (1 + scaleT * 0.3) * dragonScale;
+      const s = (1 + scaleT * 0.3) * dragonScale * depthS;
       ctx.save();
       ctx.translate(p.x, drawY);
       ctx.scale(s, s);
       ctx.translate(-p.x, -drawY);
       drawBattleCharacter(p.x, drawY, 1.0, p.charIdx, battleTime, p.facingLeft, p);
       ctx.restore();
-    } else if (dragonScale !== 1.0) {
+    } else if (dragonScale !== 1.0 || depthS !== 1.0) {
+      const s = dragonScale * depthS;
       ctx.save();
       ctx.translate(p.x, drawY);
-      ctx.scale(dragonScale, dragonScale);
+      ctx.scale(s, s);
       ctx.translate(-p.x, -drawY);
       drawBattleCharacter(p.x, drawY, 1.0, p.charIdx, battleTime, p.facingLeft, p);
       ctx.restore();
