@@ -2510,6 +2510,13 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
   ctx.rotate(rotation + walkLean);
   ctx.scale(scaleX, scaleY);
 
+  // 3D移動スキュー: 横移動速度に応じて進行方向に傾く
+  if (animData && Math.abs(animData.vx || 0) > 0.5) {
+    const skewAmt = Math.max(-0.12, Math.min(0.12, (animData.vx || 0) * 0.008));
+    // facingLeftの場合スキュー方向を反転（ctx.scale(-1,1)済み）
+    ctx.transform(1, 0, facingLeft ? -skewAmt : skewAmt, 1, 0, 0);
+  }
+
   // Draw character image
   // 天才 uses different images per mode
   const tensaiIsDragon = animData && animData.dragonMode;
@@ -12580,8 +12587,8 @@ function drawCharacterShadow(p) {
   const shadowScale = 1.0 - t * 0.7;   // 1.0 → 0.3
   if (shadowAlpha < 0.02) return;
 
-  const bodyScale = (characters[p.charIdx] && characters[p.charIdx].bodyScale) || 1.0;
-  const rx = 18 * shadowScale * bodyScale;
+  const cbShadow = CHAR_BODY[p.charIdx] ? CHAR_BODY[p.charIdx][0] : 1.0;
+  const rx = 18 * shadowScale * cbShadow;
   const ry = 5 * shadowScale;
 
   ctx.save();
@@ -13420,6 +13427,16 @@ function drawBattle(dt) {
       else if (edgeR < 30 && !p.facingLeft) ctx.translate(4, 0);
     }
 
+    // === 攻撃時モーションブラー（残像） ===
+    if (p.attacking && p.attackFrame > 0 && (Math.abs(p.vx) > 1 || Math.abs(p.vy) > 1)) {
+      ctx.save();
+      ctx.globalAlpha = 0.2;
+      drawBattleCharacter(p.x - p.vx * 2, drawY - p.vy * 2, 1.0, p.charIdx, battleTime, p.facingLeft, p);
+      ctx.globalAlpha = 0.08;
+      drawBattleCharacter(p.x - p.vx * 4, drawY - p.vy * 4, 1.0, p.charIdx, battleTime, p.facingLeft, p);
+      ctx.restore();
+    }
+
     // 2.5D遠近感スケール
     const depthS = getDepthScale(p.y);
 
@@ -13444,6 +13461,36 @@ function drawBattle(dt) {
       ctx.restore();
     } else {
       drawBattleCharacter(p.x, drawY, 1.0, p.charIdx, battleTime, p.facingLeft, p);
+    }
+
+    // === ライティング効果（光源左上・右側を暗く） ===
+    {
+      ctx.save();
+      ctx.globalCompositeOperation = 'multiply';
+      const cb = CHAR_BODY[p.charIdx] || [1.0, 1.0];
+      const lw = 40 * cb[0];
+      const lh = 70 * cb[1];
+      const lightGrad = ctx.createLinearGradient(p.x - lw, 0, p.x + lw, 0);
+      lightGrad.addColorStop(0, 'rgba(255,255,255,0)');
+      lightGrad.addColorStop(0.6, 'rgba(255,255,255,0)');
+      lightGrad.addColorStop(1, 'rgba(0,0,0,0.25)');
+      ctx.fillStyle = lightGrad;
+      ctx.fillRect(p.x - lw, drawY - lh + 15, lw * 2, lh);
+      ctx.restore();
+    }
+
+    // === ダメージ時3D的カラーフラッシュ（白→赤→通常） ===
+    if (p.hitstun > 0 && p.hitstun % 4 < 2) {
+      ctx.save();
+      ctx.globalCompositeOperation = 'screen';
+      const hitIntensity = Math.min(0.6, p.hitstun / 20);
+      ctx.globalAlpha = hitIntensity;
+      ctx.fillStyle = '#FF3300';
+      const cb2 = CHAR_BODY[p.charIdx] || [1.0, 1.0];
+      const dw = 36 * cb2[0];
+      const dh = 65 * cb2[1];
+      ctx.fillRect(p.x - dw, drawY - dh + 15, dw * 2, dh);
+      ctx.restore();
     }
 
     // Draw attack effects
