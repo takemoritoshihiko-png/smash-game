@@ -5335,6 +5335,208 @@ function resetCombo(attackerId) {
   playAudienceComboDropped(droppedCount);
 }
 
+// ========== コンボフィニッシャーシステム ==========
+let comboFinisherUsed = [false, false]; // 1コンボ中1回
+let comboFinisherReady = [false, false];
+let comboFinisherReadyDisplay = { active: false, timer: 0, playerId: -1 };
+let comboFinisherActive = { active: false, timer: 0, maxTimer: 0, playerId: -1, charIdx: -1 };
+let comboFinisherSlowmo = 0; // スローモーション残りフレーム
+
+const COMBO_FINISHERS = {
+  0:  { name:'氷龍覇砕', damage:35, hits:1, effect:'frozen', effectDur:300, kb:12, kbAngle:-60, color:'#88DDFF', desc:'凍りついた竜が突進' },
+  1:  { name:'天崩地裂掌', damage:40, hits:1, effect:'bounce', effectDur:0, kb:15, kbAngle:-80, color:'#AA6622', desc:'地震波が前後に広がる' },
+  2:  { name:'残像乱舞', damage:8, hits:12, effect:'stunned', effectDur:180, kb:6, kbAngle:-45, color:'#66FFBB', desc:'12残像が全方向攻撃' },
+  3:  { name:'業火大隕石', damage:50, hits:1, effect:'burning', effectDur:600, kb:18, kbAngle:-70, color:'#FF4400', desc:'巨大な炎の球が画面を覆う' },
+  4:  { name:'水龍大穿', damage:45, hits:1, effect:null, effectDur:0, kb:16, kbAngle:-30, color:'#44AAFF', desc:'巨大な水龍を放つ' },
+  5:  { name:'獣王絶滅砕', damage:42, hits:1, effect:null, effectDur:0, kb:20, kbAngle:-50, color:'#4169E1', desc:'獣霊爆発・KB3倍' },
+  6:  { name:'怒熊百烈拳EX', damage:3, hits:50, effect:null, effectDur:0, kb:10, kbAngle:-80, color:'#FF6B6B', desc:'50連打+大爆発', lastHitDmg:20 },
+  7:  { name:'虹色大爆発', damage:6, hits:16, effect:'confused', effectDur:600, kb:8, kbAngle:-60, color:'#FF66AA', desc:'16方向同時ビーム' },
+  8:  { name:'超電磁嵐', damage:32, hits:1, effect:'stunned', effectDur:300, kb:12, kbAngle:-50, color:'#66CCFF', desc:'全ゲージ吸収+感電', drainGauge:true },
+  9:  { name:'暗黒終末審判', damage:38, hits:1, effect:'cursed', effectDur:600, kb:14, kbAngle:-70, color:'#9966DD', desc:'呪縛10秒' },
+  10: { name:'龍炎大覚醒', damage:45, hits:1, effect:'burning', effectDur:480, kb:16, kbAngle:-60, color:'#FF8833', desc:'全画面炎爆発', dragonBonus:15 },
+  11: { name:'超高速乱舞テレポート', damage:12, hits:10, effect:'confused', effectDur:300, kb:8, kbAngle:-45, color:'#FFBB44', desc:'10回テレポート攻撃' },
+  12: { name:'超弩級砲撃嵐', damage:5, hits:20, effect:null, effectDur:0, kb:6, kbAngle:-60, color:'#A0B858', desc:'砲弾の雨' },
+  13: { name:'怒涛の千連撃', damage:2, hits:50, effect:null, effectDur:0, kb:8, kbAngle:-85, color:'#FF6644', desc:'千連打', lastHitDmg:15 },
+  14: { name:'毒霧大蔓延', damage:5, hits:10, effect:'poisoned', effectDur:1800, kb:4, kbAngle:-30, color:'#CC44FF', desc:'全体毒30秒' },
+  15: { name:'虹羽大嵐', damage:4, hits:30, effect:'confused', effectDur:480, kb:5, kbAngle:-50, color:'#FFD700', desc:'全方向無数の羽' },
+  16: { name:'永久時間停止', damage:30, hits:1, effect:'frozen', effectDur:300, kb:10, kbAngle:-40, color:'#FFD700', desc:'5秒間時間停止', timeStop:300 },
+  17: { name:'共鳴大崩壊', damage:35, hits:1, effect:'stunned', effectDur:300, kb:14, kbAngle:-70, color:'#88FFFF', desc:'全体振動+気絶' },
+  18: { name:'株式大暴騰', damage:25, hits:5, effect:null, effectDur:0, kb:10, kbAngle:-60, color:'#FFD700', desc:'金塊降下+社長発動', lastHitDmg:10 },
+  19: { name:'紫電超絶砲撃嵐', damage:8, hits:20, effect:'paralyzed', effectDur:600, kb:7, kbAngle:-55, color:'#CC66FF', desc:'紫砲弾の嵐' },
+  20: { name:'三体完全合体砲', damage:55, hits:1, effect:null, effectDur:0, kb:20, kbAngle:-40, color:'#3388FF', desc:'超巨大ビーム' },
+  21: { name:'双頭爆炎大融合', damage:40, hits:2, effect:'burning', effectDur:600, kb:15, kbAngle:-50, color:'#AA66FF', desc:'左右同時炎弾' },
+  22: { name:'黄金大竜巻億万嵐', damage:35, hits:1, effect:null, effectDur:0, kb:14, kbAngle:-60, color:'#FFD700', desc:'引き寄せ+金貨竜巻', pullIn:true },
+  23: { name:'テコンドー百蹴嵐', damage:4, hits:25, effect:'stunned', effectDur:300, kb:6, kbAngle:-70, color:'#44AAFF', desc:'100連続蹴り' },
+  24: { name:'悪夢大侵食', damage:20, hits:1, effect:'fear', effectDur:1200, kb:8, kbAngle:-40, color:'#CC0044', desc:'恐怖20秒+暗転' },
+  25: { name:'カオス大爆発EX', damage:0, hits:1, effect:'random', effectDur:600, kb:12, kbAngle:-60, color:'#FFCC44', desc:'完全ランダム', randomDmg:true },
+  26: { name:'ダブルスライム大爆発', damage:30, hits:2, effect:null, effectDur:0, kb:12, kbAngle:-60, color:'#88EEFF', desc:'巨大スライム爆発' },
+  27: { name:'重力大崩壊ブラックホール', damage:50, hits:1, effect:null, effectDur:0, kb:18, kbAngle:-70, color:'#9944DD', desc:'超巨大ブラックホール', pullIn:true },
+  28: { name:'毒虫大群嵐', damage:3, hits:15, effect:'poisoned', effectDur:1200, kb:4, kbAngle:-30, color:'#44CC44', desc:'虫の大群+毒+移動不可' },
+};
+
+function canComboFinisher(playerId) {
+  const cd = comboDisplay[playerId];
+  return cd && cd.count >= 10 && !comboFinisherUsed[playerId];
+}
+
+function executeComboFinisher(p) {
+  if (!canComboFinisher(p.id)) return;
+  comboFinisherUsed[p.id] = true;
+  comboFinisherReady[p.id] = false;
+
+  const f = COMBO_FINISHERS[p.charIdx];
+  if (!f) return;
+
+  // 共通演出: スローモーション
+  comboFinisherSlowmo = 30; // 0.5秒
+  comboFinisherActive = { active: true, timer: 0, maxTimer: 90, playerId: p.id, charIdx: p.charIdx };
+
+  // テキスト表示
+  cmdNameDisplay.push({ text: 'COMBO FINISHER!!', x: 480, y: 160, life: 120, maxLife: 120, color: f.color });
+  cmdNameDisplay.push({ text: f.name, x: 480, y: 220, life: 100, maxLife: 100, color: '#FFFFFF' });
+
+  // 画面フラッシュ + シェイク
+  hitFlash.alpha = 0.5; hitFlash.color = f.color;
+  triggerScreenShake(15, 30);
+
+  // SE
+  playHitSound('cmd');
+  playAudienceCheer(15); // 最大歓声
+
+  // ダメージ計算
+  const target = players.find(pp => pp.id !== p.id && pp.alive);
+  if (!target) return;
+
+  let totalDmg = 0;
+  const hitCount = f.hits;
+
+  // ヤッホ: ランダムダメージ
+  let dmgPerHit = f.damage;
+  if (f.randomDmg) dmgPerHit = Math.floor(Math.random() * 99) + 1;
+
+  for (let i = 0; i < hitCount; i++) {
+    const isLast = (i === hitCount - 1);
+    const hitDmg = (isLast && f.lastHitDmg) ? f.lastHitDmg : dmgPerHit;
+    totalDmg += hitDmg;
+    target.damage = Math.min(999, target.damage + hitDmg);
+
+    // マルチヒットエフェクト
+    if (hitCount > 1) {
+      const delay = i * 2;
+      setTimeout(() => {
+        if (!target.alive) return;
+        hitEffects.push({ x: target.x + (Math.random()-0.5)*40, y: target.y - 30 + (Math.random()-0.5)*30,
+          life: 12, maxLife: 12, color: f.color, size: 25 + Math.random()*15 });
+        playHitSE();
+      }, delay * 16);
+    }
+  }
+
+  // ノックバック（最後に一括適用）
+  const dir = p.x < target.x ? 1 : -1;
+  const kbRad = f.kbAngle * Math.PI / 180;
+  const kbForce = f.kb + target.damage * 0.05;
+  // 獣王のKB3倍
+  const kbMult = (p.charIdx === 5) ? 3.0 : 1.0;
+  target.vx = Math.cos(kbRad) * kbForce * dir * kbMult;
+  target.vy = Math.sin(kbRad) * kbForce * kbMult;
+  target.hitstun = Math.floor(30 + totalDmg * 0.2);
+
+  // 状態異常適用
+  if (f.effect && f.effectDur > 0) {
+    if (f.effect === 'frozen') target.frozen = Math.max(target.frozen || 0, f.effectDur);
+    else if (f.effect === 'burning') { target.burning = Math.max(target.burning || 0, f.effectDur); target.burnDmg = 2; }
+    else if (f.effect === 'stunned') target.stunned = Math.max(target.stunned || 0, f.effectDur);
+    else if (f.effect === 'cursed') target.cursed = Math.max(target.cursed || 0, f.effectDur);
+    else if (f.effect === 'confused') target.confused = Math.max(target.confused || 0, f.effectDur);
+    else if (f.effect === 'poisoned') { target.poisoned = Math.max(target.poisoned || 0, f.effectDur); target.poisonDmg = 2; }
+    else if (f.effect === 'paralyzed') target.paralyzed = Math.max(target.paralyzed || 0, f.effectDur);
+    else if (f.effect === 'fear') target.fearTimer = Math.max(target.fearTimer || 0, f.effectDur);
+    else if (f.effect === 'bounce') { target.downThrowBounce = true; target.groundBounced = false; }
+    else if (f.effect === 'random') {
+      // ヤッホ: ランダム全状態異常
+      const effs = ['frozen','burning','stunned','cursed','confused','poisoned'];
+      for (const e of effs) {
+        if (Math.random() < 0.5) {
+          if (e === 'frozen') target.frozen = Math.max(target.frozen||0, 180);
+          else if (e === 'burning') { target.burning = Math.max(target.burning||0, 300); target.burnDmg = 2; }
+          else if (e === 'stunned') target.stunned = Math.max(target.stunned||0, 180);
+          else if (e === 'cursed') target.cursed = Math.max(target.cursed||0, 300);
+          else if (e === 'confused') target.confused = Math.max(target.confused||0, 300);
+          else if (e === 'poisoned') { target.poisoned = Math.max(target.poisoned||0, 600); target.poisonDmg = 3; }
+        }
+      }
+    }
+  }
+
+  // ゲージ吸収
+  if (f.drainGauge) {
+    if (target.ultimateGauge !== undefined) { p.ultimateGauge = Math.min(100, (p.ultimateGauge||0) + target.ultimateGauge); target.ultimateGauge = 0; }
+  }
+  // 引き寄せ（金金・プル）
+  if (f.pullIn) {
+    target.vx = (p.x - target.x) * 0.3;
+    target.vy = -8;
+    target.hitstun += 20;
+  }
+  // 龍覚醒ボーナス
+  if (f.dragonBonus && p.charIdx === 10 && p.dragonMode) {
+    target.damage = Math.min(999, target.damage + f.dragonBonus);
+  }
+  // キング時間停止
+  if (f.timeStop) {
+    p.kingTimeStop = Math.max(p.kingTimeStop || 0, f.timeStop);
+  }
+  // セン社長モード
+  if (p.charIdx === 18) {
+    p.senRank = 5; p.senRankHits = 0;
+    cmdNameDisplay.push({ text: '昇進! 社長', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#FFD700' });
+  }
+
+  // 巨大エフェクト
+  for (let i = 0; i < 8; i++) {
+    hitEffects.push({ x: target.x + (Math.random()-0.5)*60, y: target.y - 30 + (Math.random()-0.5)*40,
+      life: 20 + Math.floor(Math.random()*10), maxLife: 30, color: f.color, size: 40 + Math.random()*40, type: 'ring' });
+  }
+  for (let i = 0; i < 20; i++) {
+    sparks.push({ x: target.x + (Math.random()-0.5)*30, y: target.y - 30 + (Math.random()-0.5)*30,
+      vx: (Math.random()-0.5)*12, vy: (Math.random()-0.5)*12 - 3,
+      life: 15+Math.floor(Math.random()*15), maxLife: 30, color: i%3===0?'#FFFFFF':f.color,
+      size: 2+Math.random()*4, gravity: 0.1, drag: 0.96 });
+  }
+
+  // コンボカウントに加算
+  addComboHit(p.id);
+}
+
+// コンボフィニッシャーReady判定（毎フレーム呼ぶ）
+function updateComboFinisherReady() {
+  for (let i = 0; i < 2; i++) {
+    const wasReady = comboFinisherReady[i];
+    comboFinisherReady[i] = canComboFinisher(i);
+    // 初めてReadyになった瞬間にテキスト表示
+    if (comboFinisherReady[i] && !wasReady) {
+      comboFinisherReadyDisplay = { active: true, timer: 120, playerId: i };
+      cmdNameDisplay.push({ text: 'COMBO FINISHER READY!!', x: 480, y: 130, life: 120, maxLife: 120,
+        color: characters[players[i].charIdx] ? characters[players[i].charIdx].accent : '#FFD700' });
+    }
+  }
+  // コンボが途切れたらusedフラグリセット
+  for (let i = 0; i < 2; i++) {
+    if (!comboDisplay[i]) comboFinisherUsed[i] = false;
+  }
+  // フィニッシャーアクティブ更新
+  if (comboFinisherActive.active) {
+    comboFinisherActive.timer++;
+    if (comboFinisherActive.timer >= comboFinisherActive.maxTimer) comboFinisherActive.active = false;
+  }
+  // Ready表示タイマー
+  if (comboFinisherReadyDisplay.active) {
+    comboFinisherReadyDisplay.timer--;
+    if (comboFinisherReadyDisplay.timer <= 0) comboFinisherReadyDisplay.active = false;
+  }
+}
+
 // ========== 戦績システム ==========
 let battleStats = { totalGames: 0, totalWins: 0, charWins: {}, charGames: {}, vsRecord: {}, maxCombo: 0 };
 function loadBattleStats() {
@@ -7760,6 +7962,11 @@ function initBattle() {
   cmdFlash = { alpha: 0, color: '#FFFFFF' };
   cmdScaleEffect = { playerId: -1, life: 0 };
   hitStopFrames = 0;
+  comboFinisherUsed = [false, false];
+  comboFinisherReady = [false, false];
+  comboFinisherReadyDisplay = { active: false, timer: 0, playerId: -1 };
+  comboFinisherActive = { active: false, timer: 0, maxTimer: 0, playerId: -1, charIdx: -1 };
+  comboFinisherSlowmo = 0;
   cam.x = cam.targetX = 480;
   cam.y = cam.targetY = 300;
   cam.zoom = cam.targetZoom = 0.9;
@@ -9871,6 +10078,9 @@ function updateBattle(dt) {
     else winner = p1.damage <= p2.damage ? 0 : 1;
   }
   if (gameOver) return;
+
+  // コンボフィニッシャーReady判定
+  updateComboFinisherReady();
 
   // Update hit effects
   for (let i = hitEffects.length - 1; i >= 0; i--) {
@@ -14287,6 +14497,49 @@ function drawBattle(dt) {
   // === End dynamic camera (world-space effects above, screen-space below) ===
   ctx.restore();
 
+  // === コンボフィニッシャー画面縁グロー ===
+  if (comboFinisherActive.active) {
+    const ft = 1 - comboFinisherActive.timer / comboFinisherActive.maxTimer;
+    const f = COMBO_FINISHERS[comboFinisherActive.charIdx];
+    if (f) {
+      const pulse = 0.5 + Math.sin(comboFinisherActive.timer * 0.2) * 0.2;
+      ctx.save();
+      ctx.globalAlpha = ft * pulse;
+      // 上下左右に色付きグラデーション
+      const edgeW = 60;
+      // 上
+      const gTop = ctx.createLinearGradient(0, 0, 0, edgeW);
+      gTop.addColorStop(0, f.color); gTop.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = gTop; ctx.fillRect(0, 0, 960, edgeW);
+      // 下
+      const gBot = ctx.createLinearGradient(0, 640, 0, 640 - edgeW);
+      gBot.addColorStop(0, f.color); gBot.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = gBot; ctx.fillRect(0, 640 - edgeW, 960, edgeW);
+      // 左
+      const gL = ctx.createLinearGradient(0, 0, edgeW, 0);
+      gL.addColorStop(0, f.color); gL.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = gL; ctx.fillRect(0, 0, edgeW, 640);
+      // 右
+      const gR = ctx.createLinearGradient(960, 0, 960 - edgeW, 0);
+      gR.addColorStop(0, f.color); gR.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = gR; ctx.fillRect(960 - edgeW, 0, edgeW, 640);
+      ctx.restore();
+    }
+  }
+  // コンボフィニッシャーReady時: Cキー点滅表示
+  if (comboFinisherReady[0] || comboFinisherReady[1]) {
+    const blink = Math.floor(battleTime * 0.1) % 2 === 0;
+    if (blink) {
+      ctx.save();
+      ctx.fillStyle = '#FFD700';
+      ctx.font = 'bold 14px sans-serif';
+      ctx.textAlign = 'center';
+      if (comboFinisherReady[0]) ctx.fillText('▶ C: FINISHER ◀', 160, 580);
+      if (comboFinisherReady[1]) ctx.fillText('▶ C: FINISHER ◀', 800, 580);
+      ctx.restore();
+    }
+  }
+
   // HUD (screen space)
   drawBattleHUD();
 
@@ -15594,6 +15847,27 @@ function drawComboList() {
     ctx.textAlign = 'right';
     ctx.fillStyle = r.instantKill ? '#FF4444' : '#FFD700';
     ctx.fillText('★'.repeat(r.diff) + '☆'.repeat(3 - r.diff), 840, ry + 25);
+  }
+
+  // コンボフィニッシャーセクション
+  const finisher = COMBO_FINISHERS[comboListCharIdx];
+  if (finisher) {
+    const fy = 120 + routes.length * 110;
+    ctx.fillStyle = 'rgba(255,200,0,0.08)';
+    roundRect(ctx, 100, fy, 760, 95, 8); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,200,0,0.3)'; ctx.lineWidth = 1;
+    roundRect(ctx, 100, fy, 760, 95, 8); ctx.stroke();
+    ctx.textAlign = 'left';
+    ctx.font = 'bold 16px sans-serif'; ctx.fillStyle = finisher.color;
+    ctx.fillText('💥 ' + finisher.name, 120, fy + 25);
+    ctx.font = '14px sans-serif'; ctx.fillStyle = '#FFFFFF';
+    ctx.fillText('発動条件: 10コンボ以上で Cキー  |  ' + finisher.desc, 120, fy + 48);
+    ctx.font = '12px sans-serif'; ctx.fillStyle = '#AAAAAA';
+    const totalDmg = finisher.hits > 1 ? (finisher.damage + '×' + finisher.hits + (finisher.lastHitDmg ? '+' + finisher.lastHitDmg : '')) : finisher.damage;
+    let effText = finisher.effect ? (' | 効果: ' + finisher.effect) : '';
+    ctx.fillText('ダメージ: ' + totalDmg + effText + '  |  COMBO FINISHER', 120, fy + 72);
+    ctx.textAlign = 'right'; ctx.fillStyle = '#FF6600'; ctx.font = 'bold 10px sans-serif';
+    ctx.fillText('★★★ FINISHER', 840, fy + 25);
   }
 
   // キャラアイコンバー（下部）
@@ -18354,7 +18628,10 @@ function processPlayerKeydown(key, p, playerId, keyState) {
   }
   // Special (C) - キャンセル対応
   if (key === 'c' || key === 'C') {
-    if (!(p.charIdx === 10 && !p.dragonMode && p.damage >= 80 && p.dragonCooldown <= 0 && p.grounded)) {
+    // コンボフィニッシャー: 10コンボ以上でC → 発動
+    if (canComboFinisher(p.id)) {
+      executeComboFinisher(p);
+    } else if (!(p.charIdx === 10 && !p.dragonMode && p.damage >= 80 && p.dragonCooldown <= 0 && p.grounded)) {
       if (!tryCancelAttack(p, 'special')) {
         startAttack(p, 'special');
       }
@@ -18879,6 +19156,12 @@ function gameLoop(timestamp) {
           koSlowMotion.active = false;
         }
         if (koSlowMotion.frames % 3 === 0) {
+          updateBattle(FIXED_DT);
+        }
+      } else if (comboFinisherSlowmo > 0) {
+        // コンボフィニッシャースローモーション: 2フレームに1回
+        comboFinisherSlowmo--;
+        if (comboFinisherSlowmo % 2 === 0) {
           updateBattle(FIXED_DT);
         }
       } else {
