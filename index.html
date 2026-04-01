@@ -86,6 +86,22 @@ const stages = [
     bgSrc: 'images/bg3.png',
     bgmSrc: 'sounds/bgm3.mp3',
   },
+  {
+    id: 'space',
+    name: '星降る宇宙',
+    desc: '銀河の渦の中で戦え',
+    bgSrc: 'images/bg4.png',
+    bgmSrc: 'sounds/bgm.mp3', // bgm4未作成→bgm.mp3をフォールバック
+    gravityMult: 0.85,
+  },
+  {
+    id: 'throne',
+    name: '魔王の玉座',
+    desc: '暗黒の城で最終決戦',
+    bgSrc: 'images/bg5.png',
+    bgmSrc: 'sounds/bgm2.mp3', // bgm5未作成→bgm2.mp3をフォールバック
+    gravityMult: 1.1,
+  },
 ];
 let selectedStage = 0;
 let stageSelectTime = 0;
@@ -472,6 +488,10 @@ const bg2Img = new Image();
 bg2Img.src = 'images/bg2.png';
 const bg3Img = new Image();
 bg3Img.src = 'images/bg3.png';
+const bg4Img = new Image();
+bg4Img.src = 'images/bg4.png';
+const bg5Img = new Image();
+bg5Img.src = 'images/bg5.png';
 
 // --- Particles ---
 function spawnTitleParticle() {
@@ -5179,6 +5199,18 @@ function drawStageSelect(dt) {
       if (bg3Img.complete && bg3Img.naturalWidth > 0) {
         ctx.drawImage(bg3Img, previewX, previewY, previewW, previewH);
       }
+    } else if (s.id === 'space') {
+      if (bg4Img.complete && bg4Img.naturalWidth > 0) {
+        ctx.drawImage(bg4Img, previewX, previewY, previewW, previewH);
+      } else {
+        ctx.fillStyle = '#050515'; ctx.fillRect(previewX, previewY, previewW, previewH);
+      }
+    } else if (s.id === 'throne') {
+      if (bg5Img.complete && bg5Img.naturalWidth > 0) {
+        ctx.drawImage(bg5Img, previewX, previewY, previewW, previewH);
+      } else {
+        ctx.fillStyle = '#1a0808'; ctx.fillRect(previewX, previewY, previewW, previewH);
+      }
     }
 
     // Draw mini platform preview
@@ -5210,6 +5242,26 @@ function drawStageSelect(dt) {
       // 上段中央
       const tw = (platRX - platLX) / 4;
       ctx.fillRect(previewX + previewW / 2 - tw / 2, platY - 52, tw, 4);
+    } else if (s.id === 'space') {
+      ctx.fillStyle = '#3a2870';
+      ctx.fillRect(platLX, platY, platRX - platLX, 6);
+      ctx.strokeStyle = 'rgba(136, 102, 255, 0.5)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(platLX, platY); ctx.lineTo(platRX, platY); ctx.stroke();
+      // 浮遊プラット
+      ctx.fillStyle = '#2a1860';
+      ctx.fillRect(platLX + 10, platY - 20, 40, 3);
+      ctx.fillRect(platRX - 50, platY - 20, 40, 3);
+      ctx.fillRect(previewX + previewW / 2 - 18, platY - 45, 36, 3);
+    } else if (s.id === 'throne') {
+      ctx.fillStyle = '#3a1515';
+      ctx.fillRect(platLX, platY, platRX - platLX, 6);
+      ctx.strokeStyle = 'rgba(255, 68, 34, 0.4)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(platLX, platY); ctx.lineTo(platRX, platY); ctx.stroke();
+      // 柱プラット
+      ctx.fillStyle = '#2a0a0a';
+      ctx.fillRect(platLX + 5, platY - 25, 30, 3);
+      ctx.fillRect(platRX - 35, platY - 25, 30, 3);
+      ctx.fillRect(previewX + previewW / 2 - 25, platY + 8, 50, 3);
     }
 
     ctx.restore(); // end clip
@@ -7978,13 +8030,22 @@ function createPlayer(id, charIdx, startX) {
 function initBattle() {
   // Setup platforms based on selected stage
   platforms.length = 0;
-  if (stages[selectedStage].id === 'mahoujin') {
+  const stageId = stages[selectedStage].id;
+  if (stageId === 'mahoujin') {
     const sw = STAGE_RIGHT - STAGE_LEFT;
     const midW = Math.floor(sw / 3);
     const topW = Math.floor(sw / 4);
     platforms.push({ x: STAGE_LEFT + 30, y: STAGE_GROUND_Y - 120, w: midW });          // 中段左
     platforms.push({ x: STAGE_RIGHT - midW - 30, y: STAGE_GROUND_Y - 120, w: midW }); // 中段右
     platforms.push({ x: 480 - topW / 2, y: STAGE_GROUND_Y - 230, w: topW });           // 上段中央
+  } else if (stageId === 'space') {
+    platforms.push({ x: 150, y: 380, w: 180 });  // 左浮遊プラット
+    platforms.push({ x: 680, y: 380, w: 180 });  // 右浮遊プラット
+    platforms.push({ x: 380, y: 280, w: 150 });  // 中央高プラット
+  } else if (stageId === 'throne') {
+    platforms.push({ x: 120, y: 350, w: 120 });  // 左柱プラット
+    platforms.push({ x: 740, y: 350, w: 120 });  // 右柱プラット
+    platforms.push({ x: 360, y: 420, w: 200 });  // 玉座段差
   }
 
   battleTime = 0;
@@ -12433,7 +12494,9 @@ function getGravity(p) {
   }
   let grav = p.vy < 0 ? GRAVITY_RISE : GRAVITY_FALL;
   if (p.charIdx === 11) grav *= 0.7; // Catbus: 空中重力0.7倍
-  return grav * wm;
+  // ステージ固有重力倍率
+  const stageGravMult = (stages[selectedStage] && stages[selectedStage].gravityMult) || 1.0;
+  return grav * wm * stageGravMult;
 }
 
 // 慣性付き速度更新
@@ -13004,6 +13067,10 @@ function drawBattle(dt) {
     ctx.fillStyle = '#0a0518';
   } else if (curStage.id === 'seijaku') {
     ctx.fillStyle = '#0a0a1a';
+  } else if (curStage.id === 'space') {
+    ctx.fillStyle = '#050515';
+  } else if (curStage.id === 'throne') {
+    ctx.fillStyle = '#1a0808';
   } else {
     ctx.fillStyle = '#87CEEB';
   }
@@ -13020,6 +13087,10 @@ function drawBattle(dt) {
     ctx.drawImage(bg3Img, -bgMargin, -bgMargin, 960 + bgMargin * 2, 640 + bgMargin * 2);
   } else if (curStage.id === 'seijaku') {
     ctx.drawImage(bg2Img, -bgMargin, -bgMargin, 960 + bgMargin * 2, 640 + bgMargin * 2);
+  } else if (curStage.id === 'space') {
+    if (bg4Img.complete && bg4Img.naturalWidth > 0) ctx.drawImage(bg4Img, -bgMargin, -bgMargin, 960 + bgMargin * 2, 640 + bgMargin * 2);
+  } else if (curStage.id === 'throne') {
+    if (bg5Img.complete && bg5Img.naturalWidth > 0) ctx.drawImage(bg5Img, -bgMargin, -bgMargin, 960 + bgMargin * 2, 640 + bgMargin * 2);
   } else {
     if (bgImg.complete && bgImg.naturalWidth > 0) {
       ctx.drawImage(bgImg, -bgMargin, -bgMargin, 960 + bgMargin * 2, 640 + bgMargin * 2);
@@ -13229,6 +13300,71 @@ function drawBattle(dt) {
     ctx.lineTo(farRight, stageY - farYOffset);
     ctx.stroke();
     ctx.shadowBlur = 0;
+  } else if (curStage.id === 'space') {
+    // 星降る宇宙: 宇宙クリスタルプラットフォーム (2.5D台形)
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.beginPath();
+    ctx.ellipse(stageCx, stageY + 28, nearHalfW * 0.75, 8, 0, 0, Math.PI * 2);
+    ctx.fill();
+    const spaceTopGrad = ctx.createLinearGradient(0, stageY - farYOffset, 0, stageY);
+    spaceTopGrad.addColorStop(0, '#1a1040');
+    spaceTopGrad.addColorStop(1, '#3a2870');
+    ctx.fillStyle = spaceTopGrad;
+    ctx.beginPath();
+    ctx.moveTo(farLeft, stageY - farYOffset); ctx.lineTo(farRight, stageY - farYOffset);
+    ctx.lineTo(nearRight, stageY); ctx.lineTo(nearLeft, stageY); ctx.closePath(); ctx.fill();
+    const spaceSideH = 22;
+    ctx.fillStyle = '#0a0828';
+    ctx.beginPath();
+    ctx.moveTo(nearLeft, stageY); ctx.lineTo(nearRight, stageY);
+    ctx.lineTo(nearRight + 3, stageY + spaceSideH); ctx.lineTo(nearLeft - 3, stageY + spaceSideH); ctx.closePath(); ctx.fill();
+    ctx.shadowColor = '#8866FF'; ctx.shadowBlur = 6;
+    ctx.strokeStyle = 'rgba(136, 102, 255, 0.5)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(nearLeft, stageY); ctx.lineTo(nearRight, stageY); ctx.stroke();
+    ctx.strokeStyle = 'rgba(136, 102, 255, 0.25)';
+    ctx.beginPath(); ctx.moveTo(farLeft, stageY - farYOffset); ctx.lineTo(farRight, stageY - farYOffset); ctx.stroke();
+    ctx.shadowBlur = 0;
+    // 星パーティクル
+    ctx.strokeStyle = 'rgba(200, 170, 255, 0.15)'; ctx.lineWidth = 1;
+    for (let i = 1; i < 8; i++) {
+      const t = i / 8;
+      ctx.beginPath();
+      ctx.moveTo(farLeft + (farRight - farLeft) * t, stageY - farYOffset);
+      ctx.lineTo(nearLeft + (nearRight - nearLeft) * t, stageY); ctx.stroke();
+    }
+  } else if (curStage.id === 'throne') {
+    // 魔王の玉座: ダークストーンプラットフォーム (2.5D台形)
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+    ctx.beginPath();
+    ctx.ellipse(stageCx, stageY + 28, nearHalfW * 0.75, 8, 0, 0, Math.PI * 2);
+    ctx.fill();
+    const throneTopGrad = ctx.createLinearGradient(0, stageY - farYOffset, 0, stageY);
+    throneTopGrad.addColorStop(0, '#1a0808');
+    throneTopGrad.addColorStop(1, '#3a1515');
+    ctx.fillStyle = throneTopGrad;
+    ctx.beginPath();
+    ctx.moveTo(farLeft, stageY - farYOffset); ctx.lineTo(farRight, stageY - farYOffset);
+    ctx.lineTo(nearRight, stageY); ctx.lineTo(nearLeft, stageY); ctx.closePath(); ctx.fill();
+    const throneSideH = 22;
+    const throneSideGrad = ctx.createLinearGradient(0, stageY, 0, stageY + throneSideH);
+    throneSideGrad.addColorStop(0, '#2a0a0a'); throneSideGrad.addColorStop(1, '#150505');
+    ctx.fillStyle = throneSideGrad;
+    ctx.beginPath();
+    ctx.moveTo(nearLeft, stageY); ctx.lineTo(nearRight, stageY);
+    ctx.lineTo(nearRight + 3, stageY + throneSideH); ctx.lineTo(nearLeft - 3, stageY + throneSideH); ctx.closePath(); ctx.fill();
+    ctx.shadowColor = '#FF4422'; ctx.shadowBlur = 6;
+    ctx.strokeStyle = 'rgba(255, 68, 34, 0.4)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(nearLeft, stageY); ctx.lineTo(nearRight, stageY); ctx.stroke();
+    ctx.strokeStyle = 'rgba(255, 68, 34, 0.2)';
+    ctx.beginPath(); ctx.moveTo(farLeft, stageY - farYOffset); ctx.lineTo(farRight, stageY - farYOffset); ctx.stroke();
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = 'rgba(180, 40, 20, 0.15)'; ctx.lineWidth = 1;
+    for (let i = 1; i < 10; i++) {
+      const t = i / 10;
+      ctx.beginPath();
+      ctx.moveTo(farLeft + (farRight - farLeft) * t, stageY - farYOffset);
+      ctx.lineTo(nearLeft + (nearRight - nearLeft) * t, stageY); ctx.stroke();
+    }
   } else {
     // 桜ノ舞台: 和風プラットフォーム (2.5D台形)
     // Platform shadow
