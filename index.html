@@ -6558,27 +6558,28 @@ function getGrabFrames(charIdx) {
 // キャラ別投げダメージ { front, back, up, down }
 // 掴み速度に反比例: 速い=低ダメ, 遅い=高ダメ
 const CHAR_THROW_DMG = {
-  speed:   { front: 2,  back: 2,  up: 1,  down: 1  }, // 9F組
-  balance: { front: 5,  back: 5,  up: 3,  down: 2  }, // 13F組
-  ranged:  { front: 7,  back: 7,  up: 5,  down: 4  }, // 15F組
-  power:   { front: 10, back: 10, up: 7,  down: 6  }, // 17F組
+  speed:   { front: 7,  back: 8,  up: 6,  down: 5  }, // コンボ系（KB小）
+  balance: { front: 9,  back: 10, up: 8,  down: 7  }, // バランス
+  ranged:  { front: 10, back: 11, up: 9,  down: 8  }, // 遠距離系
+  power:   { front: 15, back: 18, up: 12, down: 14 }, // パワー系（KB大）
+  status:  { front: 9,  back: 10, up: 8,  down: 7  }, // 状態異常系
 };
 const CHAR_THROW_TYPE = [
-  'balance', // 0:ゼン
+  'status',  // 0:ゼン（凍結投げ）
   'power',   // 1:ドン
   'speed',   // 2:サイソク
-  'ranged',  // 3:メテオ
+  'status',  // 3:メテオ（燃焼投げ）
   'ranged',  // 4:ロング
-  'ranged',  // 5:うる男
-  'balance', // 6:熊太郎
-  'ranged',  // 7:バレット
-  'speed',   // 8:シャうでん
-  'balance', // 9:ジャッジマン
+  'power',   // 5:うる男
+  'power',   // 6:熊太郎
+  'speed',   // 7:バレット
+  'status',  // 8:シャうでん（感電投げ）
+  'status',  // 9:ジャッジマン（呪縛投げ）
   'ranged',  // 10:天才
   'speed',   // 11:Catbus
   'power',   // 12:タンク
   'balance', // 13:波おじ
-  'speed',   // 14:とっこ
+  'status',  // 14:とっこ（毒投げ）
   'speed',   // 15:サム
   'balance', // 16:キング
   'ranged',  // 17:おんぱ
@@ -6587,13 +6588,21 @@ const CHAR_THROW_TYPE = [
   'balance', // 20:マイクロ
   'ranged',  // 21:ミスターツー
   'power',   // 22:金金
-  'balance', // 23:サトル
+  'speed',   // 23:サトル
   'ranged',  // 24:怖
   'balance', // 25:ヤッホ
   'balance', // 26:ぽよ
   'ranged',  // 27:プル
   'speed',   // 28:ムッシー
 ];
+// キャラ投げ状態異常テーブル
+const CHAR_THROW_STATUS = {
+  0: { type: 'frozen', dur: 60 },      // ゼン: 凍結
+  3: { type: 'burning', dur: 120 },     // メテオ: 燃焼
+  8: { type: 'stunned', dur: 60 },      // シャうでん: 感電
+  9: { type: 'cursed', dur: 120 },      // ジャッジマン: 呪縛
+  14: { type: 'poisoned', dur: 180 },   // とっこ: 毒
+};
 function getThrowDmg(charIdx) {
   return CHAR_THROW_DMG[CHAR_THROW_TYPE[charIdx] || 'balance'];
 }
@@ -7694,6 +7703,45 @@ const dragonAttackDefs = {
   }
   for (const charId in attackDefs) assignAttrs(attackDefs[charId]);
   assignAttrs(dragonAttackDefs);
+})();
+
+// === キャラ個性: 弱攻撃発生フレーム調整 ===
+(function adjustStartupFrames() {
+  // キャラごとの弱攻撃startup目標（scaleAttackSpeeds適用後の値を上書き）
+  const NORMAL_STARTUP = {
+    2: 2, 8: 2,                                     // 超高速
+    7: 3, 15: 3, 14: 3, 23: 4, 26: 3,              // 高速
+    0: 5, 4: 5, 10: 5, 13: 5, 18: 5, 16: 5, 9: 5, 20: 5, 22: 5, // 標準
+    1: 7, 5: 7, 12: 8, 19: 8, 6: 9,               // 低速
+    21: 10,                                          // 超低速
+  };
+  for (const charId in NORMAL_STARTUP) {
+    const ci = parseInt(charId);
+    if (attackDefs[ci] && attackDefs[ci].normal) {
+      attackDefs[ci].normal.startup = NORMAL_STARTUP[ci];
+    }
+  }
+})();
+
+// === キャラ個性: 飛び道具追加（弱攻撃に） ===
+(function addCharProjectiles() {
+  // ゼン: 氷弾
+  if (attackDefs[0] && !attackDefs[0].normal.projectile) {
+    attackDefs[0].normal.projectile = { speed:8, damage:4.8, kbBase:2, kbScale:0.04, kbAngle:-15, w:14, h:12, life:50, color:'#88DDFF', pcolor:'#AAEEFF', statusChance:0.1, statusType:'frozen' };
+  }
+  // メテオ: 火球
+  if (attackDefs[3] && !attackDefs[3].normal.projectile) {
+    attackDefs[3].normal.projectile = { speed:7, damage:6, kbBase:3, kbScale:0.05, kbAngle:-15, w:16, h:16, life:50, color:'#FF6600', pcolor:'#FFAA44', statusChance:0.3, statusType:'burning' };
+  }
+  // タンク: 砲弾（重い）
+  if (attackDefs[12] && !attackDefs[12].normal.projectile) {
+    attackDefs[12].normal.projectile = { speed:10, damage:9, kbBase:5, kbScale:0.08, kbAngle:-20, w:20, h:18, life:55, color:'#A0B858', pcolor:'#6B7B3A' };
+  }
+  // プル: 引力弾（遅い）
+  if (attackDefs[27] && !attackDefs[27].normal.projectile) {
+    attackDefs[27].normal.projectile = { speed:5, damage:7.2, kbBase:3, kbScale:0.05, kbAngle:170, w:18, h:14, life:40, color:'#9944DD', pcolor:'#CC88FF', pullEffect:true };
+  }
+  // 注: サイソク(2), バレット(7), シャうでん(8)の強攻撃, おんぱ(17), ドスボス(19), ミスターツー(21)は既に飛び道具を持っている
 })();
 
 // === メテオSE ===
@@ -9308,35 +9356,36 @@ function getPlayerHitbox(p) {
 
 // キャラ別リーチ倍率 [normalW, sideW, upH, downH]
 const CHAR_REACH = [
-  [1.4,1.5,1.3,1.2], // 0 zen (剣)
-  [1.1,1.2,1.0,1.1], // 1 don
-  [0.8,0.9,0.9,0.8], // 2 saisoku (短リーチ高速)
-  [1.1,1.2,1.0,1.0], // 3 meteo
-  [1.8,2.0,1.5,1.6], // 4 long (超長槍)
-  [1.1,1.1,1.0,1.0], // 5 uruo
-  [0.9,1.0,0.9,0.9], // 6 kumatarou
-  [0.7,0.8,0.9,0.7], // 7 bullet (超短リーチ遠距離型)
-  [0.8,0.9,0.8,0.8], // 8 shawden
-  [1.3,1.4,1.2,1.3], // 9 judgeman
-  [1.4,1.5,1.4,1.2], // 10 tensai
-  [1.0,1.1,0.9,1.0], // 11 catbus
-  [1.2,1.4,0.8,0.9], // 12 tank (横長)
-  [1.0,1.1,1.2,0.9], // 13 namioji
-  [1.6,1.8,1.4,1.5], // 14 tokko (長リーチ攻撃特化)
-  [0.8,1.0,0.9,0.8], // 15 sam
-  [1.3,1.4,1.5,1.2], // 16 king
-  [1.2,1.3,1.0,1.1], // 17 onpa
-  [1.0,1.1,1.0,0.9], // 18 sen
-  [1.2,1.4,0.8,0.9], // 19 dosboss (横長)
-  [1.2,1.3,1.4,1.0], // 20 micro
-  [1.1,1.2,1.0,1.0], // 21 mrtwo
-  [1.1,1.2,1.0,1.0], // 22 kinkin
-  [0.9,1.0,1.3,0.8], // 23 satoru (上方向リーチ)
-  [0.8,0.9,0.8,0.8], // 24 kowai
-  [0.9,0.9,0.9,0.9], // 25 yaho
-  [0.7,0.8,0.8,0.7], // 26 poyo (最短)
-  [1.0,1.0,1.0,1.0], // 27 pull
-  [0.9,1.0,0.9,0.9], // 28 mussy
+  // [normal, side/strong, up, down] リーチ倍率
+  [1.6,1.6,1.6,1.6], // 0 zen (剣・長リーチ)
+  [1.0,1.0,1.0,1.0], // 1 don (標準)
+  [0.75,0.75,0.75,0.75], // 2 saisoku (短リーチ・高速)
+  [1.0,1.0,1.0,1.0], // 3 meteo (標準)
+  [2.0,2.0,2.0,2.0], // 4 long (超長リーチ・槍)
+  [1.0,1.0,1.0,1.0], // 5 uruo (標準)
+  [0.6,0.6,0.6,0.6], // 6 kumatarou (超短・密着パワー)
+  [0.75,0.75,0.75,0.75], // 7 bullet (短リーチ・飛び道具メイン)
+  [1.0,1.0,1.0,1.0], // 8 shawden (標準)
+  [2.0,2.0,2.0,2.0], // 9 judgeman (超長リーチ・扇形)
+  [1.6,1.6,1.6,1.6], // 10 tensai (長リーチ)
+  [1.0,1.0,1.0,1.0], // 11 catbus (標準)
+  [1.6,1.6,1.0,1.0], // 12 tank (横長リーチ)
+  [1.0,1.0,1.0,1.0], // 13 namioji (標準)
+  [1.0,1.0,1.0,1.0], // 14 tokko (標準)
+  [0.75,0.75,0.75,0.75], // 15 sam (短リーチ)
+  [1.6,1.6,1.6,1.6], // 16 king (長リーチ)
+  [1.0,1.0,1.0,1.0], // 17 onpa (標準)
+  [1.0,1.0,1.0,1.0], // 18 sen (標準)
+  [1.6,1.6,1.0,1.0], // 19 dosboss (横長リーチ)
+  [0.6,0.6,0.6,0.6], // 20 micro (超短・密着パワー)
+  [1.0,1.0,1.0,1.0], // 21 mrtwo (標準)
+  [1.0,1.0,1.0,1.0], // 22 kinkin (標準)
+  [0.75,0.75,0.75,0.75], // 23 satoru (短リーチ)
+  [1.0,1.0,1.0,1.0], // 24 kowai (標準)
+  [1.0,1.0,1.0,1.0], // 25 yaho (標準)
+  [0.75,0.75,0.75,0.75], // 26 poyo (短リーチ)
+  [1.0,1.0,1.0,1.0], // 27 pull (標準)
+  [1.0,1.0,1.0,1.0], // 28 mussy (標準)
 ];
 function getAttackHitbox(p, atk) {
   const dir = p.facingLeft ? -1 : 1;
@@ -9381,6 +9430,9 @@ function spawnProjectile(p, projDef) {
     ink: projDef.ink || false,
     meshitero: !!(p.attackData && p.attackData.meshitero),
     gravityDebuff: !!(p.attackData && p.attackData.gravityDebuff),
+    statusChance: projDef.statusChance || 0,
+    statusType: projDef.statusType || null,
+    pullEffect: projDef.pullEffect || false,
     hitTargets: [],
   });
   // バレット(7): 2連射 - 0.1秒後に自動で2発目
@@ -9731,6 +9783,43 @@ function executeThrow(grabber, dirX, dirY) {
   grabber.throwCooldown = 30;
   // 自己バフ: 熊太郎「怒り」投げ成功後3秒間全ダメ1.15倍
   if (grabber.charIdx === 6) { grabber.autoBuff = 180; grabber.autoBuffType = 'kumaRage'; }
+
+  // === 状態異常投げ ===
+  const throwStatus = CHAR_THROW_STATUS[grabber.charIdx];
+  if (throwStatus) {
+    const t2 = target;
+    if (throwStatus.type === 'frozen') t2.frozen = Math.max(t2.frozen || 0, throwStatus.dur);
+    else if (throwStatus.type === 'burning') { t2.burning = Math.max(t2.burning || 0, throwStatus.dur); t2.burnDmg = 2; }
+    else if (throwStatus.type === 'stunned') t2.stunned = Math.max(t2.stunned || 0, throwStatus.dur);
+    else if (throwStatus.type === 'cursed') t2.cursed = Math.max(t2.cursed || 0, throwStatus.dur);
+    else if (throwStatus.type === 'poisoned') { t2.poisoned = Math.max(t2.poisoned || 0, throwStatus.dur); t2.poisonDmg = 2; }
+  }
+  // 特殊投げ: Catbus - 投げ後に相手背後にテレポート
+  if (grabber.charIdx === 11) {
+    grabber.x = target.x + (grabber.facingLeft ? 60 : -60);
+    grabber.facingLeft = !grabber.facingLeft;
+  }
+  // 特殊投げ: キング - 投げ後に短い時間停止
+  if (grabber.charIdx === 16) {
+    grabber.kingTimeStop = Math.max(grabber.kingTimeStop || 0, 30); // 0.5秒
+  }
+  // 特殊投げ: プル - 投げ後に相手を引き戻す
+  if (grabber.charIdx === 27) {
+    target.vx *= -0.5;
+    target.hitstun += 10;
+  }
+  // 特殊投げ: ヤッホ - ランダム効果
+  if (grabber.charIdx === 25) {
+    const effects = ['frozen','burning','stunned','cursed','confused','poisoned'];
+    const randEff = effects[Math.floor(Math.random() * effects.length)];
+    if (randEff === 'frozen') target.frozen = Math.max(target.frozen||0, 60);
+    else if (randEff === 'burning') { target.burning = Math.max(target.burning||0, 120); target.burnDmg = 2; }
+    else if (randEff === 'stunned') target.stunned = Math.max(target.stunned||0, 60);
+    else if (randEff === 'cursed') target.cursed = Math.max(target.cursed||0, 120);
+    else if (randEff === 'confused') target.confused = Math.max(target.confused||0, 120);
+    else if (randEff === 'poisoned') { target.poisoned = Math.max(target.poisoned||0, 180); target.poisonDmg = 2; }
+  }
+
   releaseGrab(grabber);
 }
 
@@ -10314,6 +10403,18 @@ function updateBattle(dt) {
           if (pr.ownerCharIdx === 19) projDmg *= (1 + Math.min((owner.dosbossComboCount || 0) * 0.05, 0.25)); // ドスボス「混沌」
         }
         applyHit(fakeAttacker, p, projDmg, pr.kbBase, pr.kbScale, pr.kbAngle, 'projectile');
+        // 飛び道具の状態異常適用
+        if (pr.statusChance && pr.statusType && Math.random() < pr.statusChance) {
+          if (pr.statusType === 'frozen') p.frozen = Math.max(p.frozen||0, 60);
+          else if (pr.statusType === 'burning') { p.burning = Math.max(p.burning||0, 120); p.burnDmg = 2; }
+          else if (pr.statusType === 'stunned') p.stunned = Math.max(p.stunned||0, 60);
+          else if (pr.statusType === 'confused') p.confused = Math.max(p.confused||0, 120);
+        }
+        // 引力弾: ヒットした相手を引き寄せ
+        if (pr.pullEffect && owner) {
+          p.vx += (owner.x - p.x) * 0.15;
+          p.vy -= 3;
+        }
         showHitDisplay(p.x, p.y, true);
         if (pr.meshitero) {
           cmdNameDisplay.push({ text: '飯テロ！', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#FF8844' });
@@ -17506,13 +17607,27 @@ function executeSmash(p) {
   p.specialState = null;
 
   let angle, startup, hw, hh, hx, hy;
-  // スマッシュ攻撃の溜め感: startupを1.5倍に
+  // キャラごとの横スマッシュ角度
+  const SIDE_SMASH_ANGLES = {
+    // 真横（0度）: 横吹っ飛ばし場外狙い
+    1: 0, 5: 0, 12: 0, 19: 0, 13: 0,
+    // 斜め上（-35度）: 上に追撃
+    0: -35, 4: -35, 10: -35, 16: -35, 9: -35,
+    // 真上寄り（-70度）: 上スマに近い
+    2: -70, 7: -70, 15: -70, 26: -70,
+    // 斜め下（20度）: 地面叩きつけ
+    14: 20, 8: 20, 20: 20,
+  };
+  // スマッシュ攻撃の溜め感: startupを弱攻撃×2.5倍
+  const normalStartup = (defs.normal ? defs.normal.startup : 5);
+  const smashStartupBase = Math.max(8, Math.round(normalStartup * 2.5));
   if (p.smashType === 'upSmash') {
-    angle = -85; startup = 22; hx = 0; hy = -60; hw = 60; hh = 65;
+    angle = -85; startup = smashStartupBase; hx = 0; hy = -60; hw = 60; hh = 65;
   } else if (p.smashType === 'downSmash') {
-    angle = -15; startup = 15; hx = 0; hy = -30; hw = 90; hh = 40;
+    angle = -15; startup = Math.round(smashStartupBase * 0.7); hx = 0; hy = -30; hw = 90; hh = 40;
   } else {
-    angle = -45; startup = 30; hx = baseAtk.hx || 20; hy = -35; hw = (baseAtk.hw || 60) * 1.2; hh = baseAtk.hh || 45;
+    angle = SIDE_SMASH_ANGLES[p.charIdx] !== undefined ? SIDE_SMASH_ANGLES[p.charIdx] : -45;
+    startup = smashStartupBase; hx = baseAtk.hx || 20; hy = -35; hw = (baseAtk.hw || 60) * 1.2; hh = baseAtk.hh || 45;
   }
 
   p.attackData = {
