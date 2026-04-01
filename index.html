@@ -99,7 +99,7 @@ const stages = [
     name: '魔王の玉座',
     desc: '暗黒の城で最終決戦',
     bgSrc: 'images/bg5.png',
-    bgmSrc: 'sounds/bgm2.mp3', // bgm5未作成→bgm2.mp3をフォールバック
+    bgmSrc: 'sounds/bgm5.mp3',
     gravityMult: 1.1,
   },
 ];
@@ -6102,9 +6102,12 @@ bgm2Audio.volume = 0.4;
 const bgm3Audio = new Audio('sounds/bgm3.mp3');
 bgm3Audio.loop = true;
 bgm3Audio.volume = 0.4;
+const bgm5Audio = new Audio('sounds/bgm5.mp3');
+bgm5Audio.loop = true;
+bgm5Audio.volume = 0.4;
 let bgmPlaying = false;
 let currentBgmAudio = bgmAudio;
-const bgmMap = { 'sounds/bgm.mp3': bgmAudio, 'sounds/bgm2.mp3': bgm2Audio, 'sounds/bgm3.mp3': bgm3Audio };
+const bgmMap = { 'sounds/bgm.mp3': bgmAudio, 'sounds/bgm2.mp3': bgm2Audio, 'sounds/bgm3.mp3': bgm3Audio, 'sounds/bgm5.mp3': bgm5Audio };
 
 function startBGM() {
   if (bgmPlaying) return;
