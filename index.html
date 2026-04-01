@@ -13714,6 +13714,7 @@ function drawBattle(dt) {
     if (p.renderX !== undefined) { p.x = p.renderX; p.y = p.renderY; }
     // 強化モード中: グロー + サイズ×1.1
     const _pm = getActivePowerMode(p);
+    ctx.save(); // プレイヤー描画の外側save（shadowBlur/transform含む）
     if (_pm) {
       const gc = POWER_GLOW[p.charIdx] || '#FFD700';
       ctx.shadowColor = gc; ctx.shadowBlur = 20;
@@ -13721,7 +13722,6 @@ function drawBattle(dt) {
       ctx.scale(1.1, 1.1);
       ctx.translate(-p.x, -(p.y - 55));
     }
-    ctx.save();
 
     // Catbus(11): 瞬間消滅中は半透明
     if (p.charIdx === 11 && p.catbusVanishTimer > 0) {
@@ -13829,35 +13829,7 @@ function drawBattle(dt) {
       drawBattleCharacter(p.x, drawY, 1.0, p.charIdx, battleTime, p.facingLeft, p);
     }
 
-    // === ライティング効果（光源左上・右側を暗く） ===
-    {
-      ctx.save();
-      ctx.globalCompositeOperation = 'multiply';
-      const cb = CHAR_BODY[p.charIdx] || [1.0, 1.0];
-      const lw = 40 * cb[0];
-      const lh = 70 * cb[1];
-      const lightGrad = ctx.createLinearGradient(p.x - lw, 0, p.x + lw, 0);
-      lightGrad.addColorStop(0, 'rgba(255,255,255,0)');
-      lightGrad.addColorStop(0.6, 'rgba(255,255,255,0)');
-      lightGrad.addColorStop(1, 'rgba(0,0,0,0.25)');
-      ctx.fillStyle = lightGrad;
-      ctx.fillRect(p.x - lw, drawY - lh + 15, lw * 2, lh);
-      ctx.restore();
-    }
-
-    // === ダメージ時3D的カラーフラッシュ（白→赤→通常） ===
-    if (p.hitstun > 0 && p.hitstun % 4 < 2) {
-      ctx.save();
-      ctx.globalCompositeOperation = 'screen';
-      const hitIntensity = Math.min(0.6, p.hitstun / 20);
-      ctx.globalAlpha = hitIntensity;
-      ctx.fillStyle = '#FF3300';
-      const cb2 = CHAR_BODY[p.charIdx] || [1.0, 1.0];
-      const dw = 36 * cb2[0];
-      const dh = 65 * cb2[1];
-      ctx.fillRect(p.x - dw, drawY - dh + 15, dw * 2, dh);
-      ctx.restore();
-    }
+    // ライティング・ダメージフラッシュはdrawBattleCharacter内のdamageTintで処理
 
     // Draw attack effects
     if (p.attacking && p.attackData) {
@@ -14120,8 +14092,6 @@ function drawBattle(dt) {
     ctx.lineTo(p.x - 6, arrowY - 4);
     ctx.lineTo(p.x + 6, arrowY - 4);
     ctx.closePath(); ctx.fill();
-    // 強化モードグロー解除
-    if (_pm) { ctx.shadowBlur = 0; }
     // 描画補間: 物理位置を復元
     p.x = _physX; p.y = _physY;
   }
