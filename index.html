@@ -9466,6 +9466,9 @@ function executeRecovery(p) {
   if (!rec) return false;
   p.recoveryUsed = true;
   p.recoveryActive = rec.frames;
+  p.recoveryHitFrames = 8; // 当たり判定は最初の8Fのみ
+  p.recoveryHitConfirmed = false;
+  p.hitTargets = [];
   // 上昇速度計算
   const rad = (rec.angle || -90) * Math.PI / 180;
   const speed = rec.height / rec.frames;
@@ -11494,15 +11497,19 @@ function updateBattle(dt) {
       if (rec2 && battleTime % 3 === 0) {
         sparks.push({ x: p.x + (Math.random()-0.5)*15, y: p.y, vx: (Math.random()-0.5)*2, vy: 1+Math.random(), life: 8, maxLife: 8, color: rec2.color, size: 2+Math.random()*2, gravity: 0.05, drag: 0.95 });
       }
-      // ヒットボックス
-      if (rec2 && rec2.dmg > 0) {
+      // ヒットボックス（最初の8Fのみ、1回ヒットで終了）
+      if (p.recoveryHitFrames > 0) p.recoveryHitFrames--;
+      if (rec2 && rec2.dmg > 0 && p.recoveryHitFrames > 0 && !p.recoveryHitConfirmed) {
         const rHb = { x: p.x - 30, y: p.y - 50, w: 60, h: 60 };
         for (const t of players) {
           if (t.id === p.id || !t.alive || t.invincibleTimer > 0) continue;
+          if (p.hitTargets.includes(t.id)) continue; // 既にヒット済み
           const th = getPlayerHitbox(t);
           if (hitboxCollides(rHb.x, rHb.y, rHb.w, rHb.h, th.x, th.y, th.w, th.h)) {
-            applyHit(p, t, rec2.dmg, 3, 0.04, -85, 'special'); // KB小さめ・真上方向
+            applyHit(p, t, rec2.dmg, 3, 0.04, -85, 'special');
             showHitDisplay(t.x, t.y, true);
+            p.hitTargets.push(t.id);
+            p.recoveryHitConfirmed = true;
             // 状態異常付与
             if (rec2.status === 'frozen') t.frozen = Math.max(t.frozen, 60);
             else if (rec2.status === 'burning') { t.burning = Math.max(t.burning, 120); t.burnDmg = 2; }
@@ -11514,7 +11521,7 @@ function updateBattle(dt) {
         }
       }
       p.x += p.vx; p.y += p.vy;
-      if (p.recoveryActive <= 0) { p.vx *= 0.3; p.vy = 0; } // 上昇完了→通常落下へ
+      if (p.recoveryActive <= 0) { p.vx *= 0.3; p.vy = 0; p.recoveryHitConfirmed = false; p.recoveryHitFrames = 0; p.hitTargets = []; } // 上昇完了→通常落下へ
       landingCheck(p); blastCheck(p);
       continue;
     }
@@ -12586,6 +12593,7 @@ function landingCheck(p) {
       if (p.y >= STAGE_GROUND_Y && p.y - p.vy < STAGE_GROUND_Y + 8) {
         p.y = STAGE_GROUND_Y; p.vy = 0; p.grounded = true; landed = true;
         p.jumps = p.charIdx === 15 ? 3 : 2; p.strongLocked = false; p.recoveryUsed = false;
+        p.recoveryActive = 0; p.recoveryHitConfirmed = false; p.recoveryHitFrames = 0;
         p.airDodgeUsed = false; p.airDodging = false; p.airDodgeTimer = 0; p.airDodgeEndlag = 0;
         if (p.attacking && p.attackData && p.attackData.specialType === 'divekick') {
           p.attacking = false; p.specialState = null; p.attackFrame = 0;
@@ -12598,6 +12606,7 @@ function landingCheck(p) {
           if (p.y >= plat.y && p.y - prevVy < plat.y + 8) {
             p.y = plat.y; p.vy = 0; p.grounded = true; landed = true;
             p.jumps = p.charIdx === 15 ? 3 : 2; p.strongLocked = false; p.recoveryUsed = false;
+            p.recoveryActive = 0; p.recoveryHitConfirmed = false; p.recoveryHitFrames = 0;
             p.airDodgeUsed = false; p.airDodging = false; p.airDodgeTimer = 0; p.airDodgeEndlag = 0;
             if (p.attacking && p.attackData && p.attackData.specialType === 'divekick') {
               p.attacking = false; p.specialState = null; p.attackFrame = 0;
