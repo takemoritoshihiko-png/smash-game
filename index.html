@@ -91,7 +91,7 @@ const stages = [
     name: '星降る宇宙',
     desc: '銀河の渦の中で戦え',
     bgSrc: 'images/bg4.png',
-    bgmSrc: 'sounds/bgm.mp3', // bgm4未作成→bgm.mp3をフォールバック
+    bgmSrc: 'sounds/bgm4.mp3',
     gravityMult: 0.85,
   },
   {
@@ -6102,12 +6102,15 @@ bgm2Audio.volume = 0.4;
 const bgm3Audio = new Audio('sounds/bgm3.mp3');
 bgm3Audio.loop = true;
 bgm3Audio.volume = 0.4;
+const bgm4Audio = new Audio('sounds/bgm4.mp3');
+bgm4Audio.loop = true;
+bgm4Audio.volume = 0.4;
 const bgm5Audio = new Audio('sounds/bgm5.mp3');
 bgm5Audio.loop = true;
 bgm5Audio.volume = 0.4;
 let bgmPlaying = false;
 let currentBgmAudio = bgmAudio;
-const bgmMap = { 'sounds/bgm.mp3': bgmAudio, 'sounds/bgm2.mp3': bgm2Audio, 'sounds/bgm3.mp3': bgm3Audio, 'sounds/bgm5.mp3': bgm5Audio };
+const bgmMap = { 'sounds/bgm.mp3': bgmAudio, 'sounds/bgm2.mp3': bgm2Audio, 'sounds/bgm3.mp3': bgm3Audio, 'sounds/bgm4.mp3': bgm4Audio, 'sounds/bgm5.mp3': bgm5Audio };
 
 function startBGM() {
   if (bgmPlaying) return;
