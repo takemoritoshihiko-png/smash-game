@@ -9879,8 +9879,8 @@ function executeThrow(grabber, dirX, dirY) {
       target.vx = 0;
       target.vy = -kb * 1.3;
     } else {
-      // 前投げ・後ろ投げ: KB×0.45 + 上限15
-      kb = Math.min(kb * 0.45, 15);
+      // 前投げ・後ろ投げ: KB×0.72 + 上限15（0.45×1.6倍に強化）
+      kb = Math.min(kb * 0.72, 15);
       target.vx = Math.cos(tRad) * kb * throwDir;
       target.vy = Math.sin(tRad) * kb;
     }
