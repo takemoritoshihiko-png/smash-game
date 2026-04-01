@@ -5522,12 +5522,13 @@ function executeComboFinisher(p) {
   const hitCount = f.hits;
 
   // ヤッホ: ランダムダメージ
-  let dmgPerHit = f.damage;
-  if (f.randomDmg) dmgPerHit = Math.floor(Math.random() * 99) + 1;
+  const FINISHER_DMG_MULT = 0.6; // ダメージ弱体化（×0.6）
+  let dmgPerHit = f.damage * FINISHER_DMG_MULT;
+  if (f.randomDmg) dmgPerHit = Math.floor(Math.random() * 99) * FINISHER_DMG_MULT + 1;
 
   for (let i = 0; i < hitCount; i++) {
     const isLast = (i === hitCount - 1);
-    const hitDmg = (isLast && f.lastHitDmg) ? f.lastHitDmg : dmgPerHit;
+    const hitDmg = (isLast && f.lastHitDmg) ? f.lastHitDmg * FINISHER_DMG_MULT : dmgPerHit;
     totalDmg += hitDmg;
     target.damage = Math.min(999, target.damage + hitDmg);
 
