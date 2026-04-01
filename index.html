@@ -16721,6 +16721,7 @@ function setupPeerConnection(conn) {
   peerConn = conn;
   conn.on('open', () => {
     console.log('[ONLINE] Connection opened, isHost:', isHost);
+    if (onlineConnectTimeout) { clearTimeout(onlineConnectTimeout); onlineConnectTimeout = null; }
     onlineState = 'connected';
     onlineError = '';
     // Send our character selection
@@ -16805,43 +16806,76 @@ function setupPeerConnection(conn) {
   });
 }
 
+// PeerJS ICE設定（NAT越え改善）
+const PEER_CONFIG = {
+  config: {
+    iceServers: [
+      { urls: 'stun:stun.l.google.com:19302' },
+      { urls: 'stun:stun1.l.google.com:19302' },
+      { urls: 'stun:stun2.l.google.com:19302' },
+    ]
+  },
+  debug: 2
+};
+let onlineConnectTimeout = null;
+
 function startHosting() {
   onlineRoomId = generateRoomId();
   onlineState = 'hosting';
   onlineError = '';
   isHost = true;
   console.log('[ONLINE] Hosting room:', onlineRoomId);
-  peer = new Peer('smash-' + onlineRoomId);
+  peer = new Peer('smash-' + onlineRoomId, PEER_CONFIG);
   peer.on('open', (id) => {
     console.log('[ONLINE] Peer opened with ID:', id);
     onlineState = 'hosting';
   });
   peer.on('connection', (conn) => {
     console.log('[ONLINE] Guest connected!');
+    if (onlineConnectTimeout) { clearTimeout(onlineConnectTimeout); onlineConnectTimeout = null; }
     setupPeerConnection(conn);
   });
   peer.on('error', (err) => {
     console.error('[ONLINE] Peer error:', err.type, err);
-    onlineError = '接続エラー: ' + err.type;
+    onlineError = '接続エラー: ' + (err.type === 'unavailable-id' ? 'このIDは既に使われています' : err.type === 'network' ? 'ネットワークエラー' : err.type === 'server-error' ? 'サーバーエラー' : err.message || err.type);
     onlineState = 'menu';
+  });
+  peer.on('disconnected', () => {
+    console.log('[ONLINE] Peer disconnected, attempting reconnect...');
+    if (peer && !peer.destroyed) peer.reconnect();
   });
 }
 
 function joinRoom(roomId) {
+  roomId = (roomId || '').trim();
+  if (!roomId || roomId.length < 4) { onlineError = 'IDを4桁以上入力してください'; return; }
   onlineState = 'joining';
   onlineError = '';
   isHost = false;
   console.log('[ONLINE] Joining room:', roomId);
-  peer = new Peer();
+  peer = new Peer(undefined, PEER_CONFIG);
   peer.on('open', (id) => {
     console.log('[ONLINE] Guest peer opened:', id, '→ connecting to smash-' + roomId);
     const conn = peer.connect('smash-' + roomId, { reliable: true });
     setupPeerConnection(conn);
+    // 10秒タイムアウト
+    onlineConnectTimeout = setTimeout(() => {
+      if (onlineState === 'joining') {
+        onlineError = '接続できませんでした。IDを確認して再試行してください';
+        onlineState = 'menu';
+        if (peer && !peer.destroyed) peer.destroy();
+      }
+    }, 10000);
   });
   peer.on('error', (err) => {
     console.error('[ONLINE] Peer error:', err.type, err);
-    onlineError = 'エラー: ' + err.type;
+    if (onlineConnectTimeout) { clearTimeout(onlineConnectTimeout); onlineConnectTimeout = null; }
+    onlineError = err.type === 'peer-unavailable' ? '相手が見つかりません。IDを確認してください' : err.type === 'network' ? 'ネットワークエラー' : (err.message || err.type);
     onlineState = 'menu';
+  });
+  peer.on('disconnected', () => {
+    console.log('[ONLINE] Peer disconnected, attempting reconnect...');
+    if (peer && !peer.destroyed) peer.reconnect();
   });
 }
 
@@ -17439,6 +17473,13 @@ function drawOnlineLobby(dt) {
     ctx.fillStyle = '#888';
     ctx.fillText('ESC で戻る', 480, 500);
 
+    // エラーメッセージ表示
+    if (onlineError) {
+      ctx.font = 'bold 14px sans-serif';
+      ctx.fillStyle = '#FF4444';
+      ctx.fillText(onlineError, 480, 530);
+    }
+
   } else if (onlineState === 'hosting') {
     ctx.font = '20px sans-serif';
     ctx.fillStyle = '#AAA';
@@ -17468,10 +17509,21 @@ function drawOnlineLobby(dt) {
   } else if (onlineState === 'joining') {
     ctx.font = '20px sans-serif';
     ctx.fillStyle = '#AAA';
-    ctx.fillText('接続中...', 480, 300);
+    ctx.fillText('接続中...', 480, 280);
+    // スピナー
+    ctx.save();
+    ctx.translate(480, 340);
+    ctx.rotate(Date.now() * 0.006);
+    ctx.strokeStyle = '#FF66AA';
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(0, 0, 20, 0, Math.PI * 1.5); ctx.stroke();
+    ctx.restore();
     const dots = '.'.repeat(1 + Math.floor(Date.now() / 500) % 3);
     ctx.fillStyle = '#FF66AA';
-    ctx.fillText(dots, 480, 340);
+    ctx.font = '16px sans-serif';
+    ctx.fillText(dots, 480, 390);
+    ctx.fillStyle = '#666';
+    ctx.fillText('ESC でキャンセル', 480, 420);
 
   } else if (onlineState === 'connected') {
     ctx.font = 'bold 28px sans-serif';
@@ -19122,8 +19174,8 @@ function handleKeyDown(e) {
       } else if (onlineInputFocused) {
         if (e.key === 'Backspace') {
           onlineInputId = onlineInputId.slice(0, -1);
-        } else if (e.key === 'Enter' && onlineInputId.length >= 4) {
-          joinRoom(onlineInputId);
+        } else if (e.key === 'Enter' && onlineInputId.trim().length >= 4) {
+          joinRoom(onlineInputId.trim());
         } else if (e.key.length === 1 && /[0-9]/.test(e.key) && onlineInputId.length < 6) {
           onlineInputId += e.key;
         }
