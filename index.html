@@ -16567,9 +16567,31 @@ function setupPeerConnection(conn) {
       // charIdxを保存してvideo phaseで使用
       ultimateHitTarget = players.find(pp => pp.id !== data.playerId) ? players.find(pp => pp.id !== data.playerId).id : -1;
     } else if (data.type === 'state') {
-      // Guest receives authoritative state from host
+      // Guest receives authoritative full state from host
       if (!isHost) {
         try { applyHostState(data); } catch(e) { console.error('[GUEST] applyHostState error:', e); }
+      }
+    } else if (data.type === 'frame') {
+      // Guest receives lightweight frame packet (position/velocity only)
+      if (!isHost && players[0] && players[1]) {
+        if (data._ts) { onlineRTT = Date.now() - data._ts; onlineLagFrames = Math.min(4, Math.round(onlineRTT / 32)); }
+        const lp = 0.25;
+        // P1
+        const dx1 = (data.p1x + data.p1vx * onlineLagFrames) - players[0].x;
+        const dy1 = (data.p1y + data.p1vy * onlineLagFrames) - players[0].y;
+        if (Math.abs(dx1) < 80) { players[0].x += dx1 * lp; players[0].y += dy1 * lp; }
+        else { players[0].x = data.p1x; players[0].y = data.p1y; }
+        players[0].vx += (data.p1vx - players[0].vx) * 0.4;
+        players[0].vy += (data.p1vy - players[0].vy) * 0.4;
+        players[0].facingLeft = data.p1f; players[0].grounded = data.p1g; players[0].animState = data.p1as;
+        // P2
+        const dx2 = (data.p2x + data.p2vx * onlineLagFrames) - players[1].x;
+        const dy2 = (data.p2y + data.p2vy * onlineLagFrames) - players[1].y;
+        if (Math.abs(dx2) < 80) { players[1].x += dx2 * lp; players[1].y += dy2 * lp; }
+        else { players[1].x = data.p2x; players[1].y = data.p2y; }
+        players[1].vx += (data.p2vx - players[1].vx) * 0.4;
+        players[1].vy += (data.p2vy - players[1].vy) * 0.4;
+        players[1].facingLeft = data.p2f; players[1].grounded = data.p2g; players[1].animState = data.p2as;
       }
     }
   });
@@ -16696,59 +16718,109 @@ function serializePlayer(p) {
 }
 
 let hostSendCounter = 0;
+let hostLastSentState = null; // 前回送信状態（デルタ検出用）
+
 function sendHostState() {
   if (!peerConn || !peerConn.open) return;
   hostSendCounter++;
-  // Send every frame for smooth gameplay (was every 2 frames)
-  const stateData = {
-    type: 'state',
-    p1: serializePlayer(players[0]),
-    p2: serializePlayer(players[1]),
-    battleTimer, battleStarted, battleCountdown, gameOver, winner,
-    hitStopFrames,
-    koSlowMotion: { active: koSlowMotion.active, frames: koSlowMotion.frames, maxFrames: koSlowMotion.maxFrames },
-    projectiles: projectiles.map(pr => ({
-      x: pr.x, y: pr.y, vx: pr.vx, vy: pr.vy,
-      w: pr.w, h: pr.h, life: pr.life, ownerId: pr.ownerId,
-      color: pr.color, pcolor: pr.pcolor,
-      shape: pr.shape, time: pr.time, ownerCharIdx: pr.ownerCharIdx,
-    })),
-    // コンボカウンター同期
-    combo0: comboDisplay[0] ? { count: comboDisplay[0].count, timer: comboDisplay[0].timer, maxTimer: comboDisplay[0].maxTimer } : null,
-    combo1: comboDisplay[1] ? { count: comboDisplay[1].count, timer: comboDisplay[1].timer, maxTimer: comboDisplay[1].maxTimer } : null,
-  };
-  peerConn.send(stateData);
+
+  const p1 = players[0], p2 = players[1];
+
+  // === デルタ検出: 変化があった時だけフルパケット送信 ===
+  const hasImportantChange = !hostLastSentState ||
+    p1.attacking !== hostLastSentState.p1a || p2.attacking !== hostLastSentState.p2a ||
+    p1.alive !== hostLastSentState.p1alive || p2.alive !== hostLastSentState.p2alive ||
+    p1.stocks !== hostLastSentState.p1s || p2.stocks !== hostLastSentState.p2s ||
+    Math.abs(p1.damage - (hostLastSentState.p1d || 0)) > 0.5 ||
+    Math.abs(p2.damage - (hostLastSentState.p2d || 0)) > 0.5 ||
+    p1.guarding !== hostLastSentState.p1g || p2.guarding !== hostLastSentState.p2g ||
+    gameOver !== hostLastSentState.go ||
+    hostSendCounter % 3 === 0; // 3Fに1回はフルパケット
+
+  if (hasImportantChange) {
+    // フルパケット送信
+    const stateData = {
+      type: 'state',
+      _ts: Date.now(), // RTT計測用タイムスタンプ
+      p1: serializePlayer(p1),
+      p2: serializePlayer(p2),
+      battleTimer, battleStarted, battleCountdown, gameOver, winner,
+      hitStopFrames,
+      koSlowMotion: { active: koSlowMotion.active, frames: koSlowMotion.frames, maxFrames: koSlowMotion.maxFrames },
+      projectiles: projectiles.map(pr => ({
+        x: Math.round(pr.x * 10) / 10, y: Math.round(pr.y * 10) / 10,
+        vx: Math.round(pr.vx * 100) / 100, vy: Math.round(pr.vy * 100) / 100,
+        w: pr.w, h: pr.h, life: pr.life, ownerId: pr.ownerId,
+        color: pr.color, pcolor: pr.pcolor,
+        shape: pr.shape, time: pr.time, ownerCharIdx: pr.ownerCharIdx,
+      })),
+      combo0: comboDisplay[0] ? { count: comboDisplay[0].count, timer: comboDisplay[0].timer, maxTimer: comboDisplay[0].maxTimer } : null,
+      combo1: comboDisplay[1] ? { count: comboDisplay[1].count, timer: comboDisplay[1].timer, maxTimer: comboDisplay[1].maxTimer } : null,
+    };
+    peerConn.send(stateData);
+    hostLastSentState = {
+      p1a: p1.attacking, p2a: p2.attacking, p1alive: p1.alive, p2alive: p2.alive,
+      p1s: p1.stocks, p2s: p2.stocks, p1d: p1.damage, p2d: p2.damage,
+      p1g: p1.guarding, p2g: p2.guarding, go: gameOver,
+    };
+  } else {
+    // 軽量パケット: 位置+速度+向き+アニメのみ
+    peerConn.send({
+      type: 'frame',
+      _ts: Date.now(),
+      p1x: Math.round(p1.x * 10) / 10, p1y: Math.round(p1.y * 10) / 10,
+      p1vx: Math.round(p1.vx * 100) / 100, p1vy: Math.round(p1.vy * 100) / 100,
+      p1f: p1.facingLeft, p1g: p1.grounded, p1as: p1.animState,
+      p2x: Math.round(p2.x * 10) / 10, p2y: Math.round(p2.y * 10) / 10,
+      p2vx: Math.round(p2.vx * 100) / 100, p2vy: Math.round(p2.vy * 100) / 100,
+      p2f: p2.facingLeft, p2g: p2.grounded, p2as: p2.animState,
+    });
+  }
 }
+
+// オンラインRTT計測
+let onlineRTT = 0; // ミリ秒
+let onlinePingTime = 0;
+let onlineLagFrames = 0;
 
 function applyHostState(data) {
   if (!players[0] || !players[1]) return;
+
+  // RTT計測: ホストからのタイムスタンプを利用
+  if (data._ts) {
+    onlineRTT = Date.now() - data._ts;
+    onlineLagFrames = Math.min(4, Math.round(onlineRTT / 32)); // 最大4F
+  }
 
   // Detect damage changes for local effects
   const oldDmg0 = players[0].damage, oldDmg1 = players[1].damage;
   const oldStocks0 = players[0].stocks, oldStocks1 = players[1].stocks;
   const oldAlive0 = players[0].alive, oldAlive1 = players[1].alive;
 
-  // Apply player states (with velocity-predicted interpolation for smooth visuals)
-  const LERP = 0.3;
+  // Apply player states (LERP + 予測 + レイテンシ補正)
+  const LERP_POS = 0.25;
+  const LERP_VEL = 0.4;
   const applyFields = (target, src) => {
-    // Predict where the character should be using velocity (1フレーム先を予測)
-    const predictX = src.x + src.vx * 1.0;
-    const predictY = src.y + src.vy * 1.0;
-    const dx = predictX - target.x, dy = predictY - target.y;
+    // ラグ補正: lag分だけ先の位置を予測
+    const lagX = src.x + src.vx * onlineLagFrames;
+    const lagY = src.y + src.vy * onlineLagFrames;
+    const dx = lagX - target.x, dy = lagY - target.y;
     const dist = Math.sqrt(dx * dx + dy * dy);
     const snapDist = 80;
     if (dist > snapDist || src.alive !== target.alive || src.respawnTimer !== target.respawnTimer) {
       // 大きなズレ or 状態変化: 即座にスナップ
       target.x = src.x; target.y = src.y;
-    } else if (dist < 2) {
+    } else if (dist < 1.5) {
       // 微小なズレ: そのまま受け入れ（ジッター防止）
       target.x = src.x; target.y = src.y;
     } else {
-      // 中間: 滑らかに補間
-      target.x += dx * LERP;
-      target.y += dy * LERP;
+      // 中間: 位置を滑らかに補間
+      target.x += dx * LERP_POS;
+      target.y += dy * LERP_POS;
     }
-    target.vx = src.vx; target.vy = src.vy;
+    // 速度も補間（急な速度変化を緩和）
+    target.vx += (src.vx - target.vx) * LERP_VEL;
+    target.vy += (src.vy - target.vy) * LERP_VEL;
     target.damage = src.damage; target.stocks = src.stocks; target.alive = src.alive;
     target.attacking = src.attacking; target.attackType = src.attackType; target.attackFrame = src.attackFrame;
     target.facingLeft = src.facingLeft; target.hitstun = src.hitstun; target.grounded = src.grounded;
@@ -17007,19 +17079,26 @@ function updateGuestEffects(dt) {
   // Increment battleTime for animation purposes
   battleTime += dt;
 
-  // Client prediction: move players by their velocity between host updates
+  // Client prediction: フル速度で予測移動（ホストデータ間を補完）
   for (const p of players) {
     if (!p.alive) continue;
     if (p.grounded) {
-      // 地上: 横移動のみ予測（摩擦付き）
-      p.x += p.vx * 0.5;
-      p.vx *= 0.95;
+      // 地上: 速度で移動 + 摩擦
+      p.x += p.vx;
+      p.vx *= GROUND_FRICTION;
     } else {
-      // 空中: 速度+重力で予測
-      p.x += p.vx * 0.5;
-      p.y += p.vy * 0.5;
-      p.vy += 0.3;
+      // 空中: 速度 + 重力で予測
+      p.x += p.vx;
+      p.y += p.vy;
+      if (p.vy < 0) p.vy += GRAVITY_RISE;
+      else p.vy += GRAVITY_FALL;
+      if (p.vy > MAX_FALL_SPEED) p.vy = MAX_FALL_SPEED;
+      p.vx *= AIR_FRICTION;
     }
+    // レンダリング補間: ゲスト側でも滑らかな描画位置を更新
+    if (p.renderX === undefined) { p.renderX = p.x; p.renderY = p.y; }
+    p.renderX += (p.x - p.renderX) * 0.35;
+    p.renderY += (p.y - p.renderY) * 0.35;
   }
 
   // Only update visual effects, no game logic
