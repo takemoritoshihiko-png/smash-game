@@ -5359,7 +5359,7 @@ const COMBO_FINISHERS = {
   11: { name:'超高速乱舞テレポート', damage:12, hits:10, effect:'confused', effectDur:300, kb:8, kbAngle:-45, color:'#FFBB44', desc:'10回テレポート攻撃' },
   12: { name:'超弩級砲撃嵐', damage:5, hits:20, effect:null, effectDur:0, kb:6, kbAngle:-60, color:'#A0B858', desc:'砲弾の雨' },
   13: { name:'怒涛の千連撃', damage:2, hits:50, effect:null, effectDur:0, kb:8, kbAngle:-85, color:'#FF6644', desc:'千連打', lastHitDmg:15 },
-  14: { name:'毒霧大蔓延', damage:5, hits:10, effect:'poisoned', effectDur:1800, kb:4, kbAngle:-30, color:'#CC44FF', desc:'全体毒30秒' },
+  14: { name:'毒霧大蔓延', damage:5, hits:10, effect:'poisoned', effectDur:180, kb:4, kbAngle:-30, color:'#CC44FF', desc:'全体毒3秒' },
   15: { name:'虹羽大嵐', damage:4, hits:30, effect:'confused', effectDur:480, kb:5, kbAngle:-50, color:'#FFD700', desc:'全方向無数の羽' },
   16: { name:'永久時間停止', damage:30, hits:1, effect:'frozen', effectDur:300, kb:10, kbAngle:-40, color:'#FFD700', desc:'5秒間時間停止', timeStop:300 },
   17: { name:'共鳴大崩壊', damage:35, hits:1, effect:'stunned', effectDur:300, kb:14, kbAngle:-70, color:'#88FFFF', desc:'全体振動+気絶' },
@@ -5451,7 +5451,7 @@ function executeComboFinisher(p) {
     else if (f.effect === 'stunned') target.stunned = Math.max(target.stunned || 0, f.effectDur);
     else if (f.effect === 'cursed') target.cursed = Math.max(target.cursed || 0, f.effectDur);
     else if (f.effect === 'confused') target.confused = Math.max(target.confused || 0, f.effectDur);
-    else if (f.effect === 'poisoned') { target.poisoned = Math.max(target.poisoned || 0, f.effectDur); target.poisonDmg = 2; }
+    else if (f.effect === 'poisoned') { target.poisoned = Math.max(target.poisoned || 0, f.effectDur); if (!target.poisonDmg || target.poisonDmg < 1) target.poisonDmg = 1; }
     else if (f.effect === 'paralyzed') target.paralyzed = Math.max(target.paralyzed || 0, f.effectDur);
     else if (f.effect === 'fear') target.fearTimer = Math.max(target.fearTimer || 0, f.effectDur);
     else if (f.effect === 'bounce') { target.downThrowBounce = true; target.groundBounced = false; }
@@ -8315,7 +8315,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
     else if (attacker.comboCount >= 4) finalDamage *= 1.05;
   } else if (aci2 === 13) { attacker.comboCount = 1; }
   // とっこ(14): 全攻撃に毒付与（3秒間、毎秒2%ダメージ、合計6%）
-  if (aci2 === 14) { target.poisoned = Math.max(target.poisoned || 0, 180); target.poisonDmg = 2; } // 重ねがけはタイマー延長のみ
+  if (aci2 === 14) { target.poisoned = Math.max(target.poisoned || 0, 180); if (!target.poisonDmg || target.poisonDmg < 1) target.poisonDmg = 1; } // 毒1%/秒、重ねがけはタイマーリセットのみ
   // セン(18): 逆境強化
   if (aci2 === 18) finalDamage *= 1 + Math.min(0.2, attacker.damage * 0.0013);
   // ミスターツー(21): 二重人格 - 爆弾(KB大) or 炎(燃焼付与)
@@ -8382,7 +8382,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   // シャうでん(8): 電圧+8
   if (aci4 === 8) attacker.shawdenVoltage = Math.min(100, (attacker.shawdenVoltage || 0) + 8);
   // とっこ(14): 相手毒蓄積+25（毒攻撃ヒット時）
-  if (aci4 === 14 && target.poisoned > 0) attacker.tokkoPoisonGauge = Math.min(100, (attacker.tokkoPoisonGauge || 0) + 15); // +25→+15
+  if (aci4 === 14 && target.poisoned > 0) attacker.tokkoPoisonGauge = Math.min(100, (attacker.tokkoPoisonGauge || 0) + 8); // +15→+8
   // とっこ重毒: ダメージ2倍
   if (aci4 === 14 && attacker.tokkoPoisonGauge >= 100) target.damage = Math.min(999, target.damage + finalDamage);
   // サム(15): 空中攻撃ヒットで飛翔+0.5
@@ -9795,7 +9795,7 @@ function executeThrow(grabber, dirX, dirY) {
     else if (throwStatus.type === 'burning') { t2.burning = Math.max(t2.burning || 0, throwStatus.dur); t2.burnDmg = 2; }
     else if (throwStatus.type === 'stunned') t2.stunned = Math.max(t2.stunned || 0, throwStatus.dur);
     else if (throwStatus.type === 'cursed') t2.cursed = Math.max(t2.cursed || 0, throwStatus.dur);
-    else if (throwStatus.type === 'poisoned') { t2.poisoned = Math.max(t2.poisoned || 0, throwStatus.dur); t2.poisonDmg = 2; }
+    else if (throwStatus.type === 'poisoned') { t2.poisoned = Math.max(t2.poisoned || 0, throwStatus.dur); if (!t2.poisonDmg || t2.poisonDmg < 1) t2.poisonDmg = 1; }
   }
   // 特殊投げ: Catbus - 投げ後に相手背後にテレポート
   if (grabber.charIdx === 11) {
@@ -11513,7 +11513,7 @@ function updateBattle(dt) {
             // 状態異常付与
             if (rec2.status === 'frozen') t.frozen = Math.max(t.frozen, 60);
             else if (rec2.status === 'burning') { t.burning = Math.max(t.burning, 120); t.burnDmg = 2; }
-            else if (rec2.status === 'poisoned') { t.poisoned = Math.max(t.poisoned, 120); t.poisonDmg = 2; }
+            else if (rec2.status === 'poisoned') { t.poisoned = Math.max(t.poisoned, 120); if (!t.poisonDmg || t.poisonDmg < 1) t.poisonDmg = 1; }
             else if (rec2.status === 'stunned') t.stunned = Math.max(t.stunned, 30);
             else if (rec2.status === 'cursed') t.cursed = Math.max(t.cursed, 60);
             else if (rec2.status === 'confused') t.confused = Math.max(t.confused, 60);
@@ -17828,7 +17828,7 @@ const ultimateData = [
   { name:'瞬間移動体当たり', dmg:40, kb:18, angle:-30, range:'teleport', color:'#FFBB44' },
   { name:'超巨大砲弾', dmg:37, kb:17, angle:-15, range:'line', color:'#A0B858' },
   { name:'怒涛の百連撃', dmg:5, kb:4, angle:-10, range:'front', hits:8, color:'#FF6644' },
-  { name:'暗黒三刀流', dmg:25, kb:13, angle:-30, range:'front', status:'poisoned', dur:180, poisonDmg:2, color:'#CC44FF' },
+  { name:'暗黒三刀流', dmg:25, kb:13, angle:-30, range:'front', status:'poisoned', dur:90, poisonDmg:1, color:'#CC44FF' },
   { name:'虹羽大爆散', dmg:18, kb:12, angle:-50, range:'circle', radius:140, status:'confused', dur:90, color:'#FFD700' },
   { name:'黄金時間停止', dmg:35, kb:16, angle:-45, range:'all', status:'frozen', dur:90, color:'#FFD700' },
   { name:'破壊音波砲', dmg:33, kb:15, angle:-40, range:'circle', radius:180, status:'stunned', dur:60, color:'#88FFFF' },
