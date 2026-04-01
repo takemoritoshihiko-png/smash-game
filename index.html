@@ -8103,9 +8103,9 @@ function initBattle() {
     platforms.push({ x: 480 - topW / 2, y: STAGE_GROUND_Y - 230, w: topW });           // 上段中央
   } else if (stageId === 'space') {
     // 動く足場
-    platforms.push({ x: 200, y: 370, w: 160, moving: true, moveType: 'horizontal', moveRange: 200, moveSpeed: 1.5, baseX: 200 });
-    platforms.push({ x: 400, y: 300, w: 120, moving: true, moveType: 'vertical', moveRange: 80, moveSpeed: 1.0, baseY: 300 });
-    platforms.push({ x: 600, y: 350, w: 100, moving: true, moveType: 'horizontal', moveRange: 250, moveSpeed: 2.5, baseX: 600 });
+    platforms.push({ x: 200, y: 370, w: 160, moving: true, moveType: 'horizontal', moveRange: 200, moveSpeed: 0.5, baseX: 200 });
+    platforms.push({ x: 400, y: 300, w: 120, moving: true, moveType: 'vertical', moveRange: 80, moveSpeed: 0.4, baseY: 300 });
+    platforms.push({ x: 600, y: 350, w: 100, moving: true, moveType: 'horizontal', moveRange: 250, moveSpeed: 0.8, baseX: 600 });
   } else if (stageId === 'throne') {
     // 足場なし・地面のみで戦う（プラットフォーム0個）
   }
