@@ -5487,7 +5487,7 @@ const COMBO_FINISHERS = {
 
 function canComboFinisher(playerId) {
   const cd = comboDisplay[playerId];
-  return cd && cd.count >= 10 && !comboFinisherUsed[playerId];
+  return cd && cd.count >= 15 && !comboFinisherUsed[playerId];
 }
 
 function executeComboFinisher(p) {
