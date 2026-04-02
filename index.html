@@ -19557,9 +19557,15 @@ function handleKeyDown(e) {
       }
     }
     if (e.key === 'c' || e.key === 'C') {
+      // コンボフィニッシャー: 10コンボ以上でC → 発動
+      if (canComboFinisher(p1.id)) {
+        executeComboFinisher(p1);
+      }
       // 天才: 変形条件を満たしている場合はspecial攻撃を抑制（長押し変形用）
-      if (!(p1.charIdx === 10 && !p1.dragonMode && p1.damage >= 80 && p1.dragonCooldown <= 0 && p1.grounded)) {
-        startAttack(p1, 'special');
+      else if (!(p1.charIdx === 10 && !p1.dragonMode && p1.damage >= 80 && p1.dragonCooldown <= 0 && p1.grounded)) {
+        if (!tryCancelAttack(p1, 'special')) {
+          startAttack(p1, 'special');
+        }
       }
     }
     // P1 Guard (ground) / Air Dodge (air) - Shift key
@@ -19633,7 +19639,9 @@ function handleKeyDown(e) {
         }
       }
       if (e.key === 'o' || e.key === 'O') {
-        if (!(p2.charIdx === 10 && !p2.dragonMode && p2.damage >= 80 && p2.dragonCooldown <= 0 && p2.grounded)) {
+        if (canComboFinisher(p2.id)) {
+          executeComboFinisher(p2);
+        } else if (!(p2.charIdx === 10 && !p2.dragonMode && p2.damage >= 80 && p2.dragonCooldown <= 0 && p2.grounded)) {
           if (!tryCancelAttack(p2, 'special')) {
             startAttack(p2, 'special');
           }
