@@ -5522,7 +5522,7 @@ function executeComboFinisher(p) {
   const hitCount = f.hits;
 
   // ヤッホ: ランダムダメージ
-  const FINISHER_DMG_MULT = 0.6; // ダメージ弱体化（×0.6）
+  const FINISHER_DMG_MULT = 0.5; // ダメージ弱体化（×0.5）
   let dmgPerHit = f.damage * FINISHER_DMG_MULT;
   if (f.randomDmg) dmgPerHit = Math.floor(Math.random() * 99) * FINISHER_DMG_MULT + 1;
 
@@ -5545,9 +5545,10 @@ function executeComboFinisher(p) {
   }
 
   // ノックバック（最後に一括適用）
+  const FINISHER_KB_MULT = 0.6; // KB弱体化（×0.6）
   const dir = p.x < target.x ? 1 : -1;
   const kbRad = f.kbAngle * Math.PI / 180;
-  const kbForce = f.kb + target.damage * 0.05;
+  const kbForce = (f.kb + target.damage * 0.05) * FINISHER_KB_MULT;
   // 獣王のKB3倍
   const kbMult = (p.charIdx === 5) ? 3.0 : 1.0;
   target.vx = Math.cos(kbRad) * kbForce * dir * kbMult;
