@@ -379,8 +379,6 @@ function updateHomeUI() {
 
   updateEvoGaugeUI();
   updateMistakeBadges();
-  updateTodayUI();
-  updateAllTimeBadge();
 }
 
 // ===== START GAME =====
@@ -413,8 +411,6 @@ let studyAnswered = false;
 function goStudy() {
   studyAnswered = false;
   currentQuestion = null;
-  sessionCorrectCount = 0;
-  startSessionTracking();
   document.getElementById('study-feedback').innerHTML = '';
   document.getElementById('study-next-btn').style.display = 'none';
   document.getElementById('study-explanation').style.display = 'none';
@@ -507,22 +503,20 @@ function answerStudy(idx, btnEl) {
 
   if (correct) {
     let statMsg = '';
-    let gains = { hp: 0, atk: 0, def: 0, spd: 0 };
     if (currentCategory === 'vocabulary') {
-      gameState.hp += 2; gains.hp = 2;
+      gameState.hp += 2;
       gameState.vocabCorrect++;
       statMsg = 'HP +2 !!';
-      showStatFloat('HP', 2, 'hp-up');
+      // Mark vocabulary as learned
       const vocabWord = extractVocabWord(currentQuestion.q) || extractVocabFromAnswer(currentQuestion.q, correctAnswer);
       if (vocabWord) markVocabLearned(vocabWord, explanation);
     } else if (currentCategory === 'grammar') {
       gameState.grammarCorrect++;
       gameState.grammarStreak++;
       if (gameState.grammarStreak >= 3) {
-        gameState.atk += 1; gains.atk = 1;
+        gameState.atk += 1;
         gameState.grammarStreak = 0;
         statMsg = 'ATK +1 !! (3 correct in a row)';
-        showStatFloat('ATK', 1, 'atk-up');
       } else {
         statMsg = `${3 - gameState.grammarStreak} more for ATK up`;
       }
@@ -530,27 +524,22 @@ function answerStudy(idx, btnEl) {
       gameState.readingCorrect++;
       gameState.readingStreak++;
       if (gameState.readingStreak >= 2) {
-        gameState.def += 1; gains.def = 1;
+        gameState.def += 1;
         gameState.readingStreak = 0;
         statMsg = 'DEF +1 !! (2 correct in a row)';
-        showStatFloat('DEF', 1, 'def-up');
       } else {
         statMsg = `${2 - gameState.readingStreak} more for DEF up`;
       }
     } else if (currentCategory === 'listening') {
       gameState.listeningCorrect = (gameState.listeningCorrect || 0) + 1;
-      gameState.spd = (gameState.spd || 1) + 1; gains.spd = 1;
+      gameState.spd = (gameState.spd || 1) + 1;
       statMsg = 'SPD +1 !!';
-      showStatFloat('SPD', 1, 'spd-up');
     }
     feedback.innerHTML = `<span class="correct-text">Correct!</span><span class="stat-up-anim">${statMsg}</span>`;
     sfx.correct();
     addEvoGauge(3);
-    recordTodayCorrect(currentCategory, gains);
-    trackSessionCorrect();
     saveGame();
     checkEvolution();
-    checkMilestone();
   } else {
     if (currentCategory === 'grammar') gameState.grammarStreak = 0;
     if (currentCategory === 'reading') gameState.readingStreak = 0;
@@ -566,118 +555,6 @@ function answerStudy(idx, btnEl) {
   showExplanation('study-explanation', correct, correctAnswer, explanation, () => {
     document.getElementById('study-next-btn').style.display = 'block';
   });
-}
-
-// ===== FLOATING STAT-UP + MONSTER BOUNCE =====
-function showStatFloat(statName, amount, cssClass) {
-  const container = document.querySelector('.monster-display');
-  if (!container) return;
-  const el = document.createElement('div');
-  el.className = 'stat-float ' + cssClass;
-  el.textContent = '+' + amount + ' ' + statName + ' ↑';
-  el.style.left = (40 + Math.random() * 40) + 'px';
-  el.style.top = (20 + Math.random() * 30) + 'px';
-  container.appendChild(el);
-  setTimeout(() => el.remove(), 2000);
-  // Monster happy bounce
-  const img = document.getElementById('monster-img');
-  if (img) { img.classList.remove('monster-bounce'); void img.offsetWidth; img.classList.add('monster-bounce'); setTimeout(() => img.classList.remove('monster-bounce'), 600); }
-  // Stat bar glow
-  const barId = statName.toLowerCase().replace(/ /g,'') + '-bar';
-  const bar = document.getElementById(barId.replace('hp','hp').replace('atk','atk').replace('def','def').replace('spd','spd'));
-  if (bar) { bar.classList.add('stat-bar-glow'); setTimeout(() => bar.classList.remove('stat-bar-glow'), 800); }
-}
-
-// ===== SESSION TRACKING =====
-let sessionCorrectCount = 0;
-let sessionStatsBefore = {};
-function startSessionTracking() {
-  sessionStatsBefore = { hp: gameState.hp, atk: getEffectiveAtk(), def: getEffectiveDef(), spd: gameState.spd || 1 };
-}
-function trackSessionCorrect() {
-  sessionCorrectCount++;
-  if (sessionCorrectCount % 5 === 0) showSessionReport();
-}
-function showSessionReport() {
-  const after = { hp: gameState.hp, atk: getEffectiveAtk(), def: getEffectiveDef(), spd: gameState.spd || 1 };
-  const overlay = document.createElement('div');
-  overlay.className = 'session-report-overlay';
-  const stats = ['hp','atk','def','spd'];
-  let rows = '';
-  for (const s of stats) {
-    const diff = after[s] - sessionStatsBefore[s];
-    const diffText = diff > 0 ? `<span class="up">↑${diff}</span>` : '—';
-    rows += `<div class="session-stat-row"><span>${s.toUpperCase()}</span><span>${sessionStatsBefore[s]} → ${after[s]} ${diffText}</span></div>`;
-  }
-  overlay.innerHTML = `<div class="session-report-box"><h3>📋 Session Report</h3><p>You answered ${sessionCorrectCount} questions!</p>${rows}<button class="btn btn-primary" style="margin-top:12px;" onclick="this.closest('.session-report-overlay').remove()">Keep going!</button></div>`;
-  document.body.appendChild(overlay);
-  sessionStatsBefore = { ...after };
-}
-
-// ===== TODAY'S PROGRESS TRACKING =====
-function getTodayKey() { return 'rpg_today_' + new Date().toISOString().slice(0, 10); }
-function getTodayProgress() {
-  try { const d = localStorage.getItem(getTodayKey()); return d ? JSON.parse(d) : { vocab: 0, grammar: 0, reading: 0, listening: 0, hpGain: 0, atkGain: 0, defGain: 0, spdGain: 0, total: 0 }; } catch(e) { return { vocab:0,grammar:0,reading:0,listening:0,hpGain:0,atkGain:0,defGain:0,spdGain:0,total:0 }; }
-}
-function saveTodayProgress(tp) { try { localStorage.setItem(getTodayKey(), JSON.stringify(tp)); } catch(e) {} }
-function recordTodayCorrect(category, statGains) {
-  const tp = getTodayProgress();
-  if (category === 'vocabulary') tp.vocab++;
-  else if (category === 'grammar') tp.grammar++;
-  else if (category === 'reading') tp.reading++;
-  else if (category === 'listening') tp.listening++;
-  tp.hpGain += statGains.hp || 0;
-  tp.atkGain += statGains.atk || 0;
-  tp.defGain += statGains.def || 0;
-  tp.spdGain += statGains.spd || 0;
-  tp.total++;
-  saveTodayProgress(tp);
-}
-function updateTodayUI() {
-  const tp = getTodayProgress();
-  const statsEl = document.getElementById('today-stats');
-  const barEl = document.getElementById('today-bar');
-  const goalEl = document.getElementById('today-goal-text');
-  if (!statsEl) return;
-  let parts = [];
-  if (tp.hpGain) parts.push(`<span style="color:#2ecc71">HP+${tp.hpGain}</span>`);
-  if (tp.atkGain) parts.push(`<span style="color:#e94560">ATK+${tp.atkGain}</span>`);
-  if (tp.defGain) parts.push(`<span style="color:#3498db">DEF+${tp.defGain}</span>`);
-  if (tp.spdGain) parts.push(`<span style="color:#f1c40f">SPD+${tp.spdGain}</span>`);
-  statsEl.innerHTML = parts.length ? parts.join('') : '<span>No stats gained yet</span>';
-  const pct = Math.min((tp.total / 20) * 100, 100);
-  barEl.style.width = pct + '%';
-  goalEl.textContent = tp.total + ' / 20 questions';
-}
-
-// ===== MILESTONE SYSTEM =====
-function getAllTimeCorrect() { return gameState.vocabCorrect + gameState.grammarCorrect + gameState.readingCorrect + (gameState.listeningCorrect || 0); }
-function checkMilestone() {
-  const total = getAllTimeCorrect();
-  if (total > 0 && total % 10 === 0) showMilestone(total);
-}
-function showMilestone(count) {
-  const overlay = document.createElement('div');
-  overlay.className = 'milestone-overlay';
-  overlay.onclick = () => overlay.remove();
-  // Confetti
-  let confetti = '';
-  const colors = ['#e94560','#f1c40f','#2ecc71','#3498db','#9b59b6','#ff6b6b'];
-  for (let i = 0; i < 30; i++) {
-    const c = colors[i % colors.length];
-    const x = Math.random() * 100;
-    const d = 0.5 + Math.random() * 1.5;
-    confetti += `<div class="milestone-confetti" style="left:${x}%;top:${10+Math.random()*20}%;background:${c};animation-delay:${Math.random()*0.5}s;animation-duration:${d}s;"></div>`;
-  }
-  overlay.innerHTML = `${confetti}<div class="milestone-box"><h2>🎉 MILESTONE!</h2><p>${count} correct answers!</p><button class="btn btn-primary" onclick="this.closest('.milestone-overlay').remove()">Awesome!</button></div>`;
-  document.body.appendChild(overlay);
-}
-function updateAllTimeBadge() {
-  const badge = document.getElementById('all-time-badge');
-  if (!badge) return;
-  const total = getAllTimeCorrect();
-  if (total >= 10) { badge.style.display = 'inline-block'; badge.textContent = '✓ ' + total; }
-  else badge.style.display = 'none';
 }
 
 // ===== SHOP SYSTEM =====
