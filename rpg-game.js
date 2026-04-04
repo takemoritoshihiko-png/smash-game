@@ -922,8 +922,7 @@ function startBattle(enemyData, boss, headerLabel) {
 
   const label = boss ? enemy.name + ' [BOSS]' : enemy.name;
   document.getElementById('enemy-name').textContent = label;
-  document.getElementById('enemy-sprite').textContent = enemy.emoji;
-  document.getElementById('enemy-sprite').style.background = '';
+  setEnemySprite(enemy);
   document.getElementById('battle-header-text').textContent = headerLabel || 'Battle';
   updateBattleHP();
   updatePotionBtn();
@@ -983,8 +982,7 @@ function goBattle() {
   battleState.teamHp = {};
 
   document.getElementById('enemy-name').textContent = enemy.name + ' Lv.' + playerLevel;
-  document.getElementById('enemy-sprite').textContent = enemy.emoji;
-  document.getElementById('enemy-sprite').style.background = '';
+  setEnemySprite(enemy);
   updateBattleHP();
   updatePotionBtn();
 
@@ -1003,6 +1001,26 @@ function goBattle() {
 function updatePotionBtn() {
   const remaining = gameState.potions - (battleState ? battleState.potionsUsed : 0);
   document.getElementById('potion-count-btn').textContent = remaining > 0 ? 'x' + remaining : '';
+}
+
+function setEnemySprite(enemy) {
+  const el = document.getElementById('enemy-sprite');
+  const imgSrc = enemy.img || (typeof ENEMY_IMAGES !== 'undefined' && ENEMY_IMAGES[enemy.name]) || null;
+  if (imgSrc) {
+    el.textContent = '';
+    el.style.background = 'none';
+    el.style.fontSize = '0';
+    let img = el.querySelector('img');
+    if (!img) { img = document.createElement('img'); img.style.cssText = 'width:130px;height:130px;object-fit:contain;mix-blend-mode:multiply;'; el.appendChild(img); }
+    img.src = imgSrc;
+    img.alt = enemy.name;
+  } else {
+    const existImg = el.querySelector('img');
+    if (existImg) existImg.remove();
+    el.style.fontSize = '';
+    el.textContent = enemy.emoji;
+    el.style.background = '';
+  }
 }
 
 function updateBattleHP() {

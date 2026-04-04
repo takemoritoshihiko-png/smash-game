@@ -279,15 +279,19 @@ const questions = {
 };
 
 // ===== ENEMY DATA (rebalanced: 4-6 hits to defeat) =====
+const ENEMY_IMAGES = {
+  'Slime': 'enemy-slime.png', 'Goblin': 'enemy-goblin.png',
+  'Orc': 'enemy-orc.png', 'Wizard': 'enemy-wizard.png', 'Dragon': 'enemy-dragon.png',
+};
 const enemies = [
-  {name:"Slime",   emoji:"\uD83D\uDFE2", hp:10, atk:2,  def:0, gold:5,  minLv:1},
-  {name:"Goblin",  emoji:"\uD83D\uDC7A", hp:16, atk:4,  def:1, gold:10, minLv:1},
-  {name:"Bat",     emoji:"\uD83E\uDD87", hp:14, atk:3,  def:1, gold:8,  minLv:3},
-  {name:"Orc",     emoji:"\uD83D\uDC79", hp:24, atk:7,  def:2, gold:18, minLv:6},
-  {name:"Wolf",    emoji:"\uD83D\uDC3A", hp:20, atk:6,  def:2, gold:15, minLv:6},
-  {name:"Wizard",  emoji:"\uD83E\uDDD9", hp:20, atk:9,  def:2, gold:22, minLv:11},
-  {name:"Golem",   emoji:"\uD83D\uDDFF", hp:30, atk:5,  def:5, gold:25, minLv:11},
-  {name:"Dragon",  emoji:"\uD83D\uDC09", hp:40, atk:14, def:4, gold:40, minLv:21}
+  {name:"Slime",   emoji:"\uD83D\uDFE2", img:"enemy-slime.png",  hp:10, atk:2,  def:0, gold:5,  minLv:1},
+  {name:"Goblin",  emoji:"\uD83D\uDC7A", img:"enemy-goblin.png", hp:16, atk:4,  def:1, gold:10, minLv:1},
+  {name:"Bat",     emoji:"\uD83E\uDD87", img:null,               hp:14, atk:3,  def:1, gold:8,  minLv:3},
+  {name:"Orc",     emoji:"\uD83D\uDC79", img:"enemy-orc.png",    hp:24, atk:7,  def:2, gold:18, minLv:6},
+  {name:"Wolf",    emoji:"\uD83D\uDC3A", img:null,               hp:20, atk:6,  def:2, gold:15, minLv:6},
+  {name:"Wizard",  emoji:"\uD83E\uDDD9", img:"enemy-wizard.png", hp:20, atk:9,  def:2, gold:22, minLv:11},
+  {name:"Golem",   emoji:"\uD83D\uDDFF", img:null,               hp:30, atk:5,  def:5, gold:25, minLv:11},
+  {name:"Dragon",  emoji:"\uD83D\uDC09", img:"enemy-dragon.png", hp:40, atk:14, def:4, gold:40, minLv:21}
 ];
 
 // ===== SHOP ITEMS =====
