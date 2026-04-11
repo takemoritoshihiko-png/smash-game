@@ -5605,6 +5605,20 @@ function executeComboFinisher(p) {
     p.senRank = 5; p.senRankHits = 0;
     cmdNameDisplay.push({ text: '昇進! 社長', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#FFD700' });
   }
+  // 金金: コンボ黄金モード（×2.0攻撃、10秒）
+  if (p.charIdx === 22 && !p.kinkinComboGold) {
+    p.kinkinComboGold = 600; // 10秒 @60fps
+    cmdNameDisplay.push({ text: '黄金モード！', x: 480, y: 120, life: 180, maxLife: 180, color: '#FFD700' });
+    hitFlash.alpha = 0.6; hitFlash.color = '#FFD700';
+    triggerScreenShake(10, 20);
+    // 金色パーティクル爆発
+    for (let gi = 0; gi < 30; gi++) {
+      const ga = Math.random() * Math.PI * 2;
+      sparks.push({ x: p.x, y: p.y - 35, vx: Math.cos(ga)*8, vy: Math.sin(ga)*8-4,
+        life: 25+Math.floor(Math.random()*15), maxLife: 40, color: gi%3===0?'#FFFFFF':'#FFD700',
+        size: 3+Math.random()*5, gravity: 0.1, drag: 0.96 });
+    }
+  }
 
   // 巨大エフェクト
   for (let i = 0; i < 8; i++) {
@@ -5757,7 +5771,7 @@ function getActivePowerMode(p) {
   const timers = [
     [p.kumaFuryMode,6],[p.saisokuLightSpeed,2],[p.uruoWildRelease,5],[p.bulletAwaken,7],
     [p.shawdenOvercharge,8],[p.judgeFinalMode,9],[p.onpaResonance,17],[p.mrtwoDualBlast,21],
-    [p.kinkinGoldMode,22],[p.longDragonSpear,4],[p.pullCollapseMode,27],[p.satoruMasterMode,23],
+    [p.kinkinComboGold,22],[p.kinkinGoldMode,22],[p.longDragonSpear,4],[p.pullCollapseMode,27],[p.satoruMasterMode,23],
     [p.poyoDoubleSlime,26],[p.kingTimeStop,16],[p.meteoBurnGauge>=70?1:0,3],[p.donEarthGauge>=80?1:0,1],
   ];
   for (const [t, ci2] of timers) { if (t > 0) return { timer: t, charIdx: ci2 }; }
@@ -8068,6 +8082,7 @@ function createPlayer(id, charIdx, startX) {
     mussySwarmCount: 1,       // ムッシー: 群れ(1-5)
     kinkinAssetGauge: 0,      // 金金: 資産ゲージ(0-100)
     kinkinGoldMode: 0,        // 金金: 億万長者モード残F
+    kinkinComboGold: 0,       // 金金: コンボ黄金モード残F (×2.0攻撃)
     longPierceGauge: 0,       // ロング: 穿孔ゲージ(0-100)
     longDragonSpear: 0,       // ロング: 龍槍モード残F
     donEarthGauge: 0,         // ドン: 大地ゲージ(0-100)
@@ -8577,6 +8592,16 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   if (target.charIdx === 22) target.kinkinAssetGauge = Math.max(0, (target.kinkinAssetGauge||0) - 5);
   // 金金億万長者: ダメ×1.8
   if (aci4 === 22 && attacker.kinkinGoldMode > 0) target.damage = Math.min(999, target.damage + finalDamage * 0.5); // 億万長者×1.5
+  if (aci4 === 22 && attacker.kinkinComboGold > 0) {
+    target.damage = Math.min(999, target.damage + finalDamage); // コンボ黄金モード×2.0
+    // 金色ヒットエフェクト
+    hitEffects.push({ x: target.x, y: target.y - 35, life: 15, maxLife: 15, color: '#FFD700', size: 50 + Math.random()*30, type: 'ring' });
+    for (let gi = 0; gi < 6; gi++) {
+      const ga = Math.random() * Math.PI * 2;
+      sparks.push({ x: target.x, y: target.y - 35, vx: Math.cos(ga)*5, vy: Math.sin(ga)*5-2,
+        life: 15, maxLife: 20, color: '#FFD700', size: 2+Math.random()*3, gravity: 0.1, drag: 0.96 });
+    }
+  }
   // ロング(4): 穿孔+20(遠距離)、+5(近距離)
   if (aci4 === 4) { const d4 = Math.abs(target.x - attacker.x); attacker.longPierceGauge = Math.min(100, (attacker.longPierceGauge||0) + (d4 > 200 ? 20 : 5)); }
   // ぽよ(26): スライムゲージ+10(攻撃)、+8(被ダメ)
@@ -11091,8 +11116,9 @@ function updateBattle(dt) {
         cmdNameDisplay.push({ text: 'GRAVITY COLLAPSE!!', x: p.x, y: p.y - 100, life: 90, maxLife: 90, color: '#AA66FF' });
       }
     }
-    // 金金(22): 資産自然減少・億万長者
+    // 金金(22): 資産自然減少・億万長者・コンボ黄金モード
     if (p.charIdx === 22) {
+      if (p.kinkinComboGold > 0) p.kinkinComboGold--;
       if (p.kinkinGoldMode > 0) p.kinkinGoldMode--;
       if (p.kinkinAssetGauge >= 100 && !p.kinkinGoldMode) {
         p.kinkinGoldMode = 480; p.kinkinAssetGauge = 0;
@@ -11197,6 +11223,7 @@ function updateBattle(dt) {
       { t: p.bulletAwaken, prev: '_prevBulletAw' },
       { t: p.shawdenOvercharge, prev: '_prevShawdenOC' },
       { t: p.onpaResonance, prev: '_prevOnpaRes' },
+      { t: p.kinkinComboGold, prev: '_prevKinkinCG' },
       { t: p.kinkinGoldMode, prev: '_prevKinkinGM' },
       { t: p.longDragonSpear, prev: '_prevLongDS' },
       { t: p.pullCollapseMode, prev: '_prevPullCM' },
@@ -16411,7 +16438,7 @@ function drawBattleHUD() {
     const modeTimers = [
       gp.kumaFuryMode, gp.saisokuLightSpeed, gp.uruoWildRelease, gp.bulletAwaken,
       gp.shawdenOvercharge, gp.judgeFinalMode, gp.onpaResonance, gp.mrtwoDualBlast,
-      gp.kinkinGoldMode, gp.longDragonSpear, gp.pullCollapseMode, gp.satoruMasterMode,
+      gp.kinkinComboGold, gp.kinkinGoldMode, gp.longDragonSpear, gp.pullCollapseMode, gp.satoruMasterMode,
       gp.poyoDoubleSlime, gp.kingTimeStop
     ];
     const activeMode = modeTimers.find(t => t > 0);
@@ -16566,8 +16593,9 @@ function drawBattleHUD() {
     if (gp.charIdx === 22) {
       const r = (gp.kinkinAssetGauge || 0) / 100;
       ctx.fillStyle = '#1a1a0a'; ctx.fillRect(ggx, ggy, 80, 5);
-      ctx.fillStyle = gp.kinkinGoldMode > 0 ? '#FFD700' : '#DAA520'; ctx.fillRect(ggx, ggy, 80 * r, 5);
-      ctx.fillStyle = '#FFD700'; ctx.fillText(gp.kinkinGoldMode > 0 ? 'GOLD RUSH!' : 'GOLD ' + Math.floor(gp.kinkinAssetGauge || 0), ggx + 40, ggy - 2);
+      ctx.fillStyle = (gp.kinkinComboGold > 0 || gp.kinkinGoldMode > 0) ? '#FFD700' : '#DAA520'; ctx.fillRect(ggx, ggy, 80 * r, 5);
+      const goldLabel = gp.kinkinComboGold > 0 ? '黄金モード! x2' : (gp.kinkinGoldMode > 0 ? 'GOLD RUSH!' : 'GOLD ' + Math.floor(gp.kinkinAssetGauge || 0));
+      ctx.fillStyle = gp.kinkinComboGold > 0 ? '#FFEE00' : '#FFD700'; ctx.fillText(goldLabel, ggx + 40, ggy - 2);
     }
     // ロング(4): 穿孔
     if (gp.charIdx === 4) {
