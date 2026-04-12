@@ -7744,30 +7744,40 @@ const attackDefs = {
     const defs = attackDefs[ci];
     if (!defs || !defs.aerial) continue;
     const a = defs.aerial;
-    const getDmg = (atk) => atk.projectile ? atk.projectile.damage : atk.damage;
-    const baseDmg = getDmg(a);
+    const getDmg = (atk) => atk.projectile ? (atk.projectile.damage || 5) : (atk.damage || 5);
+    const baseDmg = getDmg(a) || 5;
     const isProj = !!a.projectile;
+    // Ensure base aerial values are valid numbers
+    const aDmg = a.damage || 0;
+    const aKb = a.kbBase || 3;
+    const aKs = a.kbScale || 0.06;
+    const aHy = a.hy || -35;
+    const aHw = a.hw || 45;
+    const aHh = a.hh || 40;
+    const aStartup = a.startup || 4;
+    const aActive = a.active || 6;
+    const aRecovery = a.recovery || 10;
 
     if (!defs.airfront) {
       if (isProj) {
         const p = a.projectile;
-        defs.airfront = { name:'空中前' + (a.name||'攻撃'), startup:a.startup+1, active:a.active, recovery:a.recovery+2, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:a.color, effect:'none',
-          projectile:{ speed:p.speed, damage:p.damage+1, kbBase:p.kbBase+1, kbScale:p.kbScale+0.01, kbAngle:-20, w:p.w, h:p.h, life:p.life, color:p.color, pcolor:p.pcolor } };
+        defs.airfront = { name:'空中前' + (a.name||'攻撃'), startup:aStartup+1, active:aActive, recovery:aRecovery+2, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:a.color||'#FFF', effect:'none',
+          projectile:{ speed:p.speed||8, damage:(p.damage||5)+1, kbBase:(p.kbBase||3)+1, kbScale:(p.kbScale||0.06)+0.01, kbAngle:-20, w:p.w||15, h:p.h||10, life:p.life||40, color:p.color||'#FFF', pcolor:p.pcolor||'#FFF' } };
       } else {
-        defs.airfront = { name:'空中前' + (a.name||'攻撃'), startup:a.startup+1, active:a.active, recovery:a.recovery+2, damage:a.damage, kbBase:a.kbBase+1, kbScale:a.kbScale+0.01, kbAngle:-20, hx:15, hy:a.hy, hw:a.hw+5, hh:a.hh, color:a.color, effect:'airkick' };
+        defs.airfront = { name:'空中前' + (a.name||'攻撃'), startup:aStartup+1, active:aActive, recovery:aRecovery+2, damage:aDmg||5, kbBase:aKb+1, kbScale:aKs+0.01, kbAngle:-20, hx:15, hy:aHy, hw:aHw+5, hh:aHh, color:a.color||'#FFF', effect:'airkick' };
       }
     }
     if (!defs.airback) {
       if (isProj) {
         const p = a.projectile;
-        defs.airback = { name:'空中後' + (a.name||'攻撃'), startup:a.startup+2, active:a.active, recovery:a.recovery+2, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:a.color, effect:'none',
-          projectile:{ speed:p.speed-1, damage:p.damage+2, kbBase:p.kbBase+2, kbScale:p.kbScale+0.02, kbAngle:-25, w:p.w+2, h:p.h+2, life:p.life, color:p.color, pcolor:p.pcolor, dirAngle:180 } };
+        defs.airback = { name:'空中後' + (a.name||'攻撃'), startup:aStartup+2, active:aActive, recovery:aRecovery+2, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:a.color||'#FFF', effect:'none',
+          projectile:{ speed:Math.max(1,(p.speed||8)-1), damage:(p.damage||5)+2, kbBase:(p.kbBase||3)+2, kbScale:(p.kbScale||0.06)+0.02, kbAngle:-25, w:(p.w||15)+2, h:(p.h||10)+2, life:p.life||40, color:p.color||'#FFF', pcolor:p.pcolor||'#FFF', dirAngle:180 } };
       } else {
-        defs.airback = { name:'空中後' + (a.name||'攻撃'), startup:a.startup+2, active:a.active, recovery:a.recovery+2, damage:a.damage+2, kbBase:a.kbBase+2, kbScale:a.kbScale+0.02, kbAngle:-25, hx:-15, hy:a.hy, hw:a.hw, hh:a.hh, color:a.color, effect:'airkick' };
+        defs.airback = { name:'空中後' + (a.name||'攻撃'), startup:aStartup+2, active:aActive, recovery:aRecovery+2, damage:(aDmg||5)+2, kbBase:aKb+2, kbScale:aKs+0.02, kbAngle:-25, hx:-15, hy:aHy, hw:aHw, hh:aHh, color:a.color||'#FFF', effect:'airkick' };
       }
     }
     if (!defs.airup) {
-      defs.airup = { name:'空中上' + (a.name||'攻撃'), startup:a.startup, active:a.active, recovery:a.recovery, damage:Math.max(1, (isProj ? baseDmg : a.damage) - 1), kbBase:(isProj ? 4 : a.kbBase), kbScale:(isProj ? 0.08 : a.kbScale), kbAngle:-88, hx:0, hy:-55, hw:(isProj ? 40 : a.hw-5), hh:(isProj ? 55 : a.hh+10), color:a.color, effect:'upslash' };
+      defs.airup = { name:'空中上' + (a.name||'攻撃'), startup:aStartup, active:aActive, recovery:aRecovery, damage:Math.max(1, baseDmg - 1), kbBase:(isProj ? 4 : aKb), kbScale:(isProj ? 0.08 : aKs), kbAngle:-88, hx:0, hy:-55, hw:(isProj ? 40 : Math.max(1,aHw-5)), hh:(isProj ? 55 : aHh+10), color:a.color||'#FFF', effect:'upslash' };
     }
   }
 })();
@@ -7783,6 +7793,9 @@ const dragonAttackDefs = {
   up:     { name:'真上炎ブレス', startup:5, active:11, recovery:14, damage:14, kbBase:6, kbScale:0.10, kbAngle:-88, hx:0, hy:-65, hw:55, hh:60, color:'#FF6600', effect:'upslash', centerHit:true },
   side:   { name:'ドラゴンスラッシュ', startup:6, active:8, recovery:14, damage:16, kbBase:6, kbScale:0.10, kbAngle:-15, hx:20, hy:-40, hw:90, hh:50, color:'#FF4400', effect:'bigslash' },
   downair:{ name:'ドラゴン急降下', startup:5, active:12, recovery:16, damage:20, kbBase:8, kbScale:0.13, kbAngle:80, hx:0, hy:10, hw:55, hh:60, color:'#FF2200', effect:'meteor', specialType:'divekick', diveSpeed:16 },
+  airfront:{ name:'ドラゴン前爪', startup:4, active:10, recovery:14, damage:15, kbBase:7, kbScale:0.11, kbAngle:-20, hx:15, hy:-30, hw:85, hh:65, color:'#AA3300', effect:'airkick' },
+  airback: { name:'ドラゴン尾撃', startup:5, active:10, recovery:14, damage:17, kbBase:8, kbScale:0.12, kbAngle:-25, hx:-15, hy:-30, hw:80, hh:65, color:'#AA3300', effect:'airkick' },
+  airup:   { name:'ドラゴン上炎', startup:3, active:10, recovery:12, damage:14, kbBase:6, kbScale:0.10, kbAngle:-88, hx:0, hy:-55, hw:75, hh:70, color:'#FF6600', effect:'upslash' },
   dash:   { name:'ドラゴンチャージ', startup:5, active:12, recovery:16, damage:16, kbBase:6, kbScale:0.10, kbAngle:-10, hx:20, hy:-35, hw:75, hh:55, color:'#CC4400', effect:'punch', specialType:'cmdCharge', chargeSpeed:12 },
   throwDmg: 14,
 };
@@ -8259,6 +8272,12 @@ function calcKnockback(damage, kbBase, kbScale) {
 }
 
 function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
+  // NaN safety: 全パラメータの保護（最初に実行）
+  if (isNaN(damage) || damage === undefined || damage === null) damage = 5;
+  if (isNaN(kbBase) || kbBase === undefined) kbBase = 3;
+  if (isNaN(kbScale) || kbScale === undefined) kbScale = 0.06;
+  if (isNaN(kbAngle) || kbAngle === undefined) kbAngle = -30;
+
   if (target.invincibleTimer > 0 || target.airDodgeTimer > 0) return;
   // hitType: 'normal', 'strong', 'special', 'cmd', 'aerial', 'down', 'projectile'
   if (!hitType) hitType = 'normal';
@@ -8545,7 +8564,9 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
     }
   }
 
+  if (isNaN(finalDamage)) finalDamage = 5;
   target.damage = Math.min(999, target.damage + finalDamage);
+  if (isNaN(target.damage)) target.damage = 0;
 
   // === 固有個性ゲージ更新（ヒット時） ===
   const aci4 = attacker.charIdx;
@@ -12669,6 +12690,10 @@ function resolvePlayerCollisions() {
 }
 
 function checkHitboxAgainstPlayers(attacker, hitbox, damage, kbBase, kbScale, kbAngle, hitType) {
+  if (isNaN(damage)) damage = 5;
+  if (isNaN(kbBase)) kbBase = 3;
+  if (isNaN(kbScale)) kbScale = 0.06;
+  if (isNaN(kbAngle)) kbAngle = -30;
   let hit = false;
   for (const target of players) {
     if (target.id === attacker.id || !target.alive || target.invincibleTimer > 0 || target.airDodgeTimer > 0) continue;
@@ -16864,6 +16889,7 @@ function drawPlayerHUD(x, y, player, label, color) {
   ctx.fillStyle = '#FFF'; ctx.font = 'bold 16px sans-serif';
   ctx.fillText(ch.name, x + 40, y + 20);
 
+  if (isNaN(player.damage)) player.damage = 0;
   const dmgStr = Math.floor(player.damage) + '%';
   let dmgColor = '#FFFFFF';
   if (player.damage >= 100) dmgColor = '#FFDD44';
