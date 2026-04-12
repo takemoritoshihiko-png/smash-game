@@ -7738,6 +7738,40 @@ const attackDefs = {
   },
 };
 
+// Auto-generate aerial direction attacks from existing aerial data
+(function() {
+  for (let ci = 0; ci <= 28; ci++) {
+    const defs = attackDefs[ci];
+    if (!defs || !defs.aerial) continue;
+    const a = defs.aerial;
+    const getDmg = (atk) => atk.projectile ? atk.projectile.damage : atk.damage;
+    const baseDmg = getDmg(a);
+    const isProj = !!a.projectile;
+
+    if (!defs.airfront) {
+      if (isProj) {
+        const p = a.projectile;
+        defs.airfront = { name:'空中前' + (a.name||'攻撃'), startup:a.startup+1, active:a.active, recovery:a.recovery+2, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:a.color, effect:'none',
+          projectile:{ speed:p.speed, damage:p.damage+1, kbBase:p.kbBase+1, kbScale:p.kbScale+0.01, kbAngle:-20, w:p.w, h:p.h, life:p.life, color:p.color, pcolor:p.pcolor } };
+      } else {
+        defs.airfront = { name:'空中前' + (a.name||'攻撃'), startup:a.startup+1, active:a.active, recovery:a.recovery+2, damage:a.damage, kbBase:a.kbBase+1, kbScale:a.kbScale+0.01, kbAngle:-20, hx:15, hy:a.hy, hw:a.hw+5, hh:a.hh, color:a.color, effect:'airkick' };
+      }
+    }
+    if (!defs.airback) {
+      if (isProj) {
+        const p = a.projectile;
+        defs.airback = { name:'空中後' + (a.name||'攻撃'), startup:a.startup+2, active:a.active, recovery:a.recovery+2, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:a.color, effect:'none',
+          projectile:{ speed:p.speed-1, damage:p.damage+2, kbBase:p.kbBase+2, kbScale:p.kbScale+0.02, kbAngle:-25, w:p.w+2, h:p.h+2, life:p.life, color:p.color, pcolor:p.pcolor, dirAngle:180 } };
+      } else {
+        defs.airback = { name:'空中後' + (a.name||'攻撃'), startup:a.startup+2, active:a.active, recovery:a.recovery+2, damage:a.damage+2, kbBase:a.kbBase+2, kbScale:a.kbScale+0.02, kbAngle:-25, hx:-15, hy:a.hy, hw:a.hw, hh:a.hh, color:a.color, effect:'airkick' };
+      }
+    }
+    if (!defs.airup) {
+      defs.airup = { name:'空中上' + (a.name||'攻撃'), startup:a.startup, active:a.active, recovery:a.recovery, damage:Math.max(1, (isProj ? baseDmg : a.damage) - 1), kbBase:(isProj ? 4 : a.kbBase), kbScale:(isProj ? 0.08 : a.kbScale), kbAngle:-88, hx:0, hy:-55, hw:(isProj ? 40 : a.hw-5), hh:(isProj ? 55 : a.hh+10), color:a.color, effect:'upslash' };
+    }
+  }
+})();
+
 // Dragon mode attack defs (separate object)
 const dragonAttackDefs = {
   normal: { name:'ドラゴンクロー', startup:5, active:8, recovery:14, damage:14, kbBase:5, kbScale:0.09, kbAngle:-15, hx:18, hy:-40, hw:80, hh:55, color:'#FF6600', effect:'bigslash' },
@@ -8086,6 +8120,10 @@ function createPlayer(id, charIdx, startX) {
     kinkinAssetGauge: 0,      // 金金: 資産ゲージ(0-100)
     kinkinGoldMode: 0,        // 金金: 億万長者モード残F
     kinkinComboGold: 0,       // 金金: コンボ黄金モード残F (×2.0攻撃)
+    jabCount: 0,              // 弱攻撃連打カウント
+    jabTimer: 0,              // 弱連打タイマー (0.3秒 = 18F)
+    jabFlurry: false,         // 百裂中フラグ
+    jabFlurryHits: 0,         // 百裂ヒット数
     longPierceGauge: 0,       // ロング: 穿孔ゲージ(0-100)
     longDragonSpear: 0,       // ロング: 龍槍モード残F
     donEarthGauge: 0,         // ドン: 大地ゲージ(0-100)
@@ -9655,6 +9693,45 @@ function executeRecovery(p) {
   return true;
 }
 
+function startJabCombo(p) {
+  if (!p.grounded || p.hitstun > 0 || !p.alive || p.grabbing || p.grabbed || p.guarding) return;
+  const ch = characters[p.charIdx];
+  p.attacking = true;
+  p.attackType = 'jabflurry';
+  p.attackFrame = 0;
+  p.jabFlurry = true;
+  p.jabFlurryHits = 0;
+  p.hitTargets = [];
+  p.lastHitFrame = -99;
+  p.specialState = null;
+  p.attackData = {
+    name: '百裂攻撃', startup: 1, active: 3, recovery: 2,
+    damage: 1, kbBase: 0.5, kbScale: 0.01, kbAngle: -10,
+    hx: 12, hy: -38, hw: 45, hh: 40,
+    color: ch.accent || '#FFF', effect: 'punch',
+    multiHit: true, hitInterval: 3, jabFlurry: true
+  };
+}
+
+function finishJabCombo(p) {
+  if (!p.jabFlurry) return;
+  const ch = characters[p.charIdx];
+  p.jabFlurry = false;
+  p.jabCount = 0;
+  p.jabTimer = 0;
+  p.attacking = true;
+  p.attackType = 'jabfinish';
+  p.attackFrame = 0;
+  p.hitTargets = [];
+  p.lastHitFrame = -99;
+  p.attackData = {
+    name: '百裂フィニッシュ', startup: 2, active: 5, recovery: 14,
+    damage: 4, kbBase: 4, kbScale: 0.08, kbAngle: -30,
+    hx: 15, hy: -38, hw: 55, hh: 45,
+    color: ch.accent || '#FFF', effect: 'punch'
+  };
+}
+
 function startAttack(p, type) {
   if (p.attacking || p.hitstun > 0 || !p.alive || p.grabbing || p.grabbed || p.guarding || p.guardBreakStun > 0) return;
   // Catbus(11): 瞬間消滅中は攻撃不可
@@ -9676,8 +9753,8 @@ function startAttack(p, type) {
   // 天才: ドラゴンモード時は別のattackDefsを使用
   const defs = (p.charIdx === 10 && p.dragonMode) ? dragonAttackDefs : attackDefs[p.charIdx];
   let actualType = type;
-  // downair は空中専用
-  if (type === 'downair' && p.grounded) return;
+  // downair/airfront/airback/airup は空中専用
+  if ((type === 'downair' || type === 'airfront' || type === 'airback' || type === 'airup') && p.grounded) return;
 
   const atk = defs[actualType];
   if (!atk) return;
@@ -9707,7 +9784,7 @@ function startAttack(p, type) {
     let startupMod = 0, activeMod = 1.0, recoveryMod = 1.0;
 
     // 弱攻撃: 発生を少し速く（-1F）
-    if (actualType === 'normal' || actualType === 'aerial' || actualType === 'dash') startupMod = -1;
+    if (actualType === 'normal' || actualType === 'aerial' || actualType === 'airfront' || actualType === 'airback' || actualType === 'airup' || actualType === 'dash') startupMod = -1;
     // キング(16): さらに-2F
     if (p.charIdx === 16) startupMod -= 2;
 
@@ -9720,7 +9797,7 @@ function startAttack(p, type) {
     }
     // 空中攻撃のendlag短縮（コンボ接続性向上）
     if (!p.grounded && !isHeavy && !isSmashAtk) {
-      if (actualType === 'aerial') recoveryMod = 0.7;
+      if (actualType === 'aerial' || actualType === 'airfront' || actualType === 'airback' || actualType === 'airup') recoveryMod = 0.7;
       else if (actualType === 'up' || actualType === 'side') recoveryMod = 0.75;
       // downairはメテオなので変更なし
       if (recoveryMod !== 1.0) modNeeded = true;
@@ -11285,6 +11362,19 @@ function updateBattle(dt) {
       // 怒り中のオーラエフェクト
       if (p.rageActive && battleTime % 6 === 0) {
         sparks.push({ x: p.x + (Math.random()-0.5)*24, y: p.y - 10, vx: (Math.random()-0.5)*1, vy: -1.5-Math.random(), life: 8, maxLife: 8, color: '#FF4444', size: 2+Math.random(), gravity: -0.02, drag: 0.96 });
+      }
+    }
+    // Jab combo timer
+    if (p.jabTimer > 0) p.jabTimer--;
+    if (p.jabTimer <= 0 && p.jabCount > 0 && !p.jabFlurry) p.jabCount = 0;
+    // Jab flurry: auto-continue for max 10 hits, then auto-finish
+    if (p.jabFlurry && p.attacking && p.attackType === 'jabflurry') {
+      p.jabFlurryHits++;
+      if (p.jabFlurryHits >= 60) {
+        finishJabCombo(p);
+      } else if (p.attackFrame >= p.attackData.startup + p.attackData.active + p.attackData.recovery) {
+        p.attackFrame = 0;
+        p.hitTargets = [];
       }
     }
     // バレット(7): 2連射タイマー更新
@@ -19174,11 +19264,23 @@ function processPlayerKeydown(key, p, playerId, keyState) {
       const cmd = checkCommandInput(p);
       if (cmd && executeCommand(p, cmd)) { }
       else if (!p.grounded && keyState['ArrowDown']) startAttack(p, 'downair');
+      else if (!p.grounded && keyState['ArrowUp']) startAttack(p, 'airup');
+      else if (!p.grounded && ((keyState['ArrowRight'] && !p.facingLeft) || (keyState['ArrowLeft'] && p.facingLeft))) startAttack(p, 'airfront');
+      else if (!p.grounded && ((keyState['ArrowLeft'] && !p.facingLeft) || (keyState['ArrowRight'] && p.facingLeft))) startAttack(p, 'airback');
       else if (!p.grounded) startAttack(p, 'aerial');
       else if (keyState['ArrowUp']) startAttack(p, 'up');
       else if (keyState['ArrowLeft'] || keyState['ArrowRight']) startAttack(p, 'side');
       else if (keyState['ArrowDown']) startAttack(p, 'down');
-      else startAttack(p, 'normal');
+      else {
+        // Jab combo: track consecutive normal attacks
+        if (p.jabTimer > 0 && p.jabCount >= 2) {
+          startJabCombo(p);
+        } else {
+          p.jabCount++;
+          p.jabTimer = 18;
+          startAttack(p, 'normal');
+        }
+      }
     }
   }
   // Strong attack (X) - キャンセル対応
@@ -19813,6 +19915,12 @@ function handleKeyDown(e) {
           // Command executed
         } else if (!p1.grounded && keys['ArrowDown']) {
           startAttack(p1, 'downair');
+        } else if (!p1.grounded && keys['ArrowUp']) {
+          startAttack(p1, 'airup');
+        } else if (!p1.grounded && ((keys['ArrowRight'] && !p1.facingLeft) || (keys['ArrowLeft'] && p1.facingLeft))) {
+          startAttack(p1, 'airfront');
+        } else if (!p1.grounded && ((keys['ArrowLeft'] && !p1.facingLeft) || (keys['ArrowRight'] && p1.facingLeft))) {
+          startAttack(p1, 'airback');
         } else if (!p1.grounded) {
           startAttack(p1, 'aerial');
         } else if (p1.grounded && Math.abs(p1.vx) > 3 && (keys['ArrowLeft'] || keys['ArrowRight'])) {
@@ -19824,7 +19932,13 @@ function handleKeyDown(e) {
         } else if (keys['ArrowDown']) {
           startAttack(p1, 'down');
         } else {
-          startAttack(p1, 'normal');
+          if (p1.jabTimer > 0 && p1.jabCount >= 2) {
+            startJabCombo(p1);
+          } else {
+            p1.jabCount++;
+            p1.jabTimer = 18;
+            startAttack(p1, 'normal');
+          }
         }
       }
     }
