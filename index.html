@@ -162,9 +162,9 @@ const characters = [
     bodyColors: { main: '#3A3A3A', sub: '#FF6B6B', skin: '#4A4A4A' },
     moveSpeed: 7.5, jumpPower: -13.5, weight: 0.95 },
   { name: 'バレット', type: '完全遠距離型', color: '#CC3366', accent: '#FF66AA', dark: '#881144',
-    stats: { power: 5, speed: 2, tech: 4, defense: 1 }, desc: '遠距離最強・近距離は極端に弱い機械系女性兵',
+    stats: { power: 3, speed: 2, tech: 4, defense: 1 }, desc: '遠距離特化・近距離は極端に弱い機械系女性兵',
     bodyColors: { main: '#CC3366', sub: '#FF66AA', skin: '#FFD5C2' },
-    moveSpeed: 8.5, jumpPower: -10.7, weight: 0.7 },
+    moveSpeed: 7.8, jumpPower: -10.2, weight: 0.6 },
   { name: 'シャうでん', type: 'スピード型', color: '#E05090', accent: '#FF80B0', dark: '#8A2050',
     stats: { power: 2, speed: 5, tech: 3, defense: 2 }, desc: '素早い触手攻撃とインクで翻弄するタコ系生物',
     bodyColors: { main: '#E05090', sub: '#FF80B0', skin: '#F0A0C0' },
@@ -5461,7 +5461,7 @@ const COMBO_FINISHERS = {
   4:  { name:'水龍大穿', damage:45, hits:1, effect:null, effectDur:0, kb:16, kbAngle:-30, color:'#44AAFF', desc:'巨大な水龍を放つ' },
   5:  { name:'獣王絶滅砕', damage:42, hits:1, effect:null, effectDur:0, kb:20, kbAngle:-50, color:'#4169E1', desc:'獣霊爆発・KB3倍' },
   6:  { name:'怒熊百烈拳EX', damage:3, hits:50, effect:null, effectDur:0, kb:10, kbAngle:-80, color:'#FF6B6B', desc:'50連打+大爆発', lastHitDmg:20 },
-  7:  { name:'虹色大爆発', damage:6, hits:16, effect:'confused', effectDur:600, kb:8, kbAngle:-60, color:'#FF66AA', desc:'16方向同時ビーム' },
+  7:  { name:'虹色大爆発', damage:3, hits:10, effect:'confused', effectDur:300, kb:6, kbAngle:-60, color:'#FF66AA', desc:'10方向ビーム(弱体化)' },
   8:  { name:'超電磁嵐', damage:32, hits:1, effect:'stunned', effectDur:300, kb:12, kbAngle:-50, color:'#66CCFF', desc:'全ゲージ吸収+感電', drainGauge:true },
   9:  { name:'暗黒終末審判', damage:38, hits:1, effect:'cursed', effectDur:600, kb:14, kbAngle:-70, color:'#9966DD', desc:'呪縛10秒' },
   10: { name:'龍炎大覚醒', damage:45, hits:1, effect:'burning', effectDur:480, kb:16, kbAngle:-60, color:'#FF8833', desc:'全画面炎爆発', dragonBonus:15 },
@@ -6852,16 +6852,16 @@ const commandDefs = {
       attack:{ startup:8, active:5, recovery:18, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FFCC00', effect:'none',
         projectile:{ speed:7, damage:16, kbBase:6, kbScale:0.10, kbAngle:-40, w:28, h:28, life:50, color:'#FFCC00', pcolor:'#FFE066' } } },
   ],
-  7: [ // バレット
+  7: [ // バレット (弱体化)
     { name:'ミサイル', seq:['F','F','D','D'], cooldownKey:'cmd1',
-      attack:{ startup:12, active:5, recovery:20, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF3366', effect:'cmdBullet1',
-        projectile:{ speed:7, damage:18, kbBase:7, kbScale:0.12, kbAngle:-25, w:20, h:12, life:80, color:'#FF3366', pcolor:'#FF88AA', homing:true } } },
+      attack:{ startup:16, active:5, recovery:24, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF3366', effect:'cmdBullet1',
+        projectile:{ speed:6, damage:12, kbBase:5, kbScale:0.09, kbAngle:-25, w:18, h:10, life:60, color:'#FF3366', pcolor:'#FF88AA', homing:true } } },
     { name:'バレットストーム', seq:['F','F','U','U'], cooldownKey:'cmd2',
-      attack:{ startup:10, active:30, recovery:18, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF66AA', effect:'cmdBullet2',
+      attack:{ startup:14, active:24, recovery:22, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF66AA', effect:'cmdBullet2',
         specialType:'bulletStorm' } },
     { name:'溜めスナイパー', seq:['U','U','D','D'], cooldownKey:'cmd3', chargeCmd:true,
-      attack:{ startup:10, active:3, recovery:22, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF0044', effect:'none',
-        projectile:{ speed:22, damage:20, kbBase:8, kbScale:0.13, kbAngle:-10, w:20, h:10, life:80, color:'#FF0044', pcolor:'#FF4488', pierce:true } } },
+      attack:{ startup:14, active:3, recovery:26, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF0044', effect:'none',
+        projectile:{ speed:18, damage:14, kbBase:6, kbScale:0.10, kbAngle:-10, w:18, h:9, life:65, color:'#FF0044', pcolor:'#FF4488' } } },
   ],
   8: [ // シャうでん
     { name:'インク爆弾', seq:['F','F','D','D'], cooldownKey:'cmd1',
@@ -7369,26 +7369,26 @@ const attackDefs = {
   },
   // バレット - Gunner (ranged specialist)
   7: {
-    normal: { name:'ピストルショット', startup:5, active:3, recovery:14, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF66AA', effect:'none',
-              projectile:{ speed:12, damage:5, kbBase:3, kbScale:0.05, kbAngle:-15, w:12, h:8, life:50, color:'#FF66AA', pcolor:'#FFAACC' } },
-    strong: { name:'チャージショット', startup:18, active:4, recovery:20, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF3366', effect:'none',
-              projectile:{ speed:14, damage:13, kbBase:6, kbScale:0.11, kbAngle:-20, w:25, h:18, life:70, color:'#FF3366', pcolor:'#FF88AA' } },
-    special:{ name:'スナイパー', startup:20, active:3, recovery:24, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF0044', effect:'none',
-              projectile:{ speed:20, damage:18, kbBase:8, kbScale:0.14, kbAngle:-10, w:18, h:8, life:80, color:'#FF0044', pcolor:'#FF4488', pierce:true } },
-    aerial: { name:'空中射撃', startup:4, active:3, recovery:12, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF66AA', effect:'none',
-              projectile:{ speed:10, damage:6, kbBase:2, kbScale:0.04, kbAngle:80, w:10, h:10, life:40, color:'#FFAA66', pcolor:'#FFCC88', dirAngle:90 } },
-    down:   { name:'爆発弾設置', startup:6, active:5, recovery:16, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF6600', effect:'none',
-              projectile:{ speed:4, damage:14, kbBase:5, kbScale:0.09, kbAngle:-60, w:18, h:18, life:45, color:'#FF6600', pcolor:'#FFAA44', dirAngle:45 } },
-    up:     { name:'上方連射', startup:4, active:12, recovery:14, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF66AA', effect:'none',
-              projectile:{ speed:11, damage:4, kbBase:2, kbScale:0.03, kbAngle:-88, w:8, h:10, life:35, color:'#FF66AA', pcolor:'#FFAACC', dirAngle:-90 },
-              multiShot:3, shotInterval:4 },
-    side:   { name:'横撃ち', startup:5, active:3, recovery:13, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF66AA', effect:'none',
-              projectile:{ speed:11, damage:9, kbBase:4, kbScale:0.07, kbAngle:-15, w:14, h:10, life:55, color:'#FF66AA', pcolor:'#FFAACC' } },
-    downair:{ name:'空中下射撃', startup:4, active:3, recovery:12, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FFAA66', effect:'none',
-              projectile:{ speed:12, damage:8, kbBase:3, kbScale:0.06, kbAngle:80, w:10, h:12, life:40, color:'#FFAA66', pcolor:'#FFCC88', dirAngle:90 } },
-    dash:   { name:'ダッシュ連射', startup:3, active:12, recovery:12, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF66AA', effect:'none',
-              projectile:{ speed:13, damage:5, kbBase:2, kbScale:0.04, kbAngle:-10, w:10, h:8, life:40, color:'#FF66AA', pcolor:'#FFAACC' }, multiShot:3, shotInterval:4, specialType:'slide', slideSpeed:6 },
-    throwDmg: 5,
+    normal: { name:'ピストルショット', startup:7, active:3, recovery:16, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF66AA', effect:'none',
+              projectile:{ speed:10, damage:3, kbBase:2, kbScale:0.04, kbAngle:-15, w:10, h:7, life:40, color:'#FF66AA', pcolor:'#FFAACC' } },
+    strong: { name:'チャージショット', startup:22, active:4, recovery:22, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF3366', effect:'none',
+              projectile:{ speed:12, damage:9, kbBase:5, kbScale:0.09, kbAngle:-20, w:22, h:16, life:55, color:'#FF3366', pcolor:'#FF88AA' } },
+    special:{ name:'スナイパー', startup:26, active:3, recovery:28, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF0044', effect:'none',
+              projectile:{ speed:18, damage:13, kbBase:6, kbScale:0.11, kbAngle:-10, w:16, h:7, life:65, color:'#FF0044', pcolor:'#FF4488' } },
+    aerial: { name:'空中射撃', startup:6, active:3, recovery:14, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF66AA', effect:'none',
+              projectile:{ speed:8, damage:4, kbBase:2, kbScale:0.03, kbAngle:80, w:9, h:9, life:35, color:'#FFAA66', pcolor:'#FFCC88', dirAngle:90 } },
+    down:   { name:'爆発弾設置', startup:8, active:5, recovery:18, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF6600', effect:'none',
+              projectile:{ speed:4, damage:9, kbBase:4, kbScale:0.07, kbAngle:-60, w:16, h:16, life:40, color:'#FF6600', pcolor:'#FFAA44', dirAngle:45 } },
+    up:     { name:'上方連射', startup:6, active:12, recovery:16, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF66AA', effect:'none',
+              projectile:{ speed:9, damage:3, kbBase:2, kbScale:0.03, kbAngle:-88, w:7, h:9, life:30, color:'#FF66AA', pcolor:'#FFAACC', dirAngle:-90 },
+              multiShot:2, shotInterval:5 },
+    side:   { name:'横撃ち', startup:7, active:3, recovery:15, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF66AA', effect:'none',
+              projectile:{ speed:9, damage:6, kbBase:3, kbScale:0.06, kbAngle:-15, w:12, h:9, life:45, color:'#FF66AA', pcolor:'#FFAACC' } },
+    downair:{ name:'空中下射撃', startup:6, active:3, recovery:14, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FFAA66', effect:'none',
+              projectile:{ speed:10, damage:5, kbBase:2, kbScale:0.05, kbAngle:80, w:9, h:10, life:35, color:'#FFAA66', pcolor:'#FFCC88', dirAngle:90 } },
+    dash:   { name:'ダッシュ連射', startup:5, active:12, recovery:14, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF66AA', effect:'none',
+              projectile:{ speed:11, damage:3, kbBase:2, kbScale:0.03, kbAngle:-10, w:9, h:7, life:35, color:'#FF66AA', pcolor:'#FFAACC' }, multiShot:2, shotInterval:5, specialType:'slide', slideSpeed:5 },
+    throwDmg: 4,
   },
   // シャうでん - Octopus Speed
   8: {
@@ -8629,7 +8629,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   // うる男野性解放: KB×2
   if (aci4 === 5 && attacker.uruoWildRelease > 0) { target.vx *= 1.5; target.vy *= 1.5; } // 野性解放KB×1.5
   // バレット(7): 魔法+8、混乱付与で+20
-  if (aci4 === 7) { attacker.bulletMagicGauge = Math.min(100, (attacker.bulletMagicGauge||0) + 8); if (target.confused > 0) attacker.bulletMagicGauge = Math.min(100, attacker.bulletMagicGauge + 12); }
+  if (aci4 === 7) { attacker.bulletMagicGauge = Math.min(100, (attacker.bulletMagicGauge||0) + 5); if (target.confused > 0) attacker.bulletMagicGauge = Math.min(100, attacker.bulletMagicGauge + 6); }
   // おんぱ(17): 周波数+10、気絶で+25
   if (aci4 === 17) { attacker.onpaFreqGauge = Math.min(100, (attacker.onpaFreqGauge||0) + 10); if (target.stunned > 0) attacker.onpaFreqGauge = Math.min(100, attacker.onpaFreqGauge + 15); }
   // ミスターツー(21): 左右ゲージ交互+10
@@ -9599,9 +9599,9 @@ function spawnProjectile(p, projDef) {
     pullEffect: projDef.pullEffect || false,
     hitTargets: [],
   });
-  // バレット(7): 2連射 - 0.1秒後に自動で2発目
-  if (p.charIdx === 7 && p.bulletDoubleShot <= 0) {
-    p.bulletDoubleShot = 6; // 6フレーム ≈ 0.1秒
+  // バレット(7): 2連射 - 覚醒中のみ（弱体化: 通常時は単発）
+  if (p.charIdx === 7 && p.bulletAwaken > 0 && p.bulletDoubleShot <= 0) {
+    p.bulletDoubleShot = 10; // 10フレーム ≈ 0.17秒（遅延増加）
     p.bulletDoubleShotData = projDef;
   }
 }
