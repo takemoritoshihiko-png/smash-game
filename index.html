@@ -40,6 +40,8 @@ let transitioning = false;
 let transitionTarget = '';
 let titleTime = 0;
 let selectTime = 0;
+let charDetailIdx = 0;
+let showHowToPlay = false;
 
 // Select screen
 let p1Select = 0;
@@ -4736,6 +4738,7 @@ function drawTitle(dt) {
     { label: 'O  オンライン対戦', color: '#44DDFF' },
     { label: 'C  コンボリスト', color: '#FF88AA' },
     { label: 'T  戦績', color: '#88FF88' },
+    { label: 'H  HOW TO PLAY', color: '#FF88FF' },
   ];
   const menuStartY = 350;
   for (let i = 0; i < menuItems.length; i++) {
@@ -4940,11 +4943,11 @@ function drawSelect(dt) {
     ctx.fillText(gameMode === 'cpu' ? 'READY! Enter → 難易度選択' : 'READY TO FIGHT! Press ENTER', 480, 628);
     ctx.shadowBlur = 0;
   } else if (gameMode === 'bossrush') {
-    ctx.fillText('← → で選択  |  Enter で決定  |  ESC で戻る', 480, 628);
+    ctx.fillText('← → で選択  |  Enter で決定  |  I: 詳細  |  ESC で戻る', 480, 628);
   } else if (gameMode === 'cpu') {
-    ctx.fillText('1P: ← → + Enter  |  CPU: A D  |  ESC: 戻る', 480, 628);
+    ctx.fillText('1P: ← → + Enter  |  CPU: A D  |  I: 詳細  |  ESC: 戻る', 480, 628);
   } else {
-    ctx.fillText('1P: ← → + Enter  |  2P: A D + Space  |  ESC: 戻る', 480, 628);
+    ctx.fillText('1P: ← → + Enter  |  2P: A D + Space  |  I: 詳細  |  ESC: 戻る', 480, 628);
   }
 }
 
@@ -19234,12 +19237,263 @@ function processPlayerKeydown(key, p, playerId, keyState) {
   }
 }
 
+function drawCharDetail() {
+  const ch = characters[charDetailIdx];
+  const atk = attackDefs[charDetailIdx];
+  const rec = RECOVERY_MOVES[charDetailIdx];
+  const fin = COMBO_FINISHERS[charDetailIdx];
+  const ult = ultimateData[charDetailIdx];
+
+  // Background
+  const bgGrad = ctx.createLinearGradient(0, 0, 0, 640);
+  bgGrad.addColorStop(0, '#000022'); bgGrad.addColorStop(1, '#000011');
+  ctx.fillStyle = bgGrad; ctx.fillRect(0, 0, 960, 640);
+
+  // Character silhouette background
+  ctx.save(); ctx.globalAlpha = 0.06;
+  drawCharacterBody(700, 350, 4.0, charDetailIdx, Date.now(), false);
+  ctx.restore();
+
+  // Header
+  ctx.font = 'bold 28px sans-serif'; ctx.textAlign = 'left';
+  ctx.fillStyle = ch.accent || '#FFD700'; ctx.shadowColor = ch.accent || '#FFD700'; ctx.shadowBlur = 10;
+  ctx.fillText(ch.name, 30, 40); ctx.shadowBlur = 0;
+  ctx.font = 'bold 14px sans-serif'; ctx.fillStyle = '#888';
+  ctx.fillText(ch.type || '', 30, 60);
+  ctx.font = '12px sans-serif'; ctx.fillStyle = '#666';
+  ctx.fillText(ch.desc || '', 30, 78);
+
+  // Character preview
+  drawCharacterBody(130, 180, 1.8, charDetailIdx, Date.now(), false);
+
+  // Stats panel
+  const statsX = 250, statsY = 100;
+  ctx.fillStyle = 'rgba(8,8,20,0.85)'; roundRect(ctx, statsX, statsY, 280, 160, 8); ctx.fill();
+  ctx.strokeStyle = ch.accent + '44'; ctx.lineWidth = 1; roundRect(ctx, statsX, statsY, 280, 160, 8); ctx.stroke();
+  ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'left'; ctx.fillStyle = ch.accent;
+  ctx.fillText('STATUS', statsX + 12, statsY + 20);
+
+  const statLabels = ['SPEED', 'POWER', 'JUMP', 'WEIGHT', 'RECOVERY'];
+  const statValues = [
+    Math.min(5, Math.round(ch.moveSpeed / 2)),
+    ch.stats.power,
+    Math.min(5, Math.round(Math.abs(ch.jumpPower) / 3.4)),
+    Math.min(5, Math.round(ch.weight * 5)),
+    rec ? Math.min(5, Math.round(rec.height / 60)) : 3
+  ];
+  const statBarColors = ['#44FF88', '#FF4444', '#FFD700', '#4488FF', '#FF88FF'];
+  for (let i = 0; i < 5; i++) {
+    const sy = statsY + 32 + i * 24;
+    ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'left'; ctx.fillStyle = '#777';
+    ctx.fillText(statLabels[i], statsX + 12, sy + 8);
+    ctx.fillStyle = '#111122'; roundRect(ctx, statsX + 90, sy, 160, 10, 4); ctx.fill();
+    const val = statValues[i];
+    ctx.fillStyle = statBarColors[i]; roundRect(ctx, statsX + 90, sy, (val / 5) * 160, 10, 4); ctx.fill();
+    ctx.font = '9px sans-serif'; ctx.fillStyle = '#aaa'; ctx.textAlign = 'right';
+    ctx.fillText(val + '/5', statsX + 268, sy + 8);
+  }
+
+  // Move list
+  const moveX = 30, moveY = 280;
+  ctx.fillStyle = 'rgba(8,8,20,0.85)'; roundRect(ctx, moveX, moveY, 900, 330, 8); ctx.fill();
+  ctx.strokeStyle = '#333'; ctx.lineWidth = 1; roundRect(ctx, moveX, moveY, 900, 330, 8); ctx.stroke();
+  ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'left'; ctx.fillStyle = ch.accent;
+  ctx.fillText('MOVE LIST', moveX + 12, moveY + 20);
+
+  // Table header
+  const colX = [moveX + 12, moveX + 180, moveX + 430, moveX + 580, moveX + 710];
+  const headerY = moveY + 38;
+  ctx.font = 'bold 9px sans-serif'; ctx.fillStyle = '#555';
+  ['INPUT', 'MOVE NAME', 'DAMAGE', 'STARTUP', 'KNOCKBACK'].forEach((h, i) => ctx.fillText(h, colX[i], headerY));
+  ctx.strokeStyle = '#222'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(moveX + 12, headerY + 4); ctx.lineTo(moveX + 888, headerY + 4); ctx.stroke();
+
+  // Move rows
+  const moves = [];
+  if (atk) {
+    const getDmg = (a) => a.projectile ? a.projectile.damage : a.damage;
+    moves.push({ input: 'Z (\u901A\u5E38\u653B\u6483)', name: atk.normal?.name || '-', dmg: getDmg(atk.normal || {}), startup: atk.normal?.startup || '-', kb: atk.normal?.kbBase || '-' });
+    moves.push({ input: '\u2192\u2192+Z (\u6A2A\u30B9\u30DE\u30C3\u30B7\u30E5)', name: atk.side?.name || '-', dmg: getDmg(atk.side || {}), startup: atk.side?.startup || '-', kb: atk.side?.kbBase || '-' });
+    moves.push({ input: '\u2191\u2191+Z (\u4E0A\u30B9\u30DE\u30C3\u30B7\u30E5)', name: atk.up?.name || '-', dmg: getDmg(atk.up || {}), startup: atk.up?.startup || '-', kb: atk.up?.kbBase || '-' });
+    moves.push({ input: '\u2193\u2193+Z (\u4E0B\u30B9\u30DE\u30C3\u30B7\u30E5)', name: atk.down?.name || '-', dmg: getDmg(atk.down || {}), startup: atk.down?.startup || '-', kb: atk.down?.kbBase || '-' });
+    moves.push({ input: 'Z (\u6A2A\u5F37)', name: atk.strong?.name || '-', dmg: getDmg(atk.strong || {}), startup: atk.strong?.startup || '-', kb: atk.strong?.kbBase || '-' });
+    moves.push({ input: 'D\u9577\u62BC\u3057 (\u5FC5\u6BBA\u6280)', name: atk.special?.name || '-', dmg: getDmg(atk.special || {}), startup: atk.special?.startup || '-', kb: atk.special?.kbBase || '-' });
+  }
+  if (rec) moves.push({ input: '\u2191+X (\u5FA9\u5E30\u6280)', name: rec.name, dmg: rec.dmg || '-', startup: '-', kb: '-' });
+  if (ult) moves.push({ input: '\u30B2\u30FC\u30B8100% D\u9577\u62BC\u3057', name: ult.name, dmg: ult.dmg, startup: '-', kb: '-' });
+  if (fin) moves.push({ input: '15\u30B3\u30F3\u30DC+C', name: fin.name, dmg: fin.hits > 1 ? fin.damage + '\u00D7' + fin.hits : fin.damage, startup: '-', kb: fin.kb || '-' });
+
+  for (let i = 0; i < moves.length; i++) {
+    const ry = headerY + 14 + i * 22;
+    const m = moves[i];
+    ctx.font = '10px sans-serif'; ctx.fillStyle = '#aaa';
+    ctx.fillText(m.input, colX[0], ry + 8);
+    ctx.fillStyle = '#e0e0e0'; ctx.font = 'bold 11px sans-serif';
+    ctx.fillText(m.name, colX[1], ry + 8);
+    ctx.fillStyle = '#FF6666'; ctx.font = '10px sans-serif';
+    ctx.fillText(m.dmg, colX[2], ry + 8);
+    ctx.fillStyle = '#88AAFF';
+    ctx.fillText(m.startup + (typeof m.startup === 'number' ? 'F' : ''), colX[3], ry + 8);
+    ctx.fillStyle = '#FFD700';
+    ctx.fillText(m.kb, colX[4], ry + 8);
+    // Subtle row separator
+    if (i < moves.length - 1) {
+      ctx.strokeStyle = '#111'; ctx.beginPath(); ctx.moveTo(moveX + 12, ry + 14); ctx.lineTo(moveX + 888, ry + 14); ctx.stroke();
+    }
+  }
+
+  // Navigation
+  ctx.font = '13px sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#555';
+  ctx.fillText('\u2190 \u2192 \u30AD\u30E3\u30E9\u5207\u66FF  |  ESC \u623B\u308B', 480, 628);
+
+  // Left/Right arrows
+  ctx.font = 'bold 30px sans-serif'; ctx.fillStyle = '#444';
+  ctx.textAlign = 'left'; ctx.fillText('\u25C0', 8, 50);
+  ctx.textAlign = 'right'; ctx.fillText('\u25B6', 952, 50);
+}
+
+function drawHowToPlay() {
+  drawHowToPlayContent(0, 0, 960, 640, 1.0);
+  ctx.font = '13px sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#555';
+  ctx.fillText('ESC / H \u3067\u623B\u308B', 480, 630);
+}
+
+function drawHowToPlayOverlay() {
+  // Semi-transparent background
+  ctx.fillStyle = 'rgba(0,0,0,0.85)'; ctx.fillRect(0, 0, 960, 640);
+  drawHowToPlayContent(40, 20, 880, 600, 0.95);
+  ctx.font = '13px sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#666';
+  ctx.fillText('H / ESC \u3067\u9589\u3058\u308B', 480, 630);
+}
+
+function drawHowToPlayContent(ox, oy, w, h, alpha) {
+  ctx.save();
+  ctx.globalAlpha = alpha;
+
+  // Background panel
+  ctx.fillStyle = 'rgba(5,5,20,0.95)'; roundRect(ctx, ox, oy, w, h, 12); ctx.fill();
+  ctx.strokeStyle = '#FFD70044'; ctx.lineWidth = 1; roundRect(ctx, ox, oy, w, h, 12); ctx.stroke();
+
+  // Title
+  ctx.font = 'bold 28px sans-serif'; ctx.textAlign = 'center';
+  ctx.fillStyle = '#FFD700'; ctx.shadowColor = '#FFD700'; ctx.shadowBlur = 10;
+  ctx.fillText('HOW TO PLAY', ox + w/2, oy + 38); ctx.shadowBlur = 0;
+
+  // Two-column layout
+  const leftX = ox + 30, rightX = ox + w/2 + 20;
+  let ly = oy + 65, ry = oy + 65;
+
+  // === LEFT COLUMN: Basic Controls ===
+  ctx.font = 'bold 14px sans-serif'; ctx.textAlign = 'left'; ctx.fillStyle = '#44AAFF';
+  ctx.fillText('\u57FA\u672C\u64CD\u4F5C', leftX, ly); ly += 22;
+
+  const controls = [
+    ['\u2190 \u2192 \u2193', '\u79FB\u52D5'],
+    ['\u2191', '\u30B8\u30E3\u30F3\u30D7 (2\u6BB5\u30B8\u30E3\u30F3\u30D7\u53EF)'],
+    ['Z', '\u653B\u6483 (\u901A\u5E38\u653B\u6483)'],
+    ['Shift', '\u30AC\u30FC\u30C9'],
+    ['D \u9577\u62BC\u3057', '\u5FC5\u6BBA\u6280 (\u30B2\u30FC\u30B8100%\u6642)'],
+    ['\u2191 + X', '\u5FA9\u5E30\u6280 (\u7A7A\u4E2D1\u56DE\u9650\u308A)'],
+    ['A + \u65B9\u5411\u30AD\u30FC', '\u6374\u307F\u30FB\u6295\u3052'],
+    ['\u7A7A\u4E2D + \u65B9\u5411 + D', '\u30A8\u30A2\u30C0\u30C3\u30B7\u30E5'],
+    ['C', '\u30B3\u30F3\u30DC\u30D5\u30A3\u30CB\u30C3\u30B7\u30E3\u30FC (15\u30B3\u30F3\u30DC+)'],
+  ];
+  ctx.font = '11px sans-serif';
+  for (const [key, desc] of controls) {
+    ctx.fillStyle = '#FFD700'; ctx.fillText(key, leftX, ly + 1);
+    ctx.fillStyle = '#ccc'; ctx.fillText(desc, leftX + 130, ly + 1);
+    ly += 18;
+  }
+
+  // === Smash attacks ===
+  ly += 10;
+  ctx.font = 'bold 14px sans-serif'; ctx.fillStyle = '#FF8844';
+  ctx.fillText('\u30B9\u30DE\u30C3\u30B7\u30E5\u653B\u6483\u306E\u51FA\u3057\u65B9', leftX, ly); ly += 20;
+  ctx.font = '11px sans-serif'; ctx.fillStyle = '#ccc';
+  ctx.fillText('\u540C\u3058\u65B9\u5411\u3092\u7D20\u65E9\u304F2\u56DE\u5165\u529B \u2192 Z', leftX, ly); ly += 16;
+  ctx.fillText('\u2192\u2192+Z  \u6A2A\u30B9\u30DE\u30C3\u30B7\u30E5 (\u6A2A\u306B\u5F37\u304F\u5439\u3063\u98DB\u3070\u3059)', leftX, ly); ly += 16;
+  ctx.fillText('\u2191\u2191+Z  \u4E0A\u30B9\u30DE\u30C3\u30B7\u30E5 (\u4E0A\u306B\u6253\u3061\u4E0A\u3052\u308B)', leftX, ly); ly += 16;
+  ctx.fillText('\u2193\u2193+Z  \u4E0B\u30B9\u30DE\u30C3\u30B7\u30E5 (\u5468\u56F2\u3092\u653B\u6483)', leftX, ly); ly += 16;
+
+  // === RIGHT COLUMN: Combo system ===
+  ctx.font = 'bold 14px sans-serif'; ctx.fillStyle = '#FF66AA';
+  ctx.fillText('\u30B3\u30F3\u30DC\u30B7\u30B9\u30C6\u30E0', rightX, ry); ry += 22;
+  ctx.font = '11px sans-serif'; ctx.fillStyle = '#ccc';
+  const comboLines = [
+    '\u653B\u6483\u3092\u5F53\u3066\u7D9A\u3051\u308B\u3068\u30B3\u30F3\u30DC\u30AB\u30A6\u30F3\u30BF\u30FC\u304C\u5897\u52A0',
+    '\u30B3\u30F3\u30DC\u4E2D\u306F\u76F8\u624B\u306E\u30C0\u30E1\u30FC\u30B8\u304C\u84C4\u7A4D\u3057\u3084\u3059\u3044',
+    '15\u30B3\u30F3\u30DC\u4EE5\u4E0A\u3067\u300CCOMBO FINISHER READY!\u300D',
+    'C \u30AD\u30FC\u3067\u30B3\u30F3\u30DC\u30D5\u30A3\u30CB\u30C3\u30B7\u30E3\u30FC\u767A\u52D5\uFF01',
+    '\u5404\u30AD\u30E3\u30E9\u56FA\u6709\u306E\u8D85\u5F37\u529B\u306A\u6280\u3092\u7E70\u308A\u51FA\u3059',
+  ];
+  for (const line of comboLines) {
+    ctx.fillText(line, rightX, ry + 1); ry += 18;
+  }
+
+  // === Gauge system ===
+  ry += 10;
+  ctx.font = 'bold 14px sans-serif'; ctx.fillStyle = '#44FF88';
+  ctx.fillText('\u30B2\u30FC\u30B8\u30B7\u30B9\u30C6\u30E0', rightX, ry); ry += 22;
+  ctx.font = '11px sans-serif'; ctx.fillStyle = '#ccc';
+  const gaugeLines = [
+    '\u30C0\u30E1\u30FC\u30B8\u3092\u4E0E\u3048\u308B / \u53D7\u3051\u308B\u3068\u30B2\u30FC\u30B8\u304C\u5897\u52A0',
+    '\u30B2\u30FC\u30B8100%\u3067\u753B\u9762\u4E0B\u306B\u300CULTIMATE READY!\u300D',
+    'D \u30AD\u30FC\u9577\u62BC\u3057\u3067\u5FC5\u6BBA\u6280\u767A\u52D5',
+    '\u5FC5\u6BBA\u6280\u304C\u5F53\u305F\u308B\u3068\u8D85\u6F14\u51FA \u2192 \u5927\u30C0\u30E1\u30FC\u30B8',
+    '\u5916\u3059\u3068\u30B2\u30FC\u30B8\u6D88\u8CBB + \u3088\u308D\u3051',
+  ];
+  for (const line of gaugeLines) {
+    ctx.fillText(line, rightX, ry + 1); ry += 18;
+  }
+
+  // === Command attacks ===
+  ry += 10;
+  ctx.font = 'bold 14px sans-serif'; ctx.fillStyle = '#FFD700';
+  ctx.fillText('\u30B3\u30DE\u30F3\u30C9\u6280', rightX, ry); ry += 22;
+  ctx.font = '11px sans-serif'; ctx.fillStyle = '#ccc';
+  const cmdLines = [
+    '\u65B9\u5411\u30AD\u30FC\u306E\u7D44\u307F\u5408\u308F\u305B \u2192 Z \u3067\u767A\u52D5',
+    '\u4F8B: \u2192\u2192\u2193\u2193+Z, \u2192\u2192\u2191\u2191+Z, \u2191\u2191\u2193\u2193+Z',
+    '\u5404\u30AD\u30E3\u30E93\u3064\u306E\u56FA\u6709\u30B3\u30DE\u30F3\u30C9\u6280\u3092\u6301\u3064',
+    '\u30AF\u30FC\u30EB\u30C0\u30A6\u30F3\u3042\u308A\uFF08\u9023\u767A\u4E0D\u53EF\uFF09',
+  ];
+  for (const line of cmdLines) {
+    ctx.fillText(line, rightX, ry + 1); ry += 18;
+  }
+
+  // === Tips ===
+  ry += 10;
+  ctx.font = 'bold 14px sans-serif'; ctx.fillStyle = '#88FFFF';
+  ctx.fillText('Tips', rightX, ry); ry += 22;
+  ctx.font = '11px sans-serif'; ctx.fillStyle = '#ccc';
+  ctx.fillText('\u30C0\u30E1\u30FC\u30B8%\u304C\u9AD8\u3044\u307B\u3069\u5439\u3063\u98DB\u3073\u3084\u3059\u304F\u306A\u308B', rightX, ry); ry += 16;
+  ctx.fillText('\u753B\u9762\u5916\u306B\u98DB\u3076\u3068KO\uFF08\u6483\u588A\uFF09', rightX, ry); ry += 16;
+  ctx.fillText('\u30B8\u30E3\u30B9\u30C8\u30AC\u30FC\u30C9(\u30BF\u30A4\u30DF\u30F3\u30B0) \u2192 \u53CD\u6483\u30C1\u30E3\u30F3\u30B9', rightX, ry);
+
+  ctx.restore();
+}
+
 function handleKeyDown(e) {
   // Init audio context on first interaction (required by browsers)
   if (!audioCtx) { try { getAudioCtx(); } catch(ex) {} }
   if (transitioning) return;
 
-  if (scene === 'title') {
+  // H key: toggle HOW TO PLAY overlay (any scene except howtoplay/chardetail/online)
+  if ((e.key === 'h' || e.key === 'H') && scene !== 'howtoplay' && scene !== 'chardetail' && scene !== 'online') {
+    if (scene === 'title') { startTransition('howtoplay'); return; }
+    showHowToPlay = !showHowToPlay; return;
+  }
+  if (showHowToPlay && e.key === 'Escape') { showHowToPlay = false; return; }
+
+  if (scene === 'chardetail') {
+    if (e.key === 'Escape' || e.key === 'Backspace') startTransition('select');
+    if (e.key === 'ArrowLeft') charDetailIdx = (charDetailIdx + characters.length - 1) % characters.length;
+    if (e.key === 'ArrowRight') charDetailIdx = (charDetailIdx + 1) % characters.length;
+    return;
+  } else if (scene === 'howtoplay') {
+    if (e.key === 'Escape' || e.key === 'h' || e.key === 'H') startTransition('title');
+    return;
+  } else if (scene === 'title') {
     if (e.key === 'Enter' || e.key === ' ') startTransition('select');
     if (e.key === 'o' || e.key === 'O') startTransition('online');
     if (e.key === 'c' || e.key === 'C') startTransition('combolist');
@@ -19415,6 +19669,13 @@ function handleKeyDown(e) {
           p2Confirmed = true; e.preventDefault();
         }
       }
+    }
+
+    // I key: open character detail page
+    if ((e.key === 'i' || e.key === 'I') && !p1Confirmed && modeSelected && p1Select < characters.length) {
+      charDetailIdx = p1Select;
+      startTransition('chardetail');
+      return;
     }
 
     if (e.key === 'Escape') {
@@ -19853,9 +20114,14 @@ function gameLoop(timestamp) {
     drawBattle(FIXED_DT);
     drawUltimateOverlay();
     drawInstantKillOverlay();
+  } else if (scene === 'chardetail') {
+    drawCharDetail(FIXED_DT);
+  } else if (scene === 'howtoplay') {
+    drawHowToPlay();
   }
 
   drawTransition();
+  if (showHowToPlay) drawHowToPlayOverlay();
 
   requestAnimationFrame(gameLoop);
 }
