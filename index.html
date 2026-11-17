@@ -71,28 +71,28 @@ const stages = [
     id: 'sakura',
     name: '桜ノ舞台',
     desc: '日本の美を感じる戦場',
-    bgSrc: 'images/bg.png',
+    bgSrc: 'images/bg.webp',
     bgmSrc: 'sounds/bgm.mp3',
   },
   {
     id: 'seijaku',
     name: '夜のパリ',
     desc: '静かな夜の石畳で戦う',
-    bgSrc: 'images/bg2.png',
+    bgSrc: 'images/bg2.webp',
     bgmSrc: 'sounds/bgm2.mp3',
   },
   {
     id: 'mahoujin',
     name: '精霊の聖域',
     desc: '神秘の光が満ちる森の奥地',
-    bgSrc: 'images/bg3.png',
+    bgSrc: 'images/bg3.webp',
     bgmSrc: 'sounds/bgm3.mp3',
   },
   {
     id: 'space',
     name: '星降る宇宙',
     desc: '銀河の渦の中で戦え',
-    bgSrc: 'images/bg4.png',
+    bgSrc: 'images/bg4.webp',
     bgmSrc: 'sounds/bgm4.mp3',
     gravityMult: 0.85,
   },
@@ -100,7 +100,7 @@ const stages = [
     id: 'throne',
     name: '魔王の玉座',
     desc: '暗黒の城で最終決戦',
-    bgSrc: 'images/bg5.png',
+    bgSrc: 'images/bg5.webp',
     bgmSrc: 'sounds/bgm5.mp3',
     gravityMult: 1.1,
     wideStage: 1.3,    // 地面横幅1.3倍
@@ -278,224 +278,167 @@ document.addEventListener('keyup', (e) => {
 });
 
 // --- Character images ---
+// スプライトは「最初に描こうとした瞬間」に読み込む（遅延ロード）。
+// 起動時に全29キャラ分 約18MBを読んでいたのをやめ、使うキャラの分だけ読む。
+// 戻り値は Image と同じ使い方ができる（obj[key].complete / .naturalWidth）。
+function lazySprites(keys, resolve) {
+  const valid = new Set(keys);
+  const cache = Object.create(null);
+  return new Proxy(Object.create(null), {
+    get(_, k) {
+      if (typeof k !== 'string' || !valid.has(k)) return undefined;
+      let img = cache[k];
+      if (!img) { img = new Image(); img.src = resolve(k); cache[k] = img; }
+      return img;
+    },
+    has(_, k) { return valid.has(k); },
+    ownKeys() { return Object.keys(cache); },
+    getOwnPropertyDescriptor(_, k) {
+      return valid.has(k) ? { configurable: true, enumerable: true, value: this.get(null, k) } : undefined;
+    }
+  });
+}
+// 先に読んでおくと気持ちいいもの（対戦が始まる前に裏で用意する）
+function preloadSprites(charIndex) {
+  const set = SPRITE_SETS[charIndex];
+  if (!set) return;
+  for (const k of ['idle', 'walk', 'jump', 'attack_n', 'damage']) { void set[k]; }
+}
 const zenImg = new Image();
-zenImg.src = 'images/zen.png';
+zenImg.src = 'images/zen.webp';
 // Zen sprite animation images
-const zenSprites = {};
-['idle','walk','jump','attack_n','attack_s','attack_s2','special','smash','damage','guard','knockout'].forEach(k => {
-  zenSprites[k] = new Image();
-  zenSprites[k].src = 'images/zen/zen_' + k + '.png';
-});
+const zenSprites = lazySprites(['idle','walk','jump','attack_n','attack_s','attack_s2','special','smash','damage','guard','knockout'], k => 'images/zen/zen_' + k + '.webp');
 // Don sprite animation images
-const donSprites = {};
-['idle','walk','jump','attack_n','attack_s','attack_s2','special','smash','damage','guard','knockout','rage'].forEach(k => {
-  donSprites[k] = new Image();
-  donSprites[k].src = 'images/don/don_' + k + '.png';
-});
+const donSprites = lazySprites(['idle','walk','jump','attack_n','attack_s','attack_s2','special','smash','damage','guard','knockout','rage'], k => 'images/don/don_' + k + '.webp');
 const donImg = new Image();
-donImg.src = 'images/don.png';
+donImg.src = 'images/don.webp';
 const saisokuImg = new Image();
-saisokuImg.src = 'images/saisoku.png';
-const saisokuSprites = {};
-['idle','walk','jump','attack_n','attack_s','special','smash','damage','guard','knockout'].forEach(k => {
-  saisokuSprites[k] = new Image();
-  saisokuSprites[k].src = 'images/saisoku/saisoku_' + k + '.png';
-});
+saisokuImg.src = 'images/saisoku.webp';
+const saisokuSprites = lazySprites(['idle','walk','jump','attack_n','attack_s','special','smash','damage','guard','knockout'], k => 'images/saisoku/saisoku_' + k + '.webp');
 const meteoImg = new Image();
-meteoImg.src = 'images/meteo.png';
-const meteoSprites = {};
+meteoImg.src = 'images/meteo.webp';
 const meteoSpriteMap = { idle:'01_idle', walk:'02_idle2', jump:'03_kick', attack_n:'04_punch_fire', attack_side:'06_beam', attack_up:'07_spin', attack_down:'05_hook', attack_air:'03_kick', special:'09_aura_burst', damage:'08_power_up', win:'11_win', down:'12_down', projectile:'10_projectile' };
-Object.keys(meteoSpriteMap).forEach(k => {
-  meteoSprites[k] = new Image();
-  meteoSprites[k].src = 'images/meteor/' + meteoSpriteMap[k] + '.png';
-});
+const meteoSprites = lazySprites(Object.keys(meteoSpriteMap), k => 'images/meteor/' + meteoSpriteMap[k] + '.webp');
 const longImg = new Image();
-longImg.src = 'images/long.png';
-const longSprites = {};
+longImg.src = 'images/long.webp';
 const longSpriteMap = { idle:'01_idle', walk:'01_idle', jump:'03_jump', attack_n:'02_attack_side', attack_side:'06_attack_water', attack_up:'07_spin', attack_down:'04_attack_wide', attack_air:'05_attack_thrust', special:'09_special', damage:'08_damage', win:'11_win', down:'12_down', projectile:'10_projectile' };
-Object.keys(longSpriteMap).forEach(k => {
-  longSprites[k] = new Image();
-  longSprites[k].src = 'images/long/' + longSpriteMap[k] + '.png';
-});
+const longSprites = lazySprites(Object.keys(longSpriteMap), k => 'images/long/' + longSpriteMap[k] + '.webp');
 const uruoImg = new Image();
-uruoImg.src = 'images/uruo.png';
-const uruoSprites = {};
+uruoImg.src = 'images/uruo.webp';
 const uruoSpriteMap = { idle:'01_idle', walk:'02_walk', jump:'03_jump', attack_n:'04_attack_side', attack_side:'06_beam', attack_up:'07_spin', attack_down:'05_attack_down', attack_air:'03_jump', special:'09_special', damage:'08_damage', win:'11_win', down:'12_down', projectile:'10_projectile' };
-Object.keys(uruoSpriteMap).forEach(k => {
-  uruoSprites[k] = new Image();
-  uruoSprites[k].src = 'images/uruo/' + uruoSpriteMap[k] + '.png';
-});
+const uruoSprites = lazySprites(Object.keys(uruoSpriteMap), k => 'images/uruo/' + uruoSpriteMap[k] + '.webp');
 const kumataroImg = new Image();
-kumataroImg.src = 'images/kumataro.png';
-const kumatarouSprites = {};
+kumataroImg.src = 'images/kumataro.webp';
 const kumatarouSpriteMap = { idle:'01_idle', walk:'02_walk', jump:'03_jump', attack_n:'04_attack_n', attack_side:'05_attack_side', attack_up:'11_projectile2', attack_down:'04_attack_n', attack_air:'08_attack_air', special:'06_special', damage:'07_damage', win:'09_win', down:'12_down', projectile:'10_projectile1' };
-Object.keys(kumatarouSpriteMap).forEach(k => {
-  kumatarouSprites[k] = new Image();
-  kumatarouSprites[k].src = 'images/kumatarou/' + kumatarouSpriteMap[k] + '.png';
-});
+const kumatarouSprites = lazySprites(Object.keys(kumatarouSpriteMap), k => 'images/kumatarou/' + kumatarouSpriteMap[k] + '.webp');
 const bulletImg = new Image();
-bulletImg.src = 'images/bullet.png';
-const bulletSprites = {};
+bulletImg.src = 'images/bullet.webp';
 const bulletSpriteMap = { idle:'01_idle', walk:'02_walk', jump:'02_walk', attack_n:'03_attack_star', attack_side:'03_attack_star', attack_up:'05_spin', attack_down:'04_attack_down', attack_air:'03_attack_star', special:'06_special', damage:'04_attack_down', win:'01_idle', down:'04_attack_down', projectile:'03_attack_star' };
-Object.keys(bulletSpriteMap).forEach(k => {
-  bulletSprites[k] = new Image();
-  bulletSprites[k].src = 'images/bullet/' + bulletSpriteMap[k] + '.png';
-});
+const bulletSprites = lazySprites(Object.keys(bulletSpriteMap), k => 'images/bullet/' + bulletSpriteMap[k] + '.webp');
 const shaudenImg = new Image();
-shaudenImg.src = 'images/shauden.png';
-const shawdenSprites = {};
+shaudenImg.src = 'images/shauden.webp';
 const shawdenSpriteMap = { idle:'01_idle', walk:'02_walk', jump:'03_jump', attack_n:'04_attack_n', attack_side:'05_attack_side', attack_up:'06_electric', attack_down:'07_spin', attack_air:'03_jump', special:'09_special', damage:'08_damage', win:'11_win', down:'12_down', projectile:'10_projectile' };
-Object.keys(shawdenSpriteMap).forEach(k => {
-  shawdenSprites[k] = new Image();
-  shawdenSprites[k].src = 'images/shawden/' + shawdenSpriteMap[k] + '.png';
-});
+const shawdenSprites = lazySprites(Object.keys(shawdenSpriteMap), k => 'images/shawden/' + shawdenSpriteMap[k] + '.webp');
 const judgemanImg = new Image();
-judgemanImg.src = 'images/judgeman.png';
-const judgemanSprites = {};
+judgemanImg.src = 'images/judgeman.webp';
 const judgemanSpriteMap = { idle:'01_idle', walk:'02_walk', jump:'03_jump', attack_n:'04_attack_gavel', attack_side:'05_attack_scales', attack_up:'07_spin', attack_down:'06_dark_punch', attack_air:'03_jump', special:'09_special', damage:'08_damage', win:'11_win', down:'12_down', projectile:'10_projectile' };
-Object.keys(judgemanSpriteMap).forEach(k => {
-  judgemanSprites[k] = new Image();
-  judgemanSprites[k].src = 'images/judgeman/' + judgemanSpriteMap[k] + '.png';
-});
+const judgemanSprites = lazySprites(Object.keys(judgemanSpriteMap), k => 'images/judgeman/' + judgemanSpriteMap[k] + '.webp');
 const catbusImg = new Image();
-catbusImg.src = 'images/catbus.png';
-const catbusSprites = {};
+catbusImg.src = 'images/catbus.webp';
 const catbusSpriteMap = { idle:'01_idle', walk:'02_walk', jump:'03_jump', attack_n:'04_bite', attack_side:'05_slam', attack_up:'06_tail', attack_down:'05_slam', attack_air:'03_jump', special:'09_special', damage:'08_damage', win:'11_win', down:'12_down', projectile:'10_projectile' };
-Object.keys(catbusSpriteMap).forEach(k => {
-  catbusSprites[k] = new Image();
-  catbusSprites[k].src = 'images/catbus/' + catbusSpriteMap[k] + '.png';
-});
+const catbusSprites = lazySprites(Object.keys(catbusSpriteMap), k => 'images/catbus/' + catbusSpriteMap[k] + '.webp');
 const tensaiHumanImg = new Image();
-tensaiHumanImg.src = 'images/tensai_human.png';
+tensaiHumanImg.src = 'images/tensai_human.webp';
 const tensaiDragonImg = new Image();
-tensaiDragonImg.src = 'images/tensai_dragon.png';
+tensaiDragonImg.src = 'images/tensai_dragon.webp';
 // Tensai human sprites
-const tensaiSprites = {};
 const tensaiSpriteMap = { idle:'01_idle', walk:'02_walk', jump:'03_jump', attack_n:'04_attack_side', attack_side:'05_attack_slash', attack_up:'06_attack_up', attack_down:'07_spin', attack_air:'03_jump', special:'09_special_dragon', damage:'08_damage', win:'11_win', down:'12_down', projectile:'10_projectile' };
-Object.keys(tensaiSpriteMap).forEach(k => {
-  tensaiSprites[k] = new Image();
-  tensaiSprites[k].src = 'images/tensai/' + tensaiSpriteMap[k] + '.png';
-});
+const tensaiSprites = lazySprites(Object.keys(tensaiSpriteMap), k => 'images/tensai/' + tensaiSpriteMap[k] + '.webp');
 // Tensai dragon sprites
-const tensaiDragonSprites = {};
 const tensaiDragonSpriteMap = { idle:'01_idle', walk:'02_walk', jump:'05_takeoff', attack_n:'08_bite', attack_side:'09_claw', attack_up:'06_hover', attack_down:'03_rest', attack_air:'04_dive', special:'13_roar', damage:'12_damage', win:'11_win', down:'12_damage', projectile:'07_fire' };
-Object.keys(tensaiDragonSpriteMap).forEach(k => {
-  tensaiDragonSprites[k] = new Image();
-  tensaiDragonSprites[k].src = 'images/tensai/dragon/' + tensaiDragonSpriteMap[k] + '.png';
-});
+const tensaiDragonSprites = lazySprites(Object.keys(tensaiDragonSpriteMap), k => 'images/tensai/dragon/' + tensaiDragonSpriteMap[k] + '.webp');
 const tankImg = new Image();
-tankImg.src = 'images/tank.png';
-const tankSprites = {};
+tankImg.src = 'images/tank.webp';
 const tankSpriteMap = { idle:'01_idle', walk:'02_walk', jump:'03_jump', attack_n:'04_cannon', attack_side:'05_blade', attack_up:'06_turret_spin', attack_down:'07_spin360', attack_air:'03_jump', special:'09_special', damage:'08_damage', win:'11_win', down:'12_down', projectile:'10_projectile' };
-Object.keys(tankSpriteMap).forEach(k => {
-  tankSprites[k] = new Image();
-  tankSprites[k].src = 'images/tank/' + tankSpriteMap[k] + '.png';
-});
+const tankSprites = lazySprites(Object.keys(tankSpriteMap), k => 'images/tank/' + tankSpriteMap[k] + '.webp');
 const namiojiImg = new Image();
-namiojiImg.src = 'images/namioji.png';
-const namiojiSprites = {};
+namiojiImg.src = 'images/namioji.webp';
 const namiojiSpriteMap = { idle:'01_idle', walk:'02_walk', jump:'03_jump', attack_n:'04_jab', attack_side:'05_straight', attack_up:'06_uppercut', attack_down:'07_spin', attack_air:'04_jab', special:'09_special', damage:'08_damage', win:'11_win', down:'12_down', projectile:'10_projectile' };
-Object.keys(namiojiSpriteMap).forEach(k => { namiojiSprites[k] = new Image(); namiojiSprites[k].src = 'images/namioji/' + namiojiSpriteMap[k] + '.png'; });
+const namiojiSprites = lazySprites(Object.keys(namiojiSpriteMap), k => 'images/namioji/' + namiojiSpriteMap[k] + '.webp');
 const tokkoImg = new Image();
-tokkoImg.src = 'images/tokko.png?v=2';
-const tokkoSprites = {};
+tokkoImg.src = 'images/tokko.webp?v=2';
 const tokkoSpriteMap = { idle:'01_idle', walk:'02_walk', jump:'03_jump', attack_n:'04_slash', attack_side:'05_multi', attack_up:'06_upslash', attack_down:'07_spin', attack_air:'04_slash', special:'09_special', damage:'08_damage', win:'11_win', down:'12_down', projectile:'10_projectile' };
-Object.keys(tokkoSpriteMap).forEach(k => { tokkoSprites[k] = new Image(); tokkoSprites[k].src = 'images/tokko/' + tokkoSpriteMap[k] + '.png'; });
+const tokkoSprites = lazySprites(Object.keys(tokkoSpriteMap), k => 'images/tokko/' + tokkoSpriteMap[k] + '.webp');
 const samImg = new Image();
-samImg.src = 'images/sam.png';
-const samSprites = {};
+samImg.src = 'images/sam.webp';
 const samSpriteMap = { idle:'01_idle', walk:'02_walk', jump:'03_jump', attack_n:'06_peck', attack_side:'04_wing_slap', attack_up:'03_jump', attack_down:'05_spin', attack_air:'04_wing_slap', special:'09_special', damage:'08_damage', win:'11_win', down:'12_down', projectile:'10_projectile' };
-Object.keys(samSpriteMap).forEach(k => { samSprites[k] = new Image(); samSprites[k].src = 'images/sam_char/' + samSpriteMap[k] + '.png'; });
+const samSprites = lazySprites(Object.keys(samSpriteMap), k => 'images/sam_char/' + samSpriteMap[k] + '.webp');
 const kingImg = new Image();
-kingImg.src = 'images/king.png';
-const kingSprites = {};
+kingImg.src = 'images/king.webp';
 const kingSpriteMap = { idle:'01_idle', walk:'02_walk', jump:'03_jump', attack_n:'04_punch', attack_side:'05_flick', attack_up:'06_slam', attack_down:'07_spin', attack_air:'04_punch', special:'09_special', damage:'08_damage', win:'11_win', down:'12_down', projectile:'10_projectile' };
-Object.keys(kingSpriteMap).forEach(k => { kingSprites[k] = new Image(); kingSprites[k].src = 'images/king_char/' + kingSpriteMap[k] + '.png'; });
+const kingSprites = lazySprites(Object.keys(kingSpriteMap), k => 'images/king_char/' + kingSpriteMap[k] + '.webp');
 const onpaImg = new Image();
-onpaImg.src = 'images/onpa.png';
-const onpaSprites = {};
+onpaImg.src = 'images/onpa.webp';
 const onpaSpriteMap = { idle:'01_idle', walk:'02_walk', jump:'03_jump', attack_n:'04_drum_smash', attack_side:'05_trumpet', attack_up:'06_spin', attack_down:'07_sound_wave', attack_air:'03_jump', special:'09_special', damage:'08_damage', win:'11_win', down:'12_down', projectile:'10_projectile' };
-Object.keys(onpaSpriteMap).forEach(k => { onpaSprites[k] = new Image(); onpaSprites[k].src = 'images/onpa/' + onpaSpriteMap[k] + '.png'; });
+const onpaSprites = lazySprites(Object.keys(onpaSpriteMap), k => 'images/onpa/' + onpaSpriteMap[k] + '.webp');
 const senImg = new Image();
-senImg.src = 'images/sen.png';
-const senSprites = {};
+senImg.src = 'images/sen.webp';
 const senSpriteMap = { idle:'01_idle', walk:'02_walk', jump:'03_jump', attack_n:'05_chopstick', attack_side:'04_briefcase', attack_up:'06_rice_throw', attack_down:'07_spin', attack_air:'06_rice_throw', special:'09_special', damage:'08_damage', win:'11_win', down:'12_down', projectile:'10_projectile' };
-Object.keys(senSpriteMap).forEach(k => { senSprites[k] = new Image(); senSprites[k].src = 'images/sen_char/' + senSpriteMap[k] + '.png'; });
+const senSprites = lazySprites(Object.keys(senSpriteMap), k => 'images/sen_char/' + senSpriteMap[k] + '.webp');
 const dosbossImg = new Image();
-dosbossImg.src = 'images/dosboss.png';
-const dosbossSprites = {};
+dosbossImg.src = 'images/dosboss.webp';
 const dosbossSpriteMap = { idle:'01_idle', walk:'02_walk', jump:'03_jump', attack_n:'04_cannon', attack_side:'05_ram', attack_up:'06_turret_spin', attack_down:'07_spin', attack_air:'03_jump', special:'09_special', damage:'08_damage', win:'11_win', down:'12_down', projectile:'10_projectile' };
-Object.keys(dosbossSpriteMap).forEach(k => { dosbossSprites[k] = new Image(); dosbossSprites[k].src = 'images/dosboss_char/' + dosbossSpriteMap[k] + '.png'; });
+const dosbossSprites = lazySprites(Object.keys(dosbossSpriteMap), k => 'images/dosboss_char/' + dosbossSpriteMap[k] + '.webp');
 const microImg = new Image();
-microImg.src = 'images/micro.png';
-const microSprites = {};
+microImg.src = 'images/micro.webp';
 const microSpriteMap = { idle:'01_idle', walk:'02_walk', jump:'03_jump', attack_n:'04_staff_smash', attack_side:'05_magic_orb', attack_up:'06_spin', attack_down:'07_body_slam', attack_air:'03_jump', special:'09_special', damage:'08_damage', win:'11_win', down:'12_down', projectile:'10_projectile' };
-Object.keys(microSpriteMap).forEach(k => { microSprites[k] = new Image(); microSprites[k].src = 'images/micro_char/' + microSpriteMap[k] + '.png'; });
-const mrtwoSprites = {};
+const microSprites = lazySprites(Object.keys(microSpriteMap), k => 'images/micro_char/' + microSpriteMap[k] + '.webp');
 const mrtwoSpriteMap = { idle:'01_idle', walk:'02_walk', jump:'03_jump', attack_n:'04_bomb', attack_side:'05_fireball', attack_up:'06_bite', attack_down:'07_spin', attack_air:'04_bomb', special:'09_special', damage:'08_damage', win:'11_win', down:'12_down', projectile:'10_projectile' };
-Object.keys(mrtwoSpriteMap).forEach(k => { mrtwoSprites[k] = new Image(); mrtwoSprites[k].src = 'images/mrtwo_char/' + mrtwoSpriteMap[k] + '.png'; });
+const mrtwoSprites = lazySprites(Object.keys(mrtwoSpriteMap), k => 'images/mrtwo_char/' + mrtwoSpriteMap[k] + '.webp');
 const mrtwoImg = new Image();
-mrtwoImg.src = 'images/mrtwo.png';
+mrtwoImg.src = 'images/mrtwo.webp';
 const kingkingImg = new Image();
-kingkingImg.src = 'images/kingking.png?v=2';
-const kinkinSprites = {};
-['idle','walk','jump','attack_n','attack_side','attack_up','attack_down','attack_air','special','damage','down','win'].forEach(k => {
-  kinkinSprites[k] = new Image();
-  kinkinSprites[k].src = 'images/kinkin/' + k + '.png';
-});
+kingkingImg.src = 'images/kingking.webp?v=2';
+const kinkinSprites = lazySprites(['idle','walk','jump','attack_n','attack_side','attack_up','attack_down','attack_air','special','damage','down','win'], k => 'images/kinkin/' + k + '.webp');
 const satoruImg = new Image();
-satoruImg.src = 'images/satoru.png';
-const satoruSprites = {};
-['idle','walk','jump','attack_n','attack_side','attack_up','attack_down','attack_air','special','damage','down','win'].forEach(k => {
-  satoruSprites[k] = new Image();
-  satoruSprites[k].src = 'images/satoru/' + k + '.png';
-});
+satoruImg.src = 'images/satoru.webp';
+const satoruSprites = lazySprites(['idle','walk','jump','attack_n','attack_side','attack_up','attack_down','attack_air','special','damage','down','win'], k => 'images/satoru/' + k + '.webp');
 const kowaiImg = new Image();
-kowaiImg.src = 'images/kowai.png';
-const kowaiSprites = {};
-['walk','jump','attack_n','attack_side','attack_up','attack_down','attack_air','special','damage','down','win'].forEach(k => {
-  kowaiSprites[k] = new Image();
-  kowaiSprites[k].src = 'images/kowai/' + k + '.png';
-});
+kowaiImg.src = 'images/kowai.webp';
+const kowaiSprites = lazySprites(['walk','jump','attack_n','attack_side','attack_up','attack_down','attack_air','special','damage','down','win'], k => 'images/kowai/' + k + '.webp');
 // idle は元の kowaiImg を使用（立ち姿を元に戻す）
 const yahoImg = new Image();
-yahoImg.src = 'images/yaho.png?v=3';
-const yahoSprites = {};
-['idle','walk','jump','attack_n','attack_side','attack_up','attack_down','attack_air','special','damage','down','win'].forEach(k => {
-  yahoSprites[k] = new Image();
-  yahoSprites[k].src = 'images/yaho/' + k + '.png';
-});
+yahoImg.src = 'images/yaho.webp?v=3';
+const yahoSprites = lazySprites(['idle','walk','jump','attack_n','attack_side','attack_up','attack_down','attack_air','special','damage','down','win'], k => 'images/yaho/' + k + '.webp');
 const poyoImg = new Image();
-poyoImg.src = 'images/poyo.png';
-const poyoSprites = {};
-['idle','walk','jump','attack_n','attack_side','attack_up','attack_down','attack_air','special','damage','down','win'].forEach(k => {
-  poyoSprites[k] = new Image();
-  poyoSprites[k].src = 'images/poyo/' + k + '.png';
-});
+poyoImg.src = 'images/poyo.webp';
+const poyoSprites = lazySprites(['idle','walk','jump','attack_n','attack_side','attack_up','attack_down','attack_air','special','damage','down','win'], k => 'images/poyo/' + k + '.webp');
 const pullImg = new Image();
-pullImg.src = 'images/pull.png?v=2';
-const pullSprites = {};
-['idle','walk','jump','attack_n','attack_side','attack_up','attack_down','attack_air','special','damage','down','win'].forEach(k => {
-  pullSprites[k] = new Image();
-  pullSprites[k].src = 'images/puru/' + k + '.png';
-});
+pullImg.src = 'images/pull.webp?v=2';
+const pullSprites = lazySprites(['idle','walk','jump','attack_n','attack_side','attack_up','attack_down','attack_air','special','damage','down','win'], k => 'images/puru/' + k + '.webp');
 const mussyImg = new Image();
-mussyImg.src = 'images/mussy.png';
-const mussySprites = {};
-['idle','walk','jump','attack_n','attack_side','attack_up','attack_down','attack_air','special','damage','down','win'].forEach(k => {
-  mussySprites[k] = new Image();
-  mussySprites[k].src = 'images/musshi/' + k + '.png';
-});
+mussyImg.src = 'images/mussy.webp';
+const mussySprites = lazySprites(['idle','walk','jump','attack_n','attack_side','attack_up','attack_down','attack_air','special','damage','down','win'], k => 'images/musshi/' + k + '.webp');
+// キャラ番号 → スプライト組（毎フレーム 作り直さないよう ここで 1回だけ 作る）
+const SPRITE_SETS = {
+  0: zenSprites, 1: donSprites, 2: saisokuSprites,
+  3: meteoSprites, 4: longSprites, 5: uruoSprites,
+  6: kumatarouSprites, 7: bulletSprites, 8: shawdenSprites,
+  9: judgemanSprites, 10: tensaiSprites, 11: catbusSprites, 12: tankSprites, 13: namiojiSprites,
+  14: tokkoSprites, 15: samSprites, 16: kingSprites, 17: onpaSprites, 18: senSprites,
+  19: dosbossSprites, 20: microSprites, 21: mrtwoSprites, 22: kinkinSprites, 23: satoruSprites,
+  24: kowaiSprites, 25: yahoSprites, 26: poyoSprites, 27: pullSprites, 28: mussySprites,
+};
 const bgImg = new Image();
-bgImg.src = 'images/bg.png';
+bgImg.src = 'images/bg.webp';
 const bg2Img = new Image();
-bg2Img.src = 'images/bg2.png';
+bg2Img.src = 'images/bg2.webp';
 const bg3Img = new Image();
-bg3Img.src = 'images/bg3.png';
+bg3Img.src = 'images/bg3.webp';
 const bg4Img = new Image();
-bg4Img.src = 'images/bg4.png';
+bg4Img.src = 'images/bg4.webp';
 const bg5Img = new Image();
-bg5Img.src = 'images/bg5.png';
+bg5Img.src = 'images/bg5.webp';
 
 // --- Particles ---
 function spawnTitleParticle() {
@@ -2591,23 +2534,19 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
 
   let img = imgs[charIndex];
   // Sprite animation for all implemented characters
-  const spriteMap = {
-    0: zenSprites, 1: donSprites, 2: saisokuSprites,
-    3: meteoSprites, 4: longSprites, 5: uruoSprites,
-    6: kumatarouSprites, 7: bulletSprites, 8: shawdenSprites,
-    9: judgemanSprites, 11: catbusSprites, 12: tankSprites, 13: namiojiSprites, 14: tokkoSprites, 15: samSprites, 16: kingSprites, 17: onpaSprites, 18: senSprites, 19: dosbossSprites, 20: microSprites, 21: mrtwoSprites, 22: kinkinSprites, 23: satoruSprites, 24: kowaiSprites, 25: yahoSprites, 26: poyoSprites, 27: pullSprites, 28: mussySprites,
-  };
+  // SPRITE_SETS は モジュール先頭で 1回だけ 作る（毎フレーム 作り直さない）
+  let spriteSet = SPRITE_SETS[charIndex];
   // Tensai: switch sprite set based on dragonMode
   if (charIndex === 10 && animData) {
-    spriteMap[10] = animData.dragonMode ? tensaiDragonSprites : tensaiSprites;
+    spriteSet = animData.dragonMode ? tensaiDragonSprites : tensaiSprites;
   }
-  if (spriteMap[charIndex] && animData) {
+  if (spriteSet && animData) {
     let key = getSpriteKey(animData);
     // Don rage override
     if (charIndex === 1 && animData.dSkillActive && animData.dSkillTimer > 0) key = 'rage';
     // Zen/Don/Saisoku use 'knockout' instead of 'down'
     if ((charIndex <= 2) && key === 'down') key = 'knockout';
-    const picked = pickSprite(spriteMap[charIndex], key);
+    const picked = pickSprite(spriteSet, key);
     if (picked) img = picked;
   }
   if (img && img.complete && img.naturalWidth > 0) {
@@ -4645,6 +4584,21 @@ function drawStar(cx, cy, r, points, ctx) {
   ctx.fill();
 }
 
+// 同じ形の グラデーションを 毎フレーム 作り直さない（1回 作って 使いまわす）
+// 座標や色が 変われば 自動で 別物として 作り直すので 見た目は 変わらない
+const _gradCache = new Map();
+function cachedLinGrad(x0, y0, x1, y1, stops) {
+  const key = x0 + '_' + y0 + '_' + x1 + '_' + y1 + '_' + stops.join('_');
+  let g = _gradCache.get(key);
+  if (!g) {
+    if (_gradCache.size > 256) _gradCache.clear();   // 動く座標で 増えすぎたら 捨てる
+    g = ctx.createLinearGradient(x0, y0, x1, y1);
+    for (let i = 0; i < stops.length; i += 2) g.addColorStop(stops[i], stops[i + 1]);
+    _gradCache.set(key, g);
+  }
+  return g;
+}
+
 // --- Utility: round rect ---
 function roundRect(ctx, x, y, w, h, r) {
   ctx.beginPath();
@@ -4668,10 +4622,7 @@ function drawTitle(dt) {
   titleTime += dt;
 
   // === 背景: 深い紺→黒グラデーション ===
-  const bgGrad = ctx.createLinearGradient(0, 0, 0, 640);
-  bgGrad.addColorStop(0, '#000022');
-  bgGrad.addColorStop(0.5, '#000011');
-  bgGrad.addColorStop(1, '#000000');
+  const bgGrad = cachedLinGrad(0, 0, 0, 640, [0, '#000022', 0.5, '#000011', 1, '#000000']);
   ctx.fillStyle = bgGrad;
   ctx.fillRect(0, 0, 960, 640);
 
@@ -4716,12 +4667,7 @@ function drawTitle(dt) {
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   ctx.strokeStyle = '#AA7700'; ctx.lineWidth = 5;
   ctx.strokeText('SMASH GAME', 0, 0);
-  const titleGrad = ctx.createLinearGradient(-250, -40, 250, 40);
-  titleGrad.addColorStop(0, '#FFD700');
-  titleGrad.addColorStop(0.3, '#FFFFAA');
-  titleGrad.addColorStop(0.5, '#FFFFFF');
-  titleGrad.addColorStop(0.7, '#FFFFAA');
-  titleGrad.addColorStop(1, '#FFD700');
+  const titleGrad = cachedLinGrad(-250, -40, 250, 40, [0, '#FFD700', 0.3, '#FFFFAA', 0.5, '#FFFFFF', 0.7, '#FFFFAA', 1, '#FFD700']);
   ctx.fillStyle = titleGrad;
   ctx.fillText('SMASH GAME', 0, 0);
   ctx.shadowBlur = 0;
@@ -4800,8 +4746,7 @@ function drawSelect(dt) {
   selectTime += dt;
 
   // === 背景 ===
-  const bgGrad = ctx.createLinearGradient(0, 0, 0, 640);
-  bgGrad.addColorStop(0, '#000022'); bgGrad.addColorStop(1, '#000011');
+  const bgGrad = cachedLinGrad(0, 0, 0, 640, [0, '#000022', 1, '#000011']);
   ctx.fillStyle = bgGrad; ctx.fillRect(0, 0, 960, 640);
 
   // 背景パーティクル
@@ -4810,8 +4755,7 @@ function drawSelect(dt) {
 
   // === ヘッダー ===
   ctx.font = 'bold 30px sans-serif'; ctx.textAlign = 'center';
-  const hGrad = ctx.createLinearGradient(300, 0, 660, 0);
-  hGrad.addColorStop(0, '#FFD700'); hGrad.addColorStop(0.5, '#FFFFFF'); hGrad.addColorStop(1, '#FFD700');
+  const hGrad = cachedLinGrad(300, 0, 660, 0, [0, '#FFD700', 0.5, '#FFFFFF', 1, '#FFD700']);
   ctx.fillStyle = hGrad; ctx.shadowColor = '#FFD700'; ctx.shadowBlur = 12;
   ctx.fillText('CHARACTER SELECT', 480, 28); ctx.shadowBlur = 0;
   // 金ライン
@@ -5022,9 +4966,7 @@ function drawSelectPanel(px, py, charIdx, label, color, isConfirmed) {
 function drawDifficulty(dt) {
   difficultyTime += dt;
 
-  const grad = ctx.createLinearGradient(0, 0, 960, 640);
-  grad.addColorStop(0, '#0a0a20');
-  grad.addColorStop(1, '#1a0a20');
+  const grad = cachedLinGrad(0, 0, 960, 640, [0, '#0a0a20', 1, '#1a0a20']);
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, 960, 640);
 
@@ -5059,9 +5001,7 @@ function drawDifficulty(dt) {
     ctx.save();
     if (sel) { ctx.shadowColor = d.color; ctx.shadowBlur = 20; }
 
-    const cg = ctx.createLinearGradient(cx, cy, cx, cy + h);
-    cg.addColorStop(0, sel ? d.color + '33' : '#1a1a2e');
-    cg.addColorStop(1, '#0d0d1a');
+    const cg = cachedLinGrad(cx, cy, cx, cy + h, [0, sel ? d.color + '33' : '#1a1a2e', 1, '#0d0d1a']);
     ctx.fillStyle = cg;
     roundRect(ctx, cx, cy + bounce, w, h, 14);
     ctx.fill();
@@ -5127,9 +5067,7 @@ function drawStageSelect(dt) {
   stageSelectTime += dt;
 
   // Background
-  const grad = ctx.createLinearGradient(0, 0, 960, 640);
-  grad.addColorStop(0, '#0a0a20');
-  grad.addColorStop(1, '#1a0a20');
+  const grad = cachedLinGrad(0, 0, 960, 640, [0, '#0a0a20', 1, '#1a0a20']);
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, 960, 640);
 
@@ -5187,9 +5125,7 @@ function drawStageSelect(dt) {
     if (sel) { ctx.shadowColor = '#44AAFF'; ctx.shadowBlur = 20; }
 
     // Card background
-    const cg = ctx.createLinearGradient(cx, cy, cx, cy + ch);
-    cg.addColorStop(0, sel ? '#44AAFF22' : '#1a1a2e');
-    cg.addColorStop(1, '#0d0d1a');
+    const cg = cachedLinGrad(cx, cy, cx, cy + ch, [0, sel ? '#44AAFF22' : '#1a1a2e', 1, '#0d0d1a']);
     ctx.fillStyle = cg;
     roundRect(ctx, cx, cy + bounce, cw, ch, 14);
     ctx.fill();
@@ -5217,9 +5153,7 @@ function drawStageSelect(dt) {
       if (bgImg.complete && bgImg.naturalWidth > 0) {
         ctx.drawImage(bgImg, previewX, previewY, previewW, previewH);
       } else {
-        const skyGrad = ctx.createLinearGradient(previewX, previewY, previewX, previewY + previewH);
-        skyGrad.addColorStop(0, '#87CEEB');
-        skyGrad.addColorStop(1, '#E0A0A0');
+        const skyGrad = cachedLinGrad(previewX, previewY, previewX, previewY + previewH, [0, '#87CEEB', 1, '#E0A0A0']);
         ctx.fillStyle = skyGrad;
         ctx.fillRect(previewX, previewY, previewW, previewH);
       }
@@ -6172,18 +6106,23 @@ function playUltimateExplosionSE() {
 const bgmAudio = new Audio('sounds/bgm.mp3?v=2');
 bgmAudio.loop = true;
 bgmAudio.volume = 0.4;
+bgmAudio.preload = 'none';   // 再生するまで 読み込まない
 const bgm2Audio = new Audio('sounds/bgm2.mp3');
 bgm2Audio.loop = true;
 bgm2Audio.volume = 0.4;
+bgm2Audio.preload = 'none';   // 再生するまで 読み込まない
 const bgm3Audio = new Audio('sounds/bgm3.mp3');
 bgm3Audio.loop = true;
 bgm3Audio.volume = 0.4;
+bgm3Audio.preload = 'none';   // 再生するまで 読み込まない
 const bgm4Audio = new Audio('sounds/bgm4.mp3');
 bgm4Audio.loop = true;
 bgm4Audio.volume = 0.4;
+bgm4Audio.preload = 'none';   // 再生するまで 読み込まない
 const bgm5Audio = new Audio('sounds/bgm5.mp3');
 bgm5Audio.loop = true;
 bgm5Audio.volume = 0.4;
+bgm5Audio.preload = 'none';   // 再生するまで 読み込まない
 let bgmPlaying = false;
 let currentBgmAudio = bgmAudio;
 const bgmMap = { 'sounds/bgm.mp3': bgmAudio, 'sounds/bgm2.mp3': bgm2Audio, 'sounds/bgm3.mp3': bgm3Audio, 'sounds/bgm4.mp3': bgm4Audio, 'sounds/bgm5.mp3': bgm5Audio };
@@ -8162,6 +8101,9 @@ function createPlayer(id, charIdx, startX) {
 }
 
 function initBattle() {
+  // 戦う 2人分の スプライトを 先に 用意しておく（描き始めで カクつかないように）
+  preloadSprites(p1Select);
+  preloadSprites(p2Select);
   // Setup platforms based on selected stage
   platforms.length = 0;
   const stageId = stages[selectedStage].id;
@@ -13342,11 +13284,7 @@ function drawBattle(dt) {
 
   // ③ 背景に奥行きグラデーション（余白込み）
   {
-    const depthGrad = ctx.createLinearGradient(0, -bgMargin, 0, 640 + bgMargin);
-    depthGrad.addColorStop(0, 'rgba(0,0,0,0.3)');
-    depthGrad.addColorStop(0.45, 'rgba(0,0,0,0)');
-    depthGrad.addColorStop(0.7, 'rgba(0,0,0,0)');
-    depthGrad.addColorStop(1, 'rgba(255,255,255,0.05)');
+    const depthGrad = cachedLinGrad(0, -bgMargin, 0, 640 + bgMargin, [0, 'rgba(0,0,0,0.3)', 0.45, 'rgba(0,0,0,0)', 0.7, 'rgba(0,0,0,0)', 1, 'rgba(255,255,255,0.05)']);
     ctx.fillStyle = depthGrad;
     ctx.fillRect(-bgMargin, -bgMargin, 960 + bgMargin * 2, 640 + bgMargin * 2);
   }
@@ -13380,9 +13318,7 @@ function drawBattle(dt) {
     ctx.ellipse(stageCx, stageY + 28, nearHalfW * 0.75, 8, 0, 0, Math.PI * 2);
     ctx.fill();
     // 上面（台形・奥暗め→手前明るめ）
-    const magicTopGrad = ctx.createLinearGradient(0, stageY - farYOffset, 0, stageY);
-    magicTopGrad.addColorStop(0, '#0d0518'); // 奥（暗い）
-    magicTopGrad.addColorStop(1, '#2a1a3a'); // 手前（少し明るい）
+    const magicTopGrad = cachedLinGrad(0, stageY - farYOffset, 0, stageY, [0, '#0d0518', 1, '#2a1a3a']);
     ctx.fillStyle = magicTopGrad;
     ctx.beginPath();
     ctx.moveTo(farLeft, stageY - farYOffset);
@@ -13421,9 +13357,7 @@ function drawBattle(dt) {
       ctx.beginPath(); ctx.moveTo(lx1, stageY - farYOffset); ctx.lineTo(lx2, stageY); ctx.stroke();
     }
     // 薄い光のエフェクト
-    const mainGlow = ctx.createLinearGradient(0, stageY - farYOffset - 20, 0, stageY - farYOffset);
-    mainGlow.addColorStop(0, 'rgba(170, 120, 255, 0)');
-    mainGlow.addColorStop(1, 'rgba(170, 120, 255, 0.06)');
+    const mainGlow = cachedLinGrad(0, stageY - farYOffset - 20, 0, stageY - farYOffset, [0, 'rgba(170, 120, 255, 0)', 1, 'rgba(170, 120, 255, 0.06)']);
     ctx.fillStyle = mainGlow;
     ctx.fillRect(farLeft, stageY - farYOffset - 20, farRight - farLeft, 20);
 
@@ -13443,9 +13377,7 @@ function drawBattle(dt) {
       ctx.ellipse(pCx, py + 15, pNearW * 0.35, 4, 0, 0, Math.PI * 2);
       ctx.fill();
       // 上面（台形: 奥暗め→手前明るめ）
-      const subTopGrad = ctx.createLinearGradient(0, py - pFarOfs, 0, py);
-      subTopGrad.addColorStop(0, '#1a0828'); // 奥
-      subTopGrad.addColorStop(1, '#3a2050'); // 手前
+      const subTopGrad = cachedLinGrad(0, py - pFarOfs, 0, py, [0, '#1a0828', 1, '#3a2050']);
       ctx.fillStyle = subTopGrad;
       ctx.beginPath();
       ctx.moveTo(pCx - pFarW / 2, py - pFarOfs);
@@ -13471,9 +13403,7 @@ function drawBattle(dt) {
       ctx.beginPath(); ctx.moveTo(plat.x, py); ctx.lineTo(plat.x + plat.w, py); ctx.stroke();
       ctx.shadowBlur = 0;
       // 薄い光のエフェクト（足場上）
-      const subGlow = ctx.createLinearGradient(plat.x, py - 20, plat.x, py);
-      subGlow.addColorStop(0, 'rgba(170, 120, 255, 0)');
-      subGlow.addColorStop(1, 'rgba(170, 120, 255, 0.05)');
+      const subGlow = cachedLinGrad(plat.x, py - 20, plat.x, py, [0, 'rgba(170, 120, 255, 0)', 1, 'rgba(170, 120, 255, 0.05)']);
       ctx.fillStyle = subGlow;
       ctx.fillRect(plat.x, py - 20, plat.w, 20);
       // 端からのオーラ
@@ -13494,9 +13424,7 @@ function drawBattle(dt) {
     ctx.ellipse(stageCx, stageY + 28, nearHalfW * 0.75, 8, 0, 0, Math.PI * 2);
     ctx.fill();
     // 上面（台形・奥暗め→手前明るめ）
-    const stoneTopGrad = ctx.createLinearGradient(0, stageY - farYOffset, 0, stageY);
-    stoneTopGrad.addColorStop(0, '#1a1a1a'); // 奥
-    stoneTopGrad.addColorStop(1, '#3a3a3a'); // 手前
+    const stoneTopGrad = cachedLinGrad(0, stageY - farYOffset, 0, stageY, [0, '#1a1a1a', 1, '#3a3a3a']);
     ctx.fillStyle = stoneTopGrad;
     ctx.beginPath();
     ctx.moveTo(farLeft, stageY - farYOffset);
@@ -13516,9 +13444,7 @@ function drawBattle(dt) {
     }
     // 側面（厚み）
     const stoneSideH = 22;
-    const stoneSideGrad = ctx.createLinearGradient(0, stageY, 0, stageY + stoneSideH);
-    stoneSideGrad.addColorStop(0, '#2a2a2a');
-    stoneSideGrad.addColorStop(1, '#1a1a1a');
+    const stoneSideGrad = cachedLinGrad(0, stageY, 0, stageY + stoneSideH, [0, '#2a2a2a', 1, '#1a1a1a']);
     ctx.fillStyle = stoneSideGrad;
     ctx.beginPath();
     ctx.moveTo(nearLeft, stageY);
@@ -13549,9 +13475,7 @@ function drawBattle(dt) {
     ctx.beginPath();
     ctx.ellipse(stageCx, stageY + 28, nearHalfW * 0.75, 8, 0, 0, Math.PI * 2);
     ctx.fill();
-    const spaceTopGrad = ctx.createLinearGradient(0, stageY - farYOffset, 0, stageY);
-    spaceTopGrad.addColorStop(0, '#1a1040');
-    spaceTopGrad.addColorStop(1, '#3a2870');
+    const spaceTopGrad = cachedLinGrad(0, stageY - farYOffset, 0, stageY, [0, '#1a1040', 1, '#3a2870']);
     ctx.fillStyle = spaceTopGrad;
     ctx.beginPath();
     ctx.moveTo(farLeft, stageY - farYOffset); ctx.lineTo(farRight, stageY - farYOffset);
@@ -13581,16 +13505,13 @@ function drawBattle(dt) {
     ctx.beginPath();
     ctx.ellipse(stageCx, stageY + 28, nearHalfW * 0.75, 8, 0, 0, Math.PI * 2);
     ctx.fill();
-    const throneTopGrad = ctx.createLinearGradient(0, stageY - farYOffset, 0, stageY);
-    throneTopGrad.addColorStop(0, '#1a0808');
-    throneTopGrad.addColorStop(1, '#3a1515');
+    const throneTopGrad = cachedLinGrad(0, stageY - farYOffset, 0, stageY, [0, '#1a0808', 1, '#3a1515']);
     ctx.fillStyle = throneTopGrad;
     ctx.beginPath();
     ctx.moveTo(farLeft, stageY - farYOffset); ctx.lineTo(farRight, stageY - farYOffset);
     ctx.lineTo(nearRight, stageY); ctx.lineTo(nearLeft, stageY); ctx.closePath(); ctx.fill();
     const throneSideH = 22;
-    const throneSideGrad = ctx.createLinearGradient(0, stageY, 0, stageY + throneSideH);
-    throneSideGrad.addColorStop(0, '#2a0a0a'); throneSideGrad.addColorStop(1, '#150505');
+    const throneSideGrad = cachedLinGrad(0, stageY, 0, stageY + throneSideH, [0, '#2a0a0a', 1, '#150505']);
     ctx.fillStyle = throneSideGrad;
     ctx.beginPath();
     ctx.moveTo(nearLeft, stageY); ctx.lineTo(nearRight, stageY);
@@ -13616,9 +13537,7 @@ function drawBattle(dt) {
     ctx.ellipse(stageCx, stageY + 30, nearHalfW * 0.8, 10, 0, 0, Math.PI * 2);
     ctx.fill();
     // 上面（台形・グラデーション: 奥暗め→手前明るめ）
-    const platTopGrad = ctx.createLinearGradient(0, stageY - farYOffset, 0, stageY);
-    platTopGrad.addColorStop(0, '#5A3A1B'); // 奥（暗め）
-    platTopGrad.addColorStop(1, '#A0784A'); // 手前（明るめ）
+    const platTopGrad = cachedLinGrad(0, stageY - farYOffset, 0, stageY, [0, '#5A3A1B', 1, '#A0784A']);
     ctx.fillStyle = platTopGrad;
     ctx.beginPath();
     ctx.moveTo(farLeft, stageY - farYOffset);
@@ -13638,9 +13557,7 @@ function drawBattle(dt) {
     }
     // 側面（厚み・暗め）
     const sideH = 22;
-    const sideGrad = ctx.createLinearGradient(0, stageY, 0, stageY + sideH);
-    sideGrad.addColorStop(0, '#7A4A1E');
-    sideGrad.addColorStop(1, '#4A2A0E');
+    const sideGrad = cachedLinGrad(0, stageY, 0, stageY + sideH, [0, '#7A4A1E', 1, '#4A2A0E']);
     ctx.fillStyle = sideGrad;
     ctx.beginPath();
     ctx.moveTo(nearLeft, stageY);
@@ -15051,20 +14968,16 @@ function drawBattle(dt) {
       // 上下左右に色付きグラデーション
       const edgeW = 60;
       // 上
-      const gTop = ctx.createLinearGradient(0, 0, 0, edgeW);
-      gTop.addColorStop(0, f.color); gTop.addColorStop(1, 'rgba(0,0,0,0)');
+      const gTop = cachedLinGrad(0, 0, 0, edgeW, [0, f.color, 1, 'rgba(0,0,0,0)']);
       ctx.fillStyle = gTop; ctx.fillRect(0, 0, 960, edgeW);
       // 下
-      const gBot = ctx.createLinearGradient(0, 640, 0, 640 - edgeW);
-      gBot.addColorStop(0, f.color); gBot.addColorStop(1, 'rgba(0,0,0,0)');
+      const gBot = cachedLinGrad(0, 640, 0, 640 - edgeW, [0, f.color, 1, 'rgba(0,0,0,0)']);
       ctx.fillStyle = gBot; ctx.fillRect(0, 640 - edgeW, 960, edgeW);
       // 左
-      const gL = ctx.createLinearGradient(0, 0, edgeW, 0);
-      gL.addColorStop(0, f.color); gL.addColorStop(1, 'rgba(0,0,0,0)');
+      const gL = cachedLinGrad(0, 0, edgeW, 0, [0, f.color, 1, 'rgba(0,0,0,0)']);
       ctx.fillStyle = gL; ctx.fillRect(0, 0, edgeW, 640);
       // 右
-      const gR = ctx.createLinearGradient(960, 0, 960 - edgeW, 0);
-      gR.addColorStop(0, f.color); gR.addColorStop(1, 'rgba(0,0,0,0)');
+      const gR = cachedLinGrad(960, 0, 960 - edgeW, 0, [0, f.color, 1, 'rgba(0,0,0,0)']);
       ctx.fillStyle = gR; ctx.fillRect(960 - edgeW, 0, edgeW, 640);
       ctx.restore();
     }
@@ -16505,8 +16418,7 @@ function drawBattleHUD() {
     if (ratio >= 1.0) {
       const pulse = 0.7 + Math.sin(battleTime * 0.15) * 0.3;
       ctx.globalAlpha = pulse;
-      const gg = ctx.createLinearGradient(gx, gy, gx + gw, gy);
-      gg.addColorStop(0, '#FFD700'); gg.addColorStop(1, '#FFA500');
+      const gg = cachedLinGrad(gx, gy, gx + gw, gy, [0, '#FFD700', 1, '#FFA500']);
       ctx.fillStyle = gg;
       ctx.fillRect(gx, gy, gw, gh);
       ctx.globalAlpha = 1;
@@ -16516,8 +16428,7 @@ function drawBattleHUD() {
       ctx.fillStyle = '#FFD700';
       ctx.fillText('必殺技 READY!', gx + gw / 2, gy - 2);
     } else {
-      const gg = ctx.createLinearGradient(gx, gy, gx + gw * ratio, gy);
-      gg.addColorStop(0, '#4488FF'); gg.addColorStop(1, '#00CCFF');
+      const gg = cachedLinGrad(gx, gy, gx + gw * ratio, gy, [0, '#4488FF', 1, '#00CCFF']);
       ctx.fillStyle = gg;
       ctx.fillRect(gx, gy, gw * ratio, gh);
       ctx.strokeStyle = '#444'; ctx.lineWidth = 1;
@@ -17633,9 +17544,7 @@ function updateGuestEffects(dt) {
 
 function drawOnlineLobby(dt) {
   // Background
-  const bg = ctx.createLinearGradient(0, 0, 0, 640);
-  bg.addColorStop(0, '#0a0a2e');
-  bg.addColorStop(1, '#1a0a20');
+  const bg = cachedLinGrad(0, 0, 0, 640, [0, '#0a0a2e', 1, '#1a0a20']);
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, 960, 640);
 
@@ -17828,10 +17737,7 @@ function drawVsIntro(dt) {
   ctx.beginPath();
   ctx.rect(0, 0, 480, 640);
   ctx.clip();
-  const leftGrad = ctx.createLinearGradient(0, 0, 480, 640);
-  leftGrad.addColorStop(0, '#4a0a0a');
-  leftGrad.addColorStop(0.5, '#7a1a1a');
-  leftGrad.addColorStop(1, '#3a0808');
+  const leftGrad = cachedLinGrad(0, 0, 480, 640, [0, '#4a0a0a', 0.5, '#7a1a1a', 1, '#3a0808']);
   ctx.fillStyle = leftGrad;
   ctx.fillRect(0, 0, 480, 640);
   // Animated diagonal stripes
@@ -17856,10 +17762,7 @@ function drawVsIntro(dt) {
   ctx.beginPath();
   ctx.rect(480, 0, 480, 640);
   ctx.clip();
-  const rightGrad = ctx.createLinearGradient(480, 0, 960, 640);
-  rightGrad.addColorStop(0, '#0a0a4a');
-  rightGrad.addColorStop(0.5, '#1a1a7a');
-  rightGrad.addColorStop(1, '#08083a');
+  const rightGrad = cachedLinGrad(480, 0, 960, 640, [0, '#0a0a4a', 0.5, '#1a1a7a', 1, '#08083a']);
   ctx.fillStyle = rightGrad;
   ctx.fillRect(480, 0, 480, 640);
   // Animated diagonal stripes (opposite direction)
@@ -18587,8 +18490,7 @@ function drawInstantKillOverlay() {
     ctx.scale(scale, scale);
     ctx.font = 'bold 52px sans-serif'; ctx.textAlign = 'center';
     // 赤→金グラデーション
-    const grad = ctx.createLinearGradient(-200, -20, 200, 20);
-    grad.addColorStop(0, '#FF2200'); grad.addColorStop(0.5, '#FFD700'); grad.addColorStop(1, '#FF4400');
+    const grad = cachedLinGrad(-200, -20, 200, 20, [0, '#FF2200', 0.5, '#FFD700', 1, '#FF4400']);
     ctx.fillStyle = grad;
     ctx.shadowColor = '#FF0000'; ctx.shadowBlur = 20;
     ctx.fillText('INSTANT KILL!', 0, 0);
@@ -19373,8 +19275,7 @@ function drawCharDetail() {
   const ult = ultimateData[charDetailIdx];
 
   // Background
-  const bgGrad = ctx.createLinearGradient(0, 0, 0, 640);
-  bgGrad.addColorStop(0, '#000022'); bgGrad.addColorStop(1, '#000011');
+  const bgGrad = cachedLinGrad(0, 0, 0, 640, [0, '#000022', 1, '#000011']);
   ctx.fillStyle = bgGrad; ctx.fillRect(0, 0, 960, 640);
 
   // Character silhouette background
