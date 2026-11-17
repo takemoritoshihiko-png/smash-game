@@ -5476,7 +5476,7 @@ function executeComboFinisher(p) {
         if (!target.alive) return;
         hitEffects.push({ x: target.x + (Math.random()-0.5)*40, y: target.y - 30 + (Math.random()-0.5)*30,
           life: 12, maxLife: 12, color: f.color, size: 25 + Math.random()*15 });
-        playHitSE();
+        playHitSound('normal', 3);
       }, delay * 16);
     }
   }
@@ -5917,10 +5917,26 @@ function makeNoise(ac, duration, volume) {
   return { src, gain: g };
 }
 
-function playHitSound(type) {
+// 軽い歪み（サチュレーション）のカーブ。
+// サイン波だけだと「ピコッ」と 軽くなる。少し歪ませると 一気に 打撃らしく なる。
+let _satCurve = null;
+function satCurve() {
+  if (_satCurve) return _satCurve;
+  const n = 1024, c = new Float32Array(n), k = 2.8;
+  for (let i = 0; i < n; i++) { const x = i / (n - 1) * 2 - 1; c[i] = Math.tanh(x * k) / Math.tanh(k); }
+  _satCurve = c;
+  return c;
+}
+
+// power: 当たりの強さ（ノックバック量）。渡すと 弱い当たりは軽く、強い当たりは重くなる
+function playHitSound(type, power) {
   try {
     const ac = getAudioCtx();
     const now = ac.currentTime;
+    // 強さ 0.15〜1.0 に ならす
+    const pw = Math.max(0.15, Math.min(1, (power === undefined ? 4 : power) / 8));
+    // 連打しても 同じ音に 聞こえないよう 少しだけ 音程を ばらす
+    const rnd = 0.93 + Math.random() * 0.14;
     // ヘルパー: オシレーター+ゲイン生成 → dest接続
     function mkOsc(waveType, f0, f1, dur, vol, dest) {
       const o = ac.createOscillator(); const g = ac.createGain();
@@ -5939,40 +5955,62 @@ function playHitSound(type) {
     // マスター出力
     const master = ac.createGain(); master.gain.value = 0.8; master.connect(ac.destination);
 
+    // ヘルパー: 帯域を絞ったノイズ。生のノイズは「サー」としか鳴らないが、
+    // 高い所だけ残すと「パシッ」、低い所だけ残すと「ドス」という空気感になる
+    function mkBandNoise(dur, vol, dest, filtType, freq, q) {
+      const buf = ac.createBuffer(1, Math.max(1, Math.floor(ac.sampleRate * dur)), ac.sampleRate);
+      const d = buf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = (Math.random()*2-1);
+      const src = ac.createBufferSource(); src.buffer = buf;
+      const f = ac.createBiquadFilter(); f.type = filtType; f.frequency.value = freq; if (q) f.Q.value = q;
+      const g = ac.createGain(); g.gain.setValueAtTime(vol, now); g.gain.exponentialRampToValueAtTime(0.001, now + dur);
+      src.connect(f); f.connect(g); g.connect(dest); src.start(now); src.stop(now + dur);
+    }
+    // ヘルパー: 打撃用の出口（歪み → コンプ → 音量）。
+    // 歪みとコンプを通すことで、音が つぶれずに 前に出てくる＝爽快感
+    function punchBus(vol) {
+      const sat = ac.createWaveShaper(); sat.curve = satCurve(); sat.oversample = '2x';
+      const comp = ac.createDynamicsCompressor();
+      comp.threshold.value = -14; comp.knee.value = 8; comp.ratio.value = 8;
+      comp.attack.value = 0.002; comp.release.value = 0.14;
+      const g = ac.createGain(); g.gain.value = vol;
+      sat.connect(comp); comp.connect(g); g.connect(master);
+      return sat;
+    }
+
     if (type === 'normal') {
-      // 弱攻撃「ポカッ」3層
-      mkOsc('sine', 200, 60, 0.1, 0.9, master);       // 衝撃
-      mkOsc('triangle', 1000, 500, 0.08, 0.4, master); // 明るさ
-      mkOsc('sine', 400, 200, 0.15, 0.2, master);      // 残響
+      // 弱攻撃「パシッ」: アタック(ノイズ) + ボディ + サブ の3層
+      const bus = punchBus(0.75 + 0.45 * pw);
+      mkBandNoise(0.018 + 0.012 * pw, 0.55, bus, 'highpass', 2400);   // ①パシッ（立ち上がり）
+      mkOsc('square', 330 * rnd, 95, 0.045 + 0.02 * pw, 0.45, bus);    // ②ボディ（打撃の芯）
+      mkOsc('sine', 160 * rnd, 48, 0.09 + 0.10 * pw, 0.95, bus);       // ③サブ（重み）
 
     } else if (type === 'strong') {
-      // 強攻撃「バコッ」3層+コンプ
-      const comp = ac.createDynamicsCompressor();
-      comp.threshold.value = -6; comp.ratio.value = 4; comp.connect(master);
-      mkOsc('sine', 150, 40, 0.2, 1.0, comp);     // 重い衝撃
-      mkOsc('square', 600, 200, 0.1, 0.5, comp);   // パンチ感
-      mkNoise(0.12, 0.25, comp);                     // 空気感
+      // 強攻撃「バゴッ」: 弱より 低く・長く・空気が動く
+      const bus = punchBus(1.0 + 0.5 * pw);
+      mkBandNoise(0.03, 0.75, bus, 'highpass', 1700);                  // アタック
+      mkBandNoise(0.10 + 0.10 * pw, 0.40, bus, 'lowpass', 820);        // 空気のドス
+      mkOsc('square', 250 * rnd, 70, 0.08, 0.55, bus);                 // ボディ
+      mkOsc('sine', 125 * rnd, 36, 0.20 + 0.14 * pw, 1.0, bus);        // サブ
+      mkOsc('triangle', 1500 * rnd, 620, 0.05, 0.22, bus);             // きらめき
 
     } else if (type === 'special') {
-      // スマッシュ「ドゴォン!!!」4層+コンプ
-      const comp = ac.createDynamicsCompressor();
-      comp.threshold.value = -3; comp.ratio.value = 8; comp.attack.value = 0.001; comp.connect(master);
-      const sm = ac.createGain(); sm.gain.value = 1.4; sm.connect(comp); // マスター1.4倍
-      mkOsc('sine', 100, 20, 0.4, 1.0, sm);       // 超低音
-      mkOsc('sawtooth', 400, 80, 0.25, 0.7, sm);  // 破壊感
-      mkNoise(0.2, 0.4, sm);                        // 爆発ノイズ
-      mkOsc('triangle', 2000, 800, 0.15, 0.3, sm); // 金属音
+      // スマッシュ「ドゴォン!!」: さらに低く、尾を長く
+      const bus = punchBus(1.25 + 0.55 * pw);
+      mkBandNoise(0.04, 0.85, bus, 'highpass', 1200);
+      mkBandNoise(0.18 + 0.14 * pw, 0.5, bus, 'lowpass', 620);
+      mkOsc('sawtooth', 300 * rnd, 60, 0.13, 0.55, bus);               // 破壊感
+      mkOsc('sine', 105 * rnd, 28, 0.32 + 0.18 * pw, 1.0, bus);        // 超低音
+      mkOsc('triangle', 1900 * rnd, 700, 0.09, 0.3, bus);              // 金属
 
     } else if (type === 'cmd') {
-      // 必殺技「ズドォォン!!!」スマッシュ×1.3+宇宙感
-      const comp = ac.createDynamicsCompressor();
-      comp.threshold.value = -3; comp.ratio.value = 8; comp.attack.value = 0.001; comp.connect(master);
-      const sm = ac.createGain(); sm.gain.value = 1.5; sm.connect(comp);
-      mkOsc('sine', 100, 20, 0.6, 1.0, sm);
-      mkOsc('sawtooth', 400, 80, 0.375, 0.7, sm);
-      mkNoise(0.3, 0.4, sm);
-      mkOsc('triangle', 2000, 800, 0.225, 0.3, sm);
-      mkOsc('sine', 800, 200, 0.5, 0.4, sm);       // 宇宙感
+      // 必殺技「ズドォォン!!!」: スマッシュをさらに重くして 余韻を足す
+      const bus = punchBus(1.35 + 0.6 * pw);
+      mkBandNoise(0.05, 0.9, bus, 'highpass', 1000);
+      mkBandNoise(0.26, 0.55, bus, 'lowpass', 520);
+      mkOsc('sawtooth', 280 * rnd, 55, 0.2, 0.6, bus);
+      mkOsc('sine', 95 * rnd, 24, 0.5, 1.0, bus);
+      mkOsc('triangle', 2000 * rnd, 760, 0.14, 0.32, bus);
+      mkOsc('sine', 760, 190, 0.42, 0.3, bus);                          // 余韻
 
     } else if (type === 'guard') {
       // ガード「キンッ」金属3層
@@ -5995,14 +6033,14 @@ function playHitSound(type) {
       mkOsc('triangle', 1200, 1800, 0.06, 0.3, master); // 明るさ補強
 
     } else if (type === 'ko') {
-      // 撃墜「ズゴォォン！！」4層+コンプ - 最大級の爽快感
-      const comp = ac.createDynamicsCompressor();
-      comp.threshold.value = -3; comp.ratio.value = 8; comp.attack.value = 0.001; comp.connect(master);
-      const sm = ac.createGain(); sm.gain.value = 1.5; sm.connect(comp);
-      mkOsc('sine', 400, 50, 0.5, 1.0, sm);            // 重低音ドーン
-      mkOsc('sine', 2000, 800, 0.3, 0.5, sm);           // キラキラ高音
-      mkNoise(0.2, 0.35, sm);                            // 爆発ノイズ
-      mkOsc('triangle', 1200, 600, 0.4, 0.3, sm);       // 残響
+      // 撃墜「ズドゴォォン！！」: 破裂 → 低音の落下 → 長い余韻
+      const bus = punchBus(1.5);
+      mkBandNoise(0.06, 1.0, bus, 'highpass', 900);      // 破裂の アタック
+      mkBandNoise(0.45, 0.6, bus, 'lowpass', 480);       // 爆風
+      mkOsc('sawtooth', 320, 42, 0.3, 0.6, bus);          // 落下感
+      mkOsc('sine', 110, 20, 0.75, 1.0, bus);             // 腹に来る低音
+      mkOsc('triangle', 1800, 500, 0.28, 0.3, bus);       // キラキラ
+      mkOsc('sine', 2400, 900, 0.5, 0.18, bus);           // 残響
 
     } else if (type === 'jump') {
       // ジャンプ「ぴょん」2層 - 軽快
@@ -6178,46 +6216,41 @@ function fadeInBGM(duration) {
 }
 
 // === SE (攻撃ヒット・撃墜) ===
-function playHitSE() {
-  try {
-    const ac = getAudioCtx();
-    const now = ac.currentTime;
-    const o = ac.createOscillator(); const g = ac.createGain();
-    o.type = 'square';
-    o.frequency.setValueAtTime(200, now);
-    o.frequency.exponentialRampToValueAtTime(50, now + 0.1);
-    g.gain.setValueAtTime(0.33, now); // ヒット音量1.3倍
-    g.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
-    o.connect(g); g.connect(ac.destination);
-    o.start(now); o.stop(now + 0.1);
-  } catch(e) {}
-}
 
+// 撃墜の「ドーン！」。破裂 → 低音の落下 → 長い余韻 の 3段で、
+// 歪みとコンプを通して 前に出す
 function playKOSE() {
   try {
     const ac = getAudioCtx();
     const now = ac.currentTime;
-    // Deep boom
-    const o = ac.createOscillator(); const g = ac.createGain();
-    o.type = 'sawtooth';
-    o.frequency.setValueAtTime(100, now);
-    o.frequency.exponentialRampToValueAtTime(20, now + 0.6);
-    g.gain.setValueAtTime(0.3, now);
-    g.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
-    o.connect(g); g.connect(ac.destination);
-    o.start(now); o.stop(now + 0.6);
-    // Sub rumble
-    const o2 = ac.createOscillator(); const g2 = ac.createGain();
-    o2.type = 'sine';
-    o2.frequency.setValueAtTime(50, now);
-    o2.frequency.exponentialRampToValueAtTime(15, now + 0.5);
-    g2.gain.setValueAtTime(0.2, now);
-    g2.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
-    o2.connect(g2); g2.connect(ac.destination);
-    o2.start(now); o2.stop(now + 0.55);
-    // Noise burst
-    const n = makeNoise(ac, 0.2, 0.18);
-    n.src.start(now); n.src.stop(now + 0.2);
+    const sat = ac.createWaveShaper(); sat.curve = satCurve(); sat.oversample = '2x';
+    const comp = ac.createDynamicsCompressor();
+    comp.threshold.value = -16; comp.knee.value = 10; comp.ratio.value = 10;
+    comp.attack.value = 0.002; comp.release.value = 0.25;
+    const out = ac.createGain(); out.gain.value = 0.9;
+    sat.connect(comp); comp.connect(out); out.connect(ac.destination);
+
+    function osc(w, f0, f1, dur, vol) {
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.type = w; o.frequency.setValueAtTime(f0, now);
+      o.frequency.exponentialRampToValueAtTime(Math.max(1, f1), now + dur);
+      g.gain.setValueAtTime(vol, now); g.gain.exponentialRampToValueAtTime(0.001, now + dur);
+      o.connect(g); g.connect(sat); o.start(now); o.stop(now + dur);
+    }
+    function noise(dur, vol, filtType, freq) {
+      const buf = ac.createBuffer(1, Math.floor(ac.sampleRate * dur), ac.sampleRate);
+      const d = buf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = (Math.random()*2-1);
+      const src = ac.createBufferSource(); src.buffer = buf;
+      const f = ac.createBiquadFilter(); f.type = filtType; f.frequency.value = freq;
+      const g = ac.createGain(); g.gain.setValueAtTime(vol, now); g.gain.exponentialRampToValueAtTime(0.001, now + dur);
+      src.connect(f); f.connect(g); g.connect(sat); src.start(now); src.stop(now + dur);
+    }
+    noise(0.07, 1.0, 'highpass', 800);    // 破裂の 立ち上がり
+    noise(0.55, 0.65, 'lowpass', 450);    // 爆風
+    osc('sawtooth', 300, 38, 0.35, 0.6);   // 落下感
+    osc('sine', 115, 18, 0.9, 1.0);        // 腹に来る低音
+    osc('sine', 48, 14, 0.7, 0.8);         // サブ
+    osc('triangle', 1700, 450, 0.3, 0.25); // キラキラ
   } catch(e) {}
 }
 
@@ -8683,7 +8716,8 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   // ゲージ蓄積（×0.5に減速）
   if (attacker.ultimateGauge !== undefined) attacker.ultimateGauge = Math.min(100, attacker.ultimateGauge + 1.5 + atkGaugeBonus * 0.5);
   if (target.ultimateGauge !== undefined) target.ultimateGauge = Math.min(100, target.ultimateGauge + 2.5 + (target.damage >= 50 ? 1 : 0));
-  playHitSE();
+  // （以前ここで playHitSE() の 薄い電子音が 重なって、打撃が 軽く 聞こえていた。
+  //   打撃音は この下の playHitSound(...) に 一本化した）
   const kb = calcKnockback(target.damage, kbBase, finalKbScale);
   // 体重補正: 重量級は飛びにくく、軽量級は少し飛びやすい（緩やかな補正）
   // weight 0.7→1.15倍, 1.0→1.0倍, 1.5→0.75倍（旧: 0.7→1.43倍で飛びすぎ）
@@ -9127,7 +9161,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
     // Hit flash for all strong hits
     hitFlash.alpha = Math.max(hitFlash.alpha, isSmash ? 0.35 : (hitType === 'cmd' ? 0.25 : 0.15));
     hitFlash.color = isSmash ? '#FFFFFF' : charColor;
-    playHitSound(hitType === 'cmd' ? 'cmd' : isSpecial ? 'special' : 'strong');
+    playHitSound(hitType === 'cmd' ? 'cmd' : isSpecial ? 'special' : 'strong', kb);
   } else {
     // Normal hit: yellow spark flash + light shake
     hitEffects.push({
@@ -9140,7 +9174,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
     if (kb > 2) triggerScreenShake(2 + kb * 0.15, 4);
     // Subtle hit flash
     if (kb > 3) { hitFlash.alpha = Math.max(hitFlash.alpha, 0.08); hitFlash.color = '#FFDD44'; }
-    playHitSound('normal');
+    playHitSound('normal', kb);
   }
 
   // ① 攻撃ヒット時パーティクル（通常:10粒黄色、強:20粒オレンジ、必殺:30+粒キャラカラー）
