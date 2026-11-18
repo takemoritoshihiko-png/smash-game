@@ -5917,6 +5917,40 @@ function makeNoise(ac, duration, volume) {
   return { src, gain: g };
 }
 
+// 技ごとの 音の設計図。ここの 数字を いじれば 1つ1つ 作り分けられる。
+//   v   : 全体の 音量
+//   a   : [周波数, 長さ, 量]           当たった瞬間の「パシッ」（高い所だけのノイズ）
+//   b   : [波形, 開始Hz, 終了Hz, 長さ, 量]  打撃の芯。音程が 急降下するほど 重く聞こえる
+//   s   : [開始Hz, 終了Hz, 長さ, 量]   低音の重み（お腹に来る所）
+//   air : [ローパスHz, 長さ, 量]       空気が動く「ドス」「ヒュッ」
+//   met : [開始Hz, 終了Hz, 長さ, 量]   金属のきらめき
+const HIT_VOICES = {
+  // 弱攻撃: 速くて 軽い。高めで カラッとした パシッ
+  normal:     {v:0.90, a:[3400,0.014,0.60], b:['square',  380,130,0.038,0.45], s:[175,58,0.075,0.75]},
+  // 横強: 押し出す ドスッ
+  side:       {v:1.00, a:[2000,0.024,0.65], b:['square',  250, 80,0.065,0.55], s:[140,42,0.15,0.95], air:[850,0.07,0.22]},
+  // 上強: 下から 上へ 打ち上げる。音程が 上がる
+  up:         {v:0.98, a:[2800,0.018,0.55], b:['triangle',300,620,0.07,0.50], s:[150,60,0.13,0.85], met:[1400,2300,0.09,0.20]},
+  // 下強: 低くて 短い ドッ
+  down:       {v:0.98, a:[1500,0.022,0.60], b:['square',  200, 60,0.055,0.60], s:[115,34,0.17,1.00], air:[500,0.09,0.30]},
+  // 空中攻撃: 風を切る 軽い ヒュパッ
+  aerial:     {v:0.92, a:[4200,0.012,0.50], b:['triangle',480,170,0.045,0.42], s:[185,62,0.085,0.70], air:[2600,0.05,0.18]},
+  // メテオ(空中下): 鋭く 下に 叩き落とす
+  downair:    {v:1.05, a:[1800,0.030,0.75], b:['sawtooth',420, 70,0.090,0.60], s:[120,30,0.20,1.00], met:[900,260,0.12,0.25]},
+  // ダッシュ攻撃: 擦れる ザンッ
+  dash:       {v:0.98, a:[2600,0.030,0.60], b:['sawtooth',320,110,0.060,0.50], s:[150,46,0.12,0.85], air:[1600,0.10,0.30]},
+  // 飛び道具: 軽い 着弾
+  projectile: {v:0.80, a:[3800,0.012,0.45], b:['triangle',520,200,0.035,0.40], s:[200,80,0.06,0.50]},
+  // 強攻撃: バゴッ
+  strong:     {v:1.05, a:[1700,0.030,0.75], b:['square',  240, 68,0.080,0.55], s:[125,36,0.22,1.00], air:[820,0.11,0.35], met:[1500,620,0.05,0.20]},
+  // スマッシュ: 一番 重い ドゴォン
+  smash:      {v:1.30, a:[1100,0.045,0.90], b:['sawtooth',290, 55,0.130,0.60], s:[100,26,0.34,1.00], air:[560,0.20,0.50], met:[1900,700,0.10,0.30]},
+  // 必殺技
+  special:    {v:1.22, a:[1300,0.040,0.80], b:['sawtooth',340, 70,0.110,0.60], s:[108,28,0.30,1.00], air:[640,0.17,0.45], met:[2100,780,0.11,0.32]},
+  // コマンド技: 一番 派手
+  cmd:        {v:1.35, a:[1000,0.050,0.90], b:['sawtooth',280, 52,0.200,0.60], s:[ 95,22,0.50,1.00], air:[500,0.26,0.55], met:[2000,760,0.14,0.32]},
+};
+
 // 軽い歪み（サチュレーション）のカーブ。
 // サイン波だけだと「ピコッ」と 軽くなる。少し歪ませると 一気に 打撃らしく なる。
 let _satCurve = null;
@@ -5928,8 +5962,9 @@ function satCurve() {
   return c;
 }
 
-// power: 当たりの強さ（ノックバック量）。渡すと 弱い当たりは軽く、強い当たりは重くなる
-function playHitSound(type, power) {
+// power:  当たりの強さ（ノックバック量）。弱い当たりは軽く、強い当たりは重くなる
+// charIdx: 攻撃した キャラ。重いキャラほど 音程が 低くなる（キャラごとの 聞き分け）
+function playHitSound(type, power, charIdx) {
   try {
     const ac = getAudioCtx();
     const now = ac.currentTime;
@@ -5937,6 +5972,9 @@ function playHitSound(type, power) {
     const pw = Math.max(0.15, Math.min(1, (power === undefined ? 4 : power) / 8));
     // 連打しても 同じ音に 聞こえないよう 少しだけ 音程を ばらす
     const rnd = 0.93 + Math.random() * 0.14;
+    // キャラの 重さで 音程を 変える（重量級は 低く、軽量級は 高く）
+    const wgt = (charIdx !== undefined && characters[charIdx]) ? characters[charIdx].weight : 1.0;
+    const tint = 1.12 - Math.max(0, Math.min(0.8, wgt - 0.7)) * 0.28;
     // ヘルパー: オシレーター+ゲイン生成 → dest接続
     function mkOsc(waveType, f0, f1, dur, vol, dest) {
       const o = ac.createOscillator(); const g = ac.createGain();
@@ -5977,40 +6015,16 @@ function playHitSound(type, power) {
       return sat;
     }
 
-    if (type === 'normal') {
-      // 弱攻撃「パシッ」: アタック(ノイズ) + ボディ + サブ の3層
-      const bus = punchBus(0.75 + 0.45 * pw);
-      mkBandNoise(0.018 + 0.012 * pw, 0.55, bus, 'highpass', 2400);   // ①パシッ（立ち上がり）
-      mkOsc('square', 330 * rnd, 95, 0.045 + 0.02 * pw, 0.45, bus);    // ②ボディ（打撃の芯）
-      mkOsc('sine', 160 * rnd, 48, 0.09 + 0.10 * pw, 0.95, bus);       // ③サブ（重み）
-
-    } else if (type === 'strong') {
-      // 強攻撃「バゴッ」: 弱より 低く・長く・空気が動く
-      const bus = punchBus(1.0 + 0.5 * pw);
-      mkBandNoise(0.03, 0.75, bus, 'highpass', 1700);                  // アタック
-      mkBandNoise(0.10 + 0.10 * pw, 0.40, bus, 'lowpass', 820);        // 空気のドス
-      mkOsc('square', 250 * rnd, 70, 0.08, 0.55, bus);                 // ボディ
-      mkOsc('sine', 125 * rnd, 36, 0.20 + 0.14 * pw, 1.0, bus);        // サブ
-      mkOsc('triangle', 1500 * rnd, 620, 0.05, 0.22, bus);             // きらめき
-
-    } else if (type === 'special') {
-      // スマッシュ「ドゴォン!!」: さらに低く、尾を長く
-      const bus = punchBus(1.25 + 0.55 * pw);
-      mkBandNoise(0.04, 0.85, bus, 'highpass', 1200);
-      mkBandNoise(0.18 + 0.14 * pw, 0.5, bus, 'lowpass', 620);
-      mkOsc('sawtooth', 300 * rnd, 60, 0.13, 0.55, bus);               // 破壊感
-      mkOsc('sine', 105 * rnd, 28, 0.32 + 0.18 * pw, 1.0, bus);        // 超低音
-      mkOsc('triangle', 1900 * rnd, 700, 0.09, 0.3, bus);              // 金属
-
-    } else if (type === 'cmd') {
-      // 必殺技「ズドォォン!!!」: スマッシュをさらに重くして 余韻を足す
-      const bus = punchBus(1.35 + 0.6 * pw);
-      mkBandNoise(0.05, 0.9, bus, 'highpass', 1000);
-      mkBandNoise(0.26, 0.55, bus, 'lowpass', 520);
-      mkOsc('sawtooth', 280 * rnd, 55, 0.2, 0.6, bus);
-      mkOsc('sine', 95 * rnd, 24, 0.5, 1.0, bus);
-      mkOsc('triangle', 2000 * rnd, 760, 0.14, 0.32, bus);
-      mkOsc('sine', 760, 190, 0.42, 0.3, bus);                          // 余韻
+    const V = HIT_VOICES[type];
+    if (V) {
+      // 設計図どおりに 層を 重ねる。強さ(pw)で 長さと 音量が 変わる
+      const bus = punchBus(V.v * (0.75 + 0.5 * pw));
+      const p2 = rnd * tint;
+      if (V.a)   mkBandNoise(V.a[1] * (0.8 + 0.4 * pw), V.a[2], bus, 'highpass', V.a[0] * p2);
+      if (V.b)   mkOsc(V.b[0], V.b[1] * p2, V.b[2] * p2, V.b[3] * (0.85 + 0.3 * pw), V.b[4], bus);
+      if (V.s)   mkOsc('sine', V.s[0] * p2, V.s[1] * p2, V.s[2] * (0.7 + 0.6 * pw), V.s[3], bus);
+      if (V.air) mkBandNoise(V.air[1] * (0.7 + 0.6 * pw), V.air[2], bus, 'lowpass', V.air[0]);
+      if (V.met) mkOsc('triangle', V.met[0] * p2, V.met[1] * p2, V.met[2], V.met[3], bus);
 
     } else if (type === 'guard') {
       // ガード「キンッ」金属3層
@@ -9161,7 +9175,8 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
     // Hit flash for all strong hits
     hitFlash.alpha = Math.max(hitFlash.alpha, isSmash ? 0.35 : (hitType === 'cmd' ? 0.25 : 0.15));
     hitFlash.color = isSmash ? '#FFFFFF' : charColor;
-    playHitSound(hitType === 'cmd' ? 'cmd' : isSpecial ? 'special' : 'strong', kb);
+    // 技の種類を そのまま 渡す → 技ごとに 違う音が 鳴る
+    playHitSound(hitType, kb, attacker.charIdx);
   } else {
     // Normal hit: yellow spark flash + light shake
     hitEffects.push({
@@ -9174,7 +9189,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
     if (kb > 2) triggerScreenShake(2 + kb * 0.15, 4);
     // Subtle hit flash
     if (kb > 3) { hitFlash.alpha = Math.max(hitFlash.alpha, 0.08); hitFlash.color = '#FFDD44'; }
-    playHitSound('normal', kb);
+    playHitSound(hitType, kb, attacker.charIdx);
   }
 
   // ① 攻撃ヒット時パーティクル（通常:10粒黄色、強:20粒オレンジ、必殺:30+粒キャラカラー）
