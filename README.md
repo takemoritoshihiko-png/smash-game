@@ -60,6 +60,12 @@ sounds/               BGM
 .github/workflows/    main に push すると GitHub Pages へ自動デプロイ
 ```
 
+## 試合のルール
+
+- 相手のストックを 全部 奪えば 勝ち（WINNER）
+- **時間切れ（0:00）は 引き分け**。ストック差・ダメージ差に 関係なく **TIME UP!! / DRAW** になる
+  - 変えたいときは `battleTimer <= 0` の所（`isDraw = true` を 書いている あたり）
+
 ## 開発メモ
 
 - **画像は WebP**。`images/` に PNG を足したときは WebP に変換してから参照すること（元は109MBのPNGで、起動が重かった）
