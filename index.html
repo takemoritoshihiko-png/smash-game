@@ -5314,6 +5314,8 @@ const HITSTOP_SCALE = 1.0;
 const SHORT_HOP_V = 0.81;
 // ラグ（Rage）: 何%から 効きはじめ / 何%で 最大 / 最大 何倍か
 const RAGE_START = 35, RAGE_MAX = 150, RAGE_MULT = 1.1;
+// おんぱの ノックバック倍率（設定上「最強ノックバック」なので 高め）
+const ONPA_KB_MULT = 1.6;
 const BLAST_TOP = -450;
 const BLAST_BOTTOM = 1400;   // 1000→1400（+400px下に拡大）
 let BLAST_LEFT = -800;     // -600→-800（左に200px拡大）
@@ -7373,7 +7375,7 @@ const attackDefs = {
   6: {
     normal: { name:'Squishy Punch', startup:4, active:5, recovery:9, damage:5, kbBase:2, kbScale:0.04, kbAngle:-12, hx:12, hy:-32, hw:42, hh:38, color:'#FF6B6B', effect:'punch' },
     strong: { name:'Bear Slam', startup:8, active:8, recovery:16, damage:14, kbBase:5, kbScale:0.09, kbAngle:-25, hx:14, hy:-35, hw:60, hh:45, color:'#FF4444', effect:'punch' },
-    special:{ name:'Bear Roar', startup:12, active:10, recovery:18, damage:1, kbBase:3, kbScale:0.04, kbAngle:80, hx:0, hy:-30, hw:160, hh:140, color:'#FFDD44', effect:'shockwave', centerHit:true },
+    special:{ name:'Bear Roar', startup:12, active:10, recovery:18, damage:4, kbBase:10, kbScale:0.15, kbAngle:-35, hx:0, hy:-30, hw:160, hh:140, color:'#FFDD44', effect:'shockwave', centerHit:true },
     aerial: { name:'Poyo Jump', startup:4, active:10, recovery:10, damage:9, kbBase:3, kbScale:0.07, kbAngle:-85, hx:0, hy:-15, hw:55, hh:50, color:'#FF6B6B', effect:'airslam', centerHit:true },
     down:   { name:'Butt Drop', startup:5, active:10, recovery:14, damage:12, kbBase:5, kbScale:0.09, kbAngle:80, hx:0, hy:10, hw:45, hh:45, color:'#FF6B6B', effect:'meteor',
               specialType:'divekick', diveSpeed:11 },
@@ -8771,8 +8773,10 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   let weightedKb = kb * weightFactor;
   // パッシブ: ドン(1) 重量強化 吹っ飛び-10%
   if (target.charIdx === 1) weightedKb *= 0.9;
-  // パッシブ: おんぱ(17) ノックバック強化 全KB+10%
-  if (attacker.charIdx === 17) weightedKb *= 1.1;
+  // パッシブ: おんぱ(17)「最低ダメージ・最強ノックバック」
+  // ダメージが 1〜2 しか 無い かわりに 吹っ飛ばしは 全キャラ中 最強。
+  // +10% では 設定負けしていたので 1.6倍に する
+  if (attacker.charIdx === 17) weightedKb *= ONPA_KB_MULT;
   // パッシブ: 波おじ(13) コンボ強化 コンボ最終ヒットKB+15%
   if (attacker.charIdx === 13 && attacker.comboWindow > 0 && attacker.cancelWindow <= 0) weightedKb *= 1.15;
   // 自己バフ: 波おじ「根性」ダメージ100%以上でKB耐性1.2倍
@@ -9055,7 +9059,8 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
       // （これが かかり続けるせいで、弱攻撃を 連打すると 相手が まったく 飛ばず
       //   ハメに なっていた。技を 混ぜている間は 今までどおり 補正あり）
       const cc = comboDisplay[realAttacker.id];
-      if (cc && cc.count > 1 && !repEscalate) {
+      // おんぱ(17) は コンボ補正の 対象外。音波を 当て続けても 吹っ飛びが 落ちない
+      if (cc && cc.count > 1 && !repEscalate && realAttacker.charIdx !== 17) {
         const comboKbMult = Math.pow(0.7, Math.min(cc.count - 1, 5));
         target.vx *= comboKbMult;
         target.vy *= comboKbMult;
