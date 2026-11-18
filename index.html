@@ -5307,6 +5307,13 @@ const FAST_FALL_MULT = 1.8;       // 急降下倍率
 let STAGE_LEFT = 480 - (870 - 90) * 1.2 / 2;  // = 12
 let STAGE_RIGHT = 480 + (870 - 90) * 1.2 / 2;  // = 948
 const STAGE_GROUND_Y = 450;
+// ヒットストップの 長さの 倍率。1.0 = スマブラと 同じ。短くしたいなら 0.7 など
+const HITSTOP_SCALE = 1.0;
+// 小ジャンプの 上昇速度（大ジャンプに対する 割合）。高さは この2乗に なる
+// 0.74 → 高さ 約55%（スマブラの ショートホップと 同じくらい）
+const SHORT_HOP_V = 0.81;
+// ラグ（Rage）: 何%から 効きはじめ / 何%で 最大 / 最大 何倍か
+const RAGE_START = 35, RAGE_MAX = 150, RAGE_MULT = 1.1;
 const BLAST_TOP = -450;
 const BLAST_BOTTOM = 1400;   // 1000→1400（+400px下に拡大）
 let BLAST_LEFT = -800;     // -600→-800（左に200px拡大）
@@ -5352,6 +5359,8 @@ let sparks = [];       // directional spark particles on hit
 let damageNumbers = []; // floating damage numbers
 let trails = [];       // knockback trails
 let blastExplosions = []; // stock loss explosions
+let starKOs = [];      // 上に 飛んだ 撃墜（星に なって 消える）
+let screenKOs = [];    // 下に 落ちた 撃墜
 let battleCountdown = 0;
 let battleStarted = false;
 let gameOver = false;
@@ -6231,6 +6240,24 @@ function fadeInBGM(duration) {
 }
 
 // === SE (攻撃ヒット・撃墜) ===
+
+// 上に 飛ばされた 撃墜の 音。遠ざかりながら「キラーン…」と 高く 消えていく
+function playStarKOSE() {
+  try {
+    const ac = getAudioCtx(); const now = ac.currentTime;
+    const out = ac.createGain(); out.gain.value = 0.5; out.connect(ac.destination);
+    [0, 0.08, 0.16].forEach(function (d, i) {
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(900 + i * 300, now + d);
+      o.frequency.exponentialRampToValueAtTime(2600 + i * 500, now + d + 0.9);
+      g.gain.setValueAtTime(0.0001, now + d);
+      g.gain.exponentialRampToValueAtTime(0.25, now + d + 0.03);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + d + 1.0);
+      o.connect(g); g.connect(out); o.start(now + d); o.stop(now + d + 1.05);
+    });
+  } catch (e) {}
+}
 
 // 撃墜の「ドーン！」。破裂 → 低音の落下 → 長い余韻 の 3段で、
 // 歪みとコンプを通して 前に出す
@@ -7973,6 +8000,7 @@ function createPlayer(id, charIdx, startX) {
     throwTechWindow: 0,     // 投げ抜け受付残りフレーム（被投げ側）
     // Guard state
     guarding: false,
+    hitVib: 0, hitVibAmp: 0,   // ヒットストップ中の 震え
     guardDurability: GUARD_MAX_DURABILITY,
     guardBreakStun: 0, // frames of stun after guard break
     guardShrink: 0,    // ガード収縮アニメ残りフレーム
@@ -8204,6 +8232,7 @@ function initBattle() {
   damageNumbers = [];
   trails = [];
   blastExplosions = [];
+  starKOs = []; screenKOs = [];
   cmdNameDisplay = [];
   hitMissDisplays = [];
   comicTexts = [];
@@ -8805,6 +8834,14 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
       attacker.repCount = 0;
       attacker.repMove = '';
     }
+  }
+  // === ラグ（スマブラのRage）===
+  // 自分の ダメージが 溜まっているほど 吹っ飛ばし力が 上がる。
+  // 35%から 効きはじめ、150%で 最大 1.1倍。負けている側に 逆転の 目を 作る。
+  {
+    const ad = attacker.damage || 0;
+    const rageT = Math.max(0, Math.min(1, (ad - RAGE_START) / (RAGE_MAX - RAGE_START)));
+    weightedKb *= 1 + rageT * (RAGE_MULT - 1);
   }
   // 崖外復帰阻止ボーナス: ステージ外の相手には1.3倍KB
   if (target.x < STAGE_LEFT - 30 || target.x > STAGE_RIGHT + 30) weightedKb *= 1.3;
@@ -9435,11 +9472,17 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
 
   // ===== All-Star Brawl 2 エフェクト =====
 
-  // ① ヒットストップ設定（前のヒットストップが終わった時のみ）
-  if (hitStopFrames <= 0) {
-    if (isSmash) hitStopFrames = 4;
-    else if (isStrong || isSpecial) hitStopFrames = 3;
-    else if (kb > 3) hitStopFrames = 2;
+  // ① ヒットストップ（スマブラと同じ式）
+  //    フレーム数 = ダメージ × 0.65 + 6（上限30F）。桜井さん いわく
+  //    「両者が 一瞬 止まることで、当たった衝撃の 強さを 強調する」。
+  //    以前は 2〜4F 固定で スマブラの 1/5しか 止まっておらず、軽く 感じていた。
+  {
+    const hl = Math.max(2, Math.min(30,
+      Math.floor((finalDamage * 0.65 + 6) * (isSmash ? 1.15 : 1) * HITSTOP_SCALE)));
+    if (hl > hitStopFrames) hitStopFrames = hl;
+    // 止まっている間 キャラを 震わせる（見た目だけ。当たり判定は 動かさない）
+    attacker.hitVib = hl; attacker.hitVibAmp = Math.min(5, 1.2 + finalDamage * 0.10);
+    target.hitVib = hl;   target.hitVibAmp = Math.min(8, 2.0 + finalDamage * 0.18);
   }
 
   // ② 強攻撃・スマッシュヒット時: 相手を白フラッシュ + 一瞬拡大
@@ -10577,6 +10620,8 @@ function updateBattle(dt) {
   }
 
   // Update blast explosions
+  for (let i = starKOs.length - 1; i >= 0; i--) { starKOs[i].life--; if (starKOs[i].life <= 0) starKOs.splice(i, 1); }
+  for (let i = screenKOs.length - 1; i >= 0; i--) { screenKOs[i].life--; if (screenKOs[i].life <= 0) screenKOs.splice(i, 1); }
   for (let i = blastExplosions.length - 1; i >= 0; i--) {
     blastExplosions[i].life--;
     if (blastExplosions[i].life <= 0) blastExplosions.splice(i, 1);
@@ -10754,8 +10799,10 @@ function updateBattle(dt) {
 
   // Update players
   for (const p of players) {
+    if (!inHitStop && p.hitVib > 0) p.hitVib--;
     // ヒットストップ中: 攻撃フレームは進め、ガード解除だけ処理、物理はスキップ
     if (inHitStop && p.alive && !p.respawnTimer) {
+      if (p.hitVib > 0) p.hitVib--;
       // 攻撃フレームを進める（hitbox消失→再ヒットループ防止）
       if (p.attacking && p.attackData) {
         p.attackFrame++;
@@ -12319,8 +12366,10 @@ function updateBattle(dt) {
     let moveX = 0;
     let jumpPress = false;
 
+    let byAI = false;
     // CPU AI for player 2
     if (p.id === 1 && (gameMode === 'cpu' || bossRushMode)) {
+      byAI = true;
       const ai = getCpuInput(p, players[0]);
       moveX = ai.moveX;
       jumpPress = ai.jump;
@@ -12560,6 +12609,14 @@ function updateBattle(dt) {
     if (!jumpPress) p.jumpUsed = false;
 
     // ジャンプ上昇カーブ: 8Fかけて最終速度まで加速
+    // 小ジャンプ（スマブラのショートホップ）:
+    // ジャンプキーを すぐ はなすと 上昇を 打ち切って 低く 跳ぶ。
+    // 低空で 空中攻撃を 出せるように なる。CPU は 対象外（復帰できなくなるため）
+    if (!byAI && p.jumpRampTimer > 0 && !jumpPress) {
+      p.jumpRampTimer = 0;
+      if (p.vy < 0) p.vy = p.jumpTargetVy * SHORT_HOP_V;   // 上昇速度を 固定（高さは 約半分）
+      p.jumpTargetVy = 0;
+    }
     if (p.jumpRampTimer > 0) {
       p.jumpRampTimer--;
       const rampT = 1 - p.jumpRampTimer / 8; // 0→1
@@ -13013,6 +13070,19 @@ function landingCheck(p) {
 
 function blastCheck(p) {
   if (p.x < BLAST_LEFT || p.x > BLAST_RIGHT || p.y < BLAST_TOP || p.y > BLAST_BOTTOM) {
+    // === 飛んでいった 方向で 撃墜演出を 変える（スマブラと同じ）===
+    //   上 → 星に なって キラーン（Star KO）
+    //   横 → 画面端で 爆発（従来）
+    //   下 → 下に 落ちる
+    const koDir = p.y < BLAST_TOP ? 'top' : (p.y > BLAST_BOTTOM ? 'bottom' : 'side');
+    if (koDir === 'top') {
+      starKOs.push({ x: Math.max(60, Math.min(900, p.x)), y: 0, life: 70, maxLife: 70,
+        color: characters[p.charIdx].accent, charIdx: p.charIdx });
+      playStarKOSE();
+    } else if (koDir === 'bottom') {
+      screenKOs.push({ x: Math.max(60, Math.min(900, p.x)), y: 640, life: 50, maxLife: 50,
+        color: characters[p.charIdx].accent });
+    }
     // ④ 撃墜時爆発エフェクト
     const ex = Math.max(BLAST_LEFT + 20, Math.min(BLAST_RIGHT - 20, p.x));
     const ey = Math.max(BLAST_TOP + 20, Math.min(BLAST_BOTTOM - 20, p.y));
@@ -14069,6 +14139,48 @@ function drawBattle(dt) {
   }
 
   // Blast explosions (stock loss) - ④ 大きな爆発
+  // === 上に 飛んだ 撃墜: 星に なって 遠ざかる（スマブラの Star KO）===
+  for (const sk of starKOs) {
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);   // カメラの 拡大縮小を 無効にして 画面の 座標で 描く
+    const t = 1 - sk.life / sk.maxLife;      // 0→1
+    const y = 150 - t * 55;                   // 少し 上がりながら 遠ざかる（タイマーに かぶらない 高さ）
+    const scale = Math.max(0.05, 1 - t * 0.92);
+    const alpha = t < 0.15 ? t / 0.15 : (t > 0.75 ? Math.max(0, (1 - t) / 0.25) : 1);
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.translate(sk.x, y);
+    ctx.rotate(t * 7);
+    ctx.scale(scale, scale);
+    // 四芒星（キラーン）
+    ctx.fillStyle = '#FFFFFF'; ctx.shadowColor = sk.color; ctx.shadowBlur = 25;
+    ctx.beginPath();
+    for (let i = 0; i < 8; i++) {
+      const ang = (i / 8) * Math.PI * 2;
+      const r = (i % 2 === 0) ? 62 : 20;
+      ctx.lineTo(Math.cos(ang) * r, Math.sin(ang) * r);
+    }
+    ctx.closePath(); ctx.fill();
+    ctx.restore();
+    // 尾を 引く 光
+    ctx.save();
+    ctx.globalAlpha = alpha * 0.5;
+    ctx.strokeStyle = sk.color; ctx.lineWidth = 6 * scale;
+    ctx.beginPath(); ctx.moveTo(sk.x, y + 50 * scale); ctx.lineTo(sk.x, y + 220 * scale); ctx.stroke();
+    ctx.restore();
+    ctx.restore();
+  }
+  // === 下に 落ちた 撃墜: 画面の 下が 一瞬 光る ===
+  for (const sc of screenKOs) {
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    const t = 1 - sc.life / sc.maxLife;
+    const a2 = Math.max(0, 1 - t) * 0.55;
+    const g = cachedLinGrad(0, 640, 0, 520, [0, sc.color, 1, 'rgba(0,0,0,0)']);
+    ctx.globalAlpha = a2; ctx.fillStyle = g;
+    ctx.fillRect(0, 520, 960, 120);
+    ctx.restore();
+  }
   for (const be of blastExplosions) {
     const t = 1 - be.life / be.maxLife;
     ctx.save();
@@ -14201,6 +14313,9 @@ function drawBattle(dt) {
     const isIdle = p.grounded && !p.attacking && Math.abs(p.vx) < 0.5 && p.hitstun <= 0 && !p.grabbing && !p.grabbed && !p.guarding && p.guardBreakStun <= 0;
     const idleOfs = isIdle ? Math.sin(battleTime * (Math.PI * 2 / 180)) * 0.3 : 0;
     const drawY = p.y - 55 + idleOfs;
+    // ヒットストップ中の 震え（見た目だけ ずらす。当たり判定は そのまま）
+    const vibX = p.hitVib > 0 ? Math.sin(p.hitVib * 2.4) * p.hitVibAmp : 0;
+    const vibY = p.hitVib > 0 ? Math.cos(p.hitVib * 3.1) * p.hitVibAmp * 0.35 : 0;
 
     // 着地スクワッシュ（landSquash: 縦圧縮→元に戻す）
     if (p.landSquash > 0) {
@@ -14240,7 +14355,7 @@ function drawBattle(dt) {
       ctx.translate(p.x, drawY);
       ctx.scale(s, s);
       ctx.translate(-p.x, -drawY);
-      drawBattleCharacter(p.x, drawY, 1.0, p.charIdx, battleTime, p.facingLeft, p);
+      drawBattleCharacter(p.x + vibX, drawY + vibY, 1.0, p.charIdx, battleTime, p.facingLeft, p);
       ctx.restore();
     } else if (dragonScale !== 1.0 || depthS !== 1.0) {
       const s = dragonScale * depthS;
@@ -14248,10 +14363,10 @@ function drawBattle(dt) {
       ctx.translate(p.x, drawY);
       ctx.scale(s, s);
       ctx.translate(-p.x, -drawY);
-      drawBattleCharacter(p.x, drawY, 1.0, p.charIdx, battleTime, p.facingLeft, p);
+      drawBattleCharacter(p.x + vibX, drawY + vibY, 1.0, p.charIdx, battleTime, p.facingLeft, p);
       ctx.restore();
     } else {
-      drawBattleCharacter(p.x, drawY, 1.0, p.charIdx, battleTime, p.facingLeft, p);
+      drawBattleCharacter(p.x + vibX, drawY + vibY, 1.0, p.charIdx, battleTime, p.facingLeft, p);
     }
 
     // ライティング・ダメージフラッシュはdrawBattleCharacter内のdamageTintで処理
