@@ -5543,6 +5543,19 @@ function executeComboFinisher(p) {
   const target = players.find(pp => pp.id !== p.id && pp.alive);
   if (!target) return;
 
+  // Bot: ダメージを まとめて 入れるのではなく、ホーミングミサイルを 3発 飛ばす。
+  // 当たった分だけ ダメージが 入る（見た目どおりの 挙動）。
+  // setTimeout ではなく ゲームの フレームで 撃つ（ポーズ中に 飛ばないように）
+  if (p.charIdx === 29) {
+    p.botRocketsLeft = 3;
+    p.botRocketTimer = 0;
+    p.botRocketDmg = f.damage * 0.5;
+    p.botRocketKb = f.kb * 0.6;
+    p.botRocketAngle = f.kbAngle;
+    p.botRocketColor = f.color;
+    return;   // 通常の 一括ダメージは 使わない
+  }
+
   let totalDmg = 0;
   const hitCount = f.hits;
 
@@ -7181,6 +7194,20 @@ const commandDefs = {
     { name:'Stag Mandible', seq:['U','U','D','D'], cooldownKey:'cmd3',
       attack:{ startup:10, active:8, recovery:20, damage:16, kbBase:8, kbScale:0.13, kbAngle:-50, hx:15, hy:-35, hw:55, hh:50, color:'#663300', effect:'bigpunch', spinKB:true } },
   ],
+  29: [ // Bot
+    // ↓↓→→Z : 速い ロケットを 飛ばす
+    { name:'Quick Rocket', seq:['D','D','F','F'], cooldownKey:'cmd1',
+      attack:{ startup:7, active:6, recovery:16, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#66E8FF', effect:'none',
+        projectile:{ speed:19, damage:12, kbBase:6, kbScale:0.10, kbAngle:-12, w:38, h:16, life:70, color:'#66E8FF', pcolor:'#AAF4FF' } } },
+    // →→↑↑Z : 横に タックル
+    { name:'Boost Tackle', seq:['F','F','U','U'], cooldownKey:'cmd2',
+      attack:{ startup:8, active:16, recovery:18, damage:17, kbBase:7, kbScale:0.12, kbAngle:-20, hx:18, hy:-36, hw:66, hh:48, color:'#8FF4FF', effect:'dash',
+        specialType:'cmdCharge', chargeSpeed:17 } },
+    // ↑↑↓↓Z : 自分の まわりに 衝撃波。ダメージ0 だが 2秒間 動けなくする
+    { name:'EMP Pulse', seq:['U','U','D','D'], cooldownKey:'cmd3',
+      attack:{ startup:10, active:10, recovery:22, damage:0, kbBase:0, kbScale:0, kbAngle:-10, hx:0, hy:-35, hw:190, hh:150, color:'#66E8FF', effect:'shockwave', centerHit:true,
+        stun:true, stunFrames:120 } },
+  ],
 };
 
 // Dragon mode commands (separate)
@@ -8106,6 +8133,7 @@ function createPlayer(id, charIdx, startX) {
     guarding: false,
     hitVib: 0, hitVibAmp: 0,   // ヒットストップ中の 震え
     botRobot: 0,              // Bot: ロボット変身の 残りフレーム（20秒=1200）
+    botRocketsLeft: 0, botRocketTimer: 0, botRocketDmg: 0, botRocketKb: 0, botRocketAngle: -40, botRocketColor: '#66E8FF',
     guardDurability: GUARD_MAX_DURABILITY,
     guardBreakStun: 0, // frames of stun after guard break
     guardShrink: 0,    // ガード収縮アニメ残りフレーム
@@ -10830,6 +10858,30 @@ function updateBattle(dt) {
   if (stockLossAnim.active) {
     stockLossAnim.life--;
     if (stockLossAnim.life <= 0) stockLossAnim.active = false;
+  }
+
+  // Bot: コンボフィニッシャーの ホーミングミサイルを 8フレームおきに 1発ずつ 撃つ
+  for (const bp of players) {
+    if (!bp || !bp.botRocketsLeft) continue;
+    if (bp.botRocketTimer > 0) { bp.botRocketTimer--; continue; }
+    const idx = 3 - bp.botRocketsLeft;
+    const bdir = bp.facingLeft ? -1 : 1;
+    projectiles.push({
+      x: bp.x + 24 * bdir, y: bp.y - 48 + (idx - 1) * 16,
+      vx: bdir * 9, vy: 0,
+      w: 34, h: 14,
+      damage: bp.botRocketDmg, kbBase: bp.botRocketKb, kbScale: 0.10, kbAngle: bp.botRocketAngle,
+      life: 150, ownerId: bp.id,
+      color: bp.botRocketColor, pcolor: '#FFFFFF',
+      shape: 'rect', ownerCharIdx: 29, time: 0,
+      homing: true, pierce: false, ink: false,
+      meshitero: false, gravityDebuff: false,
+      statusChance: 0, statusType: null, pullEffect: false,
+      hitTargets: [],
+    });
+    playHitSound('projectile', 5, 29);
+    bp.botRocketsLeft--;
+    bp.botRocketTimer = 8;
   }
 
   // Update projectiles
