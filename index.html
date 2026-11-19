@@ -10547,6 +10547,10 @@ function updateBattle(dt) {
   }
   if (gameOver) return;
 
+  // 必殺技ゲージが たまった人の 動画を 先に 読み込んでおく（発動時の 真っ黒を 防ぐ）
+  for (const pp of players) {
+    if (pp && pp.alive && (pp.ultimateGauge || 0) >= 100) prefetchUltimateVideo(pp.charIdx);
+  }
   // コンボフィニッシャーReady判定
   updateComboFinisherReady();
 
@@ -18428,10 +18432,18 @@ const ultimateData = [
 
 function removeUltimateVideo() {
   if (ultimateVideo && ultimateVideo.el) {
-    try { ultimateVideo.el.pause(); } catch(e) {}
-    if (document.body.contains(ultimateVideo.el)) document.body.removeChild(ultimateVideo.el);
+    const el = ultimateVideo.el;
+    try { el.pause(); } catch (e) {}
+    el.onended = null; el.oncanplay = null; el.onerror = null;
+    if (document.body.contains(el)) document.body.removeChild(el);
+    el.style.cssText = '';
+    try { el.currentTime = 0; } catch (e) {}   // 次に 使う時のため 残しておく（再ダウンロードしない）
+  }
+  if (ultimateVideo && ultimateVideo.skipKey) {
+    document.removeEventListener('keydown', ultimateVideo.skipKey);
   }
   ultimateVideo = null;
+  ultimateVideoShowing = false;
 }
 
 // 必殺技hitbox判定
@@ -18477,16 +18489,32 @@ function triggerUltimate(p) {
   return true;
 }
 
+// 必殺技の 動画は 5〜19MB ある。発動してから 読み込むと
+// 真っ黒な 画面が 出て カクつくので、ゲージが 100% に なった時点で
+// 裏で 先に 読み込んでおく。
+const ultVideoCache = {};
+let ultimateVideoShowing = false;   // 動画が 画面に 出ている間は ゲームを 描かない（カクつき防止）
+
+function prefetchUltimateVideo(charIdx) {
+  const name = ultimateFileNames[charIdx];
+  if (!name || ultVideoCache[name]) return;
+  const v = document.createElement('video');
+  v.preload = 'auto';
+  v.playsInline = true;
+  v.muted = true;            // 読み込みだけ。音は 再生する時に 戻す
+  v.src = 'images/ultimates/' + name + '_ultimate.mp4';
+  try { v.load(); } catch (e) {}
+  ultVideoCache[name] = v;
+}
+
 function startUltimateVideo() {
   const p = players[ultimatePlayerId];
   if (!p) { ultimatePhase = 'damage'; ultimateTimer = 0; return; }
-  const charFileName = ultimateFileNames[p.charIdx] || 'zen';
-  const video = document.createElement('video');
-  video.src = 'images/ultimates/' + charFileName + '_ultimate.mp4';
-  video.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:9999;object-fit:cover;background:black;';
-  video.muted = false;       // play video audio (BGM already faded out)
-  video.playsInline = true;
-  video.autoplay = true;
+  const name = ultimateFileNames[p.charIdx] || 'zen';
+  if (!ultVideoCache[name]) prefetchUltimateVideo(p.charIdx);
+  const video = ultVideoCache[name];
+  if (!video) { ultimatePhase = 'damage'; ultimateTimer = 0; return; }
+
   let finished = false;
   function onFinish() {
     if (finished) return;
@@ -18499,15 +18527,51 @@ function startUltimateVideo() {
   }
   video.onended = onFinish;
   video.onerror = onFinish;
-  document.body.appendChild(video);
-  video.play().catch(() => {
-    // Unmuted autoplay blocked - retry muted
-    video.muted = true;
-    video.play().catch(onFinish);
-  });
-  ultimateVideo = { el: video };
-  // Safety timeout: 8 seconds max
-  setTimeout(onFinish, 8000);
+  // どれかの キーを 押したら 動画を 飛ばせる（毎回 最後まで 見なくていい）
+  function skipKey() { onFinish(); }
+  video.onclick = skipKey;
+  document.addEventListener('keydown', skipKey, { once: true });
+  ultimateVideo = { el: video, shown: false, skipKey: skipKey };
+
+  // 再生できる 状態に なってから 画面に 出す（読み込み中の 真っ黒を 見せない）
+  function show() {
+    if (finished || ultimateVideo.shown) return;
+    ultimateVideo.shown = true;
+    ultimateVideoShowing = true;
+    video.muted = false;
+    try { video.currentTime = 0; } catch (e) {}
+    video.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:9999;object-fit:cover;background:black;';
+    document.body.appendChild(video);
+    video.play().catch(() => {
+      video.muted = true;                       // 音つき自動再生が 止められた時
+      video.play().catch(onFinish);
+    });
+  }
+  if (video.error) {
+    // 動画が 無い キャラ（7体）。待たずに すぐ 先へ進む
+    onFinish();
+    return;
+  }
+  if (video.readyState >= 3) {
+    show();                                     // もう 読み込めている（ふつうは こっち）
+  } else {
+    video.oncanplay = show;
+    // 1.2秒 待って まだ 再生できないなら 動画は あきらめて 先へ進む。
+    // 真っ黒な 画面で 待たせない
+    setTimeout(function () { if (!finished && !ultimateVideo.shown) onFinish(); }, 1200);
+  }
+  // 見張り: 画面に 出したのに 再生が 進んでいない（固まっている）なら 打ち切る。
+  // 読み込みが 遅い 回線で 止まったまま 待たされるのを 防ぐ
+  let lastT = -1, stuck = 0;
+  const watch = setInterval(function () {
+    if (finished) { clearInterval(watch); return; }
+    if (!ultimateVideo || !ultimateVideo.shown) return;
+    const ct = video.currentTime;
+    if (ct <= lastT + 0.001) { stuck++; } else { stuck = 0; }
+    lastT = ct;
+    if (stuck >= 5) { clearInterval(watch); onFinish(); }   // 約1.5秒 進まなければ あきらめる
+  }, 300);
+  setTimeout(onFinish, 9000);                   // 保険
 }
 
 function applyUltimateDamage(attacker, target) {
@@ -20368,9 +20432,13 @@ function gameLoop(timestamp) {
   } else if (scene === 'vsintro') {
     drawVsIntro(FIXED_DT);
   } else if (scene === 'battle') {
-    drawBattle(FIXED_DT);
-    drawUltimateOverlay();
-    drawInstantKillOverlay();
+    // 必殺技の 動画が 全画面に 出ている間は ゲームを 描かない。
+    // 動画の デコードと ゲームの 描画が 同時に 走ると カクつくため
+    if (!ultimateVideoShowing) {
+      drawBattle(FIXED_DT);
+      drawUltimateOverlay();
+      drawInstantKillOverlay();
+    }
   } else if (scene === 'chardetail') {
     drawCharDetail(FIXED_DT);
   } else if (scene === 'howtoplay') {
