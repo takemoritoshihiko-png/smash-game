@@ -2099,6 +2099,33 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.beginPath(); ctx.moveTo(-3*s, -14*s); ctx.lineTo(-6*s, -10*s); ctx.lineTo(-1*s, -12*s); ctx.closePath(); ctx.fill();
       ctx.beginPath(); ctx.moveTo(3*s, -14*s); ctx.lineTo(6*s, -10*s); ctx.lineTo(1*s, -12*s); ctx.closePath(); ctx.fill();
     }
+  } else if (charIndex === 29) {
+    // Bot - 変身中は ロボットの 立ち絵、普段は 棒人間の 立ち絵
+    const useRobot29 = false;   // ここ（キャラ選択・プレビュー）は 普段の姿で 表示する
+    const img29 = useRobot29 ? botRobotImg : botImg;
+    if (img29.complete && img29.naturalWidth > 0) {
+      const imgW29 = 80 * s;
+      const imgH29 = imgW29 * (img29.naturalHeight / img29.naturalWidth);
+      ctx.drawImage(img29, -imgW29 / 2, -36 * s, imgW29, imgH29);
+    } else {
+      // 画像が 読めないとき用の 仮の絵
+      ctx.strokeStyle = '#9AA6AE'; ctx.lineWidth = 3 * s;
+      for (let i29 = 0; i29 < 2; i29++) {
+        const dy29 = -30 + i29 * 11;
+        ctx.beginPath();
+        ctx.moveTo(-5 * s, dy29 * s);
+        ctx.quadraticCurveTo(-24 * s, (dy29 - 15) * s, -33 * s, (dy29 - 3) * s);
+        ctx.stroke();
+      }
+      ctx.fillStyle = useRobot29 ? '#8A939B' : '#2A2A32';
+      ctx.fillRect(-5 * s, -24 * s, 10 * s, 36 * s);
+      ctx.beginPath(); ctx.arc(0, -33 * s, 10 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.fillRect(-10 * s, 12 * s, 4.5 * s, 24 * s);
+      ctx.fillRect(5.5 * s, 12 * s, 4.5 * s, 24 * s);
+      ctx.fillStyle = '#66E8FF';
+      ctx.beginPath(); ctx.arc(-3.2 * s, -34 * s, 2 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(3.2 * s, -34 * s, 2 * s, 0, Math.PI * 2); ctx.fill();
+    }
   }
 
   ctx.restore();
@@ -4929,37 +4956,6 @@ function drawSelect(dt) {
     ctx.fillText('<- -> select  |  Enter confirm  |  I: details  |  ESC back', 480, 628);
   } else if (gameMode === 'cpu') {
     ctx.fillText('1P: <- -> + Enter  |  CPU: A D  |  I: details  |  ESC: back', 480, 628);
-  } else if (charIndex === 29) {
-    // Bot - 変身中は ロボットの 立ち絵、普段は 棒人間の 立ち絵
-    const useRobot = animData && animData.botRobot > 0;
-    const img29 = useRobot ? botRobotImg : botImg;
-    if (img29.complete && img29.naturalWidth > 0) {
-      const imgW = 78 * s;
-      const imgH = imgW * (img29.naturalHeight / img29.naturalWidth);
-      ctx.drawImage(img29, -imgW / 2, -34 * s, imgW, imgH);
-    } else {
-      // 画像が まだ 無いとき用の 仮の絵（棒人間＋機械の腕）
-      const bodyCol = useRobot ? '#8A939B' : '#1A1A1A';
-      const glow = '#66E8FF';
-      ctx.strokeStyle = '#9AA6AE'; ctx.lineWidth = 3 * s;
-      for (let i2 = 0; i2 < 2; i2++) {
-        const dy = -28 + i2 * 10;
-        ctx.beginPath();
-        ctx.moveTo(-6 * s, dy * s);
-        ctx.quadraticCurveTo(-26 * s, (dy - 14) * s, -34 * s, (dy - 2) * s);
-        ctx.stroke();
-      }
-      ctx.fillStyle = bodyCol;
-      ctx.fillRect(-5 * s, -22 * s, 10 * s, 34 * s);
-      ctx.beginPath(); ctx.arc(0, -30 * s, 10 * s, 0, Math.PI * 2); ctx.fill();
-      ctx.fillRect(-9 * s, 12 * s, 4 * s, 22 * s);
-      ctx.fillRect(5 * s, 12 * s, 4 * s, 22 * s);
-      ctx.fillStyle = glow;
-      ctx.beginPath(); ctx.arc(-3 * s, -31 * s, 1.8 * s, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(3 * s, -31 * s, 1.8 * s, 0, Math.PI * 2); ctx.fill();
-      if (useRobot) { ctx.beginPath(); ctx.arc(0, -12 * s, 3.5 * s, 0, Math.PI * 2); ctx.fill(); }
-    }
-
   } else {
     ctx.fillText('1P: <- -> + Enter  |  2P: A D + Space  |  I: details  |  ESC: back', 480, 628);
   }
@@ -6834,7 +6830,7 @@ const CHAR_THROW_TYPE = [
   'balance', // 26:ぽよ
   'ranged',  // 27:プル
   'speed',   // 28:ムッシー
-  'normal', // 29:Bot
+  'balance', // 29:Bot（テクニック型）
 ];
 // キャラ投げ状態異常テーブル
 const CHAR_THROW_STATUS = {
