@@ -18744,7 +18744,10 @@ function startUltimateVideo() {
     lastT = ct;
     if (stuck >= 5) { clearInterval(watch); onFinish(); }   // 約1.5秒 進まなければ あきらめる
   }, 300);
-  setTimeout(onFinish, 9000);                   // 保険
+  // 保険: ここまで 来たら 必ず 終わらせる。
+  // いちばん 長い 動画（Bot の 10秒）＋余裕。再生が 止まった場合は
+  // 上の 見張りが 1.5秒で 打ち切るので、ここは 長めで よい
+  setTimeout(onFinish, 12000);
 }
 
 function applyUltimateDamage(attacker, target) {
