@@ -251,6 +251,10 @@ const characters = [
     stats: { power: 3, speed: 4, tech: 4, defense: 2 }, desc: 'Bug Lord',
     bodyColors: { main: '#228822', sub: '#44CC44', skin: '#88CC44' },
     moveSpeed: 7.8, jumpPower: -10.1, weight: 0.85 },
+  { name: 'Bot', type: 'Technical', color: '#1A1A1A', accent: '#66E8FF', dark: '#0A0A0A',
+    stats: { power: 3, speed: 4, tech: 5, defense: 2 }, desc: 'Stick figure with machine arms - transforms into a battle robot',
+    bodyColors: { main: '#1A1A1A', sub: '#66E8FF', skin: '#2A2A2A' },
+    moveSpeed: 7.6, jumpPower: -10.4, weight: 0.95 },
 ];
 
 // --- Audio unlock on first interaction ---
@@ -419,6 +423,13 @@ const pullSprites = lazySprites(['idle','walk','jump','attack_n','attack_side','
 const mussyImg = new Image();
 mussyImg.src = 'images/mussy.webp';
 const mussySprites = lazySprites(['idle','walk','jump','attack_n','attack_side','attack_up','attack_down','attack_air','special','damage','down','win'], k => 'images/musshi/' + k + '.webp');
+const botImg = new Image();
+botImg.src = 'images/bot.webp';
+const botRobotImg = new Image();
+botRobotImg.src = 'images/bot_robot.webp';
+const BOT_KEYS = ['idle','walk','jump','attack_n','attack_side','attack_up','attack_down','attack_air','special','damage','down','win'];
+const botSprites = lazySprites(BOT_KEYS, k => 'images/bot/' + k + '.webp');
+const botRobotSprites = lazySprites(BOT_KEYS, k => 'images/bot/robot/' + k + '.webp');
 // キャラ番号 → スプライト組（毎フレーム 作り直さないよう ここで 1回だけ 作る）
 const SPRITE_SETS = {
   0: zenSprites, 1: donSprites, 2: saisokuSprites,
@@ -428,6 +439,7 @@ const SPRITE_SETS = {
   14: tokkoSprites, 15: samSprites, 16: kingSprites, 17: onpaSprites, 18: senSprites,
   19: dosbossSprites, 20: microSprites, 21: mrtwoSprites, 22: kinkinSprites, 23: satoruSprites,
   24: kowaiSprites, 25: yahoSprites, 26: poyoSprites, 27: pullSprites, 28: mussySprites,
+  29: botSprites,
 };
 const bgImg = new Image();
 bgImg.src = 'images/bg.webp';
@@ -2488,8 +2500,8 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
   // 天才 uses different images per mode
   const tensaiIsDragon = animData && animData.dragonMode;
   const tensaiActiveImg = tensaiIsDragon ? tensaiDragonImg : tensaiHumanImg;
-  const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg, bulletImg, shaudenImg, judgemanImg, tensaiActiveImg, catbusImg, tankImg, namiojiImg, tokkoImg, samImg, kingImg, onpaImg, senImg, dosbossImg, microImg, mrtwoImg, kingkingImg, satoruImg, kowaiImg, yahoImg, poyoImg, pullImg, mussyImg];
-  const imgSizes = [[70, 90], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [168, 112], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [85, 85], [75, 100], [80, 100], [85, 95], [80, 95], [80, 95], [75, 95], [75, 90], [75, 75], [75, 90], [75, 90]];
+  const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg, bulletImg, shaudenImg, judgemanImg, tensaiActiveImg, catbusImg, tankImg, namiojiImg, tokkoImg, samImg, kingImg, onpaImg, senImg, dosbossImg, microImg, mrtwoImg, kingkingImg, satoruImg, kowaiImg, yahoImg, poyoImg, pullImg, mussyImg, botImg];
+  const imgSizes = [[70, 90], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [168, 112], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [85, 85], [75, 100], [80, 100], [85, 95], [80, 95], [80, 95], [75, 95], [75, 90], [75, 75], [75, 90], [75, 90], [75, 90]];
   // --- Sprite animation: common state→key resolver ---
   function getSpriteKey(ad) {
     if (!ad.alive) return 'down';
@@ -2539,6 +2551,10 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
   // Tensai: switch sprite set based on dragonMode
   if (charIndex === 10 && animData) {
     spriteSet = animData.dragonMode ? tensaiDragonSprites : tensaiSprites;
+  }
+  // Bot: 変身中は ロボットの スプライトに 差し替える
+  if (charIndex === 29 && animData && animData.botRobot > 0) {
+    spriteSet = botRobotSprites;
   }
   if (spriteSet && animData) {
     let key = getSpriteKey(animData);
@@ -2657,6 +2673,29 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
     } else {
       ctx.drawImage(img, sx, sy, sw, sh, -imgW / 2 + tankOfsX, bodyYOfs + tankOfsY, imgW, imgH);
     }
+  } else if (charIndex === 29) {
+    // Bot: 画像が まだ 無いとき用の 仮の絵（棒人間＋背中の 機械の腕）
+    const useRobot29 = animData && animData.botRobot > 0;
+    const bodyCol29 = useRobot29 ? '#8A939B' : '#141414';
+    ctx.strokeStyle = '#9AA6AE'; ctx.lineWidth = 3 * s;
+    for (let i29 = 0; i29 < 2; i29++) {
+      const dy29 = -30 + i29 * 11;
+      ctx.beginPath();
+      ctx.moveTo(-5 * s, dy29 * s);
+      ctx.quadraticCurveTo(-24 * s, (dy29 - 15) * s, -33 * s, (dy29 - 3) * s);
+      ctx.stroke();
+    }
+    ctx.fillStyle = bodyCol29;
+    ctx.fillRect(-5 * s, -24 * s, 10 * s, 36 * s);
+    ctx.beginPath(); ctx.arc(0, -33 * s, 10 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.fillRect(-10 * s, 12 * s, 4.5 * s, 24 * s);
+    ctx.fillRect(5.5 * s, 12 * s, 4.5 * s, 24 * s);
+    ctx.fillRect(-16 * s, -20 * s, 11 * s, 4 * s);
+    ctx.fillRect(5 * s, -20 * s, 11 * s, 4 * s);
+    ctx.fillStyle = '#66E8FF';
+    ctx.beginPath(); ctx.arc(-3.2 * s, -34 * s, 2 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(3.2 * s, -34 * s, 2 * s, 0, Math.PI * 2); ctx.fill();
+    if (useRobot29) { ctx.beginPath(); ctx.arc(0, -12 * s, 4 * s, 0, Math.PI * 2); ctx.fill(); }
   } else if (charIndex === 4) {
     // Long: Canvas fallback for battle
     ctx.fillStyle = '#5A6AAE';
@@ -4890,6 +4929,37 @@ function drawSelect(dt) {
     ctx.fillText('<- -> select  |  Enter confirm  |  I: details  |  ESC back', 480, 628);
   } else if (gameMode === 'cpu') {
     ctx.fillText('1P: <- -> + Enter  |  CPU: A D  |  I: details  |  ESC: back', 480, 628);
+  } else if (charIndex === 29) {
+    // Bot - 変身中は ロボットの 立ち絵、普段は 棒人間の 立ち絵
+    const useRobot = animData && animData.botRobot > 0;
+    const img29 = useRobot ? botRobotImg : botImg;
+    if (img29.complete && img29.naturalWidth > 0) {
+      const imgW = 78 * s;
+      const imgH = imgW * (img29.naturalHeight / img29.naturalWidth);
+      ctx.drawImage(img29, -imgW / 2, -34 * s, imgW, imgH);
+    } else {
+      // 画像が まだ 無いとき用の 仮の絵（棒人間＋機械の腕）
+      const bodyCol = useRobot ? '#8A939B' : '#1A1A1A';
+      const glow = '#66E8FF';
+      ctx.strokeStyle = '#9AA6AE'; ctx.lineWidth = 3 * s;
+      for (let i2 = 0; i2 < 2; i2++) {
+        const dy = -28 + i2 * 10;
+        ctx.beginPath();
+        ctx.moveTo(-6 * s, dy * s);
+        ctx.quadraticCurveTo(-26 * s, (dy - 14) * s, -34 * s, (dy - 2) * s);
+        ctx.stroke();
+      }
+      ctx.fillStyle = bodyCol;
+      ctx.fillRect(-5 * s, -22 * s, 10 * s, 34 * s);
+      ctx.beginPath(); ctx.arc(0, -30 * s, 10 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.fillRect(-9 * s, 12 * s, 4 * s, 22 * s);
+      ctx.fillRect(5 * s, 12 * s, 4 * s, 22 * s);
+      ctx.fillStyle = glow;
+      ctx.beginPath(); ctx.arc(-3 * s, -31 * s, 1.8 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(3 * s, -31 * s, 1.8 * s, 0, Math.PI * 2); ctx.fill();
+      if (useRobot) { ctx.beginPath(); ctx.arc(0, -12 * s, 3.5 * s, 0, Math.PI * 2); ctx.fill(); }
+    }
+
   } else {
     ctx.fillText('1P: <- -> + Enter  |  2P: A D + Space  |  I: details  |  ESC: back', 480, 628);
   }
@@ -5316,6 +5386,11 @@ const SHORT_HOP_V = 0.81;
 const RAGE_START = 35, RAGE_MAX = 150, RAGE_MULT = 1.1;
 // おんぱの ノックバック倍率（設定上「最強ノックバック」なので 高め）
 const ONPA_KB_MULT = 1.6;
+// Bot の ロボット変身（20秒）。ダメージ・吹っ飛ばし・移動速度の 倍率
+const BOT_ROBOT_FRAMES = 1200;   // 20秒 × 60fps
+const BOT_ROBOT_DMG = 1.45;
+const BOT_ROBOT_KB  = 1.25;
+const BOT_ROBOT_SPD = 1.3;
 const BLAST_TOP = -450;
 const BLAST_BOTTOM = 1400;   // 1000→1400（+400px下に拡大）
 let BLAST_LEFT = -800;     // -600→-800（左に200px拡大）
@@ -5432,6 +5507,7 @@ const COMBO_FINISHERS = {
   26: { name:'Double Slime Explosion', damage:30, hits:2, effect:null, effectDur:0, kb:12, kbAngle:-60, color:'#88EEFF', desc:'Giant Slime Blast' },
   27: { name:'Gravity Collapse Black Hole', damage:50, hits:1, effect:null, effectDur:0, kb:18, kbAngle:-70, color:'#9944DD', desc:'Colossal Black Hole', pullIn:true },
   28: { name:'Bug Swarm Storm', damage:3, hits:15, effect:'poisoned', effectDur:1200, kb:4, kbAngle:-30, color:'#44CC44', desc:'Bug swarm + poison + no movement' },
+  29: { name:'Homing Rocket x3', damage:11, hits:3, effect:null, effectDur:0, kb:9, kbAngle:-40, color:'#66E8FF', desc:'3 homing rockets chase the enemy' },
 };
 
 function canComboFinisher(playerId) {
@@ -5712,10 +5788,10 @@ function addGaugePopup(x, y, amount, color) {
   gaugePopups.push({ x: x, y: y - 60, text: (amount > 0 ? '+' : '') + amount, life: 30, maxLife: 30, color: color || '#FFD700' });
 }
 // キャラ別強化モードグローカラー
-const POWER_GLOW = {0:'#00BFFF',1:'#8B4513',2:'#FFFFFF',3:'#FF4500',4:'#00CED1',5:'#4169E1',6:'#FF4400',7:'#FF69B4',8:'#FFFF00',9:'#9400D3',10:'#FF8C00',11:'#66DDFF',12:'#808080',13:'#FF6600',14:'#00FF00',15:'#00FF7F',16:'#FFD700',17:'#7CFC00',18:'#FFD700',19:'#9400D3',20:'#DA70D6',21:'#FF6347',22:'#FFD700',23:'#FF0000',24:'#800080',25:'#FF1493',26:'#FFB6C1',27:'#4B0082',28:'#228B22'};
+const POWER_GLOW = {0:'#00BFFF',1:'#8B4513',2:'#FFFFFF',3:'#FF4500',4:'#00CED1',5:'#4169E1',6:'#FF4400',7:'#FF69B4',8:'#FFFF00',9:'#9400D3',10:'#FF8C00',11:'#66DDFF',12:'#808080',13:'#FF6600',14:'#00FF00',15:'#00FF7F',16:'#FFD700',17:'#7CFC00',18:'#FFD700',19:'#9400D3',20:'#DA70D6',21:'#FF6347',22:'#FFD700',23:'#FF0000',24:'#800080',25:'#FF1493',26:'#FFB6C1',27:'#4B0082',28:'#228B22',29:'#66E8FF'};
 // 強化モード名マップ
-const POWER_NAMES = {0:'Ice Power',1:'Quake Mode',2:'Lightspeed Mode',3:'Inferno Mode',4:'Dragon Spear Mode',5:'Wild Release',6:'Fury Mode',7:'Awakened Mode',8:'Overvolt',9:'Final Judgment',10:'Dragon Mode',11:'Teleport',12:'FULL LOAD',13:'Full Punch',14:'Toxin',15:'AIR MASTER',16:'Time Stop',17:'Resonance Mode',18:'CEO',19:'Armor',20:'Triple Merge',21:'Blaze Fusion',22:'Billionaire',23:'Taekwondo Master',24:'Nightmare',25:'Chaos',26:'Double Slime',27:'Gravity Collapse',28:'Swarm'};
-const POWER_DESCS = {0:'Freeze DMG x1.5',1:'KB×1.4',2:'Speed x2',3:'Burn chance +60%',4:'Reach x1.5',5:'KB×1.5',6:'DMG x1.5',7:'Confusion',8:'Shock Lock',9:'DMG x1.4',10:'DMG x1.5',12:'Power x2',13:'DMG x1.5',14:'Poison DMG x2',17:'Edge Attack',21:'DMG x1.5',22:'DMG x1.5',23:'Kick DMG x2',26:'All Attacks x2',27:'Gravity x3',28:'Poison DMG x3'};
+const POWER_NAMES = {0:'Ice Power',1:'Quake Mode',2:'Lightspeed Mode',3:'Inferno Mode',4:'Dragon Spear Mode',5:'Wild Release',6:'Fury Mode',7:'Awakened Mode',8:'Overvolt',9:'Final Judgment',10:'Dragon Mode',11:'Teleport',12:'FULL LOAD',13:'Full Punch',14:'Toxin',15:'AIR MASTER',16:'Time Stop',17:'Resonance Mode',18:'CEO',19:'Armor',20:'Triple Merge',21:'Blaze Fusion',22:'Billionaire',23:'Taekwondo Master',24:'Nightmare',25:'Chaos',26:'Double Slime',27:'Gravity Collapse',28:'Swarm',29:'ROBOT MODE'};
+const POWER_DESCS = {0:'Freeze DMG x1.5',1:'KB×1.4',2:'Speed x2',3:'Burn chance +60%',4:'Reach x1.5',5:'KB×1.5',6:'DMG x1.5',7:'Confusion',8:'Shock Lock',9:'DMG x1.4',10:'DMG x1.5',12:'Power x2',13:'DMG x1.5',14:'Poison DMG x2',17:'Edge Attack',21:'DMG x1.5',22:'DMG x1.5',23:'Kick DMG x2',26:'All Attacks x2',27:'Gravity x3',28:'Poison DMG x3',29:'Attack & Speed UP'};
 function getActivePowerMode(p) {
   const timers = [
     [p.kumaFuryMode,6],[p.saisokuLightSpeed,2],[p.uruoWildRelease,5],[p.bulletAwaken,7],
@@ -6701,6 +6777,7 @@ const CHAR_GRAB_FRAMES = [
   26, // 26:ぽよ (初心者型→バランス)
   30, // 27:プル (重力操作型→遠距離/特殊)
   18, // 28:ムッシー (虫合体型→スピード)
+  28, // 29:Bot (テクニック型・標準)
 ];
 function getGrabFrames(charIdx) {
   return CHAR_GRAB_FRAMES[charIdx] || THROW_GRAB_FRAMES;
@@ -6744,6 +6821,7 @@ const CHAR_THROW_TYPE = [
   'balance', // 26:ぽよ
   'ranged',  // 27:プル
   'speed',   // 28:ムッシー
+  'normal', // 29:Bot
 ];
 // キャラ投げ状態異常テーブル
 const CHAR_THROW_STATUS = {
@@ -7752,6 +7830,30 @@ const attackDefs = {
               specialType:'slide', slideSpeed:12 },
     throwDmg: 8,
   },
+  // === Bot - テクニック型 / 機械の腕で リーチを 取る ===
+  29: {
+    // Z: ダメージは 少ないが リーチが 長い（機械の腕の 突き）
+    normal: { name:'Machine Jab', startup:4, active:5, recovery:9, damage:4, kbBase:2.5, kbScale:0.05, kbAngle:-15, hx:26, hy:-36, hw:82, hh:32, color:'#66E8FF', effect:'punch' },
+    // 空中も Z と 同じ 性能
+    aerial: { name:'Air Machine Jab', startup:4, active:5, recovery:9, damage:4, kbBase:2.5, kbScale:0.05, kbAngle:-35, hx:24, hy:-34, hw:80, hh:34, color:'#66E8FF', effect:'airkick' },
+    // X: リーチも ダメージも 高いが 発生が 遅い
+    strong: { name:'Twin Arm Thrust', startup:13, active:7, recovery:17, damage:15, kbBase:7, kbScale:0.13, kbAngle:-28, hx:30, hy:-36, hw:96, hh:42, color:'#8FF4FF', effect:'bigpunch' },
+    // 横強: 機械の腕で 薙ぎ払う（長め）
+    side:   { name:'Arm Sweep', startup:5, active:6, recovery:11, damage:9, kbBase:4, kbScale:0.08, kbAngle:-20, hx:28, hy:-35, hw:88, hh:36, color:'#66E8FF', effect:'sideslash' },
+    // ↑X 復帰技: ロケットで 上昇。自分の 下にも 当たる（リーチは 短い）
+    up:     { name:'Rocket Rise', startup:4, active:14, recovery:16, damage:8, kbBase:5, kbScale:0.09, kbAngle:-82, hx:0, hy:-10, hw:46, hh:76, color:'#8FF4FF', effect:'upslash', centerHit:true, specialType:'jumpSlam', jumpPower:-15 },
+    // 下攻撃: ドリルで 3回 連続ヒット（リーチ ふつう）
+    down:   { name:'Drill Rush', startup:5, active:18, recovery:14, damage:4, kbBase:2, kbScale:0.04, kbAngle:-12, hx:22, hy:-32, hw:58, hh:34, color:'#8FF4FF', effect:'punch', multiHit:true, hitInterval:6, finalDamage:6, finalKbBase:6, finalKbScale:0.10, finalKbAngle:-30 },
+    // 空中下: ドリル急降下（メテオ）
+    downair:{ name:'Drill Dive', startup:5, active:10, recovery:14, damage:12, kbBase:5, kbScale:0.10, kbAngle:80, hx:0, hy:10, hw:46, hh:50, color:'#66E8FF', effect:'meteor', specialType:'divekick', diveSpeed:13 },
+    // ダッシュ攻撃
+    dash:   { name:'Boost Dash', startup:4, active:6, recovery:10, damage:8, kbBase:3.5, kbScale:0.06, kbAngle:-18, hx:22, hy:-34, hw:70, hh:36, color:'#66E8FF', effect:'dash', specialType:'slide', slideSpeed:12 },
+    // D長押し（必殺技）: 相手を 掴んで 下に 叩きつける。リーチ 長め。
+    // 当たると 20秒間 ロボットに 変身する（ultimateData 側で 処理）
+    special:{ name:'Seize and Slam', startup:10, active:10, recovery:20, damage:10, kbBase:6, kbScale:0.10, kbAngle:85, hx:28, hy:-34, hw:100, hh:48, color:'#8FF4FF', effect:'meteor', centerHit:true },
+    throwDmg: 9,
+  },
+
 };
 
 // Auto-generate aerial direction attacks from existing aerial data
@@ -8003,6 +8105,7 @@ function createPlayer(id, charIdx, startX) {
     // Guard state
     guarding: false,
     hitVib: 0, hitVibAmp: 0,   // ヒットストップ中の 震え
+    botRobot: 0,              // Bot: ロボット変身の 残りフレーム（20秒=1200）
     guardDurability: GUARD_MAX_DURABILITY,
     guardBreakStun: 0, // frames of stun after guard break
     guardShrink: 0,    // ガード収縮アニメ残りフレーム
@@ -8415,6 +8518,8 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
 
   // サム空中攻撃補正: 空中時1.3倍ダメージ
   let finalDamage = damage;
+  // Bot: ロボット変身中は ダメージUP
+  if (attacker.charIdx === 29 && attacker.botRobot > 0) finalDamage *= BOT_ROBOT_DMG;
   if (attacker.charIdx === 15 && !attacker.grounded) {
     finalDamage *= 1.3;
   }
@@ -8839,6 +8944,8 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
       attacker.repMove = '';
     }
   }
+  // Bot: ロボット変身中は 攻撃力と 吹っ飛ばしが 上がる
+  if (attacker.charIdx === 29 && attacker.botRobot > 0) weightedKb *= BOT_ROBOT_KB;
   // === ラグ（スマブラのRage）===
   // 自分の ダメージが 溜まっているほど 吹っ飛ばし力が 上がる。
   // 35%から 効きはじめ、150%で 最大 1.1倍。負けている側に 逆転の 目を 作る。
@@ -9649,6 +9756,7 @@ const CHAR_BODY = [
   [0.85,0.85],  // 26 poyo 小さい
   [1.0, 1.0],   // 27 pull 標準
   [0.9, 0.9],   // 28 mussy 細め虫
+  [1.0, 1.0], // 29 bot
 ];
 function getPlayerHitbox(p) {
   const b = CHAR_BODY[p.charIdx] || [1.0, 1.0];
@@ -9690,6 +9798,7 @@ const CHAR_REACH = [
   [0.75,0.75,0.75,0.75], // 26 poyo (短リーチ)
   [1.0,1.0,1.0,1.0], // 27 pull (標準)
   [1.0,1.0,1.0,1.0], // 28 mussy (標準)
+  [1.9,2.0,1.3,1.4], // 29 bot (機械の腕・長リーチ)
 ];
 function getAttackHitbox(p, atk) {
   const dir = p.facingLeft ? -1 : 1;
@@ -11475,6 +11584,18 @@ function updateBattle(dt) {
     // Jab combo timer
     if (p.jabTimer > 0) p.jabTimer--;
     if (p.jabTimer <= 0 && p.jabCount > 0 && !p.jabFlurry) p.jabCount = 0;
+    // Bot: ロボット変身の 残り時間
+    if (p.botRobot > 0) {
+      p.botRobot--;
+      if (p.botRobot === 0) {
+        playHitSound('guard');
+        for (let i = 0; i < 20; i++) {
+          const a2 = Math.random() * Math.PI * 2;
+          sparks.push({ x: p.x, y: p.y - 35, vx: Math.cos(a2) * 3, vy: Math.sin(a2) * 3,
+            life: 24, maxLife: 24, color: '#66E8FF', size: 3, gravity: 0.05, drag: 0.95 });
+        }
+      }
+    }
     // 同じ技の連発カウント: 間が あいたら リセット
     if (p.repTimer > 0) { p.repTimer--; if (p.repTimer <= 0) { p.repCount = 0; p.repMove = ''; } }
     // Jab flurry: auto-continue for max 10 hits, then auto-finish
@@ -12873,6 +12994,7 @@ const CHAR_MOVE = [
   [1.05,0.86,0.80,0.83], // 26 poyo 軽量
   [0.65,0.72,0.40,0.89], // 27 pull 中量
   [0.70,0.75,0.45,0.88], // 28 mussy 標準
+  [0.72,0.78,0.50,0.88], // 29 bot テクニック型
 ];
 function applyMovement(p, moveX, ch) {
   const cm = CHAR_MOVE[p.charIdx] || [0.70,0.75,0.45,0.88];
@@ -12908,7 +13030,8 @@ function applyMovement(p, moveX, ch) {
   const autoSpeedMult = ((p.charIdx === 10 && p.damage >= 80) ? 1.2 : (p.charIdx === 11 && p.dashing) ? Math.min(1.3, 1 + p.dashTimer * 0.002) : 1.0) * kkArmorSpeed * fearSpeedMult * poisonSpeedMult * dragonSpeedMult * bossSpeedMult * paralysisMult;
   if (p.charIdx === 11 && p.dashing) p.dashTimer++;
   if (!p.dashing) p.dashTimer = 0;
-  const targetVx = moveX * ch.moveSpeed * senSpeedMult * gravDebuffMult * saisokuMult * shaudenMult * yahoSpeedMult * microSplitSpeedMult * speedMult * dashMult * dSkillSpeedMult * autoSpeedMult;
+  const botRobotSpeed = (p.charIdx === 29 && p.botRobot > 0) ? BOT_ROBOT_SPD : 1;   // Bot: 変身中は 速い
+  const targetVx = moveX * ch.moveSpeed * botRobotSpeed * senSpeedMult * gravDebuffMult * saisokuMult * shaudenMult * yahoSpeedMult * microSplitSpeedMult * speedMult * dashMult * dSkillSpeedMult * autoSpeedMult;
 
   if (moveX !== 0) {
     // 振り向きモーション: 地上で逆方向に入力→6F振り向き
@@ -18397,7 +18520,7 @@ let ultimatePlayerId = -1;
 let ultimateVideo = null;
 let ultimateHitTarget = -1;
 
-const ultimateFileNames = ['zen','don','saisoku','meteo','long','uruo','kumataro','bullet','shauden','judgeman','tensai','catbus','tank','namioji','tokko','sam','king','onpa','sen','dosboss','micro','mrtwo','kingking','satoru','kowai','yaho','poyo','pull','mussy'];
+const ultimateFileNames = ['zen','don','saisoku','meteo','long','uruo','kumataro','bullet','shauden','judgeman','tensai','catbus','tank','namioji','tokko','sam','king','onpa','sen','dosboss','micro','mrtwo','kingking','satoru','kowai','yaho','poyo','pull','mussy','bot'];
 const ultimateData = [
   { name:'Azure Dragon Slash', dmg:36, kb:16, angle:-15, range:'line', status:'frozen', dur:120, color:'#44CCFF' },
   { name:'Heaven Shatter Fist', dmg:40, kb:18, angle:-80, range:'circle', radius:150, status:'bounce', color:'#FF4422' },
@@ -18428,6 +18551,8 @@ const ultimateData = [
   { name:'Squishy Explosion', dmg:8, kb:8, angle:80, range:'all', hits:5, status:'bounce', color:'#44CCEE' },
   { name:'Super Gravity Collapse', dmg:35, kb:16, angle:-50, range:'circle', radius:160, pull:true, color:'#6622AA' },
   { name:'Bug Swarm', dmg:28, kb:12, angle:-30, range:'circle', radius:140, status:'poisoned', dur:180, poisonDmg:2, color:'#228822' },
+  // Bot: 掴んで 下に 叩きつける → 当たると 20秒 ロボットに 変身する
+  { name:'Seize and Slam', dmg:22, kb:14, angle:85, range:'line', color:'#66E8FF', botTransform:true },
 ];
 
 function removeUltimateVideo() {
@@ -18576,6 +18701,20 @@ function startUltimateVideo() {
 
 function applyUltimateDamage(attacker, target) {
   const ud = ultimateData[attacker.charIdx] || ultimateData[0];
+  // Bot: 叩きつけが 決まったら 20秒間 ロボットに 変身する
+  if (ud.botTransform && attacker) {
+    attacker.botRobot = BOT_ROBOT_FRAMES;
+    playHitSound('cmd', 9, attacker.charIdx);
+    for (let i = 0; i < 40; i++) {
+      const a2 = Math.random() * Math.PI * 2, sp = 2 + Math.random() * 5;
+      sparks.push({ x: attacker.x, y: attacker.y - 35, vx: Math.cos(a2) * sp, vy: Math.sin(a2) * sp,
+        life: 30 + Math.random() * 20, maxLife: 50, color: Math.random() > 0.5 ? '#66E8FF' : '#FFFFFF',
+        size: 3 + Math.random() * 3, gravity: 0.02, drag: 0.96 });
+    }
+    hitFlash.alpha = Math.max(hitFlash.alpha, 0.5);
+    hitFlash.color = '#66E8FF';
+    triggerScreenShake(12, 20);
+  }
   let dmg = ud.dmg, kb = ud.kb, angle = ud.angle;
   if (ud.range === 'random') { dmg = Math.floor(Math.random()*40)+1; kb = 5+Math.random()*15; angle = -Math.floor(Math.random()*80); }
   if (ud.range === 'teleport' && target) { attacker.x = target.x + (target.facingLeft ? 60 : -60); attacker.y = target.y; }
