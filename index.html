@@ -255,6 +255,10 @@ const characters = [
     stats: { power: 3, speed: 4, tech: 5, defense: 2 }, desc: 'Stick figure with machine arms - transforms into a battle robot',
     bodyColors: { main: '#1A1A1A', sub: '#66E8FF', skin: '#2A2A2A' },
     moveSpeed: 7.6, jumpPower: -10.4, weight: 0.95 },
+  { name: 'Chatta', type: 'Balanced', color: '#E87BB8', accent: '#FF66CC', dark: '#A8457F',
+    stats: { power: 2, speed: 4, tech: 5, defense: 2 }, desc: 'A playful pink spirit - flies, teleports and sends a tiny copy of itself',
+    bodyColors: { main: '#E87BB8', sub: '#FF99DD', skin: '#F5B8DC' },
+    moveSpeed: 8.4, jumpPower: -11.2, weight: 0.62 },
 ];
 
 // --- Audio unlock on first interaction ---
@@ -427,9 +431,15 @@ const botImg = new Image();
 botImg.src = 'images/bot.webp';
 const botRobotImg = new Image();
 botRobotImg.src = 'images/bot_robot.webp';
+// Chatta の 飛行中の Z（指カッター）。ホーミングで 追いかける
+const CHATTA_FLY_SHOT = { speed:8, damage:5, kbBase:4, kbScale:0.07, kbAngle:-20, w:26, h:12,
+                          life:150, color:'#FF66CC', pcolor:'#FFCCEE', homing:true };
 const BOT_KEYS = ['idle','walk','jump','attack_n','attack_side','attack_up','attack_down','attack_air','special','damage','down','win'];
 const botSprites = lazySprites(BOT_KEYS, k => 'images/bot/' + k + '.webp');
 const botRobotSprites = lazySprites(BOT_KEYS, k => 'images/bot/robot/' + k + '.webp');
+const chattaImg = new Image();
+chattaImg.src = 'images/chatta.webp';
+const chattaSprites = lazySprites(BOT_KEYS, k => 'images/chatta/' + k + '.webp');
 // キャラ番号 → スプライト組（毎フレーム 作り直さないよう ここで 1回だけ 作る）
 const SPRITE_SETS = {
   0: zenSprites, 1: donSprites, 2: saisokuSprites,
@@ -440,6 +450,7 @@ const SPRITE_SETS = {
   19: dosbossSprites, 20: microSprites, 21: mrtwoSprites, 22: kinkinSprites, 23: satoruSprites,
   24: kowaiSprites, 25: yahoSprites, 26: poyoSprites, 27: pullSprites, 28: mussySprites,
   29: botSprites,
+  30: chattaSprites,
 };
 const bgImg = new Image();
 bgImg.src = 'images/bg.webp';
@@ -2126,6 +2137,19 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.beginPath(); ctx.arc(-3.2 * s, -34 * s, 2 * s, 0, Math.PI * 2); ctx.fill();
       ctx.beginPath(); ctx.arc(3.2 * s, -34 * s, 2 * s, 0, Math.PI * 2); ctx.fill();
     }
+  } else if (charIndex === 30) {
+    // Chatta
+    if (chattaImg.complete && chattaImg.naturalWidth > 0) {
+      const w30 = 76 * s, h30 = w30 * (chattaImg.naturalHeight / chattaImg.naturalWidth);
+      ctx.drawImage(chattaImg, -w30 / 2, -34 * s, w30, h30);
+    } else {
+      ctx.fillStyle = '#E87BB8';
+      ctx.beginPath(); ctx.arc(0, -26 * s, 13 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.fillRect(-6 * s, -16 * s, 12 * s, 26 * s);
+      ctx.fillStyle = '#FF66CC';
+      ctx.beginPath(); ctx.arc(-4 * s, -28 * s, 2.5 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(4 * s, -28 * s, 2.5 * s, 0, Math.PI * 2); ctx.fill();
+    }
   }
 
   ctx.restore();
@@ -2527,8 +2551,8 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
   // 天才 uses different images per mode
   const tensaiIsDragon = animData && animData.dragonMode;
   const tensaiActiveImg = tensaiIsDragon ? tensaiDragonImg : tensaiHumanImg;
-  const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg, bulletImg, shaudenImg, judgemanImg, tensaiActiveImg, catbusImg, tankImg, namiojiImg, tokkoImg, samImg, kingImg, onpaImg, senImg, dosbossImg, microImg, mrtwoImg, kingkingImg, satoruImg, kowaiImg, yahoImg, poyoImg, pullImg, mussyImg, botImg];
-  const imgSizes = [[70, 90], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [168, 112], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [85, 85], [75, 100], [80, 100], [85, 95], [80, 95], [80, 95], [75, 95], [75, 90], [75, 75], [75, 90], [75, 90], [75, 90]];
+  const imgs = [zenImg, donImg, saisokuImg, meteoImg, longImg, uruoImg, kumataroImg, bulletImg, shaudenImg, judgemanImg, tensaiActiveImg, catbusImg, tankImg, namiojiImg, tokkoImg, samImg, kingImg, onpaImg, senImg, dosbossImg, microImg, mrtwoImg, kingkingImg, satoruImg, kowaiImg, yahoImg, poyoImg, pullImg, mussyImg, botImg, chattaImg];
+  const imgSizes = [[70, 90], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [78, 90], [70, 90], [75, 90], [75, 90], [tensaiIsDragon ? 85 : 75, tensaiIsDragon ? 95 : 90], [80, 90], [168, 112], [75, 90], [75, 90], [75, 90], [75, 90], [75, 90], [85, 85], [75, 100], [80, 100], [85, 95], [80, 95], [80, 95], [75, 95], [75, 90], [75, 75], [75, 90], [75, 90], [75, 90], [72, 88]];
   // --- Sprite animation: common state→key resolver ---
   function getSpriteKey(ad) {
     if (!ad.alive) return 'down';
@@ -2700,6 +2724,14 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
     } else {
       ctx.drawImage(img, sx, sy, sw, sh, -imgW / 2 + tankOfsX, bodyYOfs + tankOfsY, imgW, imgH);
     }
+  } else if (charIndex === 30) {
+    // Chatta: 画像が 無いとき用
+    ctx.fillStyle = '#E87BB8';
+    ctx.beginPath(); ctx.arc(0, -28 * s, 13 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.fillRect(-6 * s, -18 * s, 12 * s, 28 * s);
+    ctx.fillStyle = '#FF66CC';
+    ctx.beginPath(); ctx.arc(-4 * s, -30 * s, 2.5 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(4 * s, -30 * s, 2.5 * s, 0, Math.PI * 2); ctx.fill();
   } else if (charIndex === 29) {
     // Bot: 画像が まだ 無いとき用の 仮の絵（棒人間＋背中の 機械の腕）
     const useRobot29 = animData && animData.botRobot > 0;
@@ -5387,6 +5419,11 @@ const BOT_ROBOT_FRAMES = 1200;   // 20秒 × 60fps
 const BOT_ROBOT_DMG = 1.35;
 const BOT_ROBOT_KB  = 1.25;
 const BOT_ROBOT_SPD = 1.3;
+// Chatta の 飛行: 8秒 飛べて、そのあと 30秒 飛べない
+const CHATTA_FLY_FRAMES = 480;     // 8秒
+const CHATTA_FLY_COOLDOWN = 1800;  // 30秒
+const CHATTA_FLY_TOP = -380;       // これより 上には 行けない（上の 撃墜ラインの 手前）
+const CHATTA_SHOT_INTERVAL = 26;   // 指カッターの 間隔（遅め）
 const BLAST_TOP = -450;
 const BLAST_BOTTOM = 1400;   // 1000→1400（+400px下に拡大）
 let BLAST_LEFT = -800;     // -600→-800（左に200px拡大）
@@ -5433,6 +5470,7 @@ let damageNumbers = []; // floating damage numbers
 let trails = [];       // knockback trails
 let blastExplosions = []; // stock loss explosions
 let starKOs = [];      // 上に 飛んだ 撃墜（星に なって 消える）
+let chattaMinions = [];  // Chatta の ちっちゃい分身（相手を 追って 爆発する）
 let screenKOs = [];    // 下に 落ちた 撃墜
 let battleCountdown = 0;
 let battleStarted = false;
@@ -5504,6 +5542,7 @@ const COMBO_FINISHERS = {
   27: { name:'Gravity Collapse Black Hole', damage:50, hits:1, effect:null, effectDur:0, kb:18, kbAngle:-70, color:'#9944DD', desc:'Colossal Black Hole', pullIn:true },
   28: { name:'Bug Swarm Storm', damage:3, hits:15, effect:'poisoned', effectDur:1200, kb:4, kbAngle:-30, color:'#44CC44', desc:'Bug swarm + poison + no movement' },
   29: { name:'Homing Rocket x3', damage:11, hits:3, effect:null, effectDur:0, kb:9, kbAngle:-40, color:'#66E8FF', desc:'3 homing rockets chase the enemy' },
+  30: { name:'Little Chatta', damage:8, hits:1, effect:null, effectDur:0, kb:8, kbAngle:-45, color:'#FF66CC', desc:'A tiny copy chases the enemy and explodes', chattaMinion:true },
 };
 
 function canComboFinisher(playerId) {
@@ -5539,6 +5578,15 @@ function executeComboFinisher(p) {
   const target = players.find(pp => pp.id !== p.id && pp.alive);
   if (!target) return;
 
+  // Chatta: ちっちゃい 自分の 分身を 出す。相手を 追いかけて、捕まえたら 8ダメージで 爆発。
+  // 爆発するまで 次の 分身は 出せない
+  if (p.charIdx === 30) {
+    if (chattaMinions.some(m => m.ownerId === p.id)) return;   // まだ 前のが 生きている
+    chattaMinions.push({ ownerId: p.id, x: p.x, y: STAGE_GROUND_Y, vx: 0,
+      dmg: f.damage, kb: f.kb, angle: f.kbAngle, life: 900, t: 0 });
+    playHitSound('jump');
+    return;
+  }
   // Bot: ダメージを まとめて 入れるのではなく、ホーミングミサイルを 3発 飛ばす。
   // 当たった分だけ ダメージが 入る（見た目どおりの 挙動）。
   // setTimeout ではなく ゲームの フレームで 撃つ（ポーズ中に 飛ばないように）
@@ -5797,10 +5845,10 @@ function addGaugePopup(x, y, amount, color) {
   gaugePopups.push({ x: x, y: y - 60, text: (amount > 0 ? '+' : '') + amount, life: 30, maxLife: 30, color: color || '#FFD700' });
 }
 // キャラ別強化モードグローカラー
-const POWER_GLOW = {0:'#00BFFF',1:'#8B4513',2:'#FFFFFF',3:'#FF4500',4:'#00CED1',5:'#4169E1',6:'#FF4400',7:'#FF69B4',8:'#FFFF00',9:'#9400D3',10:'#FF8C00',11:'#66DDFF',12:'#808080',13:'#FF6600',14:'#00FF00',15:'#00FF7F',16:'#FFD700',17:'#7CFC00',18:'#FFD700',19:'#9400D3',20:'#DA70D6',21:'#FF6347',22:'#FFD700',23:'#FF0000',24:'#800080',25:'#FF1493',26:'#FFB6C1',27:'#4B0082',28:'#228B22',29:'#66E8FF'};
+const POWER_GLOW = {0:'#00BFFF',1:'#8B4513',2:'#FFFFFF',3:'#FF4500',4:'#00CED1',5:'#4169E1',6:'#FF4400',7:'#FF69B4',8:'#FFFF00',9:'#9400D3',10:'#FF8C00',11:'#66DDFF',12:'#808080',13:'#FF6600',14:'#00FF00',15:'#00FF7F',16:'#FFD700',17:'#7CFC00',18:'#FFD700',19:'#9400D3',20:'#DA70D6',21:'#FF6347',22:'#FFD700',23:'#FF0000',24:'#800080',25:'#FF1493',26:'#FFB6C1',27:'#4B0082',28:'#228B22',29:'#66E8FF',30:'#FF66CC'};
 // 強化モード名マップ
-const POWER_NAMES = {0:'Ice Power',1:'Quake Mode',2:'Lightspeed Mode',3:'Inferno Mode',4:'Dragon Spear Mode',5:'Wild Release',6:'Fury Mode',7:'Awakened Mode',8:'Overvolt',9:'Final Judgment',10:'Dragon Mode',11:'Teleport',12:'FULL LOAD',13:'Full Punch',14:'Toxin',15:'AIR MASTER',16:'Time Stop',17:'Resonance Mode',18:'CEO',19:'Armor',20:'Triple Merge',21:'Blaze Fusion',22:'Billionaire',23:'Taekwondo Master',24:'Nightmare',25:'Chaos',26:'Double Slime',27:'Gravity Collapse',28:'Swarm',29:'ROBOT MODE'};
-const POWER_DESCS = {0:'Freeze DMG x1.5',1:'KB×1.4',2:'Speed x2',3:'Burn chance +60%',4:'Reach x1.5',5:'KB×1.5',6:'DMG x1.5',7:'Confusion',8:'Shock Lock',9:'DMG x1.4',10:'DMG x1.5',12:'Power x2',13:'DMG x1.5',14:'Poison DMG x2',17:'Edge Attack',21:'DMG x1.5',22:'DMG x1.5',23:'Kick DMG x2',26:'All Attacks x2',27:'Gravity x3',28:'Poison DMG x3',29:'Attack & Speed UP'};
+const POWER_NAMES = {0:'Ice Power',1:'Quake Mode',2:'Lightspeed Mode',3:'Inferno Mode',4:'Dragon Spear Mode',5:'Wild Release',6:'Fury Mode',7:'Awakened Mode',8:'Overvolt',9:'Final Judgment',10:'Dragon Mode',11:'Teleport',12:'FULL LOAD',13:'Full Punch',14:'Toxin',15:'AIR MASTER',16:'Time Stop',17:'Resonance Mode',18:'CEO',19:'Armor',20:'Triple Merge',21:'Blaze Fusion',22:'Billionaire',23:'Taekwondo Master',24:'Nightmare',25:'Chaos',26:'Double Slime',27:'Gravity Collapse',28:'Swarm',29:'ROBOT MODE',30:'FLIGHT'};
+const POWER_DESCS = {0:'Freeze DMG x1.5',1:'KB×1.4',2:'Speed x2',3:'Burn chance +60%',4:'Reach x1.5',5:'KB×1.5',6:'DMG x1.5',7:'Confusion',8:'Shock Lock',9:'DMG x1.4',10:'DMG x1.5',12:'Power x2',13:'DMG x1.5',14:'Poison DMG x2',17:'Edge Attack',21:'DMG x1.5',22:'DMG x1.5',23:'Kick DMG x2',26:'All Attacks x2',27:'Gravity x3',28:'Poison DMG x3',29:'Attack & Speed UP',30:'Fly for 8s'};
 function getActivePowerMode(p) {
   const timers = [
     [p.kumaFuryMode,6],[p.saisokuLightSpeed,2],[p.uruoWildRelease,5],[p.bulletAwaken,7],
@@ -6787,6 +6835,7 @@ const CHAR_GRAB_FRAMES = [
   30, // 27:プル (重力操作型→遠距離/特殊)
   18, // 28:ムッシー (虫合体型→スピード)
   28, // 29:Bot (テクニック型・標準)
+  24, // 30:Chatta (軽量・素早い)
 ];
 function getGrabFrames(charIdx) {
   return CHAR_GRAB_FRAMES[charIdx] || THROW_GRAB_FRAMES;
@@ -6831,6 +6880,7 @@ const CHAR_THROW_TYPE = [
   'ranged',  // 27:プル
   'speed',   // 28:ムッシー
   'balance', // 29:Bot（テクニック型）
+  'speed', // 30:Chatta
 ];
 // キャラ投げ状態異常テーブル
 const CHAR_THROW_STATUS = {
@@ -7204,6 +7254,17 @@ const commandDefs = {
       attack:{ startup:10, active:10, recovery:22, damage:0, kbBase:0, kbScale:0, kbAngle:-10, hx:0, hy:-35, hw:190, hh:150, color:'#66E8FF', effect:'shockwave', centerHit:true,
         stun:true, stunFrames:120 } },
   ],
+  30: [ // Chatta
+    // →→↑↑Z : 近くの 相手を 掴んで 横に 投げる（射程 短め）
+    { name:'Snatch Throw', seq:['F','F','U','U'], cooldownKey:'cmd1',
+      attack:{ startup:6, active:6, recovery:16, damage:9, kbBase:8, kbScale:0.13, kbAngle:-12, hx:16, hy:-34, hw:46, hh:44, color:'#FF66CC', effect:'bigpunch' } },
+    // →→↓↓Z : テレポート（前に 瞬間移動）
+    { name:'Blink', seq:['F','F','D','D'], cooldownKey:'cmd2',
+      attack:{ startup:4, active:4, recovery:10, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF99DD', effect:'none', chattaBlink:true } },
+    // ↑↑↓↓Z : 自分の まわりに 波動（ダメージ3）
+    { name:'Pink Pulse', seq:['U','U','D','D'], cooldownKey:'cmd3',
+      attack:{ startup:8, active:8, recovery:18, damage:3, kbBase:5, kbScale:0.09, kbAngle:-40, hx:0, hy:-34, hw:150, hh:120, color:'#FF66CC', effect:'shockwave', centerHit:true } },
+  ],
 };
 
 // Dragon mode commands (separate)
@@ -7281,6 +7342,23 @@ function checkCommandInput(player) {
 }
 
 function executeCommand(player, cmd) {
+  // Chatta: テレポート（前に 一気に 跳ぶ）
+  if (cmd.attack && cmd.attack.chattaBlink) {
+    const dir = player.facingLeft ? -1 : 1;
+    for (let i = 0; i < 16; i++) {
+      const a2 = Math.random() * Math.PI * 2;
+      sparks.push({ x: player.x, y: player.y - 30, vx: Math.cos(a2)*3, vy: Math.sin(a2)*3,
+        life: 22, maxLife: 22, color: '#FF99DD', size: 3, gravity: 0, drag: 0.94 });
+    }
+    player.x = Math.max(BLAST_LEFT + 80, Math.min(BLAST_RIGHT - 80, player.x + dir * 230));
+    player.vx = 0;
+    for (let i = 0; i < 16; i++) {
+      const a2 = Math.random() * Math.PI * 2;
+      sparks.push({ x: player.x, y: player.y - 30, vx: Math.cos(a2)*3, vy: Math.sin(a2)*3,
+        life: 22, maxLife: 22, color: '#FF66CC', size: 3, gravity: 0, drag: 0.94 });
+    }
+    playHitSound('jump');
+  }
   if (player.attacking || player.hitstun > 0 || !player.alive || player.grabbing || player.grabbed || player.guarding || player.guardBreakStun > 0) return false;
 
   const atk = cmd.attack;
@@ -7877,6 +7955,28 @@ const attackDefs = {
     throwDmg: 9,
   },
 
+  // === Chatta - 軽量・バランス型 / 飛ぶ・テレポート・分身 ===
+  30: {
+    // Z: 爪カッター（ダメージ3と 低いが 速い）
+    normal: { name:'Claw Cutter', startup:3, active:4, recovery:8, damage:3, kbBase:2, kbScale:0.04, kbAngle:-12, hx:22, hy:-34, hw:62, hh:32, color:'#FF66CC', effect:'slash' },
+    aerial: { name:'Air Claw', startup:4, active:5, recovery:9, damage:4, kbBase:2.5, kbScale:0.05, kbAngle:-35, hx:22, hy:-32, hw:62, hh:34, color:'#FF66CC', effect:'airkick' },
+    // X: 飛行（8秒）。攻撃判定は 無く、状態を 変えるだけ
+    strong: { name:'Take Flight', startup:6, active:4, recovery:10, damage:0, kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF99DD', effect:'none', chattaFly:true },
+    // 横強: のびる腕の 薙ぎ払い
+    side:   { name:'Stretch Swipe', startup:5, active:6, recovery:11, damage:7, kbBase:3.5, kbScale:0.07, kbAngle:-20, hx:26, hy:-34, hw:78, hh:34, color:'#FF66CC', effect:'sideslash' },
+    // ↑X 復帰技: 高いジャンプ
+    up:     { name:'High Leap', startup:4, active:10, recovery:14, damage:5, kbBase:4, kbScale:0.07, kbAngle:-82, hx:0, hy:-30, hw:42, hh:70, color:'#FF99DD', effect:'upslash', centerHit:true, specialType:'jumpSlam', jumpPower:-19 },
+    // 下強
+    down:   { name:'Spiral Slam', startup:5, active:7, recovery:12, damage:6, kbBase:3, kbScale:0.06, kbAngle:-30, hx:12, hy:4, hw:62, hh:28, color:'#FF66CC', effect:'sweep', centerHit:true },
+    // 空中下: メテオ
+    downair:{ name:'Dive Claw', startup:5, active:9, recovery:13, damage:9, kbBase:4.5, kbScale:0.09, kbAngle:80, hx:0, hy:10, hw:44, hh:48, color:'#E87BB8', effect:'meteor', specialType:'divekick', diveSpeed:13 },
+    // ダッシュ攻撃
+    dash:   { name:'Noodle Rush', startup:4, active:6, recovery:10, damage:6, kbBase:3, kbScale:0.05, kbAngle:-18, hx:20, hy:-32, hw:66, hh:34, color:'#FF66CC', effect:'dash', specialType:'slide', slideSpeed:12 },
+    // D長押し（ゲージが 無いとき）: 相手に テレポートして 下に メテオ
+    special:{ name:'Warp Meteor', startup:8, active:8, recovery:18, damage:11, kbBase:5, kbScale:0.09, kbAngle:85, hx:0, hy:0, hw:70, hh:60, color:'#FF66CC', effect:'meteor', centerHit:true, chattaWarpMeteor:true },
+    throwDmg: 7,
+  },
+
 };
 
 // Auto-generate aerial direction attacks from existing aerial data
@@ -8181,6 +8281,8 @@ function createPlayer(id, charIdx, startX) {
     hitVib: 0, hitVibAmp: 0,   // ヒットストップ中の 震え
     botRobot: 0,              // Bot: ロボット変身の 残りフレーム（20秒=1200）
     botRocketsLeft: 0, botRocketTimer: 0, botRocketDmg: 0, botRocketKb: 0, botRocketAngle: -40, botRocketColor: '#66E8FF',
+    chattaFly: 0, chattaFlyCd: 0, chattaShotCd: 0,   // Chatta: 飛行 残りF / 次に 飛べるまで / 指カッターの 間隔
+    chattaWarpCd: 0, chattaClawsLeft: 0, chattaClawTimer: 0,   // Chatta: ワープメテオの 間隔 / 必殺の 爪 残り
     guardDurability: GUARD_MAX_DURABILITY,
     guardBreakStun: 0, // frames of stun after guard break
     guardShrink: 0,    // ガード収縮アニメ残りフレーム
@@ -8413,6 +8515,7 @@ function initBattle() {
   trails = [];
   blastExplosions = [];
   starKOs = []; screenKOs = [];
+  chattaMinions = [];
   cmdNameDisplay = [];
   hitMissDisplays = [];
   comicTexts = [];
@@ -9832,6 +9935,7 @@ const CHAR_BODY = [
   [1.0, 1.0],   // 27 pull 標準
   [0.9, 0.9],   // 28 mussy 細め虫
   [1.0, 1.0], // 29 bot
+  [0.92, 0.95], // 30 chatta (小柄)
 ];
 function getPlayerHitbox(p) {
   const b = CHAR_BODY[p.charIdx] || [1.0, 1.0];
@@ -9874,6 +9978,7 @@ const CHAR_REACH = [
   [1.0,1.0,1.0,1.0], // 27 pull (標準)
   [1.0,1.0,1.0,1.0], // 28 mussy (標準)
   [1.70,1.80,1.25,1.30], // 29 bot (機械の腕・長リーチ / バランス調整で 少し 短く)
+  [1.55,1.65,1.2,1.25], // 30 chatta (のびる腕)
 ];
 function getAttackHitbox(p, atk) {
   const dir = p.facingLeft ? -1 : 1;
@@ -10015,8 +10120,60 @@ function finishJabCombo(p) {
   };
 }
 
+// Chatta: 飛行を 始める（8秒）。一度 飛ぶと 30秒 飛べない
+function chattaStartFly(p) {
+  if (p.chattaFlyCd > 0) return false;
+  p.chattaFly = CHATTA_FLY_FRAMES;
+  p.chattaFlyCd = CHATTA_FLY_COOLDOWN;
+  p.vy = -6;
+  p.grounded = false;
+  p.jumps = 1;
+  playHitSound('jump');
+  for (let i = 0; i < 18; i++) {
+    const a2 = Math.random() * Math.PI * 2;
+    sparks.push({ x: p.x, y: p.y - 30, vx: Math.cos(a2) * 3, vy: Math.sin(a2) * 3,
+      life: 26, maxLife: 26, color: '#FF99DD', size: 3, gravity: 0.02, drag: 0.95 });
+  }
+  cmdNameDisplay.push({ text: 'FLY!', x: p.x, y: p.y - 90, life: 45, maxLife: 45, color: '#FF66CC' });
+  return true;
+}
+
 function startAttack(p, type) {
   if (p.attacking || p.hitstun > 0 || !p.alive || p.grabbing || p.grabbed || p.guarding || p.guardBreakStun > 0) return;
+  // Chatta: 飛行中に Z を 押したら 指カッター（ホーミング）を 撃つ
+  if (p.charIdx === 30 && p.chattaFly > 0 && (type === 'normal' || type === 'aerial')) {
+    if (p.chattaShotCd > 0) return;
+    p.chattaShotCd = CHATTA_SHOT_INTERVAL;
+    const dir = p.facingLeft ? -1 : 1;
+    projectiles.push({
+      x: p.x + 20 * dir, y: p.y - 34, vx: dir * CHATTA_FLY_SHOT.speed, vy: 0,
+      w: CHATTA_FLY_SHOT.w, h: CHATTA_FLY_SHOT.h,
+      damage: CHATTA_FLY_SHOT.damage, kbBase: CHATTA_FLY_SHOT.kbBase,
+      kbScale: CHATTA_FLY_SHOT.kbScale, kbAngle: CHATTA_FLY_SHOT.kbAngle,
+      life: CHATTA_FLY_SHOT.life, ownerId: p.id,
+      color: CHATTA_FLY_SHOT.color, pcolor: CHATTA_FLY_SHOT.pcolor,
+      shape: 'rect', ownerCharIdx: 30, time: 0,
+      homing: true, pierce: false, ink: false,
+      meshitero: false, gravityDebuff: false,
+      statusChance: 0, statusType: null, pullEffect: false, hitTargets: [],
+    });
+    playHitSound('projectile', 4, 30);
+    p.attacking = true; p.attackType = 'normal'; p.attackFrame = 0; p.hitTargets = [];
+    p.attackData = { name:'Finger Cutter', startup:2, active:2, recovery:8, damage:0,
+      kbBase:0, kbScale:0, kbAngle:0, hx:0, hy:0, hw:0, hh:0, color:'#FF66CC', effect:'none' };
+    return;
+  }
+  // Chatta: X（強攻撃）で 飛行を 始める
+  if (p.charIdx === 30 && type === 'strong') {
+    if (chattaStartFly(p)) {
+      p.attacking = true; p.attackType = 'strong'; p.attackFrame = 0; p.hitTargets = [];
+      p.attackData = attackDefs[30].strong;
+    } else {
+      cmdNameDisplay.push({ text: 'cooling down ' + Math.ceil(p.chattaFlyCd / 60) + 's',
+        x: p.x, y: p.y - 90, life: 40, maxLife: 40, color: '#AAAAAA' });
+    }
+    return;
+  }
   // Catbus(11): 瞬間消滅中は攻撃不可
   if (p.charIdx === 11 && p.catbusVanishTimer > 0) return;
 
@@ -10907,6 +11064,57 @@ function updateBattle(dt) {
     if (stockLossAnim.life <= 0) stockLossAnim.active = false;
   }
 
+  // Chatta: ちっちゃい分身が 地面を 走って 相手を 追う。触れたら 爆発
+  for (let mi = chattaMinions.length - 1; mi >= 0; mi--) {
+    const m = chattaMinions[mi];
+    m.t++; m.life--;
+    const owner = players.find(pp => pp.id === m.ownerId);
+    const tgt = players.find(pp => pp.id !== m.ownerId && pp.alive);
+    if (m.life <= 0 || !tgt) { chattaMinions.splice(mi, 1); continue; }
+    const dir = tgt.x > m.x ? 1 : -1;
+    m.x += dir * 3.4;
+    m.y = STAGE_GROUND_Y;
+    if (Math.abs(tgt.x - m.x) < 26 && Math.abs(tgt.y - m.y) < 70) {
+      // 捕まえた → 爆発
+      const fake = { id: m.ownerId, x: m.x, charIdx: 30, damage: owner ? owner.damage : 0,
+        stocks: owner ? owner.stocks : 3, attackData: null, comboWindow: 0, consecutiveHits: 0 };
+      applyHit(fake, tgt, m.dmg, m.kb, 0.12, m.angle, 'cmd');
+      hitFlash.alpha = Math.max(hitFlash.alpha, 0.3); hitFlash.color = '#FF66CC';
+      triggerScreenShake(10, 16);
+      playHitSound('special', 8, 30);
+      for (let i = 0; i < 30; i++) {
+        const a2 = Math.random() * Math.PI * 2, sp = 2 + Math.random() * 5;
+        sparks.push({ x: m.x, y: m.y - 20, vx: Math.cos(a2)*sp, vy: Math.sin(a2)*sp,
+          life: 28, maxLife: 28, color: Math.random() > 0.5 ? '#FF66CC' : '#FFCCEE',
+          size: 3 + Math.random()*3, gravity: 0.05, drag: 0.95 });
+      }
+      chattaMinions.splice(mi, 1);
+    }
+  }
+
+  // Chatta: 必殺技の ホーミング爪を 5フレームおきに 1本ずつ 撃つ（全部で 10本）
+  for (const cp of players) {
+    if (!cp || !cp.chattaClawsLeft) continue;
+    if (cp.chattaClawTimer > 0) { cp.chattaClawTimer--; continue; }
+    const idx = 10 - cp.chattaClawsLeft;
+    const cdir = cp.facingLeft ? -1 : 1;
+    projectiles.push({
+      x: cp.x + 18 * cdir, y: cp.y - 60 + (idx % 5 - 2) * 14,
+      vx: cdir * 7, vy: (idx % 3 - 1) * 1.5,
+      w: 30, h: 13,
+      damage: 3, kbBase: 4, kbScale: 0.07, kbAngle: -30,
+      life: 600, ownerId: cp.id,           // 当たるまで 消えないよう 長めに
+      color: '#FF66CC', pcolor: '#FFCCEE',
+      shape: 'rect', ownerCharIdx: 30, time: 0,
+      homing: true, pierce: false, ink: false,
+      meshitero: false, gravityDebuff: false,
+      statusChance: 0, statusType: null, pullEffect: false, hitTargets: [],
+    });
+    playHitSound('projectile', 4, 30);
+    cp.chattaClawsLeft--;
+    cp.chattaClawTimer = 5;
+  }
+
   // Bot: コンボフィニッシャーの ホーミングミサイルを 8フレームおきに 1発ずつ 撃つ
   for (const bp of players) {
     if (!bp || !bp.botRocketsLeft) continue;
@@ -11136,6 +11344,23 @@ function updateBattle(dt) {
     }
     // 攻撃強化: 削除済み
 
+    // Chatta: ゲージが たまっていなくても D長押しで「相手に ワープして 下に メテオ」
+    if (dKeyHeld && p.charIdx === 30 && p.alive && !ultimateActive && (p.ultimateGauge || 0) < 100
+        && p.chattaWarpCd <= 0 && !p.attacking && p.hitstun <= 0 && p.sealMagic <= 0) {
+      const tg = players.find(pp => pp.id !== p.id && pp.alive);
+      if (tg) {
+        p.chattaWarpCd = 150;   // 2.5秒に 1回
+        for (let i = 0; i < 14; i++) {
+          const a2 = Math.random() * Math.PI * 2;
+          sparks.push({ x: p.x, y: p.y - 30, vx: Math.cos(a2)*3, vy: Math.sin(a2)*3,
+            life: 20, maxLife: 20, color: '#FF99DD', size: 3, gravity: 0, drag: 0.94 });
+        }
+        p.x = tg.x; p.y = Math.max(BLAST_TOP + 120, tg.y - 150);
+        p.vx = 0; p.vy = 18; p.grounded = false; p.facingLeft = false;
+        startAttack(p, 'special');
+        playHitSound('jump');
+      }
+    }
     if (dKeyHeld && p.alive && !ultimateActive && p.sealMagic <= 0) {
       // === 優先順位2: 攻撃中にD → ゲージキャンセル（30%消費） ===
       if ((p.attacking || p.guardPenalty > 0) && p.dHoldTimer === 0 && p.ultimateGauge >= 30) {
@@ -11683,6 +11908,35 @@ function updateBattle(dt) {
     // Jab combo timer
     if (p.jabTimer > 0) p.jabTimer--;
     if (p.jabTimer <= 0 && p.jabCount > 0 && !p.jabFlurry) p.jabCount = 0;
+    // Chatta: 飛行の 残り時間 と クールダウン
+    if (p.chattaFlyCd > 0) p.chattaFlyCd--;
+    if (p.chattaWarpCd > 0) p.chattaWarpCd--;
+    if (p.chattaShotCd > 0) p.chattaShotCd--;
+    if (p.chattaFly > 0) {
+      p.chattaFly--;
+      if (p.chattaFly === 0) {
+        cmdNameDisplay.push({ text: 'fly end', x: p.x, y: p.y - 90, life: 40, maxLife: 40, color: '#FF99DD' });
+      } else {
+        // ふわふわ 浮く: 重力を 打ち消して、上下キーで 動く
+        p.grounded = false;
+        p.vy *= 0.72;
+        const flyUp = (p.id === 0) ? (keys['ArrowUp'] || (onlineMode && !isHost && remoteKeys.up)) : false;
+        const flyDown = (p.id === 0) ? (keys['ArrowDown'] || (onlineMode && !isHost && remoteKeys.down)) : false;
+        if (flyUp) p.vy -= 1.1;
+        else if (flyDown) p.vy += 1.1;
+        else p.vy -= 0.12;
+        p.vy = Math.max(-9, Math.min(9, p.vy));
+        // 上は 死なない 高さまで、下は ステージより 下に 行けない
+        if (p.y < CHATTA_FLY_TOP) { p.y = CHATTA_FLY_TOP; p.vy = Math.max(0, p.vy); }
+        if (p.y > STAGE_GROUND_Y) { p.y = STAGE_GROUND_Y; p.vy = Math.min(0, p.vy); }
+        if (p.x < STAGE_LEFT - 60) { p.x = STAGE_LEFT - 60; }
+        if (p.x > STAGE_RIGHT + 60) { p.x = STAGE_RIGHT + 60; }
+        if (battleTime % 4 === 0) {
+          sparks.push({ x: p.x + (Math.random()-0.5)*20, y: p.y - 10, vx: 0, vy: 1.2,
+            life: 20, maxLife: 20, color: '#FF99DD', size: 2.5, gravity: 0, drag: 0.98 });
+        }
+      }
+    }
     // Bot: ロボット変身の 残り時間
     if (p.botRobot > 0) {
       p.botRobot--;
@@ -13094,6 +13348,7 @@ const CHAR_MOVE = [
   [0.65,0.72,0.40,0.89], // 27 pull 中量
   [0.70,0.75,0.45,0.88], // 28 mussy 標準
   [0.72,0.78,0.50,0.88], // 29 bot テクニック型
+  [0.80,0.85,0.55,0.86], // 30 chatta 軽量・機動型
 ];
 function applyMovement(p, moveX, ch) {
   const cm = CHAR_MOVE[p.charIdx] || [0.70,0.75,0.45,0.88];
@@ -14370,6 +14625,29 @@ function drawBattle(dt) {
   }
 
   // Blast explosions (stock loss) - ④ 大きな爆発
+  // Chatta の ちっちゃい分身
+  for (const m of chattaMinions) {
+    const bob = Math.sin(m.t * 0.25) * 3;
+    ctx.save();
+    ctx.translate(m.x, m.y - 16 + bob);
+    const sc = 0.42;
+    if (chattaImg.complete && chattaImg.naturalWidth > 0) {
+      const w = 70 * sc, h = w * (chattaImg.naturalHeight / chattaImg.naturalWidth);
+      ctx.drawImage(chattaImg, -w/2, -h/2, w, h);
+    } else {
+      ctx.fillStyle = '#E87BB8';
+      ctx.beginPath(); ctx.arc(0, 0, 13, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#FF66CC';
+      ctx.beginPath(); ctx.arc(-4, -2, 2.5, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(4, -2, 2.5, 0, Math.PI*2); ctx.fill();
+    }
+    // 危ないので 光らせる
+    ctx.globalAlpha = 0.45 + 0.25 * Math.sin(m.t * 0.3);
+    ctx.strokeStyle = '#FF66CC'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(0, 0, 20, 0, Math.PI*2); ctx.stroke();
+    ctx.restore();
+  }
+
   // === 上に 飛んだ 撃墜: 星に なって 遠ざかる（スマブラの Star KO）===
   for (const sk of starKOs) {
     ctx.save();
@@ -18619,7 +18897,7 @@ let ultimatePlayerId = -1;
 let ultimateVideo = null;
 let ultimateHitTarget = -1;
 
-const ultimateFileNames = ['zen','don','saisoku','meteo','long','uruo','kumataro','bullet','shauden','judgeman','tensai','catbus','tank','namioji','tokko','sam','king','onpa','sen','dosboss','micro','mrtwo','kingking','satoru','kowai','yaho','poyo','pull','mussy','bot'];
+const ultimateFileNames = ['zen','don','saisoku','meteo','long','uruo','kumataro','bullet','shauden','judgeman','tensai','catbus','tank','namioji','tokko','sam','king','onpa','sen','dosboss','micro','mrtwo','kingking','satoru','kowai','yaho','poyo','pull','mussy','bot','chatta'];
 const ultimateData = [
   { name:'Azure Dragon Slash', dmg:36, kb:16, angle:-15, range:'line', status:'frozen', dur:120, color:'#44CCFF' },
   { name:'Heaven Shatter Fist', dmg:40, kb:18, angle:-80, range:'circle', radius:150, status:'bounce', color:'#FF4422' },
@@ -18652,6 +18930,8 @@ const ultimateData = [
   { name:'Bug Swarm', dmg:28, kb:12, angle:-30, range:'circle', radius:140, status:'poisoned', dur:180, poisonDmg:2, color:'#228822' },
   // Bot: 掴んで 下に 叩きつける → 当たると 20秒 ロボットに 変身する
   { name:'Seize and Slam', dmg:22, kb:14, angle:85, range:'line', color:'#66E8FF', botTransform:true },
+  // Chatta: 動画のあと ホーミング爪が 10本 飛ぶ。合計30ダメージ、当たるまで 消えない
+  { name:'Ten Homing Claws', dmg:0, kb:0, angle:-30, range:'all', color:'#FF66CC', chattaClaws:true },
 ];
 
 function removeUltimateVideo() {
@@ -18803,6 +19083,12 @@ function startUltimateVideo() {
 
 function applyUltimateDamage(attacker, target) {
   const ud = ultimateData[attacker.charIdx] || ultimateData[0];
+  // Chatta: ホーミング爪を 10本 飛ばす。合計30ダメージ、当たるまで 消えない
+  if (ud.chattaClaws && attacker) {
+    attacker.chattaClawsLeft = 10;
+    attacker.chattaClawTimer = 0;
+    playHitSound('cmd', 9, 30);
+  }
   // Bot: 叩きつけが 決まったら 20秒間 ロボットに 変身する
   if (ud.botTransform && attacker) {
     attacker.botRobot = BOT_ROBOT_FRAMES;
