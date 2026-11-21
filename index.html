@@ -41,6 +41,7 @@ let transitionTarget = '';
 let titleTime = 0;
 let selectTime = 0;
 let charDetailIdx = 0;
+let charDetailTab = 0; // 0=MOVES 1=COMMANDS 2=COMBOS
 let showHowToPlay = false;
 
 // Select screen
@@ -4840,6 +4841,21 @@ function drawTitle(dt) {
 // ============================================================
 // CHARACTER SELECT SCREEN (2P)
 // ============================================================
+// キャラ選択グリッドの列数（上下移動の歩幅もこれ）
+const SELECT_COLS = 8;
+// 上下移動: 同じ列の中で ぐるっと回る
+function selectVMove(cur, n, dir) {
+  let v = cur + dir * SELECT_COLS;
+  if (v < 0) {
+    let last = cur % SELECT_COLS;
+    while (last + SELECT_COLS < n) last += SELECT_COLS;
+    v = last;
+  } else if (v >= n) {
+    v = cur % SELECT_COLS;
+  }
+  return v;
+}
+
 function drawSelect(dt) {
   selectTime += dt;
 
@@ -4863,11 +4879,11 @@ function drawSelect(dt) {
   // === キャラグリッド（中央） ===
   const charCount = characters.length;
   const totalSlots = charCount + 1;
-  const cols = 8, rows = Math.ceil(totalSlots / cols);
-  const cardW = 70, cardH = 70, gapX = 4, gapY = 4;
+  const cols = SELECT_COLS, rows = Math.ceil(totalSlots / cols);
+  const cardW = 86, cardH = 86, gapX = 5, gapY = 5;
   const gridW = cols * cardW + (cols - 1) * gapX;
   const gridStartX = (960 - gridW) / 2;
-  const gridStartY = 48;
+  const gridStartY = 42;
 
   for (let i = 0; i < totalSlots; i++) {
     const isRandom = i >= charCount;
@@ -4914,18 +4930,18 @@ function drawSelect(dt) {
     // キャラアイコン
     ctx.globalAlpha = selected ? 1 : 0.55;
     if (isRandom) {
-      ctx.font = 'bold 32px sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#FFD700';
+      ctx.font = 'bold 40px sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#FFD700';
       ctx.globalAlpha = 0.7 + Math.sin(selectTime * 0.005) * 0.3;
-      ctx.fillText('?', cx + cardW / 2, cy + bounce + 48);
+      ctx.fillText('?', cx + cardW / 2, cy + bounce + 56);
     } else {
-      drawCharacterBody(cx + cardW / 2, cy + bounce + 50, 0.4, i, selectTime, false);
+      drawCharacterBody(cx + cardW / 2, cy + bounce + 56, 0.62, i, selectTime, false);
     }
 
     // 名前（選択中のみ）
     if (selected) {
-      ctx.globalAlpha = 1; ctx.font = 'bold 9px sans-serif'; ctx.textAlign = 'center';
+      ctx.globalAlpha = 1; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center';
       ctx.fillStyle = '#FFF';
-      ctx.fillText(isRandom ? 'Random' : ch.name, cx + cardW / 2, cy + bounce + cardH - 3);
+      ctx.fillText(isRandom ? 'Random' : ch.name, cx + cardW / 2, cy + bounce + cardH - 6);
     }
 
     // P1/P2マーカー
@@ -4941,6 +4957,20 @@ function drawSelect(dt) {
   const p2Lbl = gameMode === 'bossrush' ? 'BOSS' : (gameMode === 'cpu' ? 'CPU' : '2P');
   const p2Col = gameMode === 'bossrush' ? '#FF44CC' : '#FF4444';
   drawSelectPanel(500, panelY, p2Select, p2Lbl, p2Col, p2Confirmed);
+
+  // === 「詳しく見る」ボタン（Iキー）: 1Pパネルの右上に出す ===
+  if (modeSelected && !p1Confirmed && p1Select < characters.length) {
+    const bw = 185, bh = 24, bx = 748, by = 612;
+    const pulse = 0.55 + Math.sin(selectTime * 0.006) * 0.45;
+    ctx.fillStyle = 'rgba(255,215,0,' + (0.10 + pulse * 0.10).toFixed(3) + ')';
+    roundRect(ctx, bx, by, bw, bh, 15); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,215,0,' + (0.45 + pulse * 0.45).toFixed(3) + ')'; ctx.lineWidth = 2;
+    roundRect(ctx, bx, by, bw, bh, 15); ctx.stroke();
+    ctx.font = 'bold 14px sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#FFD700';
+    ctx.shadowColor = '#FFD700'; ctx.shadowBlur = 6 * pulse;
+    ctx.fillText('[ I ]  DETAILS', bx + bw / 2, by + 16);
+    ctx.shadowBlur = 0;
+  }
 
   // === モード選択オーバーレイ ===
   if (!modeSelected) {
@@ -4985,18 +5015,18 @@ function drawSelect(dt) {
     ctx.fillText(gameMode === 'cpu' ? 'READY! Enter -> difficulty' : 'READY TO FIGHT! Press ENTER', 480, 628);
     ctx.shadowBlur = 0;
   } else if (gameMode === 'bossrush') {
-    ctx.fillText('<- -> select  |  Enter confirm  |  I: details  |  ESC back', 480, 628);
+    ctx.fillText('Arrow keys: move  |  Enter: confirm  |  ESC: back', 480, 628);
   } else if (gameMode === 'cpu') {
-    ctx.fillText('1P: <- -> + Enter  |  CPU: A D  |  I: details  |  ESC: back', 480, 628);
+    ctx.fillText('1P: Arrow keys + Enter  |  CPU: A D W S  |  ESC: back', 480, 628);
   } else {
-    ctx.fillText('1P: <- -> + Enter  |  2P: A D + Space  |  I: details  |  ESC: back', 480, 628);
+    ctx.fillText('1P: Arrow keys + Enter  |  2P: A D W S + Space  |  ESC: back', 480, 628);
   }
 }
 
 function drawSelectPanel(px, py, charIdx, label, color, isConfirmed) {
   const isRandom = charIdx >= characters.length;
   const ch = isRandom ? { name:'Random', type:'RANDOM', accent:'#FFD700', desc:'A random character is chosen', stats:{power:0,speed:0,tech:0,defense:0}, bodyColors:{main:'#888'} } : characters[charIdx];
-  const pw = 440, ph = Math.min(260, 640 - py - 14);
+  const pw = 440, ph = Math.min(260, 640 - py - 28);
 
   // 背景のキャラシルエット
   if (!isRandom) {
@@ -5016,8 +5046,8 @@ function drawSelectPanel(px, py, charIdx, label, color, isConfirmed) {
   ctx.fillText(label, px + 12, py + 20);
 
   // キャラプレビュー
-  const previewScale = ph < 200 ? 0.9 : 1.2;
-  const previewY = ph < 200 ? py + 80 : py + 100;
+  const previewScale = ph < 180 ? 0.9 : 1.2;
+  const previewY = ph < 180 ? py + 80 : py + 100;
   if (isRandom) {
     ctx.font = 'bold 50px sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#FFD700';
     ctx.globalAlpha = 0.7 + Math.sin(selectTime * 0.005) * 0.3;
@@ -5040,7 +5070,7 @@ function drawSelectPanel(px, py, charIdx, label, color, isConfirmed) {
   const statKeys = ['power', 'speed', 'tech', 'defense'];
   const statColors = ['#FF4444', '#44FF88', '#FFD700', '#4488FF'];
   const barW = 140, barH = 8, statGap = 18;
-  const statY = py + (ph < 200 ? 72 : 90);
+  const statY = py + (ph < 180 ? 72 : 90);
   for (let i = 0; i < 4; i++) {
     const sy = statY + i * statGap;
     ctx.font = 'bold 9px sans-serif'; ctx.textAlign = 'left'; ctx.fillStyle = '#555';
@@ -20144,58 +20174,149 @@ function drawCharDetail() {
     ctx.fillText(val + '/5', statsX + 268, sy + 8);
   }
 
-  // Move list
-  const moveX = 30, moveY = 280;
-  ctx.fillStyle = 'rgba(8,8,20,0.85)'; roundRect(ctx, moveX, moveY, 900, 330, 8); ctx.fill();
-  ctx.strokeStyle = '#333'; ctx.lineWidth = 1; roundRect(ctx, moveX, moveY, 900, 330, 8); ctx.stroke();
-  ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'left'; ctx.fillStyle = ch.accent;
-  ctx.fillText('MOVE LIST', moveX + 12, moveY + 20);
-
-  // Table header
-  const colX = [moveX + 12, moveX + 180, moveX + 430, moveX + 580, moveX + 710];
-  const headerY = moveY + 38;
-  ctx.font = 'bold 9px sans-serif'; ctx.fillStyle = '#555';
-  ['INPUT', 'MOVE NAME', 'DAMAGE', 'STARTUP', 'KNOCKBACK'].forEach((h, i) => ctx.fillText(h, colX[i], headerY));
-  ctx.strokeStyle = '#222'; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(moveX + 12, headerY + 4); ctx.lineTo(moveX + 888, headerY + 4); ctx.stroke();
-
-  // Move rows
-  const moves = [];
-  if (atk) {
-    const getDmg = (a) => a.projectile ? a.projectile.damage : a.damage;
-    moves.push({ input: 'Z (normal attack)', name: atk.normal?.name || '-', dmg: getDmg(atk.normal || {}), startup: atk.normal?.startup || '-', kb: atk.normal?.kbBase || '-' });
-    moves.push({ input: '-> -> + Z (Side Smash)', name: atk.side?.name || '-', dmg: getDmg(atk.side || {}), startup: atk.side?.startup || '-', kb: atk.side?.kbBase || '-' });
-    moves.push({ input: 'Up Up + Z (Up Smash)', name: atk.up?.name || '-', dmg: getDmg(atk.up || {}), startup: atk.up?.startup || '-', kb: atk.up?.kbBase || '-' });
-    moves.push({ input: 'Down Down + Z (Down Smash)', name: atk.down?.name || '-', dmg: getDmg(atk.down || {}), startup: atk.down?.startup || '-', kb: atk.down?.kbBase || '-' });
-    moves.push({ input: 'Z (FTilt)', name: atk.strong?.name || '-', dmg: getDmg(atk.strong || {}), startup: atk.strong?.startup || '-', kb: atk.strong?.kbBase || '-' });
-    moves.push({ input: 'Hold D (special)', name: atk.special?.name || '-', dmg: getDmg(atk.special || {}), startup: atk.special?.startup || '-', kb: atk.special?.kbBase || '-' });
+  // ---- タブ（MOVES / COMMANDS / COMBOS）----
+  const moveX = 30, moveY = 300;
+  const tabNames = ['1 MOVES', '2 COMMANDS', '3 COMBOS'];
+  const tabW = 150, tabH = 26, tabY = moveY - tabH;
+  for (let t = 0; t < 3; t++) {
+    const tx = moveX + t * (tabW + 6);
+    const on = charDetailTab === t;
+    ctx.fillStyle = on ? 'rgba(8,8,20,0.95)' : 'rgba(4,4,10,0.6)';
+    roundRect(ctx, tx, tabY, tabW, tabH + 8, 8); ctx.fill();
+    ctx.strokeStyle = on ? (ch.accent || '#FFD700') : '#262630'; ctx.lineWidth = on ? 2 : 1;
+    roundRect(ctx, tx, tabY, tabW, tabH + 8, 8); ctx.stroke();
+    ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillStyle = on ? (ch.accent || '#FFD700') : '#55555f';
+    ctx.fillText(tabNames[t], tx + tabW / 2, tabY + 18);
   }
-  if (rec) moves.push({ input: 'Up + X (recovery)', name: rec.name, dmg: rec.dmg || '-', startup: '-', kb: '-' });
-  if (ult) moves.push({ input: 'Gauge 100% + hold D', name: ult.name, dmg: ult.dmg, startup: '-', kb: '-' });
-  if (fin) moves.push({ input: '15 combo + C', name: fin.name, dmg: fin.hits > 1 ? fin.damage + '\u00D7' + fin.hits : fin.damage, startup: '-', kb: fin.kb || '-' });
 
-  for (let i = 0; i < moves.length; i++) {
-    const ry = headerY + 14 + i * 22;
-    const m = moves[i];
-    ctx.font = '10px sans-serif'; ctx.fillStyle = '#aaa';
-    ctx.fillText(m.input, colX[0], ry + 8);
-    ctx.fillStyle = '#e0e0e0'; ctx.font = 'bold 11px sans-serif';
-    ctx.fillText(m.name, colX[1], ry + 8);
-    ctx.fillStyle = '#FF6666'; ctx.font = '10px sans-serif';
-    ctx.fillText(m.dmg, colX[2], ry + 8);
-    ctx.fillStyle = '#88AAFF';
-    ctx.fillText(m.startup + (typeof m.startup === 'number' ? 'F' : ''), colX[3], ry + 8);
-    ctx.fillStyle = '#FFD700';
-    ctx.fillText(m.kb, colX[4], ry + 8);
-    // Subtle row separator
-    if (i < moves.length - 1) {
-      ctx.strokeStyle = '#111'; ctx.beginPath(); ctx.moveTo(moveX + 12, ry + 14); ctx.lineTo(moveX + 888, ry + 14); ctx.stroke();
+  // ---- パネル ----
+  const panelH = 310;
+  ctx.fillStyle = 'rgba(8,8,20,0.9)'; roundRect(ctx, moveX, moveY, 900, panelH, 8); ctx.fill();
+  ctx.strokeStyle = (ch.accent || '#FFD700') + '55'; ctx.lineWidth = 1; roundRect(ctx, moveX, moveY, 900, panelH, 8); ctx.stroke();
+  ctx.textAlign = 'left';
+
+  if (charDetailTab === 2) {
+    // ======== COMBOS ========
+    const routes = COMBO_ROUTES[charDetailIdx] || [];
+    ctx.font = 'bold 12px sans-serif'; ctx.fillStyle = ch.accent;
+    ctx.fillText('COMBO ROUTES', moveX + 14, moveY + 22);
+    if (!routes.length) {
+      ctx.font = '13px sans-serif'; ctx.fillStyle = '#666';
+      ctx.fillText('No combo routes registered for this character yet.', moveX + 14, moveY + 60);
+    } else {
+      const perCol = Math.ceil(routes.length / (routes.length > 4 ? 2 : 1));
+      const colW = routes.length > 4 ? 440 : 880;
+      for (let i = 0; i < routes.length; i++) {
+        const r = routes[i];
+        const colI = Math.floor(i / perCol), rowI = i % perCol;
+        const bx = moveX + 14 + colI * (colW + 12);
+        const by = moveY + 36 + rowI * 62;
+        if (by + 58 > moveY + panelH) continue;
+        ctx.fillStyle = r.instantKill ? 'rgba(60,10,20,0.6)' : 'rgba(16,16,30,0.7)';
+        roundRect(ctx, bx, by, colW, 56, 6); ctx.fill();
+        ctx.strokeStyle = r.instantKill ? '#FF4466' : '#2a2a38'; ctx.lineWidth = 1;
+        roundRect(ctx, bx, by, colW, 56, 6); ctx.stroke();
+        // 名前
+        ctx.font = 'bold 13px sans-serif'; ctx.fillStyle = r.instantKill ? '#FF8899' : '#FFF';
+        ctx.fillText(r.name, bx + 10, by + 18);
+        // 難易度の星
+        ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'right'; ctx.fillStyle = '#FFD700';
+        ctx.fillText('\u2605'.repeat(r.diff || 1), bx + colW - 10, by + 18);
+        ctx.textAlign = 'left';
+        // ルート
+        ctx.font = '11px sans-serif'; ctx.fillStyle = '#9fd8ff';
+        const maxChars = Math.floor((colW - 20) / 5.6);
+        let route = r.route || '';
+        if (route.length > maxChars) route = route.slice(0, maxChars - 1) + '\u2026';
+        ctx.fillText(route, bx + 10, by + 34);
+        // ダメージ帯・ヒット数
+        ctx.font = '10px sans-serif'; ctx.fillStyle = '#888';
+        ctx.fillText('Damage: ' + (r.dmgRange || '-') + '   Hits: ' + (r.hits || '-') + (r.instantKill ? '   KO COMBO' : ''), bx + 10, by + 48);
+      }
+    }
+  } else if (charDetailTab === 1) {
+    // ======== COMMANDS ========
+    const cmds = commandDefs[charDetailIdx] || [];
+    ctx.font = 'bold 12px sans-serif'; ctx.fillStyle = ch.accent;
+    ctx.fillText('COMMAND MOVES', moveX + 14, moveY + 22);
+    const seqLabel = { F: '->', B: '<-', U: 'Up', D: 'Down' };
+    if (!cmds.length) {
+      ctx.font = '13px sans-serif'; ctx.fillStyle = '#666';
+      ctx.fillText('This character has no command moves.', moveX + 14, moveY + 60);
+    } else {
+      for (let i = 0; i < cmds.length && i < 4; i++) {
+        const c = cmds[i], a = c.attack || {};
+        const by = moveY + 36 + i * 66;
+        ctx.fillStyle = 'rgba(16,16,30,0.7)'; roundRect(ctx, moveX + 14, by, 872, 58, 6); ctx.fill();
+        ctx.strokeStyle = '#2a2a38'; ctx.lineWidth = 1; roundRect(ctx, moveX + 14, by, 872, 58, 6); ctx.stroke();
+        // 入力
+        const seq = (c.seq || []).map(k => seqLabel[k] || k).join(' ') + ' + Z';
+        ctx.font = 'bold 14px sans-serif'; ctx.fillStyle = '#FFD700';
+        ctx.fillText(seq, moveX + 26, by + 24);
+        if (c.chargeCmd) { ctx.font = '10px sans-serif'; ctx.fillStyle = '#FF8844'; ctx.fillText('(hold to charge)', moveX + 26, by + 42); }
+        // 名前
+        ctx.font = 'bold 15px sans-serif'; ctx.fillStyle = '#FFF';
+        ctx.fillText(c.name, moveX + 240, by + 24);
+        // 数値
+        const pr = a.projectile;
+        const dmg = pr ? pr.damage : a.damage;
+        ctx.font = '11px sans-serif'; ctx.fillStyle = '#aaa';
+        ctx.fillText('Damage ' + (dmg != null ? dmg : '-') + '   Startup ' + (a.startup != null ? a.startup + 'F' : '-') +
+                     '   Knockback ' + (pr ? pr.kbBase : (a.kbBase != null ? a.kbBase : '-')) +
+                     (pr ? '   (projectile)' : ''), moveX + 240, by + 44);
+      }
+    }
+  } else {
+    // ======== MOVES ========
+    ctx.font = 'bold 12px sans-serif'; ctx.fillStyle = ch.accent;
+    ctx.fillText('MOVE LIST', moveX + 14, moveY + 22);
+    const colX = [moveX + 14, moveX + 180, moveX + 430, moveX + 580, moveX + 710];
+    const headerY = moveY + 42;
+    ctx.font = 'bold 9px sans-serif'; ctx.fillStyle = '#555';
+    ['INPUT', 'MOVE NAME', 'DAMAGE', 'STARTUP', 'KNOCKBACK'].forEach((h, i) => ctx.fillText(h, colX[i], headerY));
+    ctx.strokeStyle = '#222'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(moveX + 14, headerY + 5); ctx.lineTo(moveX + 886, headerY + 5); ctx.stroke();
+
+    const moves = [];
+    if (atk) {
+      const getDmg = (a) => a.projectile ? a.projectile.damage : a.damage;
+      moves.push({ input: 'Z (normal attack)', name: atk.normal?.name || '-', dmg: getDmg(atk.normal || {}), startup: atk.normal?.startup || '-', kb: atk.normal?.kbBase || '-' });
+      moves.push({ input: 'Z (FTilt)', name: atk.strong?.name || '-', dmg: getDmg(atk.strong || {}), startup: atk.strong?.startup || '-', kb: atk.strong?.kbBase || '-' });
+      moves.push({ input: '-> -> + Z (Side Smash)', name: atk.side?.name || '-', dmg: getDmg(atk.side || {}), startup: atk.side?.startup || '-', kb: atk.side?.kbBase || '-' });
+      moves.push({ input: 'Up Up + Z (Up Smash)', name: atk.up?.name || '-', dmg: getDmg(atk.up || {}), startup: atk.up?.startup || '-', kb: atk.up?.kbBase || '-' });
+      moves.push({ input: 'Down Down + Z (Down Smash)', name: atk.down?.name || '-', dmg: getDmg(atk.down || {}), startup: atk.down?.startup || '-', kb: atk.down?.kbBase || '-' });
+      moves.push({ input: 'Hold D (special)', name: atk.special?.name || '-', dmg: getDmg(atk.special || {}), startup: atk.special?.startup || '-', kb: atk.special?.kbBase || '-' });
+    }
+    if (rec) moves.push({ input: 'Up + X (recovery)', name: rec.name, dmg: rec.dmg || '-', startup: '-', kb: '-' });
+    moves.push({ input: 'A + direction', name: 'Grab & Throw', dmg: '-', startup: '-', kb: '-' });
+    moves.push({ input: 'Air + direction + D', name: 'Air Dash', dmg: '-', startup: '-', kb: '-' });
+    if (ult) moves.push({ input: 'Gauge 100% + hold D', name: ult.name, dmg: ult.dmg, startup: '-', kb: '-' });
+    if (fin) moves.push({ input: '15 combo + C', name: fin.name, dmg: fin.hits > 1 ? fin.damage + '\u00D7' + fin.hits : fin.damage, startup: '-', kb: fin.kb || '-' });
+
+    for (let i = 0; i < moves.length; i++) {
+      const ry = headerY + 16 + i * 23;
+      if (ry + 10 > moveY + panelH) break;
+      const m = moves[i];
+      ctx.font = '10px sans-serif'; ctx.fillStyle = '#aaa';
+      ctx.fillText(m.input, colX[0], ry + 8);
+      ctx.fillStyle = '#e0e0e0'; ctx.font = 'bold 11px sans-serif';
+      ctx.fillText(m.name, colX[1], ry + 8);
+      ctx.fillStyle = '#FF6666'; ctx.font = '10px sans-serif';
+      ctx.fillText(m.dmg, colX[2], ry + 8);
+      ctx.fillStyle = '#88AAFF';
+      ctx.fillText(m.startup + (typeof m.startup === 'number' ? 'F' : ''), colX[3], ry + 8);
+      ctx.fillStyle = '#FFD700';
+      ctx.fillText(m.kb, colX[4], ry + 8);
+      if (i < moves.length - 1) {
+        ctx.strokeStyle = '#141420'; ctx.beginPath(); ctx.moveTo(moveX + 14, ry + 15); ctx.lineTo(moveX + 886, ry + 15); ctx.stroke();
+      }
     }
   }
 
   // Navigation
-  ctx.font = '13px sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#555';
-  ctx.fillText('<- -> switch character  |  ESC back', 480, 628);
+  ctx.font = '13px sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#666';
+  ctx.fillText('Arrow keys: switch character  |  Z / 1 2 3: switch page  |  ESC: back', 480, 630);
 
   // Left/Right arrows
   ctx.font = 'bold 30px sans-serif'; ctx.fillStyle = '#444';
@@ -20340,6 +20461,13 @@ function handleKeyDown(e) {
     if (e.key === 'Escape' || e.key === 'Backspace') startTransition('select');
     if (e.key === 'ArrowLeft') charDetailIdx = (charDetailIdx + characters.length - 1) % characters.length;
     if (e.key === 'ArrowRight') charDetailIdx = (charDetailIdx + 1) % characters.length;
+    if (e.key === 'ArrowUp') charDetailIdx = selectVMove(charDetailIdx, characters.length, -1);
+    if (e.key === 'ArrowDown') charDetailIdx = selectVMove(charDetailIdx, characters.length, 1);
+    if (e.key === 'z' || e.key === 'Z' || e.key === 'Tab') { charDetailTab = (charDetailTab + 1) % 3; e.preventDefault(); }
+    if (e.key === 'x' || e.key === 'X') charDetailTab = (charDetailTab + 2) % 3;
+    if (e.key === '1') charDetailTab = 0;
+    if (e.key === '2') charDetailTab = 1;
+    if (e.key === '3') charDetailTab = 2;
     return;
   } else if (scene === 'howtoplay') {
     if (e.key === 'Escape' || e.key === 'h' || e.key === 'H') startTransition('title');
@@ -20437,6 +20565,8 @@ function handleKeyDown(e) {
         const n = characters.length + 1;
         if (e.key === 'ArrowLeft') p1Select = (p1Select + n - 1) % n;
         if (e.key === 'ArrowRight') p1Select = (p1Select + 1) % n;
+        if (e.key === 'ArrowUp') p1Select = selectVMove(p1Select, n, -1);
+        if (e.key === 'ArrowDown') p1Select = selectVMove(p1Select, n, 1);
         if (e.key === 'Enter') {
           if (p1Select >= characters.length) p1Select = Math.floor(Math.random() * characters.length);
           bossRushPlayerChar = p1Select;
@@ -20461,8 +20591,12 @@ function handleKeyDown(e) {
         const n = characters.length + 1; // +1 for random
         if (e.key === 'ArrowLeft') p1Select = (p1Select + n - 1) % n;
         if (e.key === 'ArrowRight') p1Select = (p1Select + 1) % n;
+        if (e.key === 'ArrowUp') p1Select = selectVMove(p1Select, n, -1);
+        if (e.key === 'ArrowDown') p1Select = selectVMove(p1Select, n, 1);
         if (e.key === 'a' || e.key === 'A') p2Select = (p2Select + n - 1) % n;
         if (e.key === 'd' || e.key === 'D') p2Select = (p2Select + 1) % n;
+        if (e.key === 'w' || e.key === 'W') p2Select = selectVMove(p2Select, n, -1);
+        if (e.key === 's' || e.key === 'S') p2Select = selectVMove(p2Select, n, 1);
         if (e.key === 'Enter') {
           if (p1Select >= characters.length) p1Select = Math.floor(Math.random() * characters.length);
           if (p2Select >= characters.length) p2Select = Math.floor(Math.random() * characters.length);
@@ -20479,6 +20613,8 @@ function handleKeyDown(e) {
         if (!p1Confirmed) {
           if (e.key === 'ArrowLeft') { p1Select = (p1Select + n - 1) % n; if (peerConn) peerConn.send({ type: 'charSelect', charIdx: p1Select }); }
           if (e.key === 'ArrowRight') { p1Select = (p1Select + 1) % n; if (peerConn) peerConn.send({ type: 'charSelect', charIdx: p1Select }); }
+          if (e.key === 'ArrowUp') { p1Select = selectVMove(p1Select, n, -1); if (peerConn) peerConn.send({ type: 'charSelect', charIdx: p1Select }); }
+          if (e.key === 'ArrowDown') { p1Select = selectVMove(p1Select, n, 1); if (peerConn) peerConn.send({ type: 'charSelect', charIdx: p1Select }); }
           if (e.key === 'Enter') {
             if (p1Select >= characters.length) p1Select = Math.floor(Math.random() * characters.length);
             p1Confirmed = true; if (peerConn) peerConn.send({ type: 'charConfirm', charIdx: p1Select });
@@ -20492,6 +20628,8 @@ function handleKeyDown(e) {
         if (!p2Confirmed) {
           if (e.key === 'ArrowLeft') { p2Select = (p2Select + n - 1) % n; if (peerConn) peerConn.send({ type: 'charSelect', charIdx: p2Select }); }
           if (e.key === 'ArrowRight') { p2Select = (p2Select + 1) % n; if (peerConn) peerConn.send({ type: 'charSelect', charIdx: p2Select }); }
+          if (e.key === 'ArrowUp') { p2Select = selectVMove(p2Select, n, -1); if (peerConn) peerConn.send({ type: 'charSelect', charIdx: p2Select }); }
+          if (e.key === 'ArrowDown') { p2Select = selectVMove(p2Select, n, 1); if (peerConn) peerConn.send({ type: 'charSelect', charIdx: p2Select }); }
           if (e.key === 'Enter') {
             if (p2Select >= characters.length) p2Select = Math.floor(Math.random() * characters.length);
             p2Confirmed = true; if (peerConn) peerConn.send({ type: 'charConfirm', charIdx: p2Select });
@@ -20505,6 +20643,8 @@ function handleKeyDown(e) {
       if (!p1Confirmed) {
         if (e.key === 'ArrowLeft') p1Select = (p1Select + n - 1) % n;
         if (e.key === 'ArrowRight') p1Select = (p1Select + 1) % n;
+        if (e.key === 'ArrowUp') p1Select = selectVMove(p1Select, n, -1);
+        if (e.key === 'ArrowDown') p1Select = selectVMove(p1Select, n, 1);
         if (e.key === 'Enter') {
           if (p1Select >= characters.length) p1Select = Math.floor(Math.random() * characters.length);
           p1Confirmed = true;
@@ -20515,6 +20655,8 @@ function handleKeyDown(e) {
       if (!p2Confirmed) {
         if (e.key === 'a' || e.key === 'A') p2Select = (p2Select + n - 1) % n;
         if (e.key === 'd' || e.key === 'D') p2Select = (p2Select + 1) % n;
+        if (e.key === 'w' || e.key === 'W') p2Select = selectVMove(p2Select, n, -1);
+        if (e.key === 's' || e.key === 'S') p2Select = selectVMove(p2Select, n, 1);
         if (e.key === ' ') {
           if (p2Select >= characters.length) p2Select = Math.floor(Math.random() * characters.length);
           p2Confirmed = true; e.preventDefault();
@@ -20525,6 +20667,7 @@ function handleKeyDown(e) {
     // I key: open character detail page
     if ((e.key === 'i' || e.key === 'I') && !p1Confirmed && modeSelected && p1Select < characters.length) {
       charDetailIdx = p1Select;
+      charDetailTab = 0;
       startTransition('chardetail');
       return;
     }
