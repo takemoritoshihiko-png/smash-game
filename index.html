@@ -5909,7 +5909,11 @@ const RECOVERY_MOVES = {
   26: { name:'Slime Bound', height:182, angle:-90, frames:16, dmg:2, color:'#FFB6C1', status:null },
   27: { name:'Gravity Flip',     height:247, angle:-90, frames:20, dmg:2, color:'#4B0082', status:null },
   28: { name:'Insect Swarm Rise',   height:182, angle:-85, frames:18, dmg:2, color:'#228B22', status:'poisoned' },
+  29: { name:'Back Booster',    height:200, angle:-88, frames:18, dmg:2, color:'#66E8FF', status:null },
+  30: { name:'Spirit Updraft',  height:200, angle:-85, frames:18, dmg:1, color:'#FF99DD', status:null },
 };
+// Bot(29) は ロボット変身中だけ ブースターが 強くなる（他の強化と そろえる）
+const BOT_ROBOT_RECOVERY = { name:'Jet Booster', height:266, angle:-88, frames:16, dmg:3, color:'#AAF4FF', status:null };
 // ゲージMAXエフェクト
 let gaugeMaxEffect = { active: false, timer: 0, playerId: -1, color: '#FFD700', text: '' };
 // ゲージ増減ポップアップ
@@ -10149,7 +10153,7 @@ function tryCancelAttack(p, type) {
 // === 復帰技実行 ===
 function executeRecovery(p) {
   if (p.recoveryUsed || p.attacking || p.hitstun > 0 || !p.alive) return false;
-  const rec = RECOVERY_MOVES[p.charIdx];
+  const rec = (p.charIdx === 29 && p.botRobot > 0) ? BOT_ROBOT_RECOVERY : RECOVERY_MOVES[p.charIdx];
   if (!rec) return false;
   p.recoveryUsed = true;
   p.recoveryActive = rec.frames;
@@ -12460,7 +12464,7 @@ function updateBattle(dt) {
     // 復帰技アクティブ中
     if (p.recoveryActive > 0) {
       p.recoveryActive--;
-      const rec2 = RECOVERY_MOVES[p.charIdx];
+      const rec2 = (p.charIdx === 29 && p.botRobot > 0) ? BOT_ROBOT_RECOVERY : RECOVERY_MOVES[p.charIdx];
       // 上昇中は重力無視
       // エフェクトパーティクル
       if (rec2 && battleTime % 3 === 0) {
@@ -20312,7 +20316,7 @@ function drawCharDetail() {
     ch.stats.power,
     Math.min(5, Math.round(Math.abs(ch.jumpPower) / 3.4)),
     Math.min(5, Math.round(ch.weight * 5)),
-    rec ? Math.min(5, Math.round(rec.height / 60)) : 3
+    rec ? Math.min(5, Math.round(rec.height / 60)) : 0
   ];
   const statBarColors = ['#44FF88', '#FF4444', '#FFD700', '#4488FF', '#FF88FF'];
   for (let i = 0; i < 5; i++) {
@@ -20440,7 +20444,9 @@ function drawCharDetail() {
       moves.push({ input: 'Down Down + Z (Down Smash)', name: atk.down?.name || '-', dmg: getDmg(atk.down || {}), startup: atk.down?.startup || '-', kb: atk.down?.kbBase || '-' });
       moves.push({ input: 'Hold D (special)', name: atk.special?.name || '-', dmg: getDmg(atk.special || {}), startup: atk.special?.startup || '-', kb: atk.special?.kbBase || '-' });
     }
-    if (rec) moves.push({ input: 'Up + X (recovery)', name: rec.name, dmg: rec.dmg || '-', startup: '-', kb: '-' });
+    moves.push(rec
+      ? { input: 'Up + X (recovery)', name: rec.name, dmg: rec.dmg || '-', startup: '-', kb: '-' }
+      : { input: 'Up + X (recovery)', name: 'none (double jump only)', dmg: '-', startup: '-', kb: '-' });
     moves.push({ input: 'A + direction', name: 'Grab & Throw', dmg: '-', startup: '-', kb: '-' });
     moves.push({ input: 'Air + direction + D', name: 'Air Dash', dmg: '-', startup: '-', kb: '-' });
     if (ult) moves.push({ input: 'Gauge 100% + hold D', name: ult.name, dmg: ult.dmg, startup: '-', kb: '-' });
