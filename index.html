@@ -42,6 +42,49 @@ let titleTime = 0;
 let selectTime = 0;
 let charDetailIdx = 0;
 let charDetailTab = 0; // 0=MOVES 1=COMMANDS 2=COMBOS
+
+// --- ポーズメニュー（バトル中に ESC）---
+let pauseOpen = false;   // メニューが 出ているか
+let pauseSel = 0;        // 選んでいる 項目
+let pauseAnim = 0;       // 出てくる アニメ 0->1
+// オンラインでは 相手を 止められないので 時間は 止めない（メニューだけ 出す）
+function pauseFreezesGame() { return !onlineMode; }
+function pauseMenuItems() {
+  if (onlineMode) return ['RESUME', 'QUIT TO TITLE'];
+  return ['RESUME', 'RETRY', 'CHARACTER SELECT', 'QUIT TO TITLE'];
+}
+function clearHeldKeys() { for (const k in keys) delete keys[k]; }
+function closePause() { pauseOpen = false; pauseAnim = 0; clearHeldKeys(); }
+function runPauseItem(label) {
+  if (label === 'RESUME') { closePause(); return; }
+  if (label === 'RETRY') {
+    closePause();
+    initBattle();
+    return;
+  }
+  if (label === 'CHARACTER SELECT') {
+    closePause();
+    stopBGM();
+    bossRushMode = false;
+    startTransition('select');
+    return;
+  }
+  if (label === 'QUIT TO TITLE') {
+    closePause();
+    stopBGM();
+    bossRushMode = false;
+    if (onlineMode) {
+      if (peer) { try { peer.destroy(); } catch (ex) {} peer = null; }
+      peerConn = null;
+      onlineMode = false;
+      onlineState = 'menu';
+      onlineInputId = '';
+      onlineError = '';
+    }
+    startTransition('title');
+    return;
+  }
+}
 let showHowToPlay = false;
 
 // Select screen
@@ -6257,6 +6300,23 @@ function playHitSound(type, power, charIdx) {
 }
 
 // === Ultimate Hit Sound Effects ===
+// メニュー操作の 効果音（カーソル移動 / 決定）
+function playMenuSE(confirm) {
+  try {
+    const ac = getAudioCtx();
+    const now = ac.currentTime;
+    const o = ac.createOscillator(); const g = ac.createGain();
+    o.type = 'square';
+    o.frequency.setValueAtTime(confirm ? 520 : 880, now);
+    o.frequency.exponentialRampToValueAtTime(confirm ? 1040 : 1180, now + (confirm ? 0.09 : 0.035));
+    g.gain.setValueAtTime(0.0001, now);
+    g.gain.exponentialRampToValueAtTime(confirm ? 0.09 : 0.05, now + 0.008);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + (confirm ? 0.14 : 0.07));
+    o.connect(g); g.connect(ac.destination);
+    o.start(now); o.stop(now + 0.16);
+  } catch (e) {}
+}
+
 function playUltimateChargeSE() {
   try {
     const ac = getAudioCtx();
@@ -8492,6 +8552,7 @@ function createPlayer(id, charIdx, startX) {
 }
 
 function initBattle() {
+  pauseOpen = false; pauseAnim = 0; pauseSel = 0;
   // 戦う 2人分の スプライトを 先に 用意しておく（描き始めで カクつかないように）
   preloadSprites(p1Select);
   preloadSprites(p2Select);
@@ -15354,6 +15415,16 @@ function drawBattle(dt) {
     }
   }
 
+  // 試合の 最初の 数秒だけ「ESCでメニュー」と 出す（見つけてもらうため）
+  if (battleStarted && !gameOver && !pauseOpen && battleTime > 1000 && battleTime < 7000) {
+    const hintA = battleTime < 6000 ? 1 : Math.max(0, 1 - (battleTime - 6000) / 1000);
+    ctx.globalAlpha = hintA * 0.75;
+    ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'right';
+    ctx.fillStyle = '#9ab';
+    ctx.fillText('ESC  MENU', 948, 22);
+    ctx.globalAlpha = 1;
+  }
+
   // Boss Rush HUD
   if (bossRushMode) {
     // Boss intro overlay
@@ -20119,6 +20190,87 @@ function processPlayerKeydown(key, p, playerId, keyState) {
   }
 }
 
+// ============================================================
+// PAUSE MENU（バトル中に ESC）
+// ============================================================
+const PAUSE_ITEM_DESC = {
+  'RESUME':           'Back to the fight',
+  'RETRY':            'Restart this match from the beginning',
+  'CHARACTER SELECT': 'Pick different fighters',
+  'QUIT TO TITLE':    'Give up and return to the title screen',
+};
+
+function drawPauseMenu() {
+  const items = pauseMenuItems();
+  const a = pauseFreezesGame() ? pauseAnim : 1;
+  const ease = a * a * (3 - 2 * a);
+
+  // 暗転
+  ctx.save();
+  ctx.fillStyle = 'rgba(0,0,6,' + (0.72 * ease).toFixed(3) + ')';
+  ctx.fillRect(0, 0, 960, 640);
+
+  // 上下の 帯
+  ctx.fillStyle = 'rgba(0,0,0,' + (0.6 * ease).toFixed(3) + ')';
+  ctx.fillRect(0, 0, 960, 56 * ease);
+  ctx.fillRect(0, 640 - 56 * ease, 960, 56 * ease);
+
+  ctx.globalAlpha = ease;
+
+  // PAUSED
+  ctx.textAlign = 'center';
+  ctx.font = 'bold 54px sans-serif';
+  ctx.fillStyle = '#FFF';
+  ctx.shadowColor = '#44AAFF'; ctx.shadowBlur = 20;
+  ctx.fillText('PAUSED', 480, 150);
+  ctx.shadowBlur = 0;
+  ctx.font = 'bold 13px sans-serif'; ctx.fillStyle = '#5a7fa0';
+  ctx.fillText(onlineMode ? 'ONLINE \u2014 the match is still running' : 'The match is frozen', 480, 176);
+
+  // 項目
+  const itemW = 420, itemH = 52, gap = 10;
+  const startY = 230;
+  for (let i = 0; i < items.length; i++) {
+    const on = pauseSel === i;
+    const iy = startY + i * (itemH + gap);
+    const ix = 480 - itemW / 2 + (on ? 0 : 0);
+    const pulse = on ? 0.6 + Math.sin(Date.now() * 0.006) * 0.4 : 0;
+    const col = items[i] === 'QUIT TO TITLE' ? '#FF6677' : (items[i] === 'RESUME' ? '#66FF99' : '#FFD700');
+
+    ctx.fillStyle = on ? 'rgba(20,24,44,0.96)' : 'rgba(8,8,18,0.8)';
+    roundRect(ctx, ix, iy, itemW, itemH, 10); ctx.fill();
+    ctx.strokeStyle = on ? col : '#2a2a3a';
+    ctx.lineWidth = on ? 2.5 : 1;
+    if (on) { ctx.shadowColor = col; ctx.shadowBlur = 10 + pulse * 8; }
+    roundRect(ctx, ix, iy, itemW, itemH, 10); ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // 選択中の 左の マーカー
+    if (on) {
+      ctx.fillStyle = col;
+      roundRect(ctx, ix + 6, iy + 10, 4, itemH - 20, 2); ctx.fill();
+      ctx.font = 'bold 16px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('\u25B6', ix - 26, iy + itemH / 2 + 6);
+    }
+
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 20px sans-serif';
+    ctx.fillStyle = on ? '#FFF' : '#6a6a7a';
+    ctx.fillText(items[i], 480, iy + (on ? 24 : 32));
+    if (on) {
+      ctx.font = '11px sans-serif'; ctx.fillStyle = col;
+      ctx.fillText(PAUSE_ITEM_DESC[items[i]] || '', 480, iy + 41);
+    }
+  }
+
+  // 操作ガイド
+  ctx.font = '13px sans-serif'; ctx.fillStyle = '#556';
+  ctx.textAlign = 'center';
+  ctx.fillText('Up / Down: move   |   Enter: select   |   ESC: resume', 480, 608);
+
+  ctx.restore();
+}
+
 function drawCharDetail() {
   const ch = characters[charDetailIdx];
   const atk = attackDefs[charDetailIdx];
@@ -20752,6 +20904,21 @@ function handleKeyDown(e) {
       bossRushMode = false;
       startTransition('select'); return;
     }
+
+    // --- ポーズメニュー ---
+    if (pauseOpen) {
+      const items = pauseMenuItems();
+      if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') { pauseSel = (pauseSel + items.length - 1) % items.length; playMenuSE(false); }
+      if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') { pauseSel = (pauseSel + 1) % items.length; playMenuSE(false); }
+      if (e.key === 'Enter' || e.key === ' ' || e.key === 'z' || e.key === 'Z') { e.preventDefault(); playMenuSE(true); runPauseItem(items[pauseSel]); }
+      if (e.key === 'Escape') closePause();
+      return;
+    }
+    if (e.key === 'Escape' && battleStarted && !gameOver && !ultimateActive && !ultimateVideoShowing) {
+      pauseOpen = true; pauseSel = 0; pauseAnim = 0; clearHeldKeys();
+      return;
+    }
+
     if (!battleStarted || gameOver) return;
     const p1 = players[0], p2 = players[1];
 
@@ -20989,7 +21156,10 @@ function gameLoop(timestamp) {
         startTransition('battle');
       }
     } else if (scene === 'battle') {
-      if (onlineMode && !isHost) {
+      if (pauseOpen && pauseFreezesGame()) {
+        // ポーズ中: 時間を 止める（メニューの アニメだけ 進める）
+        pauseAnim = Math.min(1, pauseAnim + 0.14);
+      } else if (onlineMode && !isHost) {
         // Guest: no game simulation, only update effects
         try {
           updateGuestEffects(FIXED_DT);
@@ -21123,6 +21293,7 @@ function gameLoop(timestamp) {
       drawBattle(FIXED_DT);
       drawUltimateOverlay();
       drawInstantKillOverlay();
+      if (pauseOpen) drawPauseMenu();
     }
   } else if (scene === 'chardetail') {
     drawCharDetail(FIXED_DT);
