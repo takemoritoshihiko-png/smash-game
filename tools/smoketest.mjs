@@ -202,6 +202,53 @@ try {
       onlineMode=false; isHost=false; remoteKeys={}; prevRemoteKeys={};
       check('online guest input', onlineBad.length === 0, onlineBad.join(' | ') || 'recovery/airup/finisher/disconnect');
 
+      // --- スマッシュ攻撃（方向2回 + X）---
+      var smashBad = [];
+      try {
+        gameMode='cpu'; cpuDifficulty=0; p1Select=0; p2Select=1; selectedStage=0;
+        onlineMode=false; isHost=false; scene='battle'; transitioning=false;
+        initBattle(); run(400);
+        var sp = players[0];
+        players[1].x = 3000; players[1].invincibleTimer = 99999;
+        function pressKey(k, rep){ handleKeyDown({key:k, repeat:!!rep, preventDefault:function(){}}); }
+        function freshSmash(){
+          sp.x=480; sp.vx=0; sp.grounded=true; sp.attacking=false; sp.hitstun=0;
+          sp.smashCharging=false; sp.smashType=null; sp.smashInputCount=0;
+          for (var k in keys) delete keys[k];
+        }
+        freshSmash(); keys['ArrowRight']=true;
+        pressKey('ArrowRight'); run(1); pressKey('ArrowRight'); run(1); pressKey('x');
+        if (sp.smashType !== 'sideSmash') smashBad.push('side->' + sp.smashType);
+        freshSmash(); keys['ArrowDown']=true;
+        pressKey('ArrowDown'); run(1); pressKey('ArrowDown'); run(1); pressKey('x');
+        if (sp.smashType !== 'downSmash') smashBad.push('down->' + sp.smashType);
+        // キーの 自動リピートで 暴発しないこと
+        freshSmash(); keys['ArrowRight']=true;
+        pressKey('ArrowRight'); for (var r=0;r<8;r++){ pressKey('ArrowRight', true); run(1); }
+        pressKey('x');
+        if (sp.smashCharging) smashBad.push('key-repeat triggered smash');
+        for (var k2 in keys) delete keys[k2];
+      } catch (e) { smashBad.push('threw: ' + e.message); }
+      check('smash attack', smashBad.length === 0, smashBad.join(' | ') || 'side/down + no key-repeat');
+
+      // --- 周期処理が フレーム基準で 動くか（battleTime は ms なので 使ってはいけない）---
+      var tickBad = [];
+      try {
+        gameMode='cpu'; cpuDifficulty=0; p1Select=0; p2Select=1; selectedStage=0;
+        scene='battle'; transitioning=false; initBattle(); run(400);
+        var zp = players[0]; players[1].x = 3000; players[1].alive = false;
+        zp.invincibleTimer = 99999;   // 被弾でも 氷ゲージが 減るので 相手を 無効化しておく
+        zp.zenIceGauge = 100;
+        var f0 = battleFrame, g0 = zp.zenIceGauge;
+        run(700);
+        var df = battleFrame - f0, dg = g0 - zp.zenIceGauge;
+        var want = Math.floor(df / 20);
+        // 直っていなければ dg は 1〜2 程度にしかならない。±3 は フレーム境界の 誤差
+        if (Math.abs(dg - want) > 3) tickBad.push('ice gauge -' + dg + ' over ' + df + 'F, expected ~' + want);
+        if (Math.abs(battleTime / battleFrame - 1000/60) > 0.1) tickBad.push('battleFrame drift');
+      } catch (e) { tickBad.push('threw: ' + e.message); }
+      check('per-frame ticks', tickBad.length === 0, tickBad.join(' | ') || 'gauge decays at the designed rate');
+
       // --- ポーズメニュー ---
       var pauseBad = [];
       try {

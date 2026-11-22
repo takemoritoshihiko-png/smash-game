@@ -5509,7 +5509,7 @@ const DASH_SPEED_MULT = 1.68;    // ダッシュ時速度倍率（旧1.4×1.2）
 const DASH_INPUT_WINDOW = 12;    // ダッシュ入力受付フレーム
 const DASH_TURN_FRICTION = 0.85; // ダッシュターン時の滑り
 // スマッシュ攻撃
-const SMASH_INPUT_WINDOW = 10;    // 方向2回入力受付フレーム
+const SMASH_INPUT_WINDOW = 12;    // 方向2回入力の 受付フレーム（battleFrame 基準・約0.2秒）
 const SMASH_CHARGE_MAX = 120;     // 最大溜めフレーム（2秒）
 const SMASH_DAMAGE_MULT = { upSmash: 1.4, sideSmash: 1.5, downSmash: 1.3 };
 const SMASH_CHARGE_BONUS = 0.8;   // 満タン溜めで追加0.8倍（合計1.8倍）
@@ -6911,6 +6911,9 @@ function showHitDisplay(x, y, isHit) {
 const BATTLE_TIME_LIMIT = 180;
 let battleTimer = BATTLE_TIME_LIMIT;
 let battleFrameAcc = 0;
+// 試合開始からの 経過フレーム数（整数）。
+// battleTime は ミリ秒なので 「N フレームに 1回」の 判定には 必ず こちらを 使う
+let battleFrame = 0;
 
 // --- 掴み・投げの 定数と キャラ別テーブル（attackDefs は もっと下）---
 // Each attack: { startup, active, recovery, damage, kbBase, kbScale, hx, hy, hw, hh, type, ... }
@@ -8625,6 +8628,7 @@ function initBattle() {
   gameSetTimer = 0; gameSetPhase = 0;
   battleTimer = BATTLE_TIME_LIMIT;
   battleFrameAcc = 0;
+  battleFrame = 0;
   projectiles = [];
   hitEffects = [];
   sparks = [];
@@ -10991,6 +10995,7 @@ function getCpuInput(cpu, target) {
 
 function updateBattle(dt) {
   battleTime += dt;
+  battleFrame++;
   cmdFrameCounter++; // コマンド入力用フレームカウンタ
 
   // ヒットストップ処理
@@ -11789,11 +11794,11 @@ function updateBattle(dt) {
 
     // === 固有個性システム更新 ===
     // ゼン(0): 氷ゲージ自然減少（毎秒-3 = 毎20Fに-1）
-    if (p.charIdx === 0 && battleTime % 20 === 0 && p.zenIceGauge > 0) p.zenIceGauge = Math.max(0, p.zenIceGauge - 1);
+    if (p.charIdx === 0 && battleFrame % 20 === 0 && p.zenIceGauge > 0) p.zenIceGauge = Math.max(0, p.zenIceGauge - 1);
     // 波おじ(13): スタミナ回復（毎秒+5 = 毎12Fに+1）
     if (p.charIdx === 13) {
       if (p.namiojiExhausted > 0) { p.namiojiExhausted--; }
-      else if (battleTime % 12 === 0 && p.namiojiStamina < 100) p.namiojiStamina = Math.min(100, p.namiojiStamina + 1);
+      else if (battleFrame % 12 === 0 && p.namiojiStamina < 100) p.namiojiStamina = Math.min(100, p.namiojiStamina + 1);
       if (p.namiojiFullPower > 0) p.namiojiFullPower--;
     }
     // キング(16): 時間停止タイマー・速度ボーナス
@@ -11809,7 +11814,7 @@ function updateBattle(dt) {
     // ジャッジマン(9): 最終審判モードタイマー
     if (p.charIdx === 9 && p.judgeFinalMode > 0) p.judgeFinalMode--;
     // 天才(10): 龍気ゲージ消費（龍モード中毎秒-10 = 毎6Fに-1）
-    if (p.charIdx === 10 && p.dragonMode && battleTime % 6 === 0) {
+    if (p.charIdx === 10 && p.dragonMode && battleFrame % 6 === 0) {
       p.tensaiDragonGauge = Math.max(0, p.tensaiDragonGauge - 1);
       if (p.tensaiDragonGauge <= 0) {
         p.dragonMode = false; p.dragonCooldown = 600; p.weight = 0.8;
@@ -11828,7 +11833,7 @@ function updateBattle(dt) {
     if (p.charIdx === 6) {
       if (p.kumaFuryMode > 0) p.kumaFuryMode--;
       if (p.kumaFuryCooldown > 0) p.kumaFuryCooldown--;
-      if (battleTime % 12 === 0 && p.kumaFury > 0 && !p.kumaFuryMode) p.kumaFury = Math.max(0, p.kumaFury - 1);
+      if (battleFrame % 12 === 0 && p.kumaFury > 0 && !p.kumaFuryMode) p.kumaFury = Math.max(0, p.kumaFury - 1);
       if (p.kumaFury >= 100 && !p.kumaFuryMode && p.kumaFuryCooldown <= 0) {
         p.kumaFuryMode = 480; p.kumaFury = 0;
         cmdNameDisplay.push({ text: 'Fury Mode!', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#FF4444' });
@@ -11837,7 +11842,7 @@ function updateBattle(dt) {
     // シャうでん(8): 電圧自然減少・過電圧モード
     if (p.charIdx === 8) {
       if (p.shawdenOvercharge > 0) p.shawdenOvercharge--;
-      if (battleTime % 20 === 0 && p.shawdenVoltage > 0 && !p.shawdenOvercharge) p.shawdenVoltage = Math.max(0, p.shawdenVoltage - 1);
+      if (battleFrame % 20 === 0 && p.shawdenVoltage > 0 && !p.shawdenOvercharge) p.shawdenVoltage = Math.max(0, p.shawdenVoltage - 1);
       if (p.shawdenVoltage >= 100 && !p.shawdenOvercharge) {
         p.shawdenOvercharge = 300; p.shawdenVoltage = 0;
         cmdNameDisplay.push({ text: 'Overvolt!', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#FFFF44' });
@@ -11857,11 +11862,11 @@ function updateBattle(dt) {
     // ドスボス(19): 装甲回復・大破
     if (p.charIdx === 19) {
       if (p.dosbossBroken > 0) { p.dosbossBroken--; if (p.dosbossBroken <= 0) { p.dosbossArmor = 100; cmdNameDisplay.push({ text: 'Repaired', x: p.x, y: p.y - 100, life: 45, maxLife: 45, color: '#CC66FF' }); } }
-      else if (battleTime % 20 === 0 && p.dosbossArmor < 100) p.dosbossArmor = Math.min(100, p.dosbossArmor + 1);
+      else if (battleFrame % 20 === 0 && p.dosbossArmor < 100) p.dosbossArmor = Math.min(100, p.dosbossArmor + 1);
     }
 
     // メテオ(3): 燃焼ゲージ自然減少
-    if (p.charIdx === 3 && battleTime % 15 === 0 && p.meteoBurnGauge > 0) p.meteoBurnGauge = Math.max(0, p.meteoBurnGauge - 1);
+    if (p.charIdx === 3 && battleFrame % 15 === 0 && p.meteoBurnGauge > 0) p.meteoBurnGauge = Math.max(0, p.meteoBurnGauge - 1);
     // ヤッホ(25): カオスイベント
     if (p.charIdx === 25) {
       if (p.yahoChaosEvent > 0) p.yahoChaosEvent--;
@@ -11874,11 +11879,11 @@ function updateBattle(dt) {
       }
     }
     // 怖(24): 恐怖ゲージ自然減少
-    if (p.charIdx === 24 && battleTime % 20 === 0 && p.kowaiFearGauge2 > 0) p.kowaiFearGauge2 = Math.max(0, p.kowaiFearGauge2 - 1);
+    if (p.charIdx === 24 && battleFrame % 20 === 0 && p.kowaiFearGauge2 > 0) p.kowaiFearGauge2 = Math.max(0, p.kowaiFearGauge2 - 1);
     // サトル(23): 闘志自然減少・マスターモード
     if (p.charIdx === 23) {
       if (p.satoruMasterMode > 0) p.satoruMasterMode--;
-      if (battleTime % 12 === 0 && p.satoruFightGauge > 0 && !p.satoruMasterMode) p.satoruFightGauge = Math.max(0, p.satoruFightGauge - 1);
+      if (battleFrame % 12 === 0 && p.satoruFightGauge > 0 && !p.satoruMasterMode) p.satoruFightGauge = Math.max(0, p.satoruFightGauge - 1);
       if (p.satoruFightGauge >= 100 && !p.satoruMasterMode) {
         p.satoruMasterMode = 480; p.satoruFightGauge = 0;
         cmdNameDisplay.push({ text: 'TAEKWONDO MASTER!!', x: p.x, y: p.y - 100, life: 90, maxLife: 90, color: '#FF4444' });
@@ -11887,7 +11892,7 @@ function updateBattle(dt) {
     // プル(27): 引力ゲージ自然減少・重力崩壊
     if (p.charIdx === 27) {
       if (p.pullCollapseMode > 0) p.pullCollapseMode--;
-      if (battleTime % 20 === 0 && p.pullGravGauge > 0 && !p.pullCollapseMode) p.pullGravGauge = Math.max(0, p.pullGravGauge - 1);
+      if (battleFrame % 20 === 0 && p.pullGravGauge > 0 && !p.pullCollapseMode) p.pullGravGauge = Math.max(0, p.pullGravGauge - 1);
       if (p.pullGravGauge >= 100 && !p.pullCollapseMode) {
         p.pullCollapseMode = 360; p.pullGravGauge = 0;
         cmdNameDisplay.push({ text: 'GRAVITY COLLAPSE!!', x: p.x, y: p.y - 100, life: 90, maxLife: 90, color: '#AA66FF' });
@@ -11905,7 +11910,7 @@ function updateBattle(dt) {
     // ロング(4): 穿孔ゲージ自然減少・龍槍モード
     if (p.charIdx === 4) {
       if (p.longDragonSpear > 0) p.longDragonSpear--;
-      if (battleTime % 20 === 0 && p.longPierceGauge > 0 && !p.longDragonSpear) p.longPierceGauge = Math.max(0, p.longPierceGauge - 1);
+      if (battleFrame % 20 === 0 && p.longPierceGauge > 0 && !p.longDragonSpear) p.longPierceGauge = Math.max(0, p.longPierceGauge - 1);
       if (p.longPierceGauge >= 100 && !p.longDragonSpear) {
         p.longDragonSpear = 360; p.longPierceGauge = 0;
         cmdNameDisplay.push({ text: 'DRAGON SPEAR!!', x: p.x, y: p.y - 100, life: 90, maxLife: 90, color: '#44FFCC' });
@@ -11913,13 +11918,13 @@ function updateBattle(dt) {
     }
 
     // ドン(1): 大地ゲージ自然減少
-    if (p.charIdx === 1 && battleTime % 30 === 0 && p.donEarthGauge > 0) p.donEarthGauge = Math.max(0, p.donEarthGauge - 1);
+    if (p.charIdx === 1 && battleFrame % 30 === 0 && p.donEarthGauge > 0) p.donEarthGauge = Math.max(0, p.donEarthGauge - 1);
     // サイソク(2): 加速ゲージ（移動で蓄積、静止で急減）
     if (p.charIdx === 2) {
       if (p.saisokuLightSpeed > 0) p.saisokuLightSpeed--;
       const spd = Math.abs(p.vx);
       if (spd > 1) p.saisokuAccelGauge = Math.min(100, (p.saisokuAccelGauge||0) + spd * 0.05);
-      else if (battleTime % 6 === 0) p.saisokuAccelGauge = Math.max(0, (p.saisokuAccelGauge||0) - 1);
+      else if (battleFrame % 6 === 0) p.saisokuAccelGauge = Math.max(0, (p.saisokuAccelGauge||0) - 1);
       if (p.saisokuAccelGauge >= 100 && !p.saisokuLightSpeed) {
         p.saisokuLightSpeed = 300; p.saisokuAccelGauge = 0;
         cmdNameDisplay.push({ text: 'LIGHT SPEED!!', x: p.x, y: p.y - 100, life: 90, maxLife: 90, color: '#FFFFFF' });
@@ -11928,7 +11933,7 @@ function updateBattle(dt) {
     // うる男(5): 野性ゲージ自然減少
     if (p.charIdx === 5) {
       if (p.uruoWildRelease > 0) p.uruoWildRelease--;
-      if (battleTime % 20 === 0 && p.uruoWildGauge > 0 && !p.uruoWildRelease) p.uruoWildGauge = Math.max(0, p.uruoWildGauge - 1);
+      if (battleFrame % 20 === 0 && p.uruoWildGauge > 0 && !p.uruoWildRelease) p.uruoWildGauge = Math.max(0, p.uruoWildGauge - 1);
       if (p.uruoWildGauge >= 100 && !p.uruoWildRelease) {
         p.uruoWildRelease = 420; p.uruoWildGauge = 0;
         cmdNameDisplay.push({ text: 'WILD RELEASE!!', x: p.x, y: p.y - 100, life: 90, maxLife: 90, color: '#88CCFF' });
@@ -11937,7 +11942,7 @@ function updateBattle(dt) {
     // バレット(7): 魔法ゲージ自然減少
     if (p.charIdx === 7) {
       if (p.bulletAwaken > 0) p.bulletAwaken--;
-      if (battleTime % 20 === 0 && p.bulletMagicGauge > 0 && !p.bulletAwaken) p.bulletMagicGauge = Math.max(0, p.bulletMagicGauge - 1);
+      if (battleFrame % 20 === 0 && p.bulletMagicGauge > 0 && !p.bulletAwaken) p.bulletMagicGauge = Math.max(0, p.bulletMagicGauge - 1);
       if (p.bulletMagicGauge >= 100 && !p.bulletAwaken) {
         p.bulletAwaken = 480; p.bulletMagicGauge = 0;
         cmdNameDisplay.push({ text: 'MAGICAL BURST!!', x: p.x, y: p.y - 100, life: 90, maxLife: 90, color: '#FF66AA' });
@@ -11951,7 +11956,7 @@ function updateBattle(dt) {
     // おんぱ(17): 周波数自然減少
     if (p.charIdx === 17) {
       if (p.onpaResonance > 0) p.onpaResonance--;
-      if (battleTime % 15 === 0 && p.onpaFreqGauge > 0 && !p.onpaResonance) p.onpaFreqGauge = Math.max(0, p.onpaFreqGauge - 1);
+      if (battleFrame % 15 === 0 && p.onpaFreqGauge > 0 && !p.onpaResonance) p.onpaFreqGauge = Math.max(0, p.onpaFreqGauge - 1);
       if (p.onpaFreqGauge >= 100 && !p.onpaResonance) {
         p.onpaResonance = 360; p.onpaFreqGauge = 0;
         cmdNameDisplay.push({ text: 'RESONANCE!!', x: p.x, y: p.y - 100, life: 90, maxLife: 90, color: '#88FFFF' });
@@ -11969,7 +11974,7 @@ function updateBattle(dt) {
     // ぽよ(26): スライムゲージ自然減少・ダブルスライム
     if (p.charIdx === 26) {
       if (p.poyoDoubleSlime > 0) p.poyoDoubleSlime--;
-      if (battleTime % 15 === 0 && p.poyoSlimeGauge > 0 && !p.poyoDoubleSlime) p.poyoSlimeGauge = Math.max(0, p.poyoSlimeGauge - 1);
+      if (battleFrame % 15 === 0 && p.poyoSlimeGauge > 0 && !p.poyoDoubleSlime) p.poyoSlimeGauge = Math.max(0, p.poyoSlimeGauge - 1);
       if (p.poyoSlimeGauge >= 100 && !p.poyoDoubleSlime) {
         p.poyoDoubleSlime = 480; p.poyoSlimeGauge = 0; // 8秒
         cmdNameDisplay.push({ text: 'DOUBLE SLIME!!', x: p.x, y: p.y - 100, life: 90, maxLife: 90, color: '#FF88CC' });
@@ -12033,11 +12038,11 @@ function updateBattle(dt) {
     }
     p._wasGrounded = p.grounded;
     // サイソク(2): 高速移動中残像
-    if (ci === 2 && Math.abs(p.vx) > 6 && battleTime % 3 === 0) {
+    if (ci === 2 && Math.abs(p.vx) > 6 && battleFrame % 3 === 0) {
       sparks.push({ x: p.x, y: p.y - 35, vx: 0, vy: 0, life: 8, maxLife: 8, color: '#44FFAA', size: 15, gravity: 0, drag: 1, type: 'charGhost' });
     }
     // メテオ(3): 常時炎エフェクト + 接触ダメージ
-    if (ci === 3 && battleTime % 8 === 0 && p.alive) {
+    if (ci === 3 && battleFrame % 8 === 0 && p.alive) {
       sparks.push({ x: p.x + (Math.random()-0.5)*20, y: p.y - 20, vx: (Math.random()-0.5)*1.5, vy: -1-Math.random(), life: 10, maxLife: 10, color: Math.random()>0.5?'#FFD700':'#FF8833', size: 2+Math.random(), gravity: -0.03, drag: 0.96 });
     }
     // メテオ(3): 燃焼オーラ - 近接攻撃を受けた時、相手にも微小ダメージ
@@ -12059,7 +12064,7 @@ function updateBattle(dt) {
         hitEffects.push({ x: p.x, y: p.y - 35, life: 15, maxLife: 15, color: '#FF4444', size: 50, type: 'ring' });
       }
       // 怒り中のオーラエフェクト
-      if (p.rageActive && battleTime % 6 === 0) {
+      if (p.rageActive && battleFrame % 6 === 0) {
         sparks.push({ x: p.x + (Math.random()-0.5)*24, y: p.y - 10, vx: (Math.random()-0.5)*1, vy: -1.5-Math.random(), life: 8, maxLife: 8, color: '#FF4444', size: 2+Math.random(), gravity: -0.02, drag: 0.96 });
       }
     }
@@ -12089,7 +12094,7 @@ function updateBattle(dt) {
         if (p.y > STAGE_GROUND_Y) { p.y = STAGE_GROUND_Y; p.vy = Math.min(0, p.vy); }
         if (p.x < STAGE_LEFT - 60) { p.x = STAGE_LEFT - 60; }
         if (p.x > STAGE_RIGHT + 60) { p.x = STAGE_RIGHT + 60; }
-        if (battleTime % 4 === 0) {
+        if (battleFrame % 4 === 0) {
           sparks.push({ x: p.x + (Math.random()-0.5)*20, y: p.y - 10, vx: 0, vy: 1.2,
             life: 20, maxLife: 20, color: '#FF99DD', size: 2.5, gravity: 0, drag: 0.98 });
         }
@@ -12168,7 +12173,7 @@ function updateBattle(dt) {
     if (ci === 24 && p.alive) {
       for (const t of players) {
         if (t.id !== p.id && t.ultimateGauge !== undefined) {
-          if (battleTime % 12 === 0 && t.ultimateGauge > 0) t.ultimateGauge = Math.max(0, t.ultimateGauge - 0.05);
+          if (battleFrame % 12 === 0 && t.ultimateGauge > 0) t.ultimateGauge = Math.max(0, t.ultimateGauge - 0.05);
         }
       }
       // 近くの相手が震えるエフェクト（微小な位置揺れ用フラグ）
@@ -12178,7 +12183,7 @@ function updateBattle(dt) {
         }
       }
       // 怖のオーラエフェクト
-      if (battleTime % 12 === 0) {
+      if (battleFrame % 12 === 0) {
         sparks.push({ x: p.x + (Math.random()-0.5)*30, y: p.y - 20, vx: 0, vy: -0.5, life: 15, maxLife: 15, color: '#880044', size: 2+Math.random(), gravity: -0.01, drag: 0.98 });
       }
     }
@@ -12451,7 +12456,7 @@ function updateBattle(dt) {
       if (p.techWindow > 0) p.techWindow--;
 
       // テクニング猶予中の白い光（視覚フィードバック）
-      if (p.techWindow > 0 && battleTime % 2 === 0) {
+      if (p.techWindow > 0 && battleFrame % 2 === 0) {
         p.damageTint = Math.max(p.damageTint, 2);
       }
 
@@ -12515,7 +12520,7 @@ function updateBattle(dt) {
       const rec2 = (p.charIdx === 29 && p.botRobot > 0) ? BOT_ROBOT_RECOVERY : RECOVERY_MOVES[p.charIdx];
       // 上昇中は重力無視
       // エフェクトパーティクル
-      if (rec2 && battleTime % 3 === 0) {
+      if (rec2 && battleFrame % 3 === 0) {
         sparks.push({ x: p.x + (Math.random()-0.5)*15, y: p.y, vx: (Math.random()-0.5)*2, vy: 1+Math.random(), life: 8, maxLife: 8, color: rec2.color, size: 2+Math.random()*2, gravity: 0.05, drag: 0.95 });
       }
       // ヒットボックス（最初の8Fのみ、1回ヒットで終了）
@@ -15050,7 +15055,7 @@ function drawBattle(dt) {
         });
       }
       // Max charge flash
-      if (chargeRatio >= 1 && battleTime % 10 < 5) {
+      if (chargeRatio >= 1 && battleFrame % 10 < 5) {
         ctx.globalAlpha = 0.3;
         ctx.fillStyle = '#FFFFFF';
         ctx.beginPath();
@@ -15074,13 +15079,13 @@ function drawBattle(dt) {
       ctx.arc(p.x, p.y - 40, 35, 0, Math.PI * 2);
       ctx.fill();
       // Steam particles
-      if (battleTime % 8 === 0) {
+      if (battleFrame % 8 === 0) {
         sparks.push({ x: p.x + (Math.random()-0.5)*20, y: p.y - 30, vx: (Math.random()-0.5)*1.5, vy: -1.5-Math.random()*1.5,
           life: 12, maxLife: 15, color: '#FFDDAA', size: 2+Math.random()*2, gravity: -0.03, drag: 0.98 });
       }
       // Buff timer indicator (flashing when low)
       const buffRatio = p.senBuffTimer / 600;
-      if (buffRatio < 0.3 && battleTime % 10 < 5) {
+      if (buffRatio < 0.3 && battleFrame % 10 < 5) {
         ctx.globalAlpha = 0.5;
         ctx.strokeStyle = '#FF8844';
         ctx.lineWidth = 2;
@@ -15130,7 +15135,7 @@ function drawBattle(dt) {
       const timerRatio = p.dragonTimer / 900;
       if (timerRatio < 0.3) {
         // Flashing warning when time is running out
-        if (battleTime % 10 < 5) {
+        if (battleFrame % 10 < 5) {
           ctx.globalAlpha = 0.5;
           ctx.strokeStyle = '#FF0000';
           ctx.lineWidth = 2;
@@ -15140,7 +15145,7 @@ function drawBattle(dt) {
         }
       }
       // Fire particles
-      if (battleTime % 6 === 0) {
+      if (battleFrame % 6 === 0) {
         sparks.push({ x: p.x + (Math.random()-0.5)*20, y: p.y - 20, vx: (Math.random()-0.5)*2, vy: -1-Math.random()*2,
           life: 10, maxLife: 15, color: '#FF6600', size: 2+Math.random()*2, type: 'fireball', gravity: -0.05, drag: 0.98 });
       }
@@ -17338,7 +17343,7 @@ function drawBattleHUD() {
     const activeMode = modeTimers.find(t => t > 0);
     if (activeMode) {
       // パーティクル（テーマカラー）
-      if (battleTime % 4 === 0) {
+      if (battleFrame % 4 === 0) {
         const a = Math.random() * Math.PI * 2;
         sparks.push({ x: gp.x + Math.cos(a)*20, y: gp.y - 35 + Math.sin(a)*20,
           vx: Math.cos(a)*1.5, vy: Math.sin(a)*1.5 - 1, life: 10, maxLife: 10,
@@ -17563,7 +17568,7 @@ function drawBattleHUD() {
       const mDesc = POWER_DESCS[bp.charIdx] || '';
       const bx = bp.id === 0 ? 180 : 780;
       // 半透明帯
-      ctx.globalAlpha = sec <= 3 && battleTime % 10 < 5 ? 0.4 : 0.7; // 3秒前点滅
+      ctx.globalAlpha = sec <= 3 && battleFrame % 10 < 5 ? 0.4 : 0.7; // 3秒前点滅
       ctx.fillStyle = 'rgba(0,0,0,0.6)';
       roundRect(ctx, bx - 120, 60, 240, 24, 6); ctx.fill();
       ctx.strokeStyle = gc2; ctx.lineWidth = 1.5;
@@ -18410,6 +18415,7 @@ function applyHostState(data) {
 function updateGuestEffects(dt) {
   // Increment battleTime for animation purposes
   battleTime += dt;
+  battleFrame++;
 
   // Client prediction: フル速度で予測移動（ホストデータ間を補完）
   for (const p of players) {
@@ -18958,21 +18964,22 @@ function drawTransition() {
 }
 
 // --- スマッシュ攻撃システム ---
-// ※ 2026-11 時点で 未使用。方向2回入力の スマッシュ攻撃は どこからも 呼ばれておらず、
-//    README と 詳細画面が 載せている「-> -> + Z」は 実際には 動いていない。
-//    復活させる なら handleKeyDown の X処理で checkSmashReady() を 呼ぶ。
+// 方向キーを 押した 瞬間に 呼ぶ。同じ方向を 素早く 2回 押すと スマッシュが 構える。
+// 呼び元: handleKeyDown の P1 方向キー / gameLoop の リモート入力（ゲスト）
 function trackSmashInput(p, dir) {
-  if (p.smashInputDir === dir && (battleTime - p.smashInputTime) < SMASH_INPUT_WINDOW) {
+  if (!p || !p.alive) return;
+  if (p.smashInputDir === dir && (battleFrame - p.smashInputTime) < SMASH_INPUT_WINDOW) {
     p.smashInputCount++;
   } else {
     p.smashInputDir = dir;
     p.smashInputCount = 1;
   }
-  p.smashInputTime = battleTime;
+  p.smashInputTime = battleFrame;
 }
 
 function checkSmashReady(p) {
-  if (p.smashInputCount >= 2 && (battleTime - p.smashInputTime) < SMASH_INPUT_WINDOW) {
+  if (!p) return null;
+  if (p.smashInputCount >= 2 && (battleFrame - p.smashInputTime) < SMASH_INPUT_WINDOW) {
     const dir = p.smashInputDir;
     p.smashInputCount = 0;
     if (dir === 'up') return 'upSmash';
@@ -21098,10 +21105,11 @@ function handleKeyDown(e) {
     }
 
     // P1 direction input for commands (host or offline)
-    if (e.key === 'ArrowDown') addCmdInput(0, 'D');
-    if (e.key === 'ArrowUp') addCmdInput(0, 'U');
-    if (e.key === 'ArrowLeft') addCmdInput(0, 'L');
-    if (e.key === 'ArrowRight') addCmdInput(0, 'R');
+    // e.repeat を 弾かないと キーの 自動リピートで スマッシュが 暴発する
+    if (e.key === 'ArrowDown') { addCmdInput(0, 'D'); if (!e.repeat) trackSmashInput(p1, 'down'); }
+    if (e.key === 'ArrowUp') { addCmdInput(0, 'U'); if (!e.repeat) trackSmashInput(p1, 'up'); }
+    if (e.key === 'ArrowLeft') { addCmdInput(0, 'L'); if (!e.repeat) trackSmashInput(p1, 'side'); }
+    if (e.key === 'ArrowRight') { addCmdInput(0, 'R'); if (!e.repeat) trackSmashInput(p1, 'side'); }
 
     // P1 attacks: Z X C
     if (e.key === 'z' || e.key === 'Z') {
@@ -21151,8 +21159,11 @@ function handleKeyDown(e) {
       // ↑+X で復帰技（空中のみ）
       if (keys['ArrowUp'] && !p1.grounded && !p1.recoveryUsed) {
         executeRecovery(p1);
-      } else if (!tryCancelAttack(p1, 'strong')) {
-        startAttack(p1, 'strong');
+      } else {
+        // 方向2回入力の 直後なら スマッシュ攻撃（溜めて 離すと 強くなる）
+        const smash = checkSmashReady(p1);
+        if (smash && p1.grounded) startSmashAttack(p1, smash);
+        else if (!tryCancelAttack(p1, 'strong')) startAttack(p1, 'strong');
       }
     }
     // P1 Throw (A key) / 投げ抜け
@@ -21386,8 +21397,13 @@ function gameLoopInner(timestamp) {
           }
           // X pressed - 上入力中なら 復帰技（これが 無く、ゲストは 崖外から 戻れなかった）
           if (rk.x && !prk.x) {
-            if (rk.up && !rp.grounded && !rp.recoveryUsed) { executeRecovery(rp); }
-            else if (!tryCancelAttack(rp, 'strong')) { startAttack(rp, 'strong'); }
+            if (rk.up && !rp.grounded && !rp.recoveryUsed) {
+              executeRecovery(rp);
+            } else {
+              const rsmash = checkSmashReady(rp);
+              if (rsmash && rp.grounded) startSmashAttack(rp, rsmash);
+              else if (!tryCancelAttack(rp, 'strong')) startAttack(rp, 'strong');
+            }
           }
           // A pressed - 投げ / 投げ抜け
           if (rk.a && !prk.a) {
@@ -21406,11 +21422,11 @@ function gameLoopInner(timestamp) {
               if (!tryCancelAttack(rp, 'special')) { startAttack(rp, 'special'); }
             }
           }
-          // Direction commands
-          if (rk.down && !prk.down) addCmdInput(1, 'D');
-          if (rk.up && !prk.up) addCmdInput(1, 'U');
-          if (rk.left && !prk.left) addCmdInput(1, 'L');
-          if (rk.right && !prk.right) addCmdInput(1, 'R');
+          // Direction commands（スマッシュの 2回入力も ここで 記録する）
+          if (rk.down && !prk.down) { addCmdInput(1, 'D'); trackSmashInput(rp, 'down'); }
+          if (rk.up && !prk.up) { addCmdInput(1, 'U'); trackSmashInput(rp, 'up'); }
+          if (rk.left && !prk.left) { addCmdInput(1, 'L'); trackSmashInput(rp, 'side'); }
+          if (rk.right && !prk.right) { addCmdInput(1, 'R'); trackSmashInput(rp, 'side'); }
           // S pressed - Air Dodge
           if (rk.s && !prk.s) {
             if (canAirDodge(rp)) {
