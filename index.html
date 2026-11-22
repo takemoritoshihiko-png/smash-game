@@ -73,14 +73,7 @@ function runPauseItem(label) {
     closePause();
     stopBGM();
     bossRushMode = false;
-    if (onlineMode) {
-      if (peer) { try { peer.destroy(); } catch (ex) {} peer = null; }
-      peerConn = null;
-      onlineMode = false;
-      onlineState = 'menu';
-      onlineInputId = '';
-      onlineError = '';
-    }
+    if (onlineMode) { teardownOnlineSession(); onlineError = ''; }
     startTransition('title');
     return;
   }
@@ -17710,6 +17703,37 @@ function generateRoomId() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
+// オンラインの 後始末。自分で やめる ときは これだけ 呼ぶ（画面は 呼び出し側が 決める）
+let onlineTeardown = false;
+function teardownOnlineSession() {
+  onlineTeardown = true;   // peer.destroy() が 呼ぶ 'close' を 無視させる
+  if (onlineConnectTimeout) { clearTimeout(onlineConnectTimeout); onlineConnectTimeout = null; }
+  if (peer) { try { peer.destroy(); } catch (ex) {} peer = null; }
+  peerConn = null;
+  onlineMode = false;
+  onlineState = 'menu';
+  onlineInputId = '';
+  remoteKeys = {}; prevRemoteKeys = {};   // 残ると 相手が キーを 押しっぱなしに なる
+  hostLastSentState = null; lastGuestKeys = null;
+  onlineTeardown = false;
+}
+
+// 相手が 切れた ときの 後始末。
+// これを やらないと バトルが そのまま ローカル対戦として 走り続ける
+function handleOnlineDisconnect(msg) {
+  if (onlineTeardown) return;   // 自分で 閉じた ときの 二重呼び出し
+  const wasInGame = (scene === 'battle' || scene === 'vsintro' || scene === 'stageselect' ||
+                     (scene === 'select' && onlineMode));
+  teardownOnlineSession();
+  onlineError = msg || 'Disconnected';
+  closePause();
+  if (wasInGame) {
+    stopBGM();
+    bossRushMode = false;
+    if (!transitioning) startTransition('online');
+  }
+}
+
 function setupPeerConnection(conn) {
   peerConn = conn;
   conn.on('open', () => {
@@ -17744,7 +17768,7 @@ function setupPeerConnection(conn) {
       if (scene === 'select' || scene === 'stageselect') startTransition('vsintro');
     } else if (data.type === 'input') {
       // Host receives guest input
-      if (isHost) {
+      if (isHost && data.keys && typeof data.keys === 'object') {
         remoteKeys = data.keys;
       }
     } else if (data.type === 'ultimate') {
@@ -17757,6 +17781,22 @@ function setupPeerConnection(conn) {
       // ゲスト側でも必殺技動画を再生（darken→text→video の流れ）
       // charIdxを保存してvideo phaseで使用
       ultimateHitTarget = players.find(pp => pp.id !== data.playerId) ? players.find(pp => pp.id !== data.playerId).id : -1;
+    } else if (data.type === 'rematch') {
+      // ホストが 再戦を 決めた
+      if (!isHost) { closePause(); initBattle(); }
+    } else if (data.type === 'rematchReq') {
+      // ゲストが 再戦を 希望 → ホストが 決めて 両方に 反映
+      if (isHost && gameOver && gameSetTimer > 180) {
+        if (peerConn && peerConn.open) peerConn.send({ type: 'rematch' });
+        closePause(); initBattle();
+      }
+    } else if (data.type === 'quitToSelect') {
+      if (!isHost) { closePause(); stopBGM(); startTransition('select'); }
+    } else if (data.type === 'quitReq') {
+      if (isHost && gameOver && gameSetTimer > 180) {
+        if (peerConn && peerConn.open) peerConn.send({ type: 'quitToSelect' });
+        closePause(); stopBGM(); startTransition('select');
+      }
     } else if (data.type === 'state') {
       // Guest receives authoritative full state from host
       if (!isHost) {
@@ -17788,10 +17828,7 @@ function setupPeerConnection(conn) {
   });
   conn.on('close', () => {
     console.log('[ONLINE] Connection closed');
-    onlineError = 'Disconnected';
-    onlineState = 'menu';
-    onlineMode = false;
-    peerConn = null;
+    handleOnlineDisconnect('The opponent disconnected');
   });
   conn.on('error', (err) => {
     console.error('[ONLINE] Connection error:', err);
@@ -17813,6 +17850,7 @@ const PEER_CONFIG = {
 let onlineConnectTimeout = null;
 
 function startHosting() {
+  teardownOnlineSession();   // 前のセッションを 必ず 捨ててから 始める
   onlineRoomId = generateRoomId();
   onlineState = 'hosting';
   onlineError = '';
@@ -17832,6 +17870,7 @@ function startHosting() {
     console.error('[ONLINE] Peer error:', err.type, err);
     onlineError = 'Connection error: ' + (err.type === 'unavailable-id' ? 'That ID is already taken' : err.type === 'network' ? 'Network error' : err.type === 'server-error' ? 'Server error' : err.message || err.type);
     onlineState = 'menu';
+    if (peer) { try { peer.destroy(); } catch (ex) {} peer = null; }
   });
   peer.on('disconnected', () => {
     console.log('[ONLINE] Peer disconnected, attempting reconnect...');
@@ -17842,6 +17881,7 @@ function startHosting() {
 function joinRoom(roomId) {
   roomId = (roomId || '').trim();
   if (!roomId || roomId.length < 4) { onlineError = 'Enter an ID of 4 or more characters'; return; }
+  teardownOnlineSession();   // 前のセッションを 必ず 捨ててから 始める
   onlineState = 'joining';
   onlineError = '';
   isHost = false;
@@ -17865,6 +17905,7 @@ function joinRoom(roomId) {
     if (onlineConnectTimeout) { clearTimeout(onlineConnectTimeout); onlineConnectTimeout = null; }
     onlineError = err.type === 'peer-unavailable' ? 'Opponent not found. Check the ID.' : err.type === 'network' ? 'Network error' : (err.message || err.type);
     onlineState = 'menu';
+    if (peer) { try { peer.destroy(); } catch (ex) {} peer = null; }
   });
   peer.on('disconnected', () => {
     console.log('[ONLINE] Peer disconnected, attempting reconnect...');
@@ -17970,6 +18011,7 @@ function sendHostState() {
       p1: serializePlayer(p1),
       p2: serializePlayer(p2),
       battleTimer, battleStarted, battleCountdown, gameOver, winner,
+      ultActive: ultimateActive,
       hitStopFrames,
       koSlowMotion: { active: koSlowMotion.active, frames: koSlowMotion.frames, maxFrames: koSlowMotion.maxFrames },
       projectiles: projectiles.map(pr => ({
@@ -18010,6 +18052,14 @@ let onlineLagFrames = 0;
 
 function applyHostState(data) {
   if (!players[0] || !players[1]) return;
+
+  // 保険: ホスト側では 必殺技が 終わっているのに ゲストだけ 暗転したままに なる のを 防ぐ
+  // （動画の 読み込み速度が 端末ごとに 違うため ずれる ことがある）
+  if (data.ultActive === false && ultimateActive && ultimateTimer > 120) {
+    ultimateActive = false; ultimatePhase = ''; ultimateTimer = 0;
+    try { removeUltimateVideo(); } catch (ex) {}
+    try { fadeInBGM(0.5); } catch (ex) {}
+  }
 
   // RTT計測: ホストからのタイムスタンプを利用
   if (data._ts) {
@@ -20744,11 +20794,7 @@ function handleKeyDown(e) {
     if (e.key === 'Escape') startTransition('title');
   } else if (scene === 'online') {
     if (e.key === 'Escape') {
-      if (peer) { peer.destroy(); peer = null; }
-      peerConn = null;
-      onlineMode = false;
-      onlineState = 'menu';
-      onlineInputId = '';
+      teardownOnlineSession();
       onlineError = '';
       startTransition('title');
     }
@@ -20923,12 +20969,17 @@ function handleKeyDown(e) {
       }
     }
 
-    // I key: open character detail page
-    if ((e.key === 'i' || e.key === 'I') && !p1Confirmed && modeSelected && p1Select < characters.length) {
-      charDetailIdx = p1Select;
-      charDetailTab = 0;
-      startTransition('chardetail');
-      return;
+    // I key: open character detail page（オンラインのゲストは 自分のカーソルは p2Select）
+    {
+      const isGuest = onlineMode && !isHost;
+      const mySel = isGuest ? p2Select : p1Select;
+      const myConfirmed = isGuest ? p2Confirmed : p1Confirmed;
+      if ((e.key === 'i' || e.key === 'I') && !myConfirmed && modeSelected && mySel < characters.length) {
+        charDetailIdx = mySel;
+        charDetailTab = 0;
+        startTransition('chardetail');
+        return;
+      }
     }
 
     if (e.key === 'Escape') {
@@ -21004,9 +21055,27 @@ function handleKeyDown(e) {
         return;
       }
       // リマッチ
+      if (onlineMode) {
+        if (isHost) {
+          if (peerConn && peerConn.open) peerConn.send({ type: 'rematch' });
+          closePause(); initBattle();
+        } else if (peerConn && peerConn.open) {
+          peerConn.send({ type: 'rematchReq' });   // ホストが 受けて 両方 やり直す
+        }
+        return;
+      }
       initBattle(); return;
     }
     if (gameOver && gameSetTimer > 180 && e.key === 'Escape') {
+      if (onlineMode) {
+        if (isHost) {
+          if (peerConn && peerConn.open) peerConn.send({ type: 'quitToSelect' });
+          closePause(); stopBGM(); startTransition('select');
+        } else if (peerConn && peerConn.open) {
+          peerConn.send({ type: 'quitReq' });
+        }
+        return;
+      }
       stopBGM();
       bossRushMode = false;
       startTransition('select'); return;
@@ -21027,6 +21096,11 @@ function handleKeyDown(e) {
     }
 
     if (!battleStarted || gameOver) return;
+
+    // Online: ゲストの 入力は keys{} に 入って sendGuestInput() で ホストへ 送られる。
+    // ここで ローカルの ゲーム状態を 触ると 相手キャラを 勝手に 動かしてしまうので 何もしない
+    if (onlineMode && !isHost) return;
+
     const p1 = players[0], p2 = players[1];
 
     // 崖つかまり中の入力処理（P1）
@@ -21047,14 +21121,6 @@ function handleKeyDown(e) {
         else releaseLedge(p2, 'normal');
       }
       if (e.key === 's' || e.key === 'S') releaseLedge(p2, 'drop');
-      return;
-    }
-
-    // Online: guest's local input controls P2, not P1
-    // Remote attacks are handled in the game loop via remoteKeys
-    if (onlineMode && !isHost) {
-      // Guest: input is recorded in keys{} and sent via sendGuestInput()
-      // No local game state changes - host is authoritative
       return;
     }
 
@@ -21302,23 +21368,36 @@ function gameLoop(timestamp) {
         if (rp && rp.alive && battleStarted && !gameOver) {
           const rk = remoteKeys;
           const prk = prevRemoteKeys;
-          // Z pressed
+          // Z pressed  ※ P1(ローカル)の 処理と 同じに なるよう そろえること
           if (rk.z && !prk.z) {
-            const cmd = checkCommandInput(rp);
-            if (cmd && cmd.chargeCmd) {
-              if (!rp.charging && !rp.attacking) { rp.charging = true; rp.chargeTime = 0; rp.chargeCmd = cmd; }
-            } else if (cmd && executeCommand(rp, cmd)) {
-            } else if (!rp.grounded && rk.down) { startAttack(rp, 'downair');
-            } else if (!rp.grounded) { startAttack(rp, 'aerial');
-            } else if (rp.grounded && Math.abs(rp.vx) > 3 && (rk.left || rk.right)) { startAttack(rp, 'dash');
-            } else if (rk.up) { startAttack(rp, 'up');
-            } else if (rk.left || rk.right) { startAttack(rp, 'side');
-            } else if (rk.down) { startAttack(rp, 'down');
-            } else { startAttack(rp, 'normal'); }
+            if (rp.grabbing) {
+              // 掴み中の Z = 掴み攻撃
+              const gt = players.find(pp => pp.id === rp.grabTarget);
+              if (gt) { gt.damage = Math.min(999, gt.damage + 2); hitEffects.push({x:gt.x,y:gt.y-40,life:6,maxLife:6,color:'#FFF',size:10}); }
+            } else {
+              const cmd = checkCommandInput(rp);
+              if (cmd && cmd.chargeCmd) {
+                if (!rp.charging && !rp.attacking) { rp.charging = true; rp.chargeTime = 0; rp.chargeCmd = cmd; }
+              } else if (cmd && executeCommand(rp, cmd)) {
+              } else if (!rp.grounded && rk.down) { startAttack(rp, 'downair');
+              } else if (!rp.grounded && rk.up) { startAttack(rp, 'airup');
+              } else if (!rp.grounded && ((rk.right && !rp.facingLeft) || (rk.left && rp.facingLeft))) { startAttack(rp, 'airfront');
+              } else if (!rp.grounded && ((rk.left && !rp.facingLeft) || (rk.right && rp.facingLeft))) { startAttack(rp, 'airback');
+              } else if (!rp.grounded) { startAttack(rp, 'aerial');
+              } else if (rp.grounded && Math.abs(rp.vx) > 3 && (rk.left || rk.right)) { startAttack(rp, 'dash');
+              } else if (rk.up) { startAttack(rp, 'up');
+              } else if (rk.left || rk.right) { startAttack(rp, 'side');
+              } else if (rk.down) { startAttack(rp, 'down');
+              } else {
+                if (rp.jabTimer > 0 && rp.jabCount >= 2) { startJabCombo(rp); }
+                else { rp.jabCount++; rp.jabTimer = 18; startAttack(rp, 'normal'); }
+              }
+            }
           }
-          // X pressed - キャンセル対応
+          // X pressed - 上入力中なら 復帰技（これが 無く、ゲストは 崖外から 戻れなかった）
           if (rk.x && !prk.x) {
-            if (!tryCancelAttack(rp, 'strong')) { startAttack(rp, 'strong'); }
+            if (rk.up && !rp.grounded && !rp.recoveryUsed) { executeRecovery(rp); }
+            else if (!tryCancelAttack(rp, 'strong')) { startAttack(rp, 'strong'); }
           }
           // A pressed - 投げ / 投げ抜け
           if (rk.a && !prk.a) {
@@ -21329,9 +21408,11 @@ function gameLoop(timestamp) {
               tryGrab(rp);
             }
           }
-          // C pressed - キャンセル対応
+          // C pressed - コンボフィニッシャー優先（これが 無く、ゲストは 一生 使えなかった）
           if (rk.c && !prk.c) {
-            if (!(rp.charIdx === 10 && !rp.dragonMode && rp.damage >= 80 && rp.dragonCooldown <= 0 && rp.grounded)) {
+            if (canComboFinisher(rp.id)) {
+              executeComboFinisher(rp);
+            } else if (!(rp.charIdx === 10 && !rp.dragonMode && rp.damage >= 80 && rp.dragonCooldown <= 0 && rp.grounded)) {
               if (!tryCancelAttack(rp, 'special')) { startAttack(rp, 'special'); }
             }
           }
