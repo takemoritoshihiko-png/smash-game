@@ -21,53 +21,54 @@
 //   変更したら  node tools/smoketest.mjs  を 必ず 走らせること。
 //   目次が ずれたら  node tools/toc.mjs  で 作り直す。
 //
-//   80    CANVAS / 画面サイズ
-//   917   音の ロック解除（最初の 操作で 呼ぶ）
-//   946   キャラ画像（遅延読み込み）
-//   1126  タイトル画面の 粒子
-//   1165  キャラの 絵 ①メニュー用（選択画面・詳細画面）
-//   2825  キャラの 絵 ②バトル用
-//   5341  描画ユーティリティ
-//   5390  画面: タイトル
-//   5514  画面: キャラ選択
-//   5764  画面: 難易度選択（CPU戦）
-//   5864  画面: ステージ選択
-//   6095  バトルの 定数 と 状態
-//   6497  復帰技 / パワーモードの 表示
-//   6545  カメラ / 画面揺れ
-//   6564  効果音（Web Audio で 合成）
-//   6982  観客の 音
-//   7325  ヒット表示 / コミック文字
-//   7353  掴み・投げ の 定数と キャラ別テーブル
-//   7404  コマンド技（→→↓↓+Z など）
-//   7895  技データ
-//   8660  プレイヤー生成 / 試合の 初期化
-//   9005  ヒット処理（ダメージ・ノックバック）
-//   10344 当たり判定
-//   10376 飛び道具
-//   10419 技の 発動（通常技・復帰技・ジャブ）
-//   10678 掴み・投げ の 実行
-//   10903 CPU の 思考
-//   11249 バトルの 毎フレーム更新（中核）
-//   13667 物理（移動・重力・着地・撃墜判定）
-//   14154 バトル描画の 下準備（カメラ・影・2.5D）
-//   14254 バトル画面の 描画
-//   16285 技の エフェクト描画
-//   17360 画面: コンボ一覧 / 戦績
-//   17493 バトルの HUD
-//   17959 オンライン対戦（PeerJS / ホストが 正）
-//   18887 画面: VS イントロ
-//   19172 画面の 切り替え（フェード）
-//   19206 スマッシュ攻撃（方向2回 + X）
-//   19310 崖つかまり
-//   19403 D技 と 必殺技 の データ
-//   19967 D技の 中身（キャラ別）
-//   20485 空中回避
-//   20546 ポーズメニュー（バトル中に ESC）
-//   20627 画面: キャラ詳細（Iキー）
-//   20840 画面: 操作説明
-//   20964 キー入力の 振り分け（画面ごと）
-//   21518 メインループ（60FPS 固定タイムステップ）
+//   81    CANVAS / 画面サイズ
+//   918   音の ロック解除（最初の 操作で 呼ぶ）
+//   947   キャラ画像（遅延読み込み）
+//   1127  タイトル画面の 粒子
+//   1166  キャラの 絵 ①メニュー用（選択画面・詳細画面）
+//   2826  キャラの 絵 ②バトル用
+//   5342  描画ユーティリティ
+//   5391  画面: タイトル
+//   5515  画面: キャラ選択
+//   5765  画面: 難易度選択（CPU戦）
+//   5865  画面: ステージ選択
+//   6096  バトルの 定数 と 状態
+//   6498  復帰技 / パワーモードの 表示
+//   6546  カメラ / 画面揺れ
+//   6565  効果音（Web Audio で 合成）
+//   6983  観客の 音
+//   7326  ヒット表示 / コミック文字
+//   7354  掴み・投げ の 定数と キャラ別テーブル
+//   7405  コマンド技（→→↓↓+Z など）
+//   7896  技データ
+//   8661  プレイヤー生成 / 試合の 初期化
+//   9006  ヒット処理（ダメージ・ノックバック）
+//   10345 当たり判定
+//   10377 飛び道具
+//   10420 技の 発動（通常技・復帰技・ジャブ）
+//   10679 掴み・投げ の 実行
+//   10904 CPU の 思考
+//   11250 バトルの 毎フレーム更新（中核）
+//   13668 物理（移動・重力・着地・撃墜判定）
+//   14155 スマッシュ攻撃（方向2回 + X）
+//   14259 崖つかまり
+//   14353 D技 と 必殺技 の データ
+//   14748 D技の 中身（キャラ別）
+//   15267 空中回避
+//   15329 バトル描画の 下準備（カメラ・影・2.5D）
+//   15429 バトル画面の 描画
+//   17460 技の エフェクト描画
+//   18535 必殺技 / 即死技 の 全画面オーバーレイ
+//   18708 画面: コンボ一覧 / 戦績
+//   18841 バトルの HUD
+//   19307 オンライン対戦（PeerJS / ホストが 正）
+//   20235 画面: VS イントロ
+//   20520 画面の 切り替え（フェード）
+//   20555 ポーズメニュー（バトル中に ESC）
+//   20636 画面: キャラ詳細（Iキー）
+//   20849 画面: 操作説明
+//   20973 キー入力の 振り分け（画面ごと）
+//   21527 メインループ（60FPS 固定タイムステップ）
 //
 // ### 目次ここまで
 // ======================================================================
@@ -14150,6 +14151,1180 @@ function blastCheck(p) {
   }
 }
 
+// ======================================================================
+// スマッシュ攻撃（方向2回 + X）
+// ======================================================================
+function trackSmashInput(p, dir) {
+  if (!p || !p.alive) return;
+  if (p.smashInputDir === dir && (battleFrame - p.smashInputTime) < SMASH_INPUT_WINDOW) {
+    p.smashInputCount++;
+  } else {
+    p.smashInputDir = dir;
+    p.smashInputCount = 1;
+  }
+  p.smashInputTime = battleFrame;
+}
+
+function checkSmashReady(p) {
+  if (!p) return null;
+  if (p.smashInputCount >= 2 && (battleFrame - p.smashInputTime) < SMASH_INPUT_WINDOW) {
+    const dir = p.smashInputDir;
+    p.smashInputCount = 0;
+    if (dir === 'up') return 'upSmash';
+    if (dir === 'side') return 'sideSmash';
+    if (dir === 'down') return 'downSmash';
+  }
+  return null;
+}
+
+function startSmashAttack(p, smashType) {
+  if (p.attacking || p.hitstun > 0 || !p.alive || p.grabbing || p.grabbed || p.guarding || p.guardBreakStun > 0 || p.guardPenalty > 0) return;
+  if (!p.grounded) return; // 地上限定
+  p.smashCharging = true;
+  p.smashChargeTime = 0;
+  p.smashType = smashType;
+}
+
+function executeSmash(p) {
+  if (!p.smashCharging) return;
+  const chargeRatio = Math.min(p.smashChargeTime / SMASH_CHARGE_MAX, 1);
+  const chargeMult = 1 + chargeRatio * SMASH_CHARGE_BONUS;
+  const defs = (p.charIdx === 10 && p.dragonMode) ? dragonAttackDefs : attackDefs[p.charIdx];
+  if (!defs) return;
+  const baseAtk = defs.strong;
+  if (!baseAtk) { p.smashCharging = false; return; }
+  const dir = p.facingLeft ? -1 : 1;
+  const mult = SMASH_DAMAGE_MULT[p.smashType] || 1.5;
+  const smashDmg = baseAtk.damage * mult * chargeMult;
+
+  p.smashCharging = false;
+  p.attacking = true;
+  p.attackType = 'smash';
+  p.attackFrame = 0;
+  p.hitTargets = [];
+  p.lastHitFrame = -99;
+  p.specialState = null;
+
+  let angle, startup, hw, hh, hx, hy;
+  // キャラごとの横スマッシュ角度
+  const SIDE_SMASH_ANGLES = {
+    // 真横（0度）: 横吹っ飛ばし場外狙い
+    1: 0, 5: 0, 12: 0, 19: 0, 13: 0,
+    // 斜め上（-35度）: 上に追撃
+    0: -35, 4: -35, 10: -35, 16: -35, 9: -35,
+    // 真上寄り（-70度）: 上スマに近い
+    2: -70, 7: -70, 15: -70, 26: -70,
+    // 斜め下（20度）: 地面叩きつけ
+    14: 20, 8: 20, 20: 20,
+  };
+  // スマッシュ攻撃の溜め感: startupを弱攻撃×2.5倍
+  const normalStartup = (defs.normal ? defs.normal.startup : 5);
+  const smashStartupBase = Math.max(8, Math.round(normalStartup * 2.5));
+  if (p.smashType === 'upSmash') {
+    angle = -85; startup = smashStartupBase; hx = 0; hy = -60; hw = 60; hh = 65;
+  } else if (p.smashType === 'downSmash') {
+    angle = -15; startup = Math.round(smashStartupBase * 0.7); hx = 0; hy = -30; hw = 90; hh = 40;
+  } else {
+    angle = SIDE_SMASH_ANGLES[p.charIdx] !== undefined ? SIDE_SMASH_ANGLES[p.charIdx] : -45;
+    startup = smashStartupBase; hx = baseAtk.hx || 20; hy = -35; hw = (baseAtk.hw || 60) * 1.2; hh = baseAtk.hh || 45;
+  }
+
+  p.attackData = {
+    name: p.smashType === 'upSmash' ? 'Up Smash' : p.smashType === 'downSmash' ? 'Down Smash' : 'Side Smash',
+    startup: startup, active: 6, recovery: p.smashType === 'sideSmash' ? 22 : 16,
+    damage: smashDmg, kbBase: baseAtk.kbBase * mult, kbScale: baseAtk.kbScale * 1.3,
+    kbAngle: angle, hx: hx, hy: hy, hw: hw, hh: hh,
+    color: characters[p.charIdx].accent, effect: 'bigpunch',
+    isSmash: true, smashType: p.smashType,
+    centerHit: p.smashType === 'downSmash',
+  };
+
+  // 溜めエフェクト
+  if (chargeRatio > 0.3) {
+    hitEffects.push({ x: p.x, y: p.y - 40, life: 15, maxLife: 15, color: characters[p.charIdx].accent, size: 30 + chargeRatio * 30, type: 'ring' });
+  }
+  triggerScreenShake(2 + chargeRatio * 3, 6);
+  playHitSound('cmd');
+  playAudienceSpecialMove();
+}
+
+// --- 崖つかまりシステム ---
+const LEDGE_GRAB_RANGE = 30;      // 崖端からの判定幅
+const LEDGE_Y_ABOVE = 20;        // 崖上端より上の判定範囲
+const LEDGE_Y_BELOW = 80;        // 崖上端より下の判定範囲
+const LEDGE_MAX_TIME = 180;       // 最大つかまり時間(3秒)
+const LEDGE_COOLDOWN = 60;        // 連続つかまり制限(1秒)
+
+// ======================================================================
+// 崖つかまり
+// ======================================================================
+function checkLedgeGrab(p) {
+  if (p.ledgeGrab || p.grounded || p.ledgeCooldown > 0 || !p.alive) return;
+  if (p.hitstun > 0 || p.attacking || p.airDodging) return;
+  // 上方向に移動中 or 落下速度が遅い時のみ
+  if (p.vy > 4) return;
+  const gy = STAGE_GROUND_Y;
+  // 崖より上すぎる場合はスキップ
+  if (p.y < gy - LEDGE_Y_ABOVE) return;
+  // 崖より下すぎる場合もスキップ
+  if (p.y > gy + LEDGE_Y_BELOW) return;
+  // 左崖
+  if (p.x >= STAGE_LEFT - LEDGE_GRAB_RANGE && p.x <= STAGE_LEFT + 15 && p.y >= gy - LEDGE_Y_ABOVE && p.y <= gy + LEDGE_Y_BELOW) {
+    if (players.some(pp => pp.id !== p.id && pp.ledgeGrab && pp.ledgeSide === -1)) return;
+    grabLedge(p, -1);
+  }
+  // 右崖
+  if (p.x >= STAGE_RIGHT - 15 && p.x <= STAGE_RIGHT + LEDGE_GRAB_RANGE && p.y >= gy - LEDGE_Y_ABOVE && p.y <= gy + LEDGE_Y_BELOW) {
+    if (players.some(pp => pp.id !== p.id && pp.ledgeGrab && pp.ledgeSide === 1)) return;
+    grabLedge(p, 1);
+  }
+}
+
+function grabLedge(p, side) {
+  p.ledgeGrab = true;
+  p.ledgeSide = side;
+  p.ledgeTimer = 0;
+  p.ledgeInvincible = 30; // 崖つかまり無敵0.5秒
+  p.vx = 0; p.vy = 0;
+  p.x = side === -1 ? STAGE_LEFT : STAGE_RIGHT;
+  p.y = STAGE_GROUND_Y + 30;
+  p.facingLeft = side === 1;
+  p.attacking = false; p.specialState = null;
+  p.grounded = false;
+  p.jumps = p.charIdx === 15 ? 3 : 2;
+}
+
+function releaseLedge(p, type) {
+  if (!p.ledgeGrab) return;
+  p.ledgeGrab = false;
+  p.ledgeCooldown = LEDGE_COOLDOWN;
+  const dir = -p.ledgeSide; // ステージ内側方向
+  if (type === 'normal') {
+    // その場上がり
+    p.x += dir * 40;
+    p.y = STAGE_GROUND_Y;
+    p.grounded = true;
+    p.ledgeInvincible = 10;
+  } else if (type === 'attack') {
+    // 攻撃上がり
+    p.x += dir * 50;
+    p.y = STAGE_GROUND_Y - 10;
+    p.vy = -3;
+    startAttack(p, 'normal');
+  } else if (type === 'dodge') {
+    // 回避上がり
+    p.x += dir * 70;
+    p.y = STAGE_GROUND_Y;
+    p.grounded = true;
+    p.ledgeInvincible = 20;
+    p.ledgeEndlag = 18; // 0.3秒硬直
+  } else if (type === 'drop') {
+    // 崖離し（落下）
+    p.vy = 0;
+  }
+}
+
+function updateLedge(p) {
+  if (p.ledgeCooldown > 0) p.ledgeCooldown--;
+  if (p.ledgeInvincible > 0) {
+    p.ledgeInvincible--;
+    p.invincibleTimer = Math.max(p.invincibleTimer, 1);
+    // 無敵解除の瞬間: 赤フラッシュ
+    if (p.ledgeInvincible === 0 && p.ledgeGrab) p.damageTint = 6;
+  }
+  if (p.ledgeEndlag > 0) { p.ledgeEndlag--; p.vx *= 0.8; }
+  if (!p.ledgeGrab) return;
+  p.ledgeTimer++;
+  p.vx = 0; p.vy = 0;
+  p.x = p.ledgeSide === -1 ? STAGE_LEFT : STAGE_RIGHT;
+  p.y = STAGE_GROUND_Y + 30;
+  // 3秒経過で自動落下
+  if (p.ledgeTimer >= LEDGE_MAX_TIME) { releaseLedge(p, 'drop'); return; }
+  // 無敵解除後のみ被弾で崖離し
+  if (p.ledgeInvincible <= 0 && p.hitstun > 0) { releaseLedge(p, 'drop'); }
+}
+
+// --- D技（固有追加技）システム ---
+const D_SKILL_HOLD_FRAMES = 30;   // 0.5秒長押し
+const D_SKILL_COOLDOWN = 600;     // 10秒クールダウン
+// 詳細画面に 出すための D技の 名前（triggerDSkill の 中身と そろえること）
+
+// ======================================================================
+// D技 と 必殺技 の データ
+// D_SKILL_NAMES は 表示名 兼「D技を 持っているか」の 判定に 使う。
+// triggerDSkill の 分岐と 必ず 対応させること
+// ======================================================================
+
+// 必殺技（アルティメット）システム
+let ultimateActive = false;
+let ultimateTimer = 0;
+let ultimatePhase = ''; // 'darken' | 'text' | 'video' | 'damage' | 'brighten'
+let ultimatePlayerId = -1;
+let ultimateVideo = null;
+let ultimateHitTarget = -1;
+
+const ultimateFileNames = ['zen','don','saisoku','meteo','long','uruo','kumataro','bullet','shauden','judgeman','tensai','catbus','tank','namioji','tokko','sam','king','onpa','sen','dosboss','micro','mrtwo','kingking','satoru','kowai','yaho','poyo','pull','mussy','bot','chatta'];
+const ultimateData = [
+  { name:'Azure Dragon Slash', dmg:36, kb:16, angle:-15, range:'line', status:'frozen', dur:120, color:'#44CCFF' },
+  { name:'Heaven Shatter Fist', dmg:40, kb:18, angle:-80, range:'circle', radius:150, status:'bounce', color:'#FF4422' },
+  { name:'Lightspeed Dance', dmg:12, kb:8, angle:-30, range:'all', hits:3, status:'stunned', dur:30, color:'#44FF88' },
+  { name:'Golden Meteor', dmg:40, kb:17, angle:-70, range:'all', status:'burning', dur:180, color:'#FFD700' },
+  { name:'Water Dragon Sky', dmg:38, kb:16, angle:-15, range:'line', color:'#44CCFF' },
+  { name:'Azure Fang Crusher', dmg:38, kb:20, angle:-30, range:'circle', radius:160, color:'#C8A878' },
+  { name:'Starfall Bear Blow', dmg:28, kb:12, angle:-40, range:'all', status:'stunned', dur:18, color:'#FF6B6B' },
+  { name:'Rainbow Burst', dmg:8, kb:6, angle:-20, range:'all', hits:4, status:'confused', dur:60, color:'#FF66AA' },
+  { name:'Electromagnetic Sponge Cannon', dmg:30, kb:14, angle:-40, range:'all', status:'stunned', dur:30, steal:20, color:'#FF80B0' },
+  { name:'Dark Final Judgment', dmg:35, kb:15, angle:-25, range:'front', status:'cursed', dur:180, color:'#C0A0FF' },
+  { name:'Dragon Flame Fusion', dmg:35, kb:16, angle:-40, range:'front', status:'burning', dur:180, color:'#FF6600' },
+  { name:'Teleport Slam', dmg:40, kb:18, angle:-30, range:'teleport', color:'#FFBB44' },
+  { name:'Giant Shell', dmg:37, kb:17, angle:-15, range:'line', color:'#A0B858' },
+  { name:'Raging 100 Hits', dmg:5, kb:4, angle:-10, range:'front', hits:8, color:'#FF6644' },
+  { name:'Dark Triple Blade', dmg:25, kb:13, angle:-30, range:'front', status:'poisoned', dur:90, poisonDmg:1, color:'#CC44FF' },
+  { name:'Rainbow Feather Burst', dmg:18, kb:12, angle:-50, range:'circle', radius:140, status:'confused', dur:90, color:'#FFD700' },
+  { name:'Golden Time Stop', dmg:35, kb:16, angle:-45, range:'all', status:'frozen', dur:90, color:'#FFD700' },
+  { name:'Destructive Sonic Cannon', dmg:33, kb:15, angle:-40, range:'circle', radius:180, status:'stunned', dur:60, color:'#88FFFF' },
+  { name:'Billionaire Rage', dmg:32, kb:14, angle:-35, range:'front', status:'stunned', dur:30, color:'#FF8844' },
+  { name:'Violet Barrage', dmg:37, kb:16, angle:-15, range:'line', status:'paralyzed', dur:180, color:'#CC66FF' },
+  { name:'Triple Merge Cannon', dmg:38, kb:17, angle:-40, range:'front', status:'sealMagic', dur:180, color:'#3388FF' },
+  { name:'Blaze Dual Blast', dmg:18, kb:12, angle:-30, range:'all', hits:2, status:'burning', dur:120, color:'#7733CC' },
+  { name:'Golden Money Storm', dmg:34, kb:15, angle:-50, range:'circle', radius:170, pull:true, color:'#FFD700' },
+  { name:'Taichi Fist', dmg:36, kb:18, angle:-85, range:'front', color:'#44AAFF' },
+  { name:'Terror Scissor Hell', dmg:22, kb:10, angle:-20, range:'front', status:'feared2', dur:60, color:'#CC0044' },
+  { name:'Mystery Blast', dmg:0, kb:0, angle:0, range:'random', color:'#FF8800' },
+  { name:'Squishy Explosion', dmg:8, kb:8, angle:80, range:'all', hits:5, status:'bounce', color:'#44CCEE' },
+  { name:'Super Gravity Collapse', dmg:35, kb:16, angle:-50, range:'circle', radius:160, pull:true, color:'#6622AA' },
+  { name:'Bug Swarm', dmg:28, kb:12, angle:-30, range:'circle', radius:140, status:'poisoned', dur:180, poisonDmg:2, color:'#228822' },
+  // Bot: 掴んで 下に 叩きつける → 当たると 20秒 ロボットに 変身する
+  { name:'Seize and Slam', dmg:22, kb:14, angle:85, range:'line', color:'#66E8FF', botTransform:true },
+  // Chatta: 動画のあと ホーミング爪が 10本 飛ぶ。合計30ダメージ、当たるまで 消えない
+  { name:'Ten Homing Claws', dmg:0, kb:0, angle:-30, range:'all', color:'#FF66CC', chattaClaws:true },
+];
+
+function removeUltimateVideo() {
+  if (ultimateVideo && ultimateVideo.el) {
+    const el = ultimateVideo.el;
+    try { el.pause(); } catch (e) {}
+    el.onended = null; el.oncanplay = null; el.onerror = null;
+    if (document.body.contains(el)) document.body.removeChild(el);
+    el.style.cssText = '';
+    try { el.currentTime = 0; } catch (e) {}   // 次に 使う時のため 残しておく（再ダウンロードしない）
+  }
+  if (ultimateVideo && ultimateVideo.skipKey) {
+    document.removeEventListener('keydown', ultimateVideo.skipKey);
+  }
+  ultimateVideo = null;
+  ultimateVideoShowing = false;
+}
+
+// 必殺技hitbox判定
+function checkUltimateHit(attacker, target) {
+  if (!target || !target.alive) return false;
+  const ud = ultimateData[attacker.charIdx];
+  if (!ud) return false;
+  const dir = attacker.facingLeft ? -1 : 1;
+  const tx = target.x, ty = target.y - 35;
+  const range = ud.range;
+  const r = ud.radius || 160;
+
+  if (range === 'all' || range === 'random') return true;
+  if (range === 'circle') {
+    return Math.hypot(tx - attacker.x, ty - (attacker.y - 35)) < r;
+  }
+  if (range === 'line') {
+    const inY = Math.abs(ty - (attacker.y - 35)) < 50;
+    const inFront = dir > 0 ? tx > attacker.x - 20 : tx < attacker.x + 20;
+    return inY && inFront;
+  }
+  if (range === 'front') {
+    const dx = tx - attacker.x;
+    const inFront = dir > 0 ? dx > -30 && dx < 200 : dx < 30 && dx > -200;
+    const inY = Math.abs(ty - (attacker.y - 35)) < 100;
+    return inFront && inY;
+  }
+  if (range === 'teleport') {
+    // Catbus: always hits if target exists
+    return true;
+  }
+  return Math.hypot(tx - attacker.x, ty - (attacker.y - 35)) < 200;
+}
+
+function triggerUltimate(p) {
+  if (p.ultimateGauge < 100 || ultimateActive) return false;
+  // Phase 1: startup attack motion (hit check happens after)
+  ultimateActive = true;
+  ultimatePlayerId = p.id;
+  ultimatePhase = 'startup';
+  ultimateTimer = 0;
+  ultimateVideo = null;
+  return true;
+}
+
+// 必殺技の 動画は 5〜19MB ある。発動してから 読み込むと
+// 真っ黒な 画面が 出て カクつくので、ゲージが 100% に なった時点で
+// 裏で 先に 読み込んでおく。
+const ultVideoCache = {};
+let ultimateVideoShowing = false;   // 動画が 画面に 出ている間は ゲームを 描かない（カクつき防止）
+
+function prefetchUltimateVideo(charIdx) {
+  const name = ultimateFileNames[charIdx];
+  if (!name || ultVideoCache[name]) return;
+  const v = document.createElement('video');
+  v.preload = 'auto';
+  v.playsInline = true;
+  v.muted = true;            // 読み込みだけ。音は 再生する時に 戻す
+  v.src = 'images/ultimates/' + name + '_ultimate.mp4';
+  try { v.load(); } catch (e) {}
+  ultVideoCache[name] = v;
+}
+
+function startUltimateVideo() {
+  const p = players[ultimatePlayerId];
+  if (!p) { ultimatePhase = 'damage'; ultimateTimer = 0; return; }
+  const name = ultimateFileNames[p.charIdx] || 'zen';
+  if (!ultVideoCache[name]) prefetchUltimateVideo(p.charIdx);
+  const video = ultVideoCache[name];
+  if (!video) { ultimatePhase = 'damage'; ultimateTimer = 0; return; }
+
+  let finished = false;
+  function onFinish() {
+    if (finished) return;
+    finished = true;
+    removeUltimateVideo();
+    if (ultimateActive && ultimatePhase === 'video') {
+      ultimatePhase = 'damage';
+      ultimateTimer = 0;
+    }
+  }
+  video.onended = onFinish;
+  video.onerror = onFinish;
+  // どれかの キーを 押したら 動画を 飛ばせる（毎回 最後まで 見なくていい）
+  function skipKey() { onFinish(); }
+  video.onclick = skipKey;
+  document.addEventListener('keydown', skipKey, { once: true });
+  ultimateVideo = { el: video, shown: false, skipKey: skipKey };
+
+  // 再生できる 状態に なってから 画面に 出す（読み込み中の 真っ黒を 見せない）
+  function show() {
+    if (finished || !ultimateVideo || ultimateVideo.shown) return;
+    ultimateVideo.shown = true;
+    ultimateVideoShowing = true;
+    video.muted = false;
+    try { video.currentTime = 0; } catch (e) {}
+    video.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:9999;object-fit:cover;background:black;';
+    document.body.appendChild(video);
+    video.play().catch(() => {
+      video.muted = true;                       // 音つき自動再生が 止められた時
+      video.play().catch(onFinish);
+    });
+  }
+  if (video.error) {
+    // 動画が 無い キャラ（7体）。待たずに すぐ 先へ進む
+    onFinish();
+    return;
+  }
+  if (video.readyState >= 3) {
+    show();                                     // もう 読み込めている（ふつうは こっち）
+  } else {
+    video.oncanplay = show;
+    // 1.2秒 待って まだ 再生できないなら 動画は あきらめて 先へ進む。
+    // 真っ黒な 画面で 待たせない
+    setTimeout(function () { if (!finished && (!ultimateVideo || !ultimateVideo.shown)) onFinish(); }, 1200);
+  }
+  // 見張り: 画面に 出したのに 再生が 進んでいない（固まっている）なら 打ち切る。
+  // 読み込みが 遅い 回線で 止まったまま 待たされるのを 防ぐ
+  let lastT = -1, stuck = 0;
+  const watch = setInterval(function () {
+    if (finished) { clearInterval(watch); return; }
+    if (!ultimateVideo) { clearInterval(watch); return; }   // 消えた後も 300msごとに 回り続けていた
+    if (!ultimateVideo.shown) return;
+    const ct = video.currentTime;
+    if (ct <= lastT + 0.001) { stuck++; } else { stuck = 0; }
+    lastT = ct;
+    if (stuck >= 5) { clearInterval(watch); onFinish(); }   // 約1.5秒 進まなければ あきらめる
+  }, 300);
+  // 保険: ここまで 来たら 必ず 終わらせる。
+  // いちばん 長い 動画（Bot の 10秒）＋余裕。再生が 止まった場合は
+  // 上の 見張りが 1.5秒で 打ち切るので、ここは 長めで よい
+  setTimeout(onFinish, 12000);
+}
+
+function applyUltimateDamage(attacker, target) {
+  const ud = ultimateData[attacker.charIdx] || ultimateData[0];
+  // Chatta: ホーミング爪を 10本 飛ばす。合計30ダメージ、当たるまで 消えない
+  if (ud.chattaClaws && attacker) {
+    attacker.chattaClawsLeft = 10;
+    attacker.chattaClawTimer = 0;
+    playHitSound('cmd', 9, 30);
+  }
+  // Bot: 叩きつけが 決まったら 20秒間 ロボットに 変身する
+  if (ud.botTransform && attacker) {
+    attacker.botRobot = BOT_ROBOT_FRAMES;
+    playHitSound('cmd', 9, attacker.charIdx);
+    for (let i = 0; i < 40; i++) {
+      const a2 = Math.random() * Math.PI * 2, sp = 2 + Math.random() * 5;
+      sparks.push({ x: attacker.x, y: attacker.y - 35, vx: Math.cos(a2) * sp, vy: Math.sin(a2) * sp,
+        life: 30 + Math.random() * 20, maxLife: 50, color: Math.random() > 0.5 ? '#66E8FF' : '#FFFFFF',
+        size: 3 + Math.random() * 3, gravity: 0.02, drag: 0.96 });
+    }
+    hitFlash.alpha = Math.max(hitFlash.alpha, 0.5);
+    hitFlash.color = '#66E8FF';
+    triggerScreenShake(12, 20);
+  }
+  let dmg = ud.dmg, kb = ud.kb, angle = ud.angle;
+  if (ud.range === 'random') { dmg = Math.floor(Math.random()*40)+1; kb = 5+Math.random()*15; angle = -Math.floor(Math.random()*80); }
+  if (ud.range === 'teleport' && target) { attacker.x = target.x + (target.facingLeft ? 60 : -60); attacker.y = target.y; }
+  if (ud.pull && target) { target.vx = (attacker.x - target.x)*0.15; target.vy = (attacker.y - target.y)*0.1; }
+  if (attacker.charIdx === 10 && attacker.dragonMode) { dmg = 40; kb = 20; }
+  const hitCount = ud.hits || 1;
+  if (target) {
+    for (let h = 0; h < hitCount; h++) applyHit(attacker, target, dmg, kb, 0.2, angle, 'cmd');
+    if (ud.status) {
+      const dur = ud.dur || 60;
+      const st = ud.status;
+      if (st === 'frozen') target.frozen = Math.max(target.frozen, dur);
+      if (st === 'burning') { target.burning = Math.max(target.burning, dur); target.burnDmg = 3; }
+      if (st === 'poisoned') { target.poisoned = Math.max(target.poisoned, ud.dur); target.poisonDmg = ud.poisonDmg||8; }
+      if (st === 'stunned') target.stunned = Math.max(target.stunned, dur);
+      if (st === 'cursed') target.cursed = Math.max(target.cursed, dur);
+      if (st === 'confused') target.confused = Math.max(target.confused, dur);
+      if (st === 'paralyzed') target.paralyzed = Math.max(target.paralyzed, dur);
+      if (st === 'feared2') target.feared2 = Math.max(target.feared2, dur);
+      if (st === 'sealMagic') target.sealMagic = Math.max(target.sealMagic, dur);
+      if (st === 'bounce') { target.vy = 12; target.groundBounced = false; }
+    }
+    if (ud.steal && target.ultimateGauge !== undefined) {
+      const stolen = target.ultimateGauge * (ud.steal/100);
+      target.ultimateGauge -= stolen;
+      attacker.ultimateGauge = Math.min(100, attacker.ultimateGauge + stolen);
+    }
+    if (ud.range === 'random') {
+      const effs = ['frozen','burning','stunned','confused','paralyzed'];
+      target[effs[Math.floor(Math.random()*effs.length)]] = 60+Math.floor(Math.random()*60);
+    }
+  }
+  triggerScreenShake(30, 36);
+  hitFlash.alpha = 0.8; hitFlash.color = ud.color;
+  playUltimateExplosionSE();
+  const ex = target ? target.x : attacker.x, ey = target ? target.y-35 : attacker.y-35;
+  // 3x particles (90), 1.5x size
+  for (let i = 0; i < 90; i++) {
+    const a = Math.random()*Math.PI*2;
+    const spd = 4 + Math.random() * 10;
+    sparks.push({ x:ex,y:ey,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd-4,life:30+Math.floor(Math.random()*12),maxLife:35,color:i%3===0?'#FFF':(i%3===1?ud.color:'#FFD700'),size:4.5+Math.random()*6,gravity:0.08,drag:0.96 });
+  }
+  // Shockwave rings
+  hitEffects.push({ x:ex, y:ey, life:24, maxLife:24, color:'#FFFFFF', size:200, type:'ring' });
+  hitEffects.push({ x:ex, y:ey, life:30, maxLife:30, color:ud.color, size:300, type:'ring' });
+  cmdNameDisplay.push({ text: ud.name, x: 480, y: 200, life: 70, maxLife: 70, color: ud.color });
+}
+
+function updateUltimate() {
+  if (!ultimateActive) return;
+  ultimateTimer++;
+
+  // Phase 1: Startup attack motion (0.3s) → hit check
+  if (ultimatePhase === 'startup') {
+    if (ultimateTimer > 18) {
+      const attacker = players[ultimatePlayerId];
+      const target = attacker ? players.find(pp => pp.id !== attacker.id && pp.alive) : null;
+      if (attacker && target && checkUltimateHit(attacker, target)) {
+        // HIT confirmed → slow-mo phase
+        attacker.ultimateGauge = 0;
+        ultimatePhase = 'hitconfirm';
+        ultimateTimer = 0;
+        ultimateHitTarget = target.id;
+        const ud = ultimateData[attacker.charIdx];
+        const udColor = ud ? ud.color : '#FFD700';
+        // Charge SE (0.2s ため音) then explosion
+        playUltimateChargeSE();
+        setTimeout(() => { playUltimateExplosionSE(); }, 200);
+        // Hit sound at 1.5x volume (play cmd sound which is the loudest)
+        playHitSound('cmd');
+        playHitSound('strong'); // layer extra hit for more impact
+        // Enhanced screen shake: 2x intensity & duration (30 intensity, 36 frames = 0.6s)
+        triggerScreenShake(30, 36);
+        // White flash (will be rendered as 3 rapid blinks in drawUltimateOverlay)
+        hitFlash.alpha = 0.8; hitFlash.color = '#FFFFFF';
+        target.damageTint = 20;
+        // HIT!! text (bigger)
+        comicTexts.push({ text: 'HIT!!', x: target.x, y: target.y - 60, life: 45, maxLife: 45, color: '#FF4444', bgColor: '#FFD700', size: 40, rotation: 0 });
+        // Hitbox flash ring (larger)
+        hitEffects.push({ x: target.x, y: target.y - 35, life: 18, maxLife: 18, color: udColor, size: 150, type: 'ring' });
+        // Shockwave ring effect (radial, expanding)
+        hitEffects.push({ x: target.x, y: target.y - 35, life: 24, maxLife: 24, color: '#FFFFFF', size: 200, type: 'ring' });
+        hitEffects.push({ x: target.x, y: target.y - 35, life: 30, maxLife: 30, color: udColor, size: 280, type: 'ring' });
+        // Explosion particles: 3x quantity (90 total), 1.5x size
+        for (let i = 0; i < 90; i++) {
+          const a = Math.random() * Math.PI * 2;
+          const spd = 3 + Math.random() * 10;
+          const colors = [udColor, '#FFFFFF', '#FFD700', '#FF4444'];
+          sparks.push({
+            x: target.x, y: target.y - 35,
+            vx: Math.cos(a) * spd, vy: Math.sin(a) * spd - 4,
+            life: 30 + Math.floor(Math.random() * 15),
+            maxLife: 35,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            size: 4.5 + Math.random() * 6,
+            gravity: 0.08, drag: 0.96
+          });
+        }
+        // Send to guest
+        if (onlineMode && isHost && peerConn && peerConn.open) {
+          peerConn.send({ type: 'ultimate', playerId: attacker.id, charIdx: attacker.charIdx });
+        }
+      } else {
+        // MISS → ゲージ消費・よろけ硬直
+        if (attacker) {
+          attacker.ultimateGauge = 0;
+          attacker.hitstun = Math.max(attacker.hitstun, 12); // 0.2秒よろけ
+        }
+        ultimatePhase = 'missdrain';
+        ultimateTimer = 0;
+        playHitSound('guardBreak');
+        if (attacker) {
+          comicTexts.push({ text: 'MISS...', x: 480, y: 280, life: 48, maxLife: 48, color: '#666666', bgColor: '#333333', size: 28, rotation: 0 });
+          for (let i = 0; i < 12; i++) {
+            sparks.push({ x: attacker.x+(Math.random()-0.5)*40, y: attacker.y-30, vx: (Math.random()-0.5)*4, vy: -1-Math.random()*3, life: 18, maxLife: 18, color: '#888888', size: 3+Math.random()*3, gravity: -0.02, drag: 0.94 });
+          }
+        }
+      }
+    }
+    return;
+  }
+
+  // Phase 1.5: Hit confirm slow-mo (0.3s at 0.2x speed)
+  if (ultimatePhase === 'hitconfirm') {
+    if (ultimateTimer > 18) {
+      fadeOutBGM(0.3);
+      ultimatePhase = 'darken';
+      ultimateTimer = 0;
+    }
+    return; // game loop runs at reduced speed during this phase
+  }
+
+  // Phase 1.5b: Miss gauge drain animation
+  if (ultimatePhase === 'missdrain') {
+    if (ultimateTimer > 30) {
+      ultimateActive = false;
+      ultimatePhase = '';
+    }
+    return;
+  }
+
+  // Phase 2: Darken
+  if (ultimatePhase === 'darken' && ultimateTimer > 18) {
+    ultimatePhase = 'text';
+    ultimateTimer = 0;
+  }
+  // Phase 3: Text display
+  if (ultimatePhase === 'text' && ultimateTimer > 30) {
+    ultimatePhase = 'video';
+    ultimateTimer = 0;
+    startUltimateVideo();
+  }
+  // Phase 4: Video (handled by video events → transitions to 'damage')
+  // Phase 5: Damage（ホスト側のみダメージ適用、ゲストはstate同期で反映）
+  if (ultimatePhase === 'damage') {
+    if (ultimateTimer === 1 && !(onlineMode && !isHost)) {
+      const attacker = players[ultimatePlayerId];
+      const target = attacker ? players.find(pp => pp.id !== attacker.id && pp.alive) : null;
+      if (attacker && target) applyUltimateDamage(attacker, target);
+    }
+    if (ultimateTimer > 5) {
+      ultimatePhase = 'brighten';
+      ultimateTimer = 0;
+    }
+  }
+  // Phase 6: Brighten
+  if (ultimatePhase === 'brighten' && ultimateTimer > 18) {
+    ultimateActive = false;
+    ultimatePhase = '';
+    removeUltimateVideo();
+    fadeInBGM(0.5);
+  }
+}
+
+// ======================================================================
+// D技の 中身（キャラ別）
+// ======================================================================
+function triggerDSkill(p) {
+  if (p.dSkillCooldown > 0 || p.dSkillActive || !p.alive || p.hitstun > 0 || p.grabbed) return;
+  // D技を 持たないキャラ（Chatta は D＝ワープメテオ）で クールダウンだけ 取られないように、
+  // 分岐が ある ことを 先に 確かめる
+  if (!D_SKILL_NAMES[p.charIdx]) return;
+  p.dSkillCooldown = D_SKILL_COOLDOWN;
+  const target = players.find(pp => pp.id !== p.id && pp.alive);
+  const dir = p.facingLeft ? -1 : 1;
+  const ci = p.charIdx;
+
+  if (ci === 0 && target) {
+    // ゼン「居合い」: 残像3枚 + 長く太い斬撃ライン
+    const oldX = p.x, oldY = p.y;
+    const behindDir = target.facingLeft ? 1 : -1;
+    p.x = target.x + behindDir * 50; p.y = target.y;
+    p.facingLeft = behindDir < 0; p.vx = 0; p.vy = 0;
+    // 残像3枚（元の位置→中間→到着）
+    const mx = (oldX + p.x) / 2, my = (oldY + p.y) / 2;
+    hitEffects.push({ x: oldX, y: oldY - 40, life: 22, maxLife: 22, color: '#88CCFF', size: 25, type: 'charGhost' });
+    hitEffects.push({ x: mx, y: my - 40, life: 18, maxLife: 18, color: '#88CCFF', size: 20, type: 'charGhost' });
+    hitEffects.push({ x: p.x - behindDir*20, y: p.y - 40, life: 14, maxLife: 14, color: '#AADDFF', size: 18, type: 'charGhost' });
+    for (let i = 0; i < 8; i++) sparks.push({ x: oldX+(Math.random()-0.5)*25, y: oldY-40+(Math.random()-0.5)*25, vx:(Math.random()-0.5)*4, vy:-1-Math.random()*2.5, life:16, maxLife:16, color:'#AADDFF', size:2+Math.random(), gravity:0.04, drag:0.97 });
+    // 斬撃（長く太く青白い）
+    const hitbox = { x: p.x - 60, y: p.y - 75, w: 120, h: 120 };
+    checkHitboxAgainstPlayers(p, hitbox, 12, 7, 0.10, -30, 'special');
+    hitEffects.push({ x: p.x, y: p.y - 40, life: 24, maxLife: 24, color: '#AADDFF', size: 80, type: 'charSlash' });
+    hitEffects.push({ x: p.x, y: p.y - 40, life: 20, maxLife: 20, color: '#FFFFFF', size: 55, type: 'charSlash' });
+    hitEffects.push({ x: p.x, y: p.y - 40, life: 16, maxLife: 16, color: '#88CCFF', size: 40, type: 'charSlash' });
+    cmdNameDisplay.push({ text: 'Iai Slash!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#AADDFF' });
+  } else if (ci === 1) {
+    // ドン「大地震」: 画面端まで亀裂 + 大量土煙
+    if (p.grounded) {
+      const hitbox = { x: p.x - 126, y: p.y - 45, w: 252, h: 70 };
+      checkHitboxAgainstPlayers(p, hitbox, 10, 8, 0.08, -70, 'special');
+      triggerScreenShake(8, 16);
+      hitEffects.push({ x: p.x, y: p.y, life: 25, maxLife: 25, color: '#8B4513', size: 200, type: 'shockwave' });
+      hitEffects.push({ x: p.x - 120, y: p.y, life: 22, maxLife: 22, color: '#8B4513', size: 140, type: 'shockwave' });
+      hitEffects.push({ x: p.x + 120, y: p.y, life: 22, maxLife: 22, color: '#8B4513', size: 140, type: 'shockwave' });
+      hitEffects.push({ x: p.x, y: p.y, life: 18, maxLife: 18, color: '#FF6644', size: 90, type: 'ring' });
+      for (let i = 0; i < 20; i++) sparks.push({ x: p.x+(Math.random()-0.5)*200, y: p.y, vx:(Math.random()-0.5)*7, vy:-3-Math.random()*5, life:22, maxLife:22, color:i%3===0?'#8B6914':(i%3===1?'#AA8855':'#CC9966'), size:3+Math.random()*4, gravity:0.15, drag:0.95 });
+      cmdNameDisplay.push({ text: 'Earthquake!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FF4422' });
+    }
+  } else if (ci === 2) {
+    // サイソク「分身」: 残像2枚 + 鮮明
+    p.dSkillActive = true; p.dSkillTimer = 30; p.dSkillBuff = 'bunshin';
+    hitEffects.push({ x: p.x - dir*30, y: p.y - 40, life: 24, maxLife: 24, color: 'rgba(68,255,136,0.6)', size: 30, type: 'charGhost' });
+    hitEffects.push({ x: p.x + dir*20, y: p.y - 40, life: 20, maxLife: 20, color: 'rgba(68,255,136,0.4)', size: 25, type: 'charGhost' });
+    for (let i = 0; i < 10; i++) sparks.push({ x: p.x+(Math.random()-0.5)*35, y: p.y-40+(Math.random()-0.5)*35, vx:(Math.random()-0.5)*3, vy:-1.5-Math.random(), life:16, maxLife:16, color:'#44FF88', size:2+Math.random(), gravity:0.03, drag:0.97 });
+    cmdNameDisplay.push({ text: 'Clone!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#44FF88' });
+  } else if (ci === 3) {
+    // メテオ「燃焼拳」: 多めの炎 + 明るいオレンジ
+    p.dSkillActive = true; p.dSkillTimer = 600; p.dSkillBuff = 'burnFist';
+    for (let i = 0; i < 16; i++) sparks.push({ x: p.x+dir*15+(Math.random()-0.5)*15, y: p.y-45+(Math.random()-0.5)*20, vx:(Math.random()-0.5)*4+dir*2, vy:-2-Math.random()*3, life:20, maxLife:20, color:i%3===0?'#FF4400':(i%3===1?'#FFAA33':'#FFCC55'), size:2.5+Math.random()*2.5, type:'fireball', gravity:0.06, drag:0.97 });
+    hitEffects.push({ x: p.x + dir*20, y: p.y - 45, life: 22, maxLife: 22, color: '#FFAA33', size: 25, type: 'charGlow' });
+    hitEffects.push({ x: p.x + dir*15, y: p.y - 45, life: 16, maxLife: 16, color: '#FF6600', size: 18, type: 'ring' });
+    cmdNameDisplay.push({ text: 'Burning Fist!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FF8833' });
+  } else if (ci === 4) {
+    // ロング「砲台展開」: 大弾 + 水色光跡
+    p.dSkillActive = true; p.dSkillTimer = 60; p.dSkillBuff = 'turret';
+    hitEffects.push({ x: p.x + dir*30, y: p.y - 40, life: 16, maxLife: 16, color: '#66DDFF', size: 35, type: 'charGlow' });
+    hitEffects.push({ x: p.x, y: p.y - 40, life: 18, maxLife: 18, color: '#A0B4FF', size: 40, type: 'ring' });
+    for (let i = 0; i < 5; i++) sparks.push({ x: p.x+dir*25, y: p.y-40, vx:dir*(2+Math.random()*3), vy:(Math.random()-0.5)*2, life:10, maxLife:10, color:'#66DDFF', size:2+Math.random(), gravity:0, drag:0.95 });
+    cmdNameDisplay.push({ text: 'Deploy Cannon!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#66DDFF' });
+  } else if (ci === 5) {
+    // うる男「鉄壁」: 大きく鮮明な紫バリア
+    p.dSkillActive = true; p.dSkillTimer = 180; p.dSkillBuff = 'ironWall';
+    hitEffects.push({ x: p.x, y: p.y - 35, life: 30, maxLife: 30, color: '#BB77EE', size: 65, type: 'ring' });
+    hitEffects.push({ x: p.x, y: p.y - 35, life: 25, maxLife: 25, color: '#CC99FF', size: 45, type: 'charGlow' });
+    hitEffects.push({ x: p.x, y: p.y - 35, life: 20, maxLife: 20, color: '#9966CC', size: 55, type: 'ring' });
+    cmdNameDisplay.push({ text: 'Iron Wall!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#BB77EE' });
+  } else if (ci === 6) {
+    // 熊太郎「熊の怒り」: 全身赤く染める
+    p.dSkillActive = true; p.dSkillTimer = 600; p.dSkillBuff = 'bearRage';
+    hitFlash.alpha = 0.2; hitFlash.color = '#FF2222';
+    hitEffects.push({ x: p.x, y: p.y - 40, life: 25, maxLife: 25, color: '#FF2222', size: 45, type: 'charGlow' });
+    hitEffects.push({ x: p.x, y: p.y - 40, life: 20, maxLife: 20, color: '#FF4444', size: 35, type: 'ring' });
+    for (let i = 0; i < 10; i++) sparks.push({ x: p.x+(Math.random()-0.5)*30, y: p.y-40+(Math.random()-0.5)*35, vx:(Math.random()-0.5)*3, vy:-2-Math.random()*1.5, life:18, maxLife:18, color:i%2?'#FF4444':'#FF6B6B', size:2.5+Math.random(), gravity:0.05, drag:0.96 });
+    cmdNameDisplay.push({ text: 'Bear Rage!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FF4444' });
+  } else if (ci === 7) {
+    // バレット「スナイパー」: 太いビーム + 大きな着弾爆発
+    const pr = { x: p.x + 30 * dir, y: p.y - 40, vx: 23 * dir, vy: 0, w: 16, h: 8,
+      damage: 15, kbBase: 9, kbScale: 0.12, kbAngle: -20, life: 78, ownerId: p.id,
+      color: '#FFEE44', pcolor: '#FFAA00', shape: 'rect', ownerCharIdx: ci, time: 0, pierce: true, hitTargets: [] };
+    projectiles.push(pr);
+    // 太いビームライン
+    hitEffects.push({ x: p.x + dir*250, y: p.y - 40, life: 16, maxLife: 16, color: '#FFEE44', size: 75, type: 'charSlash' });
+    hitEffects.push({ x: p.x + dir*120, y: p.y - 40, life: 14, maxLife: 14, color: '#FFFFFF', size: 50, type: 'charSlash' });
+    hitEffects.push({ x: p.x + dir*15, y: p.y - 40, life: 10, maxLife: 10, color: '#FFFFFF', size: 20, type: 'charSpark' });
+    for (let i = 0; i < 8; i++) sparks.push({ x: p.x+dir*25, y: p.y-40, vx: dir*(3+Math.random()*3), vy:(Math.random()-0.5)*4, life:12, maxLife:12, color:i%2?'#FFEE44':'#FFFFFF', size:2+Math.random(), gravity:0.08, drag:0.96 });
+    cmdNameDisplay.push({ text: 'Sniper!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FFEE44' });
+  } else if (ci === 8 && target) {
+    // シャうでん「墨吐き」: 広範囲の黒い液体 + 大量しぶき
+    const hitbox = { x: p.x + (dir > 0 ? 0 : -120), y: p.y - 65, w: 120, h: 90 };
+    for (let i = 0; i < 14; i++) sparks.push({ x: p.x+dir*25, y: p.y-40, vx: dir*(3+Math.random()*6), vy:(Math.random()-0.5)*5, life:22, maxLife:22, color:i%3===0?'#111133':(i%3===1?'#222244':'#333355'), size:3+Math.random()*3, gravity:0.1, drag:0.94 });
+    for (const t2 of players) {
+      if (t2.id === p.id || !t2.alive || t2.invincibleTimer > 0) continue;
+      const th = getPlayerHitbox(t2);
+      if (hitboxCollides(hitbox.x, hitbox.y, hitbox.w, hitbox.h, th.x, th.y, th.w, th.h)) {
+        t2.hitstun = Math.max(t2.hitstun, 30); t2.vx = 0; t2.vy = 0;
+        t2.damage = Math.min(999, t2.damage + 5);
+        hitEffects.push({ x: t2.x, y: t2.y - 40, life: 22, maxLife: 22, color: '#111133', size: 50 });
+        for (let j = 0; j < 10; j++) sparks.push({ x: t2.x+(Math.random()-0.5)*30, y: t2.y-40, vx:(Math.random()-0.5)*6, vy:-2.5-Math.random()*4, life:18, maxLife:18, color:j%2?'#222244':'#111133', size:2.5+Math.random()*3, gravity:0.12, drag:0.94 });
+      }
+    }
+    cmdNameDisplay.push({ text: 'Ink Spray!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#222266' });
+  } else if (ci === 9 && target) {
+    // ジャッジマン「判決」: 太い光の柱 + 大きなJUDGEMENT!
+    cmdNameDisplay.push({ text: 'JUDGEMENT!', x: 480, y: 180, life: 75, maxLife: 75, color: '#FFD700' });
+    // 太い金色の光の柱
+    for (let i = 0; i < 14; i++) sparks.push({ x: target.x+(Math.random()-0.5)*40, y: target.y-250-Math.random()*120, vx:(Math.random()-0.5)*1.5, vy:7+Math.random()*5, life:25, maxLife:25, color:i%3===0?'#FFD700':(i%3===1?'#FFFFFF':'#FFEE88'), size:3+Math.random()*3, gravity:-0.1, drag:0.98 });
+    hitEffects.push({ x: target.x, y: target.y - 80, life: 22, maxLife: 22, color: '#FFD700', size: 40, type: 'charGlow' });
+    if (target.damage >= 100) {
+      target.vx = dir * 30; target.vy = -20; target.hitstun = 60;
+      hitFlash.alpha = 0.6; hitFlash.color = '#FFD700';
+      triggerScreenShake(12, 24);
+      hitEffects.push({ x: target.x, y: target.y - 40, life: 30, maxLife: 30, color: '#FFD700', size: 120, type: 'ring' });
+      hitEffects.push({ x: target.x, y: target.y - 40, life: 25, maxLife: 25, color: '#FFFFFF', size: 70, type: 'charGlow' });
+      hitEffects.push({ x: target.x, y: target.y - 40, life: 20, maxLife: 20, color: '#FFEE88', size: 90, type: 'ring' });
+      cmdNameDisplay.push({ text: 'Guilty!', x: target.x, y: target.y - 120, life: 70, maxLife: 70, color: '#FFD700' });
+    } else {
+      cmdNameDisplay.push({ text: 'Not Guilty...', x: target.x, y: target.y - 100, life: 50, maxLife: 50, color: '#888888' });
+    }
+  } else if (ci === 10) {
+    // 天才「覚醒」: 大きな黒紫オーラ + 速い脈動
+    p.dSkillActive = true; p.dSkillTimer = 120; p.dSkillBuff = 'tensaiBoost';
+    hitEffects.push({ x: p.x, y: p.y - 40, life: 30, maxLife: 30, color: '#6622AA', size: 55, type: 'charGlow' });
+    hitEffects.push({ x: p.x, y: p.y - 40, life: 25, maxLife: 25, color: '#440066', size: 70, type: 'ring' });
+    hitEffects.push({ x: p.x, y: p.y - 40, life: 20, maxLife: 20, color: '#9944CC', size: 50, type: 'ring' });
+    for (let i = 0; i < 15; i++) sparks.push({ x: p.x+(Math.random()-0.5)*40, y: p.y-40+(Math.random()-0.5)*40, vx:(Math.random()-0.5)*4, vy:-2-Math.random()*2.5, life:22, maxLife:22, color:i%3===0?'#6622AA':(i%3===1?'#9944CC':'#440088'), size:2.5+Math.random()*2.5, gravity:-0.04, drag:0.96 });
+    cmdNameDisplay.push({ text: 'Awakened!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FF6600' });
+  } else if (ci === 11) {
+    // Catbus「全力疾走」: 太いスピードライン + 大きな風
+    p.vx = dir * 25; p.vy = 0;
+    p.dSkillActive = true; p.dSkillTimer = 15; p.dSkillBuff = 'catbusDash';
+    const hitbox = { x: p.x - 45, y: p.y - 65, w: 90, h: 90 };
+    checkHitboxAgainstPlayers(p, hitbox, 14, 8, 0.10, -25, 'special');
+    for (let i = 0; i < 14; i++) sparks.push({ x: p.x-dir*i*35, y: p.y-35+(Math.random()-0.5)*25, vx: -dir*(3+Math.random()*4), vy:(Math.random()-0.5)*2, life:16, maxLife:16, color:i%3===0?'#FFBB44':(i%3===1?'#FFE8AA':'#FFFFFF'), size:2+Math.random()*1.5, gravity:0, drag:0.93 });
+    hitEffects.push({ x: p.x, y: p.y - 35, life: 16, maxLife: 16, color: '#FFBB44', size: 45, type: 'charSlash' });
+    hitEffects.push({ x: p.x - dir*40, y: p.y - 35, life: 12, maxLife: 12, color: '#FFE8AA', size: 35, type: 'charSlash' });
+    cmdNameDisplay.push({ text: 'Full Sprint!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FFBB44' });
+  } else if (ci === 12) {
+    // タンク「要塞化」: 大きなバリア + 強い金属光沢
+    p.dSkillActive = true; p.dSkillTimer = 180; p.dSkillBuff = 'fortress';
+    hitEffects.push({ x: p.x, y: p.y - 35, life: 30, maxLife: 30, color: '#999999', size: 65, type: 'ring' });
+    hitEffects.push({ x: p.x, y: p.y - 35, life: 25, maxLife: 25, color: '#DDDDDD', size: 45, type: 'charGlow' });
+    hitEffects.push({ x: p.x, y: p.y - 35, life: 20, maxLife: 20, color: '#AAAAAA', size: 55, type: 'ring' });
+    for (let i = 0; i < 8; i++) sparks.push({ x: p.x+(Math.random()-0.5)*35, y: p.y-30, vx:(Math.random()-0.5)*2.5, vy:-1.5-Math.random(), life:15, maxLife:15, color:i%2?'#EEEEEE':'#CCCCCC', size:2+Math.random()*1.5, gravity:0.04, drag:0.96 });
+    cmdNameDisplay.push({ text: 'Fortify!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#A0B858' });
+  } else if (ci === 13) {
+    // 波おじ「怒涛のラッシュ」: 大きい赤いオーラ
+    p.dSkillActive = true; p.dSkillTimer = 30; p.dSkillBuff = 'rush';
+    hitEffects.push({ x: p.x, y: p.y - 40, life: 20, maxLife: 20, color: '#FF2222', size: 45, type: 'charGlow' });
+    hitEffects.push({ x: p.x, y: p.y - 40, life: 16, maxLife: 16, color: '#FF4444', size: 35, type: 'ring' });
+    for (let i = 0; i < 10; i++) sparks.push({ x: p.x+(Math.random()-0.5)*25, y: p.y-40+(Math.random()-0.5)*25, vx:(Math.random()-0.5)*5, vy:-2-Math.random()*2.5, life:15, maxLife:15, color:i%2?'#FF4444':'#FF6644', size:2.5+Math.random(), gravity:0.08, drag:0.95 });
+    cmdNameDisplay.push({ text: 'Raging Rush!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FF6644' });
+  } else if (ci === 14) {
+    // とっこ「殺意の波動」: 大きな緑オーラ + 多い粒子
+    p.dSkillActive = true; p.dSkillTimer = 300; p.dSkillBuff = 'killIntent';
+    hitEffects.push({ x: p.x, y: p.y - 40, life: 30, maxLife: 30, color: '#44FF44', size: 50, type: 'charGlow' });
+    hitEffects.push({ x: p.x, y: p.y - 40, life: 25, maxLife: 25, color: '#22CC22', size: 65, type: 'ring' });
+    hitEffects.push({ x: p.x, y: p.y - 40, life: 20, maxLife: 20, color: '#44FF44', size: 50, type: 'ring' });
+    for (let i = 0; i < 14; i++) sparks.push({ x: p.x+(Math.random()-0.5)*35, y: p.y-40+(Math.random()-0.5)*40, vx:(Math.random()-0.5)*3, vy:-1.5-Math.random()*2.5, life:24, maxLife:24, color:i%3===0?'#44FF44':(i%3===1?'#22CC22':'#66FF66'), size:2.5+Math.random()*2, gravity:-0.04, drag:0.97 });
+    cmdNameDisplay.push({ text: 'Killing Intent!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#CC44FF' });
+  } else if (ci === 15) {
+    // サム「カーニバル」: カラフルな軌跡
+    const samCols = ['#FFD700','#FF4444','#4488FF','#44FF88','#FF88AA'];
+    for (let i = 0; i < 5; i++) {
+      const angle = -Math.PI * 0.8 + (i / 4) * Math.PI * 0.6;
+      const spd = 6 + Math.random() * 3;
+      projectiles.push({ x: p.x, y: p.y - 40, vx: Math.cos(angle) * spd * dir, vy: Math.sin(angle) * spd - 3,
+        w: 13, h: 13, damage: 8, kbBase: 6, kbScale: 0.08, kbAngle: -40, life: 65, ownerId: p.id,
+        color: samCols[i], pcolor: '#FFFFFF', shape: 'star', ownerCharIdx: ci, time: 0 });
+      // カラフルな軌跡パーティクル（多め）
+      for (let j = 0; j < 5; j++) sparks.push({ x: p.x, y: p.y-40, vx: Math.cos(angle)*spd*dir*0.5+(Math.random()-0.5)*2, vy: Math.sin(angle)*spd*0.5-1.5, life:16, maxLife:16, color:samCols[(i+j)%5], size:2+Math.random()*1.5, gravity:0.08, drag:0.95 });
+    }
+    hitEffects.push({ x: p.x, y: p.y - 40, life: 20, maxLife: 20, color: '#FFD700', size: 45, type: 'charGlow' });
+    hitEffects.push({ x: p.x, y: p.y - 40, life: 15, maxLife: 15, color: '#FF4444', size: 35, type: 'ring' });
+    cmdNameDisplay.push({ text: 'Carnival!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FFD700' });
+  } else if (ci === 16 && target) {
+    // キング「王の威圧」: 画面半分まで広がる圧力波 + 大きな王冠マーク
+    target.gravityDebuffTimer = Math.max(target.gravityDebuffTimer, 180);
+    hitEffects.push({ x: p.x + dir*120, y: p.y - 35, life: 24, maxLife: 24, color: '#FFD700', size: 120, type: 'ring' });
+    hitEffects.push({ x: p.x + dir*60, y: p.y - 35, life: 20, maxLife: 20, color: '#FFFFFF', size: 80, type: 'ring' });
+    hitEffects.push({ x: p.x + dir*30, y: p.y - 35, life: 16, maxLife: 16, color: '#FFD700', size: 50, type: 'ring' });
+    hitEffects.push({ x: target.x, y: target.y - 70, life: 30, maxLife: 30, color: '#FFD700', size: 25, type: 'charGlow' });
+    cmdNameDisplay.push({ text: '👑', x: target.x, y: target.y - 90, life: 40, maxLife: 40, color: '#FFD700' });
+    cmdNameDisplay.push({ text: 'Royal Pressure!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FFD700' });
+  } else if (ci === 17) {
+    // おんぱ「超音波」: 3重の大きな鮮明波紋
+    for (const t2 of players) {
+      if (t2.id === p.id || !t2.alive || t2.invincibleTimer > 0) continue;
+      const pushDir2 = t2.x > p.x ? 1 : -1;
+      t2.vx = pushDir2 * 12; t2.vy = -8; t2.hitstun = 15; t2.damage = Math.min(999, t2.damage + 5);
+    }
+    hitEffects.push({ x: p.x, y: p.y - 35, life: 28, maxLife: 28, color: '#66FFFF', size: 200, type: 'ring' });
+    hitEffects.push({ x: p.x, y: p.y - 35, life: 24, maxLife: 24, color: '#88FFFF', size: 160, type: 'ring' });
+    hitEffects.push({ x: p.x, y: p.y - 35, life: 20, maxLife: 20, color: '#44DDEE', size: 120, type: 'ring' });
+    hitEffects.push({ x: p.x, y: p.y - 35, life: 16, maxLife: 16, color: '#AAFFFF', size: 80, type: 'ring' });
+    hitEffects.push({ x: p.x, y: p.y - 35, life: 22, maxLife: 22, color: '#88FFFF', size: 50, type: 'charGlow' });
+    triggerScreenShake(6, 12);
+    cmdNameDisplay.push({ text: 'Ultrasonic!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#88FFFF' });
+  } else if (ci === 18) {
+    // セン「大盛りパワー」: 大量の白く明るい湯気
+    p.senBuffTimer = 1200;
+    for (let i = 0; i < 20; i++) sparks.push({ x: p.x+(Math.random()-0.5)*35, y: p.y-25, vx:(Math.random()-0.5)*3, vy:-2-Math.random()*3, life:24, maxLife:24, color:i%3===0?'#FFFFFF':(i%3===1?'#FFEEDD':'#FFDDCC'), size:3+Math.random()*3, gravity:-0.05, drag:0.94 });
+    hitEffects.push({ x: p.x, y: p.y - 40, life: 25, maxLife: 25, color: '#FFFFFF', size: 40, type: 'charGlow' });
+    hitEffects.push({ x: p.x, y: p.y - 35, life: 18, maxLife: 18, color: '#FFEEDD', size: 35, type: 'ring' });
+    cmdNameDisplay.push({ text: 'Big Serving Power!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FF8844' });
+  } else if (ci === 19) {
+    // ドスボス「全弾発射」: 大きな3色爆発 + 強い紫フラッシュ
+    spawnProjectile(p, { speed:14, damage:11, kbBase:6, kbScale:0.10, kbAngle:-25, w:36, h:34, life:58, color:'#CC66FF', pcolor:'#9944CC' });
+    projectiles.push({ x: p.x + 30*dir, y: p.y - 50, vx: 12*dir, vy: -2, w:26, h:34,
+      damage:7, kbBase:3, kbScale:0.05, kbAngle:-15, life:52, ownerId: p.id,
+      color:'#44AA22', pcolor:'#33881A', shape:'rect', ownerCharIdx:ci, time:0, stun:true, stunFrames:30 });
+    const boomHitbox = { x: p.x - 98, y: p.y - 98, w: 196, h: 140 };
+    checkHitboxAgainstPlayers(p, boomHitbox, 15, 8, 0.14, -40, 'special');
+    p.damage = Math.min(999, p.damage + 6);
+    triggerScreenShake(10, 18);
+    hitFlash.alpha = 0.35; hitFlash.color = '#9944CC';
+    hitEffects.push({ x: p.x-40, y: p.y - 35, life: 22, maxLife: 22, color: '#CC66FF', size: 70 });
+    hitEffects.push({ x: p.x, y: p.y - 35, life: 20, maxLife: 20, color: '#FF6600', size: 85, type: 'ring' });
+    hitEffects.push({ x: p.x+40, y: p.y - 50, life: 18, maxLife: 18, color: '#44AA22', size: 60 });
+    hitEffects.push({ x: p.x, y: p.y - 40, life: 16, maxLife: 16, color: '#FFFFFF', size: 50, type: 'charGlow' });
+    for (let i = 0; i < 16; i++) { const cols=['#CC66FF','#FF6600','#44AA22']; sparks.push({ x: p.x+(Math.random()-0.5)*100, y: p.y-40+(Math.random()-0.5)*50, vx:(Math.random()-0.5)*8, vy:-3-Math.random()*4, life:18, maxLife:18, color:cols[i%3], size:3+Math.random()*3, gravity:0.1, drag:0.95 }); }
+    cmdNameDisplay.push({ text: 'Fire All!', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#CC66FF' });
+  } else if (ci === 20) {
+    // マイクロ「スター変身」: 3秒間無敵+攻撃力1.3倍 + 星形エフェクト
+    p.dSkillActive = true; p.dSkillTimer = 180; p.dSkillBuff = 'microStar';
+    p.invincibleTimer = Math.max(p.invincibleTimer, 180);
+    hitFlash.alpha = 0.2; hitFlash.color = '#FFD700';
+    hitEffects.push({ x: p.x, y: p.y - 40, life: 25, maxLife: 25, color: '#FFD700', size: 60, type: 'ring' });
+    hitEffects.push({ x: p.x, y: p.y - 40, life: 20, maxLife: 20, color: '#FFFFFF', size: 40, type: 'charGlow' });
+    for (let i = 0; i < 12; i++) {
+      const a = (i / 12) * Math.PI * 2;
+      sparks.push({ x: p.x + Math.cos(a)*25, y: p.y-40+Math.sin(a)*25, vx:Math.cos(a)*4, vy:Math.sin(a)*4-1, life:20, maxLife:20, color:i%3===0?'#FFD700':(i%3===1?'#FFFFFF':'#FFEE88'), size:3+Math.random()*2, gravity:0.02, drag:0.96 });
+    }
+    cmdNameDisplay.push({ text: 'Star Form!', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#FFD700' });
+  } else if (ci === 21) {
+    // ミスターツー「メガシャドーボール」: 巨大紫黒弾 + 画面フラッシュ
+    const pr = { x: p.x + 30 * dir, y: p.y - 40, vx: 10 * dir, vy: 0, w: 50, h: 50,
+      damage: 25, kbBase: 12, kbScale: 0.16, kbAngle: -30, life: 80, ownerId: p.id,
+      color: '#330044', pcolor: '#7733CC', shape: 'star', ownerCharIdx: ci, time: 0 };
+    projectiles.push(pr);
+    hitFlash.alpha = 0.3; hitFlash.color = '#7733CC';
+    triggerScreenShake(8, 15);
+    hitEffects.push({ x: p.x, y: p.y - 40, life: 25, maxLife: 25, color: '#7733CC', size: 80, type: 'ring' });
+    hitEffects.push({ x: p.x, y: p.y - 40, life: 20, maxLife: 20, color: '#440066', size: 60, type: 'charGlow' });
+    hitEffects.push({ x: p.x + dir*40, y: p.y - 40, life: 18, maxLife: 18, color: '#AA66FF', size: 50, type: 'ring' });
+    for (let i = 0; i < 15; i++) sparks.push({ x: p.x+(Math.random()-0.5)*40, y: p.y-40+(Math.random()-0.5)*40, vx:(Math.random()-0.5)*5+dir*3, vy:-2-Math.random()*3, life:18, maxLife:18, color:i%3===0?'#7733CC':(i%3===1?'#AA66FF':'#440066'), size:3+Math.random()*2, gravity:-0.02, drag:0.96 });
+    cmdNameDisplay.push({ text: 'Mega Shadow Ball!', x: p.x, y: p.y - 100, life: 70, maxLife: 70, color: '#AA66FF' });
+  } else if (ci === 22) {
+    // 金金「マネーボム」: 巨大金の爆弾 + 大爆発
+    const armorMult = p.kingkingArmorTimer > 0 ? 2.0 : 1.0;
+    const bombDmg = Math.floor(20 * armorMult);
+    const pr2 = { x: p.x + 30 * dir, y: p.y - 40, vx: 8 * dir, vy: -4, w: 35, h: 35,
+      damage: bombDmg, kbBase: 10, kbScale: 0.14, kbAngle: -40, life: 50, ownerId: p.id,
+      color: '#FFD700', pcolor: '#DAA520', shape: 'star', ownerCharIdx: ci, time: 0 };
+    projectiles.push(pr2);
+    hitFlash.alpha = 0.25; hitFlash.color = '#FFD700';
+    triggerScreenShake(7, 14);
+    hitEffects.push({ x: p.x, y: p.y - 40, life: 22, maxLife: 22, color: '#FFD700', size: 70, type: 'ring' });
+    hitEffects.push({ x: p.x, y: p.y - 40, life: 18, maxLife: 18, color: '#DAA520', size: 50, type: 'charGlow' });
+    for (let i = 0; i < 12; i++) sparks.push({ x: p.x+(Math.random()-0.5)*35, y: p.y-40+(Math.random()-0.5)*35, vx:(Math.random()-0.5)*6+dir*2, vy:-2-Math.random()*3, life:16, maxLife:16, color:i%2?'#FFD700':'#DAA520', size:3+Math.random()*2, gravity:0.12, drag:0.96 });
+    cmdNameDisplay.push({ text: 'Money Bomb!', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#FFD700' });
+  } else if (ci === 23) {
+    // サトル「海王類の覇気」: 3秒間無敵+攻撃力1.3倍 + 波エフェクト
+    p.dSkillActive = true; p.dSkillTimer = 180; p.dSkillBuff = 'satoruHaki';
+    p.invincibleTimer = Math.max(p.invincibleTimer, 180);
+    hitFlash.alpha = 0.2; hitFlash.color = '#2266AA';
+    triggerScreenShake(5, 10);
+    hitEffects.push({ x: p.x - 80, y: p.y - 20, life: 25, maxLife: 25, color: '#44AAFF', size: 80, type: 'ring' });
+    hitEffects.push({ x: p.x + 80, y: p.y - 20, life: 25, maxLife: 25, color: '#44AAFF', size: 80, type: 'ring' });
+    hitEffects.push({ x: p.x, y: p.y - 40, life: 20, maxLife: 20, color: '#2266AA', size: 50, type: 'charGlow' });
+    for (let i = 0; i < 14; i++) {
+      const a = (i / 14) * Math.PI * 2;
+      sparks.push({ x: p.x+Math.cos(a)*30, y: p.y-35+Math.sin(a)*20, vx:Math.cos(a)*5, vy:Math.sin(a)*3-1, life:18, maxLife:18, color:i%2?'#44AAFF':'#88DDFF', size:3+Math.random()*2, gravity:0.03, drag:0.96 });
+    }
+    cmdNameDisplay.push({ text: 'Sea King Aura!', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#44AAFF' });
+  } else if (ci === 24) {
+    // 怖「口裂け変身」: 2秒間透明化+攻撃力1.5倍
+    p.dSkillActive = true; p.dSkillTimer = 120; p.dSkillBuff = 'kowaiStealth';
+    p.invincibleTimer = Math.max(p.invincibleTimer, 120);
+    hitEffects.push({ x: p.x, y: p.y - 40, life: 20, maxLife: 20, color: '#220011', size: 50, type: 'charGlow' });
+    hitEffects.push({ x: p.x, y: p.y - 40, life: 16, maxLife: 16, color: '#440022', size: 40, type: 'ring' });
+    for (let i = 0; i < 10; i++) sparks.push({ x: p.x+(Math.random()-0.5)*35, y: p.y-40+(Math.random()-0.5)*35, vx:(Math.random()-0.5)*3, vy:-1-Math.random()*2, life:18, maxLife:18, color:i%2?'#440022':'#220011', size:2.5+Math.random()*2, gravity:-0.03, drag:0.96 });
+    cmdNameDisplay.push({ text: 'Slit Mouth Form!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#CC0044' });
+  } else if (ci === 25) {
+    // ヤッホ「ヤッホビーム」: 虹色ビーム+ランダム方向ノックバック
+    const randomAngle = (Math.random() - 0.5) * Math.PI;
+    const pr3 = { x: p.x + 30 * dir, y: p.y - 40, vx: 14 * dir, vy: 0, w: 20, h: 14,
+      damage: 18, kbBase: 10, kbScale: 0.13, kbAngle: Math.floor(randomAngle * 180 / Math.PI), life: 50, ownerId: p.id,
+      color: '#FF44FF', pcolor: '#44FFFF', shape: 'star', ownerCharIdx: ci, time: 0 };
+    projectiles.push(pr3);
+    hitFlash.alpha = 0.2; hitFlash.color = '#FFCC44';
+    triggerScreenShake(5, 10);
+    // 虹色エフェクト
+    const rainbowCols = ['#FF4444','#FF8800','#FFCC00','#44FF44','#4488FF','#8844FF'];
+    hitEffects.push({ x: p.x + dir*60, y: p.y - 40, life: 16, maxLife: 16, color: '#FF44FF', size: 50, type: 'charSlash' });
+    for (let i = 0; i < 10; i++) sparks.push({ x: p.x+dir*20, y: p.y-40, vx: dir*(4+Math.random()*4), vy:(Math.random()-0.5)*5, life:14, maxLife:14, color:rainbowCols[i%6], size:2.5+Math.random(), gravity:0.05, drag:0.96 });
+    cmdNameDisplay.push({ text: 'What the heck!', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#FF8800' });
+  } else if (ci === 26) {
+    // ぽよ「スーパースライム」: 3秒間巨大化+攻撃範囲・ダメージ1.5倍
+    p.dSkillActive = true; p.dSkillTimer = 180; p.dSkillBuff = 'poyoSuper';
+    hitEffects.push({ x: p.x, y: p.y - 30, life: 25, maxLife: 25, color: '#88EEFF', size: 60, type: 'ring' });
+    hitEffects.push({ x: p.x, y: p.y - 30, life: 20, maxLife: 20, color: '#44CCEE', size: 40, type: 'charGlow' });
+    for (let i = 0; i < 10; i++) {
+      const a = (i / 10) * Math.PI * 2;
+      sparks.push({ x: p.x+Math.cos(a)*25, y: p.y-30+Math.sin(a)*20, vx:Math.cos(a)*3, vy:Math.sin(a)*3-1, life:16, maxLife:16, color:i%2?'#88EEFF':'#AAEEFF', size:3+Math.random()*2, gravity:0.03, drag:0.96 });
+    }
+    cmdNameDisplay.push({ text: 'Super Slime!', x: p.x, y: p.y - 90, life: 60, maxLife: 60, color: '#44CCEE' });
+  } else if (ci === 27) {
+    // プル「超重力崩壊」: 全相手を引き寄せ→大爆発
+    for (const t2 of players) {
+      if (t2.id === p.id || !t2.alive || t2.invincibleTimer > 0) continue;
+      // 引き寄せ
+      const dx = p.x - t2.x, dy = (p.y - 35) - (t2.y - 35);
+      const dist = Math.sqrt(dx*dx + dy*dy) || 1;
+      t2.vx = (dx / dist) * 15;
+      t2.vy = (dy / dist) * 10;
+      t2.hitstun = 20;
+    }
+    // 1秒後に爆発（dSkillTimerで管理）
+    p.dSkillActive = true; p.dSkillTimer = 60; p.dSkillBuff = 'pullCollapse';
+    hitFlash.alpha = 0.25; hitFlash.color = '#6622AA';
+    triggerScreenShake(6, 12);
+    hitEffects.push({ x: p.x, y: p.y - 35, life: 25, maxLife: 25, color: '#6622AA', size: 100, type: 'ring' });
+    hitEffects.push({ x: p.x, y: p.y - 35, life: 20, maxLife: 20, color: '#330066', size: 70, type: 'charGlow' });
+    hitEffects.push({ x: p.x, y: p.y - 35, life: 18, maxLife: 18, color: '#CC88FF', size: 80, type: 'ring' });
+    for (let i = 0; i < 12; i++) sparks.push({ x: p.x+(Math.random()-0.5)*60, y: p.y-35+(Math.random()-0.5)*60, vx:(p.x-(p.x+(Math.random()-0.5)*120))*0.05, vy:(p.y-35-(p.y-35+(Math.random()-0.5)*80))*0.05, life:20, maxLife:20, color:i%2?'#9944DD':'#6622AA', size:3+Math.random()*2, gravity:-0.02, drag:0.96 });
+    cmdNameDisplay.push({ text: 'Super Gravity Collapse!', x: p.x, y: p.y - 100, life: 70, maxLife: 70, color: '#CC88FF' });
+  } else if (ci === 28) {
+    // ムッシー「虫の大群」: 全方向に虫の群れ + 毒
+    const swarm = { x: p.x - 80, y: p.y - 80, w: 160, h: 120 };
+    checkHitboxAgainstPlayers(p, swarm, 16, 7, 0.11, -40, 'special');
+    p.hitTargets = [];
+    // 毒付与
+    for (const t2 of players) {
+      if (t2.id === p.id || !t2.alive) continue;
+      const th = getPlayerHitbox(t2);
+      if (hitboxCollides(swarm.x, swarm.y, swarm.w, swarm.h, th.x, th.y, th.w, th.h)) t2.poisonTimer = 180;
+    }
+    triggerScreenShake(6, 12);
+    hitEffects.push({ x: p.x, y: p.y-35, life: 22, maxLife: 22, color: '#228822', size: 80, type: 'ring' });
+    hitEffects.push({ x: p.x, y: p.y-35, life: 18, maxLife: 18, color: '#88CC00', size: 60, type: 'charGlow' });
+    for (let i = 0; i < 20; i++) {
+      const a = Math.random() * Math.PI * 2;
+      sparks.push({ x: p.x+(Math.random()-0.5)*60, y: p.y-35+(Math.random()-0.5)*50, vx:Math.cos(a)*5, vy:Math.sin(a)*4-1, life:18, maxLife:18, color:i%3===0?'#111':(i%3===1?'#228822':'#88CC00'), size:2+Math.random()*2, gravity:0.05, drag:0.96 });
+    }
+    cmdNameDisplay.push({ text: 'Bug Swarm!', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#44CC44' });
+  } else if (ci === 29) {
+    // Bot「システムハック」: 背中の 腕を 展開して EMP。当たると 操作が 逆に なり、ゲージも 抜かれる
+    const emp = { x: p.x - 95, y: p.y - 85, w: 190, h: 130 };
+    checkHitboxAgainstPlayers(p, emp, 12, 6, 0.09, -30, 'special');
+    p.hitTargets = [];
+    for (const t2 of players) {
+      if (t2.id === p.id || !t2.alive || t2.invincibleTimer > 0) continue;
+      const th = getPlayerHitbox(t2);
+      if (!hitboxCollides(emp.x, emp.y, emp.w, emp.h, th.x, th.y, th.w, th.h)) continue;
+      t2.confused = Math.max(t2.confused || 0, 240);          // 4秒 操作が 逆に なる
+      const drained = Math.min(15, t2.ultimateGauge || 0);     // ゲージを 抜いて 半分 もらう
+      t2.ultimateGauge = Math.max(0, (t2.ultimateGauge || 0) - drained);
+      p.ultimateGauge = Math.min(100, (p.ultimateGauge || 0) + drained * 0.5);
+      if (drained > 0) {
+        cmdNameDisplay.push({ text: '-' + Math.round(drained) + '% GAUGE', x: t2.x, y: t2.y - 120,
+          life: 45, maxLife: 45, color: '#66E8FF' });
+      }
+    }
+    triggerScreenShake(7, 14);
+    hitFlash.alpha = Math.max(hitFlash.alpha, 0.22); hitFlash.color = '#66E8FF';
+    // 電磁リング 3重
+    hitEffects.push({ x: p.x, y: p.y - 40, life: 24, maxLife: 24, color: '#66E8FF', size: 110, type: 'ring' });
+    hitEffects.push({ x: p.x, y: p.y - 40, life: 18, maxLife: 18, color: '#FFFFFF', size: 70, type: 'ring' });
+    hitEffects.push({ x: p.x, y: p.y - 40, life: 20, maxLife: 20, color: '#1A3A4A', size: 85, type: 'charGlow' });
+    // 走る 電流
+    for (let i = 0; i < 22; i++) {
+      const a = Math.random() * Math.PI * 2, sp = 4 + Math.random() * 4;
+      sparks.push({ x: p.x + Math.cos(a) * 20, y: p.y - 40 + Math.sin(a) * 20,
+        vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: 16 + Math.random() * 8, maxLife: 24,
+        color: i % 3 === 0 ? '#FFFFFF' : '#66E8FF', size: 2 + Math.random() * 2, gravity: 0, drag: 0.93 });
+    }
+    cmdNameDisplay.push({ text: 'SYSTEM HACK!', x: p.x, y: p.y - 100, life: 65, maxLife: 65, color: '#66E8FF' });
+  }
+  playHitSound('cmd');
+}
+
+// --- D技更新（メインループから毎フレーム呼ぶ） ---
+function updateDSkill(p) {
+  if (p.dSkillCooldown > 0) p.dSkillCooldown--;
+  if (!p.dSkillActive) return;
+  p.dSkillTimer--;
+  if (p.dSkillTimer <= 0) { p.dSkillActive = false; p.dSkillBuff = null; return; }
+  const dir = p.facingLeft ? -1 : 1;
+
+  // --- バフ持続エフェクト ---
+  if (p.dSkillBuff === 'burnFist' && p.dSkillTimer % 8 === 0) {
+    // メテオ: 拳周囲に小さな炎
+    const d = p.facingLeft ? -1 : 1;
+    sparks.push({ x: p.x+d*15+(Math.random()-0.5)*8, y: p.y-45+(Math.random()-0.5)*8, vx:(Math.random()-0.5)*1.5, vy:-1-Math.random(), life:10, maxLife:10, color:Math.random()>0.5?'#FF6600':'#FFAA44', size:1.5+Math.random(), type:'fireball', gravity:0.05, drag:0.97 });
+  }
+  if (p.dSkillBuff === 'ironWall' && p.dSkillTimer % 12 === 0) {
+    // うる男: 紫オーラゆらゆら
+    sparks.push({ x: p.x+(Math.random()-0.5)*30, y: p.y-20, vx:(Math.random()-0.5)*0.5, vy:-0.8-Math.random()*0.5, life:14, maxLife:14, color:'#AA88CC', size:2+Math.random()*2, gravity:-0.02, drag:0.97 });
+  }
+  if (p.dSkillBuff === 'bearRage' && p.dSkillTimer % 15 === 0) {
+    // 熊太郎: 赤いオーラ
+    sparks.push({ x: p.x+(Math.random()-0.5)*20, y: p.y-30, vx:0, vy:-1-Math.random()*0.5, life:12, maxLife:12, color:'#FF4444', size:1.5+Math.random(), gravity:-0.02, drag:0.97 });
+  }
+  if (p.dSkillBuff === 'tensaiBoost' && p.dSkillTimer % 6 === 0) {
+    // 天才: 黒紫オーラ脈動
+    sparks.push({ x: p.x+(Math.random()-0.5)*25, y: p.y-40+(Math.random()-0.5)*25, vx:(Math.random()-0.5)*2, vy:-0.5-Math.random(), life:12, maxLife:12, color:Math.random()>0.5?'#6622AA':'#9944CC', size:2+Math.random(), gravity:-0.02, drag:0.96 });
+  }
+  if (p.dSkillBuff === 'fortress' && p.dSkillTimer % 10 === 0) {
+    // タンク: 金属光沢
+    sparks.push({ x: p.x+(Math.random()-0.5)*30, y: p.y-30+(Math.random()-0.5)*20, vx:(Math.random()-0.5)*0.5, vy:-0.3, life:10, maxLife:10, color:Math.random()>0.5?'#CCCCCC':'#EEEEEE', size:1.5+Math.random(), gravity:0, drag:0.97 });
+  }
+  if (p.dSkillBuff === 'killIntent' && p.dSkillTimer % 8 === 0) {
+    // とっこ: 緑の粒子が漂う
+    sparks.push({ x: p.x+(Math.random()-0.5)*25, y: p.y-40+(Math.random()-0.5)*30, vx:(Math.random()-0.5)*1.5, vy:-0.5-Math.random(), life:15, maxLife:15, color:Math.random()>0.5?'#44FF44':'#22CC22', size:1.5+Math.random()*1.5, gravity:-0.03, drag:0.97 });
+  }
+  if (p.dSkillBuff === 'microStar' && p.dSkillTimer % 6 === 0) {
+    // マイクロ: 黄色い星パーティクル
+    const a = Math.random() * Math.PI * 2;
+    sparks.push({ x: p.x+Math.cos(a)*20, y: p.y-35+Math.sin(a)*15, vx:Math.cos(a)*1.5, vy:-1-Math.random()*0.5, life:12, maxLife:12, color:Math.random()>0.5?'#FFD700':'#FFEE88', size:2+Math.random()*1.5, gravity:0.02, drag:0.97 });
+  }
+  // プル: 超重力崩壊の爆発
+  if (p.dSkillBuff === 'pullCollapse') {
+    // 持続引き寄せ
+    for (const t of players) {
+      if (t.id === p.id || !t.alive) continue;
+      const dx = p.x - t.x, dy = (p.y-35) - (t.y-35);
+      const dist = Math.max(Math.sqrt(dx*dx+dy*dy), 30);
+      t.vx += (dx/dist) * 0.8; t.vy += (dy/dist) * 0.5;
+    }
+    if (p.dSkillTimer <= 1) {
+      // 大爆発
+      const boom = { x: p.x - 60, y: p.y - 95, w: 120, h: 120 };
+      checkHitboxAgainstPlayers(p, boom, 20, 10, 0.14, -45, 'special');
+      p.hitTargets = [];
+      hitFlash.alpha = 0.4; hitFlash.color = '#330066';
+      triggerScreenShake(10, 18);
+      hitEffects.push({ x: p.x, y: p.y-35, life: 22, maxLife: 22, color: '#6622AA', size: 120, type: 'ring' });
+      hitEffects.push({ x: p.x, y: p.y-35, life: 18, maxLife: 18, color: '#CC88FF', size: 80 });
+      for (let i = 0; i < 15; i++) sparks.push({ x: p.x+(Math.random()-0.5)*80, y: p.y-35+(Math.random()-0.5)*60, vx:(Math.random()-0.5)*8, vy:-3-Math.random()*4, life:18, maxLife:18, color:i%3===0?'#6622AA':(i%3===1?'#9944DD':'#330066'), size:3+Math.random()*3, gravity:0.08, drag:0.95 });
+    }
+    if (p.dSkillTimer % 6 === 0) sparks.push({ x: p.x+(Math.random()-0.5)*50, y: p.y-35+(Math.random()-0.5)*40, vx:(p.x-(p.x+(Math.random()-0.5)*80))*0.03, vy:(p.y-35-(p.y+(Math.random()-0.5)*60))*0.03, life:12, maxLife:12, color:'#9944DD', size:2.5+Math.random(), gravity:-0.02, drag:0.97 });
+  }
+  if (p.dSkillBuff === 'poyoSuper' && p.dSkillTimer % 8 === 0) {
+    // ぽよ: 水色の光パーティクル
+    sparks.push({ x: p.x+(Math.random()-0.5)*30, y: p.y-25+(Math.random()-0.5)*20, vx:(Math.random()-0.5)*1.5, vy:-0.5-Math.random()*0.5, life:10, maxLife:10, color:Math.random()>0.5?'#88EEFF':'#AAEEFF', size:2+Math.random()*1.5, gravity:-0.02, drag:0.97 });
+  }
+  if (p.dSkillBuff === 'kowaiStealth' && p.dSkillTimer % 8 === 0) {
+    // 怖: 透明化中の黒い霧
+    sparks.push({ x: p.x+(Math.random()-0.5)*25, y: p.y-35+(Math.random()-0.5)*25, vx:(Math.random()-0.5)*1.5, vy:-0.5-Math.random()*0.5, life:14, maxLife:14, color:'#220011', size:2.5+Math.random()*2, gravity:-0.03, drag:0.96 });
+  }
+  if (p.dSkillBuff === 'satoruHaki' && p.dSkillTimer % 6 === 0) {
+    // サトル: 青いオーラ
+    sparks.push({ x: p.x+(Math.random()-0.5)*25, y: p.y-35+(Math.random()-0.5)*20, vx:(Math.random()-0.5)*1.5, vy:-1-Math.random()*0.5, life:12, maxLife:12, color:Math.random()>0.5?'#44AAFF':'#2266AA', size:2+Math.random()*1.5, gravity:-0.02, drag:0.97 });
+  }
+  // 金金: 鎧中の金色オーラ（updateDSkillとは別にメインループでも呼べるが、ここでまとめる）
+  if (p.charIdx === 22 && p.kingkingArmorTimer > 0 && p.dSkillTimer % 8 === 0) {
+    sparks.push({ x: p.x+(Math.random()-0.5)*30, y: p.y-35+(Math.random()-0.5)*25, vx:(Math.random()-0.5)*1.5, vy:-0.8-Math.random()*0.5, life:12, maxLife:12, color:Math.random()>0.5?'#FFD700':'#DAA520', size:2+Math.random()*1.5, gravity:-0.02, drag:0.97 });
+  }
+  // 分身（サイソク）: 毎フレーム分身が攻撃判定 + 残像エフェクト
+  if (p.dSkillBuff === 'bunshin') {
+    const bx = p.x - dir * 30, by = p.y;
+    const hitbox = { x: bx - 20, y: by - 50, w: 40, h: 50 };
+    if (p.dSkillTimer % 4 === 0) hitEffects.push({ x: bx, y: by - 40, life: 8, maxLife: 8, color: 'rgba(68,255,136,0.4)', size: 15, type: 'charGhost' });
+    for (const t of players) {
+      if (t.id === p.id || !t.alive || t.invincibleTimer > 0) continue;
+      const th = getPlayerHitbox(t);
+      if (hitboxCollides(hitbox.x, hitbox.y, hitbox.w, hitbox.h, th.x, th.y, th.w, th.h) && p.dSkillTimer % 6 === 0) {
+        applyHit(p, t, 3, 2, 0.02, -20, 'normal');
+      }
+    }
+  }
+  // 砲台展開（ロング）: 10Fごとに大弾発射 + 光跡フラッシュ
+  if (p.dSkillBuff === 'turret' && p.dSkillTimer % 10 === 0) {
+    projectiles.push({ x: p.x + 25*dir, y: p.y - 40, vx: 15*dir, vy: (Math.random()-0.5)*2,
+      w: 12, h: 8, damage: 4, kbBase: 3, kbScale: 0.04, kbAngle: -15, life: 39, ownerId: p.id,
+      color: '#66DDFF', pcolor: '#A0B4FF', shape: 'rect', ownerCharIdx: p.charIdx, time: 0 });
+    hitEffects.push({ x: p.x + dir*30, y: p.y - 40, life: 8, maxLife: 8, color: '#66DDFF', size: 15, type: 'charSpark' });
+    sparks.push({ x: p.x+dir*25, y: p.y-40, vx:dir*4, vy:(Math.random()-0.5)*1.5, life:8, maxLife:8, color:'#A0B4FF', size:2, gravity:0, drag:0.95 });
+  }
+  // Catbus全力疾走: ダッシュ中ヒット判定
+  if (p.dSkillBuff === 'catbusDash') {
+    const hitbox = { x: p.x - 30, y: p.y - 50, w: 60, h: 60 };
+    for (const t of players) {
+      if (t.id === p.id || !t.alive || t.invincibleTimer > 0) continue;
+      const th = getPlayerHitbox(t);
+      if (hitboxCollides(hitbox.x, hitbox.y, hitbox.w, hitbox.h, th.x, th.y, th.w, th.h) && p.dSkillTimer % 5 === 0) {
+        applyHit(p, t, 8, 6, 0.08, -30, 'strong');
+      }
+    }
+  }
+  // 波おじ ラッシュ: 3Fごとにパンチ判定 + 大きい衝撃波 + 派手な最終爆発
+  if (p.dSkillBuff === 'rush' && p.dSkillTimer % 3 === 0) {
+    const hitbox = { x: p.x + (dir > 0 ? 0 : -75), y: p.y - 65, w: 75, h: 75 };
+    const isLast = p.dSkillTimer <= 3;
+    checkHitboxAgainstPlayers(p, hitbox, isLast ? 8 : 3, isLast ? 6 : 2, isLast ? 0.08 : 0.03, isLast ? -35 : -15, isLast ? 'strong' : 'normal');
+    p.hitTargets = [];
+    hitEffects.push({ x: p.x + dir*30, y: p.y - 40, life: 8, maxLife: 8, color: '#FF4444', size: isLast ? 60 : 22, type: isLast ? 'ring' : 'charSpark' });
+    if (isLast) {
+      triggerScreenShake(6, 12);
+      hitEffects.push({ x: p.x + dir*30, y: p.y - 40, life: 16, maxLife: 16, color: '#FF6644', size: 70 });
+      hitEffects.push({ x: p.x + dir*30, y: p.y - 40, life: 12, maxLife: 12, color: '#FFFFFF', size: 45, type: 'ring' });
+      for (let i = 0; i < 6; i++) sparks.push({ x: p.x+dir*30+(Math.random()-0.5)*20, y: p.y-40, vx:dir*(2+Math.random()*4), vy:-2-Math.random()*3, life:12, maxLife:12, color:i%2?'#FF4444':'#FF8844', size:2.5+Math.random(), gravity:0.1, drag:0.95 });
+    }
+  }
+  // 要塞化（タンク）: 移動不可
+  if (p.dSkillBuff === 'fortress') {
+    p.vx = 0;
+  }
+}
+
+// --- Air dodge trigger ---
+
+// ======================================================================
+// 空中回避
+// ======================================================================
+function triggerAirDodge(p, dirKeys) {
+  // Catbus(11): 瞬間消滅 - 空中回避の代わりに透明無敵0.5秒（攻撃不可）
+  if (p.charIdx === 11) {
+    p.catbusVanishTimer = 30; // 0.5秒
+    p.invincibleTimer = 30;
+    p.airDodgeUsed = true;
+    p.attacking = false;
+    p.specialState = null;
+    p.attackFrame = 0;
+    // 消滅エフェクト
+    for (let i = 0; i < 8; i++) {
+      sparks.push({ x: p.x + (Math.random()-0.5)*30, y: p.y - 35 + (Math.random()-0.5)*30,
+        vx: (Math.random()-0.5)*3, vy: (Math.random()-0.5)*3, life: 12, maxLife: 12,
+        color: '#AADDFF', size: 2+Math.random()*3, gravity: 0, drag: 0.95 });
+    }
+    return;
+  }
+  p.airDodging = true;
+  p.airDodgeTimer = AIR_DODGE_INVINCIBLE_FRAMES;
+  p.airDodgeUsed = true;
+  p.attacking = false;
+  p.specialState = null;
+  p.attackFrame = 0;
+
+  // 方向入力に応じた回避ダッシュ
+  let dx = 0, dy = 0;
+  // Arrow keys (P1, or online remote)
+  if (dirKeys['ArrowLeft']) dx -= 1;
+  if (dirKeys['ArrowRight']) dx += 1;
+  if (dirKeys['ArrowUp']) dy -= 1;
+  if (dirKeys['ArrowDown']) dy += 1;
+  // WASD keys (P2 local)
+  if (dirKeys['a'] || dirKeys['A']) dx -= 1;
+  if (dirKeys['d'] || dirKeys['D']) dx += 1;
+  if (dirKeys['w'] || dirKeys['W']) dy -= 1;
+  // Note: S key is the air dodge trigger for P2, so don't count it as down direction here
+
+  // Clamp
+  if (dx > 1) dx = 1; if (dx < -1) dx = -1;
+  if (dy > 1) dy = 1; if (dy < -1) dy = -1;
+
+  if (dx !== 0 || dy !== 0) {
+    // 方向回避: 既存の慣性に回避方向の速度を加算
+    const len = Math.sqrt(dx * dx + dy * dy);
+    p.vx += (dx / len) * AIR_DODGE_SPEED;
+    p.vy += (dy / len) * AIR_DODGE_SPEED;
+    if (dx !== 0) p.facingLeft = dx < 0;
+  }
+  // 方向なし: 慣性を維持したまま回避（速度リセットしない）
+}
+
+function canAirDodge(p) {
+  return !p.grounded && !p.airDodging && !p.airDodgeUsed && p.airDodgeEndlag <= 0
+    && !p.attacking && p.hitstun <= 0 && !p.grabbed && !p.grabbing
+    && p.guardBreakStun <= 0 && p.alive;
+}
+
+// Process a keydown event for a specific player
+
 // ============================================================
 // バトル描画の 下準備（カメラ・影・2.5D）
 // ============================================================
@@ -17357,6 +18532,179 @@ function drawGrabEffect(p) {
 
 // ========== コンボリスト画面 ==========
 // ======================================================================
+// 必殺技 / 即死技 の 全画面オーバーレイ
+// ======================================================================
+
+function drawInstantKillOverlay() {
+  if (!instantKillDisplay || !instantKillDisplay.active) return;
+  instantKillDisplay.timer--;
+  if (instantKillDisplay.timer <= 0) { instantKillDisplay.active = false; return; }
+  const t = 1 - instantKillDisplay.timer / instantKillDisplay.maxTimer;
+  ctx.save();
+  // 暗転背景
+  if (t < 0.05) {
+    ctx.fillStyle = 'rgba(0,0,0,0.8)'; ctx.fillRect(0, 0, 960, 640);
+  }
+  // テキスト（ズームイン）
+  if (t > 0.03 && t < 0.85) {
+    const textT = Math.min(1, (t - 0.03) / 0.15);
+    const scale = 0.3 + textT * 0.7; // 0.3→1.0
+    const alpha = t < 0.7 ? 1 : Math.max(0, (0.85 - t) / 0.15);
+    ctx.globalAlpha = alpha;
+    ctx.translate(480, 280);
+    ctx.scale(scale, scale);
+    ctx.font = 'bold 52px sans-serif'; ctx.textAlign = 'center';
+    // 赤→金グラデーション
+    const grad = cachedLinGrad(-200, -20, 200, 20, [0, '#FF2200', 0.5, '#FFD700', 1, '#FF4400']);
+    ctx.fillStyle = grad;
+    ctx.shadowColor = '#FF0000'; ctx.shadowBlur = 20;
+    ctx.fillText('INSTANT KILL!', 0, 0);
+    ctx.shadowBlur = 0;
+    // 爆発リング
+    if (textT < 0.5) {
+      ctx.strokeStyle = '#FF4400'; ctx.lineWidth = 3 * (1 - textT * 2);
+      ctx.globalAlpha = alpha * (1 - textT * 2);
+      ctx.beginPath(); ctx.arc(0, 0, 100 + textT * 300, 0, Math.PI * 2); ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
+
+function drawUltimateOverlay() {
+  if (!ultimateActive) return;
+  if (ultimatePhase === 'startup') {
+    // Attack motion: flash around character
+    const p = players[ultimatePlayerId];
+    if (p) {
+      const ud = ultimateData[p.charIdx];
+      const t = ultimateTimer / 18;
+      ctx.save();
+      ctx.globalAlpha = 0.3 + t * 0.4;
+      ctx.fillStyle = ud ? ud.color : '#FFD700';
+      ctx.beginPath(); ctx.arc(p.x, p.y - 35, 40 + t * 30, 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.restore();
+    }
+    return;
+  }
+  if (ultimatePhase === 'hitconfirm') {
+    const t = ultimateTimer / 18;
+    const p2 = players[ultimatePlayerId];
+    const ud2 = p2 ? ultimateData[p2.charIdx] : null;
+    const edgeColor = ud2 ? ud2.color : '#FFD700';
+    const hitTarget = ultimateHitTarget >= 0 ? players[ultimateHitTarget] : null;
+    const cx = hitTarget ? hitTarget.x : 480;
+    const cy = hitTarget ? hitTarget.y - 35 : 285;
+
+    // 1) White flash blinks (3 rapid blinks in first 12 frames)
+    if (ultimateTimer <= 12) {
+      const blinkPhase = Math.floor(ultimateTimer / 2) % 3;
+      const blinkOn = ultimateTimer % 2 === 0;
+      if (blinkOn && blinkPhase < 3) {
+        const blinkAlpha = 0.9 - blinkPhase * 0.2;
+        ctx.fillStyle = `rgba(255,255,255,${blinkAlpha})`;
+        ctx.fillRect(0, 0, 960, 640);
+      }
+    }
+
+    // 2) Gradual darken
+    ctx.fillStyle = `rgba(0,0,0,${t * 0.3})`;
+    ctx.fillRect(0, 0, 960, 640);
+
+    // 3) Radial shockwave (expanding circle from hit point)
+    if (ultimateTimer > 2) {
+      const shockT = (ultimateTimer - 2) / 16;
+      const shockRadius = shockT * 400;
+      const shockAlpha = Math.max(0, 0.6 - shockT * 0.6);
+      ctx.save();
+      ctx.globalAlpha = shockAlpha;
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.lineWidth = 6 - shockT * 4;
+      ctx.beginPath(); ctx.arc(cx, cy, shockRadius, 0, Math.PI * 2); ctx.stroke();
+      // Second shockwave ring (colored, slightly delayed)
+      if (ultimateTimer > 5) {
+        const shockT2 = (ultimateTimer - 5) / 16;
+        const shockR2 = shockT2 * 350;
+        const shockA2 = Math.max(0, 0.5 - shockT2 * 0.5);
+        ctx.globalAlpha = shockA2;
+        ctx.strokeStyle = edgeColor;
+        ctx.lineWidth = 4 - shockT2 * 3;
+        ctx.beginPath(); ctx.arc(cx, cy, shockR2, 0, Math.PI * 2); ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // 4) Vignette flash (bright edges)
+    ctx.save();
+    const vigGrad = ctx.createRadialGradient(480, 320, 150, 480, 320, 520);
+    vigGrad.addColorStop(0, 'rgba(255,255,255,0)');
+    vigGrad.addColorStop(0.7, 'rgba(255,255,255,0)');
+    vigGrad.addColorStop(1, `rgba(255,255,255,${0.25 + Math.sin(ultimateTimer * 0.8) * 0.15})`);
+    ctx.fillStyle = vigGrad;
+    ctx.fillRect(0, 0, 960, 640);
+    ctx.restore();
+
+    // 5) Pulsing edge glow (stronger)
+    ctx.strokeStyle = edgeColor;
+    ctx.lineWidth = 6 + Math.sin(ultimateTimer * 0.5) * 3;
+    ctx.globalAlpha = 0.6 + Math.sin(ultimateTimer * 0.3) * 0.3;
+    ctx.strokeRect(3, 3, 954, 634);
+    // Inner white edge
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 2;
+    ctx.globalAlpha = 0.3 + Math.sin(ultimateTimer * 0.6) * 0.2;
+    ctx.strokeRect(6, 6, 948, 628);
+    ctx.globalAlpha = 1;
+    return;
+  }
+  if (ultimatePhase === 'missdrain') {
+    // Gauge drain flash: red pulse fading out
+    const t = ultimateTimer / 30;
+    if (t < 0.5) {
+      ctx.fillStyle = `rgba(255,0,0,${(0.5 - t) * 0.15})`;
+      ctx.fillRect(0, 0, 960, 640);
+    }
+    return;
+  }
+  if (ultimatePhase === 'darken') {
+    ctx.fillStyle = `rgba(0,0,0,${Math.min(0.85, ultimateTimer / 18 * 0.85)})`;
+    ctx.fillRect(0, 0, 960, 640);
+  } else if (ultimatePhase === 'text') {
+    ctx.fillStyle = 'rgba(0,0,0,0.85)';
+    ctx.fillRect(0, 0, 960, 640);
+    const a = Math.min(1, ultimateTimer / 10);
+    ctx.globalAlpha = a;
+    const p = players[ultimatePlayerId];
+    const ch = p ? characters[p.charIdx] : characters[0];
+    ctx.font = 'bold 28px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillStyle = ch.accent || '#FFD700';
+    ctx.fillText(ch.name, 480, 280);
+    const ud2 = ultimateData[p ? p.charIdx : 0] || ultimateData[0];
+    ctx.font = 'bold 44px sans-serif';
+    ctx.fillStyle = ud2.color || '#FFD700'; ctx.shadowColor = ud2.color || '#FFD700'; ctx.shadowBlur = 20;
+    ctx.fillText(ud2.name, 480, 340);
+    ctx.shadowBlur = 0;
+    ctx.globalAlpha = 1;
+  } else if (ultimatePhase === 'video') {
+    // Video element covers the screen via DOM; canvas shows fallback behind it
+    ctx.fillStyle = 'rgba(0,0,0,0.85)';
+    ctx.fillRect(0, 0, 960, 640);
+    // Pulsing flash (visible if video hasn't loaded yet or file missing)
+    {
+      ctx.globalAlpha = 0.5 + Math.sin(ultimateTimer * 0.3) * 0.3;
+      ctx.fillStyle = '#FFD700';
+      ctx.font = 'bold 40px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('⚡', 480, 330);
+      ctx.globalAlpha = 1;
+    }
+  } else if (ultimatePhase === 'brighten') {
+    const a = Math.max(0, 0.85 - ultimateTimer / 18 * 0.85);
+    ctx.fillStyle = `rgba(0,0,0,${a})`;
+    ctx.fillRect(0, 0, 960, 640);
+  }
+}
+
+// ======================================================================
 // 画面: コンボ一覧 / 戦績
 // ======================================================================
 function drawComboList() {
@@ -19202,1346 +20550,7 @@ function drawTransition() {
 // --- スマッシュ攻撃システム ---
 // 方向キーを 押した 瞬間に 呼ぶ。同じ方向を 素早く 2回 押すと スマッシュが 構える。
 // 呼び元: handleKeyDown の P1 方向キー / gameLoop の リモート入力（ゲスト）
-// ======================================================================
-// スマッシュ攻撃（方向2回 + X）
-// ======================================================================
-function trackSmashInput(p, dir) {
-  if (!p || !p.alive) return;
-  if (p.smashInputDir === dir && (battleFrame - p.smashInputTime) < SMASH_INPUT_WINDOW) {
-    p.smashInputCount++;
-  } else {
-    p.smashInputDir = dir;
-    p.smashInputCount = 1;
-  }
-  p.smashInputTime = battleFrame;
-}
 
-function checkSmashReady(p) {
-  if (!p) return null;
-  if (p.smashInputCount >= 2 && (battleFrame - p.smashInputTime) < SMASH_INPUT_WINDOW) {
-    const dir = p.smashInputDir;
-    p.smashInputCount = 0;
-    if (dir === 'up') return 'upSmash';
-    if (dir === 'side') return 'sideSmash';
-    if (dir === 'down') return 'downSmash';
-  }
-  return null;
-}
-
-function startSmashAttack(p, smashType) {
-  if (p.attacking || p.hitstun > 0 || !p.alive || p.grabbing || p.grabbed || p.guarding || p.guardBreakStun > 0 || p.guardPenalty > 0) return;
-  if (!p.grounded) return; // 地上限定
-  p.smashCharging = true;
-  p.smashChargeTime = 0;
-  p.smashType = smashType;
-}
-
-function executeSmash(p) {
-  if (!p.smashCharging) return;
-  const chargeRatio = Math.min(p.smashChargeTime / SMASH_CHARGE_MAX, 1);
-  const chargeMult = 1 + chargeRatio * SMASH_CHARGE_BONUS;
-  const defs = (p.charIdx === 10 && p.dragonMode) ? dragonAttackDefs : attackDefs[p.charIdx];
-  if (!defs) return;
-  const baseAtk = defs.strong;
-  if (!baseAtk) { p.smashCharging = false; return; }
-  const dir = p.facingLeft ? -1 : 1;
-  const mult = SMASH_DAMAGE_MULT[p.smashType] || 1.5;
-  const smashDmg = baseAtk.damage * mult * chargeMult;
-
-  p.smashCharging = false;
-  p.attacking = true;
-  p.attackType = 'smash';
-  p.attackFrame = 0;
-  p.hitTargets = [];
-  p.lastHitFrame = -99;
-  p.specialState = null;
-
-  let angle, startup, hw, hh, hx, hy;
-  // キャラごとの横スマッシュ角度
-  const SIDE_SMASH_ANGLES = {
-    // 真横（0度）: 横吹っ飛ばし場外狙い
-    1: 0, 5: 0, 12: 0, 19: 0, 13: 0,
-    // 斜め上（-35度）: 上に追撃
-    0: -35, 4: -35, 10: -35, 16: -35, 9: -35,
-    // 真上寄り（-70度）: 上スマに近い
-    2: -70, 7: -70, 15: -70, 26: -70,
-    // 斜め下（20度）: 地面叩きつけ
-    14: 20, 8: 20, 20: 20,
-  };
-  // スマッシュ攻撃の溜め感: startupを弱攻撃×2.5倍
-  const normalStartup = (defs.normal ? defs.normal.startup : 5);
-  const smashStartupBase = Math.max(8, Math.round(normalStartup * 2.5));
-  if (p.smashType === 'upSmash') {
-    angle = -85; startup = smashStartupBase; hx = 0; hy = -60; hw = 60; hh = 65;
-  } else if (p.smashType === 'downSmash') {
-    angle = -15; startup = Math.round(smashStartupBase * 0.7); hx = 0; hy = -30; hw = 90; hh = 40;
-  } else {
-    angle = SIDE_SMASH_ANGLES[p.charIdx] !== undefined ? SIDE_SMASH_ANGLES[p.charIdx] : -45;
-    startup = smashStartupBase; hx = baseAtk.hx || 20; hy = -35; hw = (baseAtk.hw || 60) * 1.2; hh = baseAtk.hh || 45;
-  }
-
-  p.attackData = {
-    name: p.smashType === 'upSmash' ? 'Up Smash' : p.smashType === 'downSmash' ? 'Down Smash' : 'Side Smash',
-    startup: startup, active: 6, recovery: p.smashType === 'sideSmash' ? 22 : 16,
-    damage: smashDmg, kbBase: baseAtk.kbBase * mult, kbScale: baseAtk.kbScale * 1.3,
-    kbAngle: angle, hx: hx, hy: hy, hw: hw, hh: hh,
-    color: characters[p.charIdx].accent, effect: 'bigpunch',
-    isSmash: true, smashType: p.smashType,
-    centerHit: p.smashType === 'downSmash',
-  };
-
-  // 溜めエフェクト
-  if (chargeRatio > 0.3) {
-    hitEffects.push({ x: p.x, y: p.y - 40, life: 15, maxLife: 15, color: characters[p.charIdx].accent, size: 30 + chargeRatio * 30, type: 'ring' });
-  }
-  triggerScreenShake(2 + chargeRatio * 3, 6);
-  playHitSound('cmd');
-  playAudienceSpecialMove();
-}
-
-// --- 崖つかまりシステム ---
-const LEDGE_GRAB_RANGE = 30;      // 崖端からの判定幅
-const LEDGE_Y_ABOVE = 20;        // 崖上端より上の判定範囲
-const LEDGE_Y_BELOW = 80;        // 崖上端より下の判定範囲
-const LEDGE_MAX_TIME = 180;       // 最大つかまり時間(3秒)
-const LEDGE_COOLDOWN = 60;        // 連続つかまり制限(1秒)
-
-// ======================================================================
-// 崖つかまり
-// ======================================================================
-function checkLedgeGrab(p) {
-  if (p.ledgeGrab || p.grounded || p.ledgeCooldown > 0 || !p.alive) return;
-  if (p.hitstun > 0 || p.attacking || p.airDodging) return;
-  // 上方向に移動中 or 落下速度が遅い時のみ
-  if (p.vy > 4) return;
-  const gy = STAGE_GROUND_Y;
-  // 崖より上すぎる場合はスキップ
-  if (p.y < gy - LEDGE_Y_ABOVE) return;
-  // 崖より下すぎる場合もスキップ
-  if (p.y > gy + LEDGE_Y_BELOW) return;
-  // 左崖
-  if (p.x >= STAGE_LEFT - LEDGE_GRAB_RANGE && p.x <= STAGE_LEFT + 15 && p.y >= gy - LEDGE_Y_ABOVE && p.y <= gy + LEDGE_Y_BELOW) {
-    if (players.some(pp => pp.id !== p.id && pp.ledgeGrab && pp.ledgeSide === -1)) return;
-    grabLedge(p, -1);
-  }
-  // 右崖
-  if (p.x >= STAGE_RIGHT - 15 && p.x <= STAGE_RIGHT + LEDGE_GRAB_RANGE && p.y >= gy - LEDGE_Y_ABOVE && p.y <= gy + LEDGE_Y_BELOW) {
-    if (players.some(pp => pp.id !== p.id && pp.ledgeGrab && pp.ledgeSide === 1)) return;
-    grabLedge(p, 1);
-  }
-}
-
-function grabLedge(p, side) {
-  p.ledgeGrab = true;
-  p.ledgeSide = side;
-  p.ledgeTimer = 0;
-  p.ledgeInvincible = 30; // 崖つかまり無敵0.5秒
-  p.vx = 0; p.vy = 0;
-  p.x = side === -1 ? STAGE_LEFT : STAGE_RIGHT;
-  p.y = STAGE_GROUND_Y + 30;
-  p.facingLeft = side === 1;
-  p.attacking = false; p.specialState = null;
-  p.grounded = false;
-  p.jumps = p.charIdx === 15 ? 3 : 2;
-}
-
-function releaseLedge(p, type) {
-  if (!p.ledgeGrab) return;
-  p.ledgeGrab = false;
-  p.ledgeCooldown = LEDGE_COOLDOWN;
-  const dir = -p.ledgeSide; // ステージ内側方向
-  if (type === 'normal') {
-    // その場上がり
-    p.x += dir * 40;
-    p.y = STAGE_GROUND_Y;
-    p.grounded = true;
-    p.ledgeInvincible = 10;
-  } else if (type === 'attack') {
-    // 攻撃上がり
-    p.x += dir * 50;
-    p.y = STAGE_GROUND_Y - 10;
-    p.vy = -3;
-    startAttack(p, 'normal');
-  } else if (type === 'dodge') {
-    // 回避上がり
-    p.x += dir * 70;
-    p.y = STAGE_GROUND_Y;
-    p.grounded = true;
-    p.ledgeInvincible = 20;
-    p.ledgeEndlag = 18; // 0.3秒硬直
-  } else if (type === 'drop') {
-    // 崖離し（落下）
-    p.vy = 0;
-  }
-}
-
-function updateLedge(p) {
-  if (p.ledgeCooldown > 0) p.ledgeCooldown--;
-  if (p.ledgeInvincible > 0) {
-    p.ledgeInvincible--;
-    p.invincibleTimer = Math.max(p.invincibleTimer, 1);
-    // 無敵解除の瞬間: 赤フラッシュ
-    if (p.ledgeInvincible === 0 && p.ledgeGrab) p.damageTint = 6;
-  }
-  if (p.ledgeEndlag > 0) { p.ledgeEndlag--; p.vx *= 0.8; }
-  if (!p.ledgeGrab) return;
-  p.ledgeTimer++;
-  p.vx = 0; p.vy = 0;
-  p.x = p.ledgeSide === -1 ? STAGE_LEFT : STAGE_RIGHT;
-  p.y = STAGE_GROUND_Y + 30;
-  // 3秒経過で自動落下
-  if (p.ledgeTimer >= LEDGE_MAX_TIME) { releaseLedge(p, 'drop'); return; }
-  // 無敵解除後のみ被弾で崖離し
-  if (p.ledgeInvincible <= 0 && p.hitstun > 0) { releaseLedge(p, 'drop'); }
-}
-
-// --- D技（固有追加技）システム ---
-const D_SKILL_HOLD_FRAMES = 30;   // 0.5秒長押し
-const D_SKILL_COOLDOWN = 600;     // 10秒クールダウン
-// 詳細画面に 出すための D技の 名前（triggerDSkill の 中身と そろえること）
-// ======================================================================
-// D技 と 必殺技 の データ
-// D_SKILL_NAMES は 表示名 兼「D技を 持っているか」の 判定に 使う。
-// triggerDSkill の 分岐と 必ず 対応させること
-// ======================================================================
-
-// 必殺技（アルティメット）システム
-let ultimateActive = false;
-let ultimateTimer = 0;
-let ultimatePhase = ''; // 'darken' | 'text' | 'video' | 'damage' | 'brighten'
-let ultimatePlayerId = -1;
-let ultimateVideo = null;
-let ultimateHitTarget = -1;
-
-const ultimateFileNames = ['zen','don','saisoku','meteo','long','uruo','kumataro','bullet','shauden','judgeman','tensai','catbus','tank','namioji','tokko','sam','king','onpa','sen','dosboss','micro','mrtwo','kingking','satoru','kowai','yaho','poyo','pull','mussy','bot','chatta'];
-const ultimateData = [
-  { name:'Azure Dragon Slash', dmg:36, kb:16, angle:-15, range:'line', status:'frozen', dur:120, color:'#44CCFF' },
-  { name:'Heaven Shatter Fist', dmg:40, kb:18, angle:-80, range:'circle', radius:150, status:'bounce', color:'#FF4422' },
-  { name:'Lightspeed Dance', dmg:12, kb:8, angle:-30, range:'all', hits:3, status:'stunned', dur:30, color:'#44FF88' },
-  { name:'Golden Meteor', dmg:40, kb:17, angle:-70, range:'all', status:'burning', dur:180, color:'#FFD700' },
-  { name:'Water Dragon Sky', dmg:38, kb:16, angle:-15, range:'line', color:'#44CCFF' },
-  { name:'Azure Fang Crusher', dmg:38, kb:20, angle:-30, range:'circle', radius:160, color:'#C8A878' },
-  { name:'Starfall Bear Blow', dmg:28, kb:12, angle:-40, range:'all', status:'stunned', dur:18, color:'#FF6B6B' },
-  { name:'Rainbow Burst', dmg:8, kb:6, angle:-20, range:'all', hits:4, status:'confused', dur:60, color:'#FF66AA' },
-  { name:'Electromagnetic Sponge Cannon', dmg:30, kb:14, angle:-40, range:'all', status:'stunned', dur:30, steal:20, color:'#FF80B0' },
-  { name:'Dark Final Judgment', dmg:35, kb:15, angle:-25, range:'front', status:'cursed', dur:180, color:'#C0A0FF' },
-  { name:'Dragon Flame Fusion', dmg:35, kb:16, angle:-40, range:'front', status:'burning', dur:180, color:'#FF6600' },
-  { name:'Teleport Slam', dmg:40, kb:18, angle:-30, range:'teleport', color:'#FFBB44' },
-  { name:'Giant Shell', dmg:37, kb:17, angle:-15, range:'line', color:'#A0B858' },
-  { name:'Raging 100 Hits', dmg:5, kb:4, angle:-10, range:'front', hits:8, color:'#FF6644' },
-  { name:'Dark Triple Blade', dmg:25, kb:13, angle:-30, range:'front', status:'poisoned', dur:90, poisonDmg:1, color:'#CC44FF' },
-  { name:'Rainbow Feather Burst', dmg:18, kb:12, angle:-50, range:'circle', radius:140, status:'confused', dur:90, color:'#FFD700' },
-  { name:'Golden Time Stop', dmg:35, kb:16, angle:-45, range:'all', status:'frozen', dur:90, color:'#FFD700' },
-  { name:'Destructive Sonic Cannon', dmg:33, kb:15, angle:-40, range:'circle', radius:180, status:'stunned', dur:60, color:'#88FFFF' },
-  { name:'Billionaire Rage', dmg:32, kb:14, angle:-35, range:'front', status:'stunned', dur:30, color:'#FF8844' },
-  { name:'Violet Barrage', dmg:37, kb:16, angle:-15, range:'line', status:'paralyzed', dur:180, color:'#CC66FF' },
-  { name:'Triple Merge Cannon', dmg:38, kb:17, angle:-40, range:'front', status:'sealMagic', dur:180, color:'#3388FF' },
-  { name:'Blaze Dual Blast', dmg:18, kb:12, angle:-30, range:'all', hits:2, status:'burning', dur:120, color:'#7733CC' },
-  { name:'Golden Money Storm', dmg:34, kb:15, angle:-50, range:'circle', radius:170, pull:true, color:'#FFD700' },
-  { name:'Taichi Fist', dmg:36, kb:18, angle:-85, range:'front', color:'#44AAFF' },
-  { name:'Terror Scissor Hell', dmg:22, kb:10, angle:-20, range:'front', status:'feared2', dur:60, color:'#CC0044' },
-  { name:'Mystery Blast', dmg:0, kb:0, angle:0, range:'random', color:'#FF8800' },
-  { name:'Squishy Explosion', dmg:8, kb:8, angle:80, range:'all', hits:5, status:'bounce', color:'#44CCEE' },
-  { name:'Super Gravity Collapse', dmg:35, kb:16, angle:-50, range:'circle', radius:160, pull:true, color:'#6622AA' },
-  { name:'Bug Swarm', dmg:28, kb:12, angle:-30, range:'circle', radius:140, status:'poisoned', dur:180, poisonDmg:2, color:'#228822' },
-  // Bot: 掴んで 下に 叩きつける → 当たると 20秒 ロボットに 変身する
-  { name:'Seize and Slam', dmg:22, kb:14, angle:85, range:'line', color:'#66E8FF', botTransform:true },
-  // Chatta: 動画のあと ホーミング爪が 10本 飛ぶ。合計30ダメージ、当たるまで 消えない
-  { name:'Ten Homing Claws', dmg:0, kb:0, angle:-30, range:'all', color:'#FF66CC', chattaClaws:true },
-];
-
-function removeUltimateVideo() {
-  if (ultimateVideo && ultimateVideo.el) {
-    const el = ultimateVideo.el;
-    try { el.pause(); } catch (e) {}
-    el.onended = null; el.oncanplay = null; el.onerror = null;
-    if (document.body.contains(el)) document.body.removeChild(el);
-    el.style.cssText = '';
-    try { el.currentTime = 0; } catch (e) {}   // 次に 使う時のため 残しておく（再ダウンロードしない）
-  }
-  if (ultimateVideo && ultimateVideo.skipKey) {
-    document.removeEventListener('keydown', ultimateVideo.skipKey);
-  }
-  ultimateVideo = null;
-  ultimateVideoShowing = false;
-}
-
-// 必殺技hitbox判定
-function checkUltimateHit(attacker, target) {
-  if (!target || !target.alive) return false;
-  const ud = ultimateData[attacker.charIdx];
-  if (!ud) return false;
-  const dir = attacker.facingLeft ? -1 : 1;
-  const tx = target.x, ty = target.y - 35;
-  const range = ud.range;
-  const r = ud.radius || 160;
-
-  if (range === 'all' || range === 'random') return true;
-  if (range === 'circle') {
-    return Math.hypot(tx - attacker.x, ty - (attacker.y - 35)) < r;
-  }
-  if (range === 'line') {
-    const inY = Math.abs(ty - (attacker.y - 35)) < 50;
-    const inFront = dir > 0 ? tx > attacker.x - 20 : tx < attacker.x + 20;
-    return inY && inFront;
-  }
-  if (range === 'front') {
-    const dx = tx - attacker.x;
-    const inFront = dir > 0 ? dx > -30 && dx < 200 : dx < 30 && dx > -200;
-    const inY = Math.abs(ty - (attacker.y - 35)) < 100;
-    return inFront && inY;
-  }
-  if (range === 'teleport') {
-    // Catbus: always hits if target exists
-    return true;
-  }
-  return Math.hypot(tx - attacker.x, ty - (attacker.y - 35)) < 200;
-}
-
-function triggerUltimate(p) {
-  if (p.ultimateGauge < 100 || ultimateActive) return false;
-  // Phase 1: startup attack motion (hit check happens after)
-  ultimateActive = true;
-  ultimatePlayerId = p.id;
-  ultimatePhase = 'startup';
-  ultimateTimer = 0;
-  ultimateVideo = null;
-  return true;
-}
-
-// 必殺技の 動画は 5〜19MB ある。発動してから 読み込むと
-// 真っ黒な 画面が 出て カクつくので、ゲージが 100% に なった時点で
-// 裏で 先に 読み込んでおく。
-const ultVideoCache = {};
-let ultimateVideoShowing = false;   // 動画が 画面に 出ている間は ゲームを 描かない（カクつき防止）
-
-function prefetchUltimateVideo(charIdx) {
-  const name = ultimateFileNames[charIdx];
-  if (!name || ultVideoCache[name]) return;
-  const v = document.createElement('video');
-  v.preload = 'auto';
-  v.playsInline = true;
-  v.muted = true;            // 読み込みだけ。音は 再生する時に 戻す
-  v.src = 'images/ultimates/' + name + '_ultimate.mp4';
-  try { v.load(); } catch (e) {}
-  ultVideoCache[name] = v;
-}
-
-function startUltimateVideo() {
-  const p = players[ultimatePlayerId];
-  if (!p) { ultimatePhase = 'damage'; ultimateTimer = 0; return; }
-  const name = ultimateFileNames[p.charIdx] || 'zen';
-  if (!ultVideoCache[name]) prefetchUltimateVideo(p.charIdx);
-  const video = ultVideoCache[name];
-  if (!video) { ultimatePhase = 'damage'; ultimateTimer = 0; return; }
-
-  let finished = false;
-  function onFinish() {
-    if (finished) return;
-    finished = true;
-    removeUltimateVideo();
-    if (ultimateActive && ultimatePhase === 'video') {
-      ultimatePhase = 'damage';
-      ultimateTimer = 0;
-    }
-  }
-  video.onended = onFinish;
-  video.onerror = onFinish;
-  // どれかの キーを 押したら 動画を 飛ばせる（毎回 最後まで 見なくていい）
-  function skipKey() { onFinish(); }
-  video.onclick = skipKey;
-  document.addEventListener('keydown', skipKey, { once: true });
-  ultimateVideo = { el: video, shown: false, skipKey: skipKey };
-
-  // 再生できる 状態に なってから 画面に 出す（読み込み中の 真っ黒を 見せない）
-  function show() {
-    if (finished || !ultimateVideo || ultimateVideo.shown) return;
-    ultimateVideo.shown = true;
-    ultimateVideoShowing = true;
-    video.muted = false;
-    try { video.currentTime = 0; } catch (e) {}
-    video.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:9999;object-fit:cover;background:black;';
-    document.body.appendChild(video);
-    video.play().catch(() => {
-      video.muted = true;                       // 音つき自動再生が 止められた時
-      video.play().catch(onFinish);
-    });
-  }
-  if (video.error) {
-    // 動画が 無い キャラ（7体）。待たずに すぐ 先へ進む
-    onFinish();
-    return;
-  }
-  if (video.readyState >= 3) {
-    show();                                     // もう 読み込めている（ふつうは こっち）
-  } else {
-    video.oncanplay = show;
-    // 1.2秒 待って まだ 再生できないなら 動画は あきらめて 先へ進む。
-    // 真っ黒な 画面で 待たせない
-    setTimeout(function () { if (!finished && (!ultimateVideo || !ultimateVideo.shown)) onFinish(); }, 1200);
-  }
-  // 見張り: 画面に 出したのに 再生が 進んでいない（固まっている）なら 打ち切る。
-  // 読み込みが 遅い 回線で 止まったまま 待たされるのを 防ぐ
-  let lastT = -1, stuck = 0;
-  const watch = setInterval(function () {
-    if (finished) { clearInterval(watch); return; }
-    if (!ultimateVideo) { clearInterval(watch); return; }   // 消えた後も 300msごとに 回り続けていた
-    if (!ultimateVideo.shown) return;
-    const ct = video.currentTime;
-    if (ct <= lastT + 0.001) { stuck++; } else { stuck = 0; }
-    lastT = ct;
-    if (stuck >= 5) { clearInterval(watch); onFinish(); }   // 約1.5秒 進まなければ あきらめる
-  }, 300);
-  // 保険: ここまで 来たら 必ず 終わらせる。
-  // いちばん 長い 動画（Bot の 10秒）＋余裕。再生が 止まった場合は
-  // 上の 見張りが 1.5秒で 打ち切るので、ここは 長めで よい
-  setTimeout(onFinish, 12000);
-}
-
-function applyUltimateDamage(attacker, target) {
-  const ud = ultimateData[attacker.charIdx] || ultimateData[0];
-  // Chatta: ホーミング爪を 10本 飛ばす。合計30ダメージ、当たるまで 消えない
-  if (ud.chattaClaws && attacker) {
-    attacker.chattaClawsLeft = 10;
-    attacker.chattaClawTimer = 0;
-    playHitSound('cmd', 9, 30);
-  }
-  // Bot: 叩きつけが 決まったら 20秒間 ロボットに 変身する
-  if (ud.botTransform && attacker) {
-    attacker.botRobot = BOT_ROBOT_FRAMES;
-    playHitSound('cmd', 9, attacker.charIdx);
-    for (let i = 0; i < 40; i++) {
-      const a2 = Math.random() * Math.PI * 2, sp = 2 + Math.random() * 5;
-      sparks.push({ x: attacker.x, y: attacker.y - 35, vx: Math.cos(a2) * sp, vy: Math.sin(a2) * sp,
-        life: 30 + Math.random() * 20, maxLife: 50, color: Math.random() > 0.5 ? '#66E8FF' : '#FFFFFF',
-        size: 3 + Math.random() * 3, gravity: 0.02, drag: 0.96 });
-    }
-    hitFlash.alpha = Math.max(hitFlash.alpha, 0.5);
-    hitFlash.color = '#66E8FF';
-    triggerScreenShake(12, 20);
-  }
-  let dmg = ud.dmg, kb = ud.kb, angle = ud.angle;
-  if (ud.range === 'random') { dmg = Math.floor(Math.random()*40)+1; kb = 5+Math.random()*15; angle = -Math.floor(Math.random()*80); }
-  if (ud.range === 'teleport' && target) { attacker.x = target.x + (target.facingLeft ? 60 : -60); attacker.y = target.y; }
-  if (ud.pull && target) { target.vx = (attacker.x - target.x)*0.15; target.vy = (attacker.y - target.y)*0.1; }
-  if (attacker.charIdx === 10 && attacker.dragonMode) { dmg = 40; kb = 20; }
-  const hitCount = ud.hits || 1;
-  if (target) {
-    for (let h = 0; h < hitCount; h++) applyHit(attacker, target, dmg, kb, 0.2, angle, 'cmd');
-    if (ud.status) {
-      const dur = ud.dur || 60;
-      const st = ud.status;
-      if (st === 'frozen') target.frozen = Math.max(target.frozen, dur);
-      if (st === 'burning') { target.burning = Math.max(target.burning, dur); target.burnDmg = 3; }
-      if (st === 'poisoned') { target.poisoned = Math.max(target.poisoned, ud.dur); target.poisonDmg = ud.poisonDmg||8; }
-      if (st === 'stunned') target.stunned = Math.max(target.stunned, dur);
-      if (st === 'cursed') target.cursed = Math.max(target.cursed, dur);
-      if (st === 'confused') target.confused = Math.max(target.confused, dur);
-      if (st === 'paralyzed') target.paralyzed = Math.max(target.paralyzed, dur);
-      if (st === 'feared2') target.feared2 = Math.max(target.feared2, dur);
-      if (st === 'sealMagic') target.sealMagic = Math.max(target.sealMagic, dur);
-      if (st === 'bounce') { target.vy = 12; target.groundBounced = false; }
-    }
-    if (ud.steal && target.ultimateGauge !== undefined) {
-      const stolen = target.ultimateGauge * (ud.steal/100);
-      target.ultimateGauge -= stolen;
-      attacker.ultimateGauge = Math.min(100, attacker.ultimateGauge + stolen);
-    }
-    if (ud.range === 'random') {
-      const effs = ['frozen','burning','stunned','confused','paralyzed'];
-      target[effs[Math.floor(Math.random()*effs.length)]] = 60+Math.floor(Math.random()*60);
-    }
-  }
-  triggerScreenShake(30, 36);
-  hitFlash.alpha = 0.8; hitFlash.color = ud.color;
-  playUltimateExplosionSE();
-  const ex = target ? target.x : attacker.x, ey = target ? target.y-35 : attacker.y-35;
-  // 3x particles (90), 1.5x size
-  for (let i = 0; i < 90; i++) {
-    const a = Math.random()*Math.PI*2;
-    const spd = 4 + Math.random() * 10;
-    sparks.push({ x:ex,y:ey,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd-4,life:30+Math.floor(Math.random()*12),maxLife:35,color:i%3===0?'#FFF':(i%3===1?ud.color:'#FFD700'),size:4.5+Math.random()*6,gravity:0.08,drag:0.96 });
-  }
-  // Shockwave rings
-  hitEffects.push({ x:ex, y:ey, life:24, maxLife:24, color:'#FFFFFF', size:200, type:'ring' });
-  hitEffects.push({ x:ex, y:ey, life:30, maxLife:30, color:ud.color, size:300, type:'ring' });
-  cmdNameDisplay.push({ text: ud.name, x: 480, y: 200, life: 70, maxLife: 70, color: ud.color });
-}
-
-function updateUltimate() {
-  if (!ultimateActive) return;
-  ultimateTimer++;
-
-  // Phase 1: Startup attack motion (0.3s) → hit check
-  if (ultimatePhase === 'startup') {
-    if (ultimateTimer > 18) {
-      const attacker = players[ultimatePlayerId];
-      const target = attacker ? players.find(pp => pp.id !== attacker.id && pp.alive) : null;
-      if (attacker && target && checkUltimateHit(attacker, target)) {
-        // HIT confirmed → slow-mo phase
-        attacker.ultimateGauge = 0;
-        ultimatePhase = 'hitconfirm';
-        ultimateTimer = 0;
-        ultimateHitTarget = target.id;
-        const ud = ultimateData[attacker.charIdx];
-        const udColor = ud ? ud.color : '#FFD700';
-        // Charge SE (0.2s ため音) then explosion
-        playUltimateChargeSE();
-        setTimeout(() => { playUltimateExplosionSE(); }, 200);
-        // Hit sound at 1.5x volume (play cmd sound which is the loudest)
-        playHitSound('cmd');
-        playHitSound('strong'); // layer extra hit for more impact
-        // Enhanced screen shake: 2x intensity & duration (30 intensity, 36 frames = 0.6s)
-        triggerScreenShake(30, 36);
-        // White flash (will be rendered as 3 rapid blinks in drawUltimateOverlay)
-        hitFlash.alpha = 0.8; hitFlash.color = '#FFFFFF';
-        target.damageTint = 20;
-        // HIT!! text (bigger)
-        comicTexts.push({ text: 'HIT!!', x: target.x, y: target.y - 60, life: 45, maxLife: 45, color: '#FF4444', bgColor: '#FFD700', size: 40, rotation: 0 });
-        // Hitbox flash ring (larger)
-        hitEffects.push({ x: target.x, y: target.y - 35, life: 18, maxLife: 18, color: udColor, size: 150, type: 'ring' });
-        // Shockwave ring effect (radial, expanding)
-        hitEffects.push({ x: target.x, y: target.y - 35, life: 24, maxLife: 24, color: '#FFFFFF', size: 200, type: 'ring' });
-        hitEffects.push({ x: target.x, y: target.y - 35, life: 30, maxLife: 30, color: udColor, size: 280, type: 'ring' });
-        // Explosion particles: 3x quantity (90 total), 1.5x size
-        for (let i = 0; i < 90; i++) {
-          const a = Math.random() * Math.PI * 2;
-          const spd = 3 + Math.random() * 10;
-          const colors = [udColor, '#FFFFFF', '#FFD700', '#FF4444'];
-          sparks.push({
-            x: target.x, y: target.y - 35,
-            vx: Math.cos(a) * spd, vy: Math.sin(a) * spd - 4,
-            life: 30 + Math.floor(Math.random() * 15),
-            maxLife: 35,
-            color: colors[Math.floor(Math.random() * colors.length)],
-            size: 4.5 + Math.random() * 6,
-            gravity: 0.08, drag: 0.96
-          });
-        }
-        // Send to guest
-        if (onlineMode && isHost && peerConn && peerConn.open) {
-          peerConn.send({ type: 'ultimate', playerId: attacker.id, charIdx: attacker.charIdx });
-        }
-      } else {
-        // MISS → ゲージ消費・よろけ硬直
-        if (attacker) {
-          attacker.ultimateGauge = 0;
-          attacker.hitstun = Math.max(attacker.hitstun, 12); // 0.2秒よろけ
-        }
-        ultimatePhase = 'missdrain';
-        ultimateTimer = 0;
-        playHitSound('guardBreak');
-        if (attacker) {
-          comicTexts.push({ text: 'MISS...', x: 480, y: 280, life: 48, maxLife: 48, color: '#666666', bgColor: '#333333', size: 28, rotation: 0 });
-          for (let i = 0; i < 12; i++) {
-            sparks.push({ x: attacker.x+(Math.random()-0.5)*40, y: attacker.y-30, vx: (Math.random()-0.5)*4, vy: -1-Math.random()*3, life: 18, maxLife: 18, color: '#888888', size: 3+Math.random()*3, gravity: -0.02, drag: 0.94 });
-          }
-        }
-      }
-    }
-    return;
-  }
-
-  // Phase 1.5: Hit confirm slow-mo (0.3s at 0.2x speed)
-  if (ultimatePhase === 'hitconfirm') {
-    if (ultimateTimer > 18) {
-      fadeOutBGM(0.3);
-      ultimatePhase = 'darken';
-      ultimateTimer = 0;
-    }
-    return; // game loop runs at reduced speed during this phase
-  }
-
-  // Phase 1.5b: Miss gauge drain animation
-  if (ultimatePhase === 'missdrain') {
-    if (ultimateTimer > 30) {
-      ultimateActive = false;
-      ultimatePhase = '';
-    }
-    return;
-  }
-
-  // Phase 2: Darken
-  if (ultimatePhase === 'darken' && ultimateTimer > 18) {
-    ultimatePhase = 'text';
-    ultimateTimer = 0;
-  }
-  // Phase 3: Text display
-  if (ultimatePhase === 'text' && ultimateTimer > 30) {
-    ultimatePhase = 'video';
-    ultimateTimer = 0;
-    startUltimateVideo();
-  }
-  // Phase 4: Video (handled by video events → transitions to 'damage')
-  // Phase 5: Damage（ホスト側のみダメージ適用、ゲストはstate同期で反映）
-  if (ultimatePhase === 'damage') {
-    if (ultimateTimer === 1 && !(onlineMode && !isHost)) {
-      const attacker = players[ultimatePlayerId];
-      const target = attacker ? players.find(pp => pp.id !== attacker.id && pp.alive) : null;
-      if (attacker && target) applyUltimateDamage(attacker, target);
-    }
-    if (ultimateTimer > 5) {
-      ultimatePhase = 'brighten';
-      ultimateTimer = 0;
-    }
-  }
-  // Phase 6: Brighten
-  if (ultimatePhase === 'brighten' && ultimateTimer > 18) {
-    ultimateActive = false;
-    ultimatePhase = '';
-    removeUltimateVideo();
-    fadeInBGM(0.5);
-  }
-}
-
-function drawInstantKillOverlay() {
-  if (!instantKillDisplay || !instantKillDisplay.active) return;
-  instantKillDisplay.timer--;
-  if (instantKillDisplay.timer <= 0) { instantKillDisplay.active = false; return; }
-  const t = 1 - instantKillDisplay.timer / instantKillDisplay.maxTimer;
-  ctx.save();
-  // 暗転背景
-  if (t < 0.05) {
-    ctx.fillStyle = 'rgba(0,0,0,0.8)'; ctx.fillRect(0, 0, 960, 640);
-  }
-  // テキスト（ズームイン）
-  if (t > 0.03 && t < 0.85) {
-    const textT = Math.min(1, (t - 0.03) / 0.15);
-    const scale = 0.3 + textT * 0.7; // 0.3→1.0
-    const alpha = t < 0.7 ? 1 : Math.max(0, (0.85 - t) / 0.15);
-    ctx.globalAlpha = alpha;
-    ctx.translate(480, 280);
-    ctx.scale(scale, scale);
-    ctx.font = 'bold 52px sans-serif'; ctx.textAlign = 'center';
-    // 赤→金グラデーション
-    const grad = cachedLinGrad(-200, -20, 200, 20, [0, '#FF2200', 0.5, '#FFD700', 1, '#FF4400']);
-    ctx.fillStyle = grad;
-    ctx.shadowColor = '#FF0000'; ctx.shadowBlur = 20;
-    ctx.fillText('INSTANT KILL!', 0, 0);
-    ctx.shadowBlur = 0;
-    // 爆発リング
-    if (textT < 0.5) {
-      ctx.strokeStyle = '#FF4400'; ctx.lineWidth = 3 * (1 - textT * 2);
-      ctx.globalAlpha = alpha * (1 - textT * 2);
-      ctx.beginPath(); ctx.arc(0, 0, 100 + textT * 300, 0, Math.PI * 2); ctx.stroke();
-    }
-  }
-  ctx.restore();
-}
-
-function drawUltimateOverlay() {
-  if (!ultimateActive) return;
-  if (ultimatePhase === 'startup') {
-    // Attack motion: flash around character
-    const p = players[ultimatePlayerId];
-    if (p) {
-      const ud = ultimateData[p.charIdx];
-      const t = ultimateTimer / 18;
-      ctx.save();
-      ctx.globalAlpha = 0.3 + t * 0.4;
-      ctx.fillStyle = ud ? ud.color : '#FFD700';
-      ctx.beginPath(); ctx.arc(p.x, p.y - 35, 40 + t * 30, 0, Math.PI * 2); ctx.fill();
-      ctx.globalAlpha = 1;
-      ctx.restore();
-    }
-    return;
-  }
-  if (ultimatePhase === 'hitconfirm') {
-    const t = ultimateTimer / 18;
-    const p2 = players[ultimatePlayerId];
-    const ud2 = p2 ? ultimateData[p2.charIdx] : null;
-    const edgeColor = ud2 ? ud2.color : '#FFD700';
-    const hitTarget = ultimateHitTarget >= 0 ? players[ultimateHitTarget] : null;
-    const cx = hitTarget ? hitTarget.x : 480;
-    const cy = hitTarget ? hitTarget.y - 35 : 285;
-
-    // 1) White flash blinks (3 rapid blinks in first 12 frames)
-    if (ultimateTimer <= 12) {
-      const blinkPhase = Math.floor(ultimateTimer / 2) % 3;
-      const blinkOn = ultimateTimer % 2 === 0;
-      if (blinkOn && blinkPhase < 3) {
-        const blinkAlpha = 0.9 - blinkPhase * 0.2;
-        ctx.fillStyle = `rgba(255,255,255,${blinkAlpha})`;
-        ctx.fillRect(0, 0, 960, 640);
-      }
-    }
-
-    // 2) Gradual darken
-    ctx.fillStyle = `rgba(0,0,0,${t * 0.3})`;
-    ctx.fillRect(0, 0, 960, 640);
-
-    // 3) Radial shockwave (expanding circle from hit point)
-    if (ultimateTimer > 2) {
-      const shockT = (ultimateTimer - 2) / 16;
-      const shockRadius = shockT * 400;
-      const shockAlpha = Math.max(0, 0.6 - shockT * 0.6);
-      ctx.save();
-      ctx.globalAlpha = shockAlpha;
-      ctx.strokeStyle = '#FFFFFF';
-      ctx.lineWidth = 6 - shockT * 4;
-      ctx.beginPath(); ctx.arc(cx, cy, shockRadius, 0, Math.PI * 2); ctx.stroke();
-      // Second shockwave ring (colored, slightly delayed)
-      if (ultimateTimer > 5) {
-        const shockT2 = (ultimateTimer - 5) / 16;
-        const shockR2 = shockT2 * 350;
-        const shockA2 = Math.max(0, 0.5 - shockT2 * 0.5);
-        ctx.globalAlpha = shockA2;
-        ctx.strokeStyle = edgeColor;
-        ctx.lineWidth = 4 - shockT2 * 3;
-        ctx.beginPath(); ctx.arc(cx, cy, shockR2, 0, Math.PI * 2); ctx.stroke();
-      }
-      ctx.restore();
-    }
-
-    // 4) Vignette flash (bright edges)
-    ctx.save();
-    const vigGrad = ctx.createRadialGradient(480, 320, 150, 480, 320, 520);
-    vigGrad.addColorStop(0, 'rgba(255,255,255,0)');
-    vigGrad.addColorStop(0.7, 'rgba(255,255,255,0)');
-    vigGrad.addColorStop(1, `rgba(255,255,255,${0.25 + Math.sin(ultimateTimer * 0.8) * 0.15})`);
-    ctx.fillStyle = vigGrad;
-    ctx.fillRect(0, 0, 960, 640);
-    ctx.restore();
-
-    // 5) Pulsing edge glow (stronger)
-    ctx.strokeStyle = edgeColor;
-    ctx.lineWidth = 6 + Math.sin(ultimateTimer * 0.5) * 3;
-    ctx.globalAlpha = 0.6 + Math.sin(ultimateTimer * 0.3) * 0.3;
-    ctx.strokeRect(3, 3, 954, 634);
-    // Inner white edge
-    ctx.strokeStyle = '#FFFFFF';
-    ctx.lineWidth = 2;
-    ctx.globalAlpha = 0.3 + Math.sin(ultimateTimer * 0.6) * 0.2;
-    ctx.strokeRect(6, 6, 948, 628);
-    ctx.globalAlpha = 1;
-    return;
-  }
-  if (ultimatePhase === 'missdrain') {
-    // Gauge drain flash: red pulse fading out
-    const t = ultimateTimer / 30;
-    if (t < 0.5) {
-      ctx.fillStyle = `rgba(255,0,0,${(0.5 - t) * 0.15})`;
-      ctx.fillRect(0, 0, 960, 640);
-    }
-    return;
-  }
-  if (ultimatePhase === 'darken') {
-    ctx.fillStyle = `rgba(0,0,0,${Math.min(0.85, ultimateTimer / 18 * 0.85)})`;
-    ctx.fillRect(0, 0, 960, 640);
-  } else if (ultimatePhase === 'text') {
-    ctx.fillStyle = 'rgba(0,0,0,0.85)';
-    ctx.fillRect(0, 0, 960, 640);
-    const a = Math.min(1, ultimateTimer / 10);
-    ctx.globalAlpha = a;
-    const p = players[ultimatePlayerId];
-    const ch = p ? characters[p.charIdx] : characters[0];
-    ctx.font = 'bold 28px sans-serif'; ctx.textAlign = 'center';
-    ctx.fillStyle = ch.accent || '#FFD700';
-    ctx.fillText(ch.name, 480, 280);
-    const ud2 = ultimateData[p ? p.charIdx : 0] || ultimateData[0];
-    ctx.font = 'bold 44px sans-serif';
-    ctx.fillStyle = ud2.color || '#FFD700'; ctx.shadowColor = ud2.color || '#FFD700'; ctx.shadowBlur = 20;
-    ctx.fillText(ud2.name, 480, 340);
-    ctx.shadowBlur = 0;
-    ctx.globalAlpha = 1;
-  } else if (ultimatePhase === 'video') {
-    // Video element covers the screen via DOM; canvas shows fallback behind it
-    ctx.fillStyle = 'rgba(0,0,0,0.85)';
-    ctx.fillRect(0, 0, 960, 640);
-    // Pulsing flash (visible if video hasn't loaded yet or file missing)
-    {
-      ctx.globalAlpha = 0.5 + Math.sin(ultimateTimer * 0.3) * 0.3;
-      ctx.fillStyle = '#FFD700';
-      ctx.font = 'bold 40px sans-serif'; ctx.textAlign = 'center';
-      ctx.fillText('⚡', 480, 330);
-      ctx.globalAlpha = 1;
-    }
-  } else if (ultimatePhase === 'brighten') {
-    const a = Math.max(0, 0.85 - ultimateTimer / 18 * 0.85);
-    ctx.fillStyle = `rgba(0,0,0,${a})`;
-    ctx.fillRect(0, 0, 960, 640);
-  }
-}
-
-// ======================================================================
-// D技の 中身（キャラ別）
-// ======================================================================
-function triggerDSkill(p) {
-  if (p.dSkillCooldown > 0 || p.dSkillActive || !p.alive || p.hitstun > 0 || p.grabbed) return;
-  // D技を 持たないキャラ（Chatta は D＝ワープメテオ）で クールダウンだけ 取られないように、
-  // 分岐が ある ことを 先に 確かめる
-  if (!D_SKILL_NAMES[p.charIdx]) return;
-  p.dSkillCooldown = D_SKILL_COOLDOWN;
-  const target = players.find(pp => pp.id !== p.id && pp.alive);
-  const dir = p.facingLeft ? -1 : 1;
-  const ci = p.charIdx;
-
-  if (ci === 0 && target) {
-    // ゼン「居合い」: 残像3枚 + 長く太い斬撃ライン
-    const oldX = p.x, oldY = p.y;
-    const behindDir = target.facingLeft ? 1 : -1;
-    p.x = target.x + behindDir * 50; p.y = target.y;
-    p.facingLeft = behindDir < 0; p.vx = 0; p.vy = 0;
-    // 残像3枚（元の位置→中間→到着）
-    const mx = (oldX + p.x) / 2, my = (oldY + p.y) / 2;
-    hitEffects.push({ x: oldX, y: oldY - 40, life: 22, maxLife: 22, color: '#88CCFF', size: 25, type: 'charGhost' });
-    hitEffects.push({ x: mx, y: my - 40, life: 18, maxLife: 18, color: '#88CCFF', size: 20, type: 'charGhost' });
-    hitEffects.push({ x: p.x - behindDir*20, y: p.y - 40, life: 14, maxLife: 14, color: '#AADDFF', size: 18, type: 'charGhost' });
-    for (let i = 0; i < 8; i++) sparks.push({ x: oldX+(Math.random()-0.5)*25, y: oldY-40+(Math.random()-0.5)*25, vx:(Math.random()-0.5)*4, vy:-1-Math.random()*2.5, life:16, maxLife:16, color:'#AADDFF', size:2+Math.random(), gravity:0.04, drag:0.97 });
-    // 斬撃（長く太く青白い）
-    const hitbox = { x: p.x - 60, y: p.y - 75, w: 120, h: 120 };
-    checkHitboxAgainstPlayers(p, hitbox, 12, 7, 0.10, -30, 'special');
-    hitEffects.push({ x: p.x, y: p.y - 40, life: 24, maxLife: 24, color: '#AADDFF', size: 80, type: 'charSlash' });
-    hitEffects.push({ x: p.x, y: p.y - 40, life: 20, maxLife: 20, color: '#FFFFFF', size: 55, type: 'charSlash' });
-    hitEffects.push({ x: p.x, y: p.y - 40, life: 16, maxLife: 16, color: '#88CCFF', size: 40, type: 'charSlash' });
-    cmdNameDisplay.push({ text: 'Iai Slash!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#AADDFF' });
-  } else if (ci === 1) {
-    // ドン「大地震」: 画面端まで亀裂 + 大量土煙
-    if (p.grounded) {
-      const hitbox = { x: p.x - 126, y: p.y - 45, w: 252, h: 70 };
-      checkHitboxAgainstPlayers(p, hitbox, 10, 8, 0.08, -70, 'special');
-      triggerScreenShake(8, 16);
-      hitEffects.push({ x: p.x, y: p.y, life: 25, maxLife: 25, color: '#8B4513', size: 200, type: 'shockwave' });
-      hitEffects.push({ x: p.x - 120, y: p.y, life: 22, maxLife: 22, color: '#8B4513', size: 140, type: 'shockwave' });
-      hitEffects.push({ x: p.x + 120, y: p.y, life: 22, maxLife: 22, color: '#8B4513', size: 140, type: 'shockwave' });
-      hitEffects.push({ x: p.x, y: p.y, life: 18, maxLife: 18, color: '#FF6644', size: 90, type: 'ring' });
-      for (let i = 0; i < 20; i++) sparks.push({ x: p.x+(Math.random()-0.5)*200, y: p.y, vx:(Math.random()-0.5)*7, vy:-3-Math.random()*5, life:22, maxLife:22, color:i%3===0?'#8B6914':(i%3===1?'#AA8855':'#CC9966'), size:3+Math.random()*4, gravity:0.15, drag:0.95 });
-      cmdNameDisplay.push({ text: 'Earthquake!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FF4422' });
-    }
-  } else if (ci === 2) {
-    // サイソク「分身」: 残像2枚 + 鮮明
-    p.dSkillActive = true; p.dSkillTimer = 30; p.dSkillBuff = 'bunshin';
-    hitEffects.push({ x: p.x - dir*30, y: p.y - 40, life: 24, maxLife: 24, color: 'rgba(68,255,136,0.6)', size: 30, type: 'charGhost' });
-    hitEffects.push({ x: p.x + dir*20, y: p.y - 40, life: 20, maxLife: 20, color: 'rgba(68,255,136,0.4)', size: 25, type: 'charGhost' });
-    for (let i = 0; i < 10; i++) sparks.push({ x: p.x+(Math.random()-0.5)*35, y: p.y-40+(Math.random()-0.5)*35, vx:(Math.random()-0.5)*3, vy:-1.5-Math.random(), life:16, maxLife:16, color:'#44FF88', size:2+Math.random(), gravity:0.03, drag:0.97 });
-    cmdNameDisplay.push({ text: 'Clone!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#44FF88' });
-  } else if (ci === 3) {
-    // メテオ「燃焼拳」: 多めの炎 + 明るいオレンジ
-    p.dSkillActive = true; p.dSkillTimer = 600; p.dSkillBuff = 'burnFist';
-    for (let i = 0; i < 16; i++) sparks.push({ x: p.x+dir*15+(Math.random()-0.5)*15, y: p.y-45+(Math.random()-0.5)*20, vx:(Math.random()-0.5)*4+dir*2, vy:-2-Math.random()*3, life:20, maxLife:20, color:i%3===0?'#FF4400':(i%3===1?'#FFAA33':'#FFCC55'), size:2.5+Math.random()*2.5, type:'fireball', gravity:0.06, drag:0.97 });
-    hitEffects.push({ x: p.x + dir*20, y: p.y - 45, life: 22, maxLife: 22, color: '#FFAA33', size: 25, type: 'charGlow' });
-    hitEffects.push({ x: p.x + dir*15, y: p.y - 45, life: 16, maxLife: 16, color: '#FF6600', size: 18, type: 'ring' });
-    cmdNameDisplay.push({ text: 'Burning Fist!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FF8833' });
-  } else if (ci === 4) {
-    // ロング「砲台展開」: 大弾 + 水色光跡
-    p.dSkillActive = true; p.dSkillTimer = 60; p.dSkillBuff = 'turret';
-    hitEffects.push({ x: p.x + dir*30, y: p.y - 40, life: 16, maxLife: 16, color: '#66DDFF', size: 35, type: 'charGlow' });
-    hitEffects.push({ x: p.x, y: p.y - 40, life: 18, maxLife: 18, color: '#A0B4FF', size: 40, type: 'ring' });
-    for (let i = 0; i < 5; i++) sparks.push({ x: p.x+dir*25, y: p.y-40, vx:dir*(2+Math.random()*3), vy:(Math.random()-0.5)*2, life:10, maxLife:10, color:'#66DDFF', size:2+Math.random(), gravity:0, drag:0.95 });
-    cmdNameDisplay.push({ text: 'Deploy Cannon!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#66DDFF' });
-  } else if (ci === 5) {
-    // うる男「鉄壁」: 大きく鮮明な紫バリア
-    p.dSkillActive = true; p.dSkillTimer = 180; p.dSkillBuff = 'ironWall';
-    hitEffects.push({ x: p.x, y: p.y - 35, life: 30, maxLife: 30, color: '#BB77EE', size: 65, type: 'ring' });
-    hitEffects.push({ x: p.x, y: p.y - 35, life: 25, maxLife: 25, color: '#CC99FF', size: 45, type: 'charGlow' });
-    hitEffects.push({ x: p.x, y: p.y - 35, life: 20, maxLife: 20, color: '#9966CC', size: 55, type: 'ring' });
-    cmdNameDisplay.push({ text: 'Iron Wall!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#BB77EE' });
-  } else if (ci === 6) {
-    // 熊太郎「熊の怒り」: 全身赤く染める
-    p.dSkillActive = true; p.dSkillTimer = 600; p.dSkillBuff = 'bearRage';
-    hitFlash.alpha = 0.2; hitFlash.color = '#FF2222';
-    hitEffects.push({ x: p.x, y: p.y - 40, life: 25, maxLife: 25, color: '#FF2222', size: 45, type: 'charGlow' });
-    hitEffects.push({ x: p.x, y: p.y - 40, life: 20, maxLife: 20, color: '#FF4444', size: 35, type: 'ring' });
-    for (let i = 0; i < 10; i++) sparks.push({ x: p.x+(Math.random()-0.5)*30, y: p.y-40+(Math.random()-0.5)*35, vx:(Math.random()-0.5)*3, vy:-2-Math.random()*1.5, life:18, maxLife:18, color:i%2?'#FF4444':'#FF6B6B', size:2.5+Math.random(), gravity:0.05, drag:0.96 });
-    cmdNameDisplay.push({ text: 'Bear Rage!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FF4444' });
-  } else if (ci === 7) {
-    // バレット「スナイパー」: 太いビーム + 大きな着弾爆発
-    const pr = { x: p.x + 30 * dir, y: p.y - 40, vx: 23 * dir, vy: 0, w: 16, h: 8,
-      damage: 15, kbBase: 9, kbScale: 0.12, kbAngle: -20, life: 78, ownerId: p.id,
-      color: '#FFEE44', pcolor: '#FFAA00', shape: 'rect', ownerCharIdx: ci, time: 0, pierce: true, hitTargets: [] };
-    projectiles.push(pr);
-    // 太いビームライン
-    hitEffects.push({ x: p.x + dir*250, y: p.y - 40, life: 16, maxLife: 16, color: '#FFEE44', size: 75, type: 'charSlash' });
-    hitEffects.push({ x: p.x + dir*120, y: p.y - 40, life: 14, maxLife: 14, color: '#FFFFFF', size: 50, type: 'charSlash' });
-    hitEffects.push({ x: p.x + dir*15, y: p.y - 40, life: 10, maxLife: 10, color: '#FFFFFF', size: 20, type: 'charSpark' });
-    for (let i = 0; i < 8; i++) sparks.push({ x: p.x+dir*25, y: p.y-40, vx: dir*(3+Math.random()*3), vy:(Math.random()-0.5)*4, life:12, maxLife:12, color:i%2?'#FFEE44':'#FFFFFF', size:2+Math.random(), gravity:0.08, drag:0.96 });
-    cmdNameDisplay.push({ text: 'Sniper!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FFEE44' });
-  } else if (ci === 8 && target) {
-    // シャうでん「墨吐き」: 広範囲の黒い液体 + 大量しぶき
-    const hitbox = { x: p.x + (dir > 0 ? 0 : -120), y: p.y - 65, w: 120, h: 90 };
-    for (let i = 0; i < 14; i++) sparks.push({ x: p.x+dir*25, y: p.y-40, vx: dir*(3+Math.random()*6), vy:(Math.random()-0.5)*5, life:22, maxLife:22, color:i%3===0?'#111133':(i%3===1?'#222244':'#333355'), size:3+Math.random()*3, gravity:0.1, drag:0.94 });
-    for (const t2 of players) {
-      if (t2.id === p.id || !t2.alive || t2.invincibleTimer > 0) continue;
-      const th = getPlayerHitbox(t2);
-      if (hitboxCollides(hitbox.x, hitbox.y, hitbox.w, hitbox.h, th.x, th.y, th.w, th.h)) {
-        t2.hitstun = Math.max(t2.hitstun, 30); t2.vx = 0; t2.vy = 0;
-        t2.damage = Math.min(999, t2.damage + 5);
-        hitEffects.push({ x: t2.x, y: t2.y - 40, life: 22, maxLife: 22, color: '#111133', size: 50 });
-        for (let j = 0; j < 10; j++) sparks.push({ x: t2.x+(Math.random()-0.5)*30, y: t2.y-40, vx:(Math.random()-0.5)*6, vy:-2.5-Math.random()*4, life:18, maxLife:18, color:j%2?'#222244':'#111133', size:2.5+Math.random()*3, gravity:0.12, drag:0.94 });
-      }
-    }
-    cmdNameDisplay.push({ text: 'Ink Spray!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#222266' });
-  } else if (ci === 9 && target) {
-    // ジャッジマン「判決」: 太い光の柱 + 大きなJUDGEMENT!
-    cmdNameDisplay.push({ text: 'JUDGEMENT!', x: 480, y: 180, life: 75, maxLife: 75, color: '#FFD700' });
-    // 太い金色の光の柱
-    for (let i = 0; i < 14; i++) sparks.push({ x: target.x+(Math.random()-0.5)*40, y: target.y-250-Math.random()*120, vx:(Math.random()-0.5)*1.5, vy:7+Math.random()*5, life:25, maxLife:25, color:i%3===0?'#FFD700':(i%3===1?'#FFFFFF':'#FFEE88'), size:3+Math.random()*3, gravity:-0.1, drag:0.98 });
-    hitEffects.push({ x: target.x, y: target.y - 80, life: 22, maxLife: 22, color: '#FFD700', size: 40, type: 'charGlow' });
-    if (target.damage >= 100) {
-      target.vx = dir * 30; target.vy = -20; target.hitstun = 60;
-      hitFlash.alpha = 0.6; hitFlash.color = '#FFD700';
-      triggerScreenShake(12, 24);
-      hitEffects.push({ x: target.x, y: target.y - 40, life: 30, maxLife: 30, color: '#FFD700', size: 120, type: 'ring' });
-      hitEffects.push({ x: target.x, y: target.y - 40, life: 25, maxLife: 25, color: '#FFFFFF', size: 70, type: 'charGlow' });
-      hitEffects.push({ x: target.x, y: target.y - 40, life: 20, maxLife: 20, color: '#FFEE88', size: 90, type: 'ring' });
-      cmdNameDisplay.push({ text: 'Guilty!', x: target.x, y: target.y - 120, life: 70, maxLife: 70, color: '#FFD700' });
-    } else {
-      cmdNameDisplay.push({ text: 'Not Guilty...', x: target.x, y: target.y - 100, life: 50, maxLife: 50, color: '#888888' });
-    }
-  } else if (ci === 10) {
-    // 天才「覚醒」: 大きな黒紫オーラ + 速い脈動
-    p.dSkillActive = true; p.dSkillTimer = 120; p.dSkillBuff = 'tensaiBoost';
-    hitEffects.push({ x: p.x, y: p.y - 40, life: 30, maxLife: 30, color: '#6622AA', size: 55, type: 'charGlow' });
-    hitEffects.push({ x: p.x, y: p.y - 40, life: 25, maxLife: 25, color: '#440066', size: 70, type: 'ring' });
-    hitEffects.push({ x: p.x, y: p.y - 40, life: 20, maxLife: 20, color: '#9944CC', size: 50, type: 'ring' });
-    for (let i = 0; i < 15; i++) sparks.push({ x: p.x+(Math.random()-0.5)*40, y: p.y-40+(Math.random()-0.5)*40, vx:(Math.random()-0.5)*4, vy:-2-Math.random()*2.5, life:22, maxLife:22, color:i%3===0?'#6622AA':(i%3===1?'#9944CC':'#440088'), size:2.5+Math.random()*2.5, gravity:-0.04, drag:0.96 });
-    cmdNameDisplay.push({ text: 'Awakened!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FF6600' });
-  } else if (ci === 11) {
-    // Catbus「全力疾走」: 太いスピードライン + 大きな風
-    p.vx = dir * 25; p.vy = 0;
-    p.dSkillActive = true; p.dSkillTimer = 15; p.dSkillBuff = 'catbusDash';
-    const hitbox = { x: p.x - 45, y: p.y - 65, w: 90, h: 90 };
-    checkHitboxAgainstPlayers(p, hitbox, 14, 8, 0.10, -25, 'special');
-    for (let i = 0; i < 14; i++) sparks.push({ x: p.x-dir*i*35, y: p.y-35+(Math.random()-0.5)*25, vx: -dir*(3+Math.random()*4), vy:(Math.random()-0.5)*2, life:16, maxLife:16, color:i%3===0?'#FFBB44':(i%3===1?'#FFE8AA':'#FFFFFF'), size:2+Math.random()*1.5, gravity:0, drag:0.93 });
-    hitEffects.push({ x: p.x, y: p.y - 35, life: 16, maxLife: 16, color: '#FFBB44', size: 45, type: 'charSlash' });
-    hitEffects.push({ x: p.x - dir*40, y: p.y - 35, life: 12, maxLife: 12, color: '#FFE8AA', size: 35, type: 'charSlash' });
-    cmdNameDisplay.push({ text: 'Full Sprint!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FFBB44' });
-  } else if (ci === 12) {
-    // タンク「要塞化」: 大きなバリア + 強い金属光沢
-    p.dSkillActive = true; p.dSkillTimer = 180; p.dSkillBuff = 'fortress';
-    hitEffects.push({ x: p.x, y: p.y - 35, life: 30, maxLife: 30, color: '#999999', size: 65, type: 'ring' });
-    hitEffects.push({ x: p.x, y: p.y - 35, life: 25, maxLife: 25, color: '#DDDDDD', size: 45, type: 'charGlow' });
-    hitEffects.push({ x: p.x, y: p.y - 35, life: 20, maxLife: 20, color: '#AAAAAA', size: 55, type: 'ring' });
-    for (let i = 0; i < 8; i++) sparks.push({ x: p.x+(Math.random()-0.5)*35, y: p.y-30, vx:(Math.random()-0.5)*2.5, vy:-1.5-Math.random(), life:15, maxLife:15, color:i%2?'#EEEEEE':'#CCCCCC', size:2+Math.random()*1.5, gravity:0.04, drag:0.96 });
-    cmdNameDisplay.push({ text: 'Fortify!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#A0B858' });
-  } else if (ci === 13) {
-    // 波おじ「怒涛のラッシュ」: 大きい赤いオーラ
-    p.dSkillActive = true; p.dSkillTimer = 30; p.dSkillBuff = 'rush';
-    hitEffects.push({ x: p.x, y: p.y - 40, life: 20, maxLife: 20, color: '#FF2222', size: 45, type: 'charGlow' });
-    hitEffects.push({ x: p.x, y: p.y - 40, life: 16, maxLife: 16, color: '#FF4444', size: 35, type: 'ring' });
-    for (let i = 0; i < 10; i++) sparks.push({ x: p.x+(Math.random()-0.5)*25, y: p.y-40+(Math.random()-0.5)*25, vx:(Math.random()-0.5)*5, vy:-2-Math.random()*2.5, life:15, maxLife:15, color:i%2?'#FF4444':'#FF6644', size:2.5+Math.random(), gravity:0.08, drag:0.95 });
-    cmdNameDisplay.push({ text: 'Raging Rush!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FF6644' });
-  } else if (ci === 14) {
-    // とっこ「殺意の波動」: 大きな緑オーラ + 多い粒子
-    p.dSkillActive = true; p.dSkillTimer = 300; p.dSkillBuff = 'killIntent';
-    hitEffects.push({ x: p.x, y: p.y - 40, life: 30, maxLife: 30, color: '#44FF44', size: 50, type: 'charGlow' });
-    hitEffects.push({ x: p.x, y: p.y - 40, life: 25, maxLife: 25, color: '#22CC22', size: 65, type: 'ring' });
-    hitEffects.push({ x: p.x, y: p.y - 40, life: 20, maxLife: 20, color: '#44FF44', size: 50, type: 'ring' });
-    for (let i = 0; i < 14; i++) sparks.push({ x: p.x+(Math.random()-0.5)*35, y: p.y-40+(Math.random()-0.5)*40, vx:(Math.random()-0.5)*3, vy:-1.5-Math.random()*2.5, life:24, maxLife:24, color:i%3===0?'#44FF44':(i%3===1?'#22CC22':'#66FF66'), size:2.5+Math.random()*2, gravity:-0.04, drag:0.97 });
-    cmdNameDisplay.push({ text: 'Killing Intent!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#CC44FF' });
-  } else if (ci === 15) {
-    // サム「カーニバル」: カラフルな軌跡
-    const samCols = ['#FFD700','#FF4444','#4488FF','#44FF88','#FF88AA'];
-    for (let i = 0; i < 5; i++) {
-      const angle = -Math.PI * 0.8 + (i / 4) * Math.PI * 0.6;
-      const spd = 6 + Math.random() * 3;
-      projectiles.push({ x: p.x, y: p.y - 40, vx: Math.cos(angle) * spd * dir, vy: Math.sin(angle) * spd - 3,
-        w: 13, h: 13, damage: 8, kbBase: 6, kbScale: 0.08, kbAngle: -40, life: 65, ownerId: p.id,
-        color: samCols[i], pcolor: '#FFFFFF', shape: 'star', ownerCharIdx: ci, time: 0 });
-      // カラフルな軌跡パーティクル（多め）
-      for (let j = 0; j < 5; j++) sparks.push({ x: p.x, y: p.y-40, vx: Math.cos(angle)*spd*dir*0.5+(Math.random()-0.5)*2, vy: Math.sin(angle)*spd*0.5-1.5, life:16, maxLife:16, color:samCols[(i+j)%5], size:2+Math.random()*1.5, gravity:0.08, drag:0.95 });
-    }
-    hitEffects.push({ x: p.x, y: p.y - 40, life: 20, maxLife: 20, color: '#FFD700', size: 45, type: 'charGlow' });
-    hitEffects.push({ x: p.x, y: p.y - 40, life: 15, maxLife: 15, color: '#FF4444', size: 35, type: 'ring' });
-    cmdNameDisplay.push({ text: 'Carnival!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FFD700' });
-  } else if (ci === 16 && target) {
-    // キング「王の威圧」: 画面半分まで広がる圧力波 + 大きな王冠マーク
-    target.gravityDebuffTimer = Math.max(target.gravityDebuffTimer, 180);
-    hitEffects.push({ x: p.x + dir*120, y: p.y - 35, life: 24, maxLife: 24, color: '#FFD700', size: 120, type: 'ring' });
-    hitEffects.push({ x: p.x + dir*60, y: p.y - 35, life: 20, maxLife: 20, color: '#FFFFFF', size: 80, type: 'ring' });
-    hitEffects.push({ x: p.x + dir*30, y: p.y - 35, life: 16, maxLife: 16, color: '#FFD700', size: 50, type: 'ring' });
-    hitEffects.push({ x: target.x, y: target.y - 70, life: 30, maxLife: 30, color: '#FFD700', size: 25, type: 'charGlow' });
-    cmdNameDisplay.push({ text: '👑', x: target.x, y: target.y - 90, life: 40, maxLife: 40, color: '#FFD700' });
-    cmdNameDisplay.push({ text: 'Royal Pressure!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FFD700' });
-  } else if (ci === 17) {
-    // おんぱ「超音波」: 3重の大きな鮮明波紋
-    for (const t2 of players) {
-      if (t2.id === p.id || !t2.alive || t2.invincibleTimer > 0) continue;
-      const pushDir2 = t2.x > p.x ? 1 : -1;
-      t2.vx = pushDir2 * 12; t2.vy = -8; t2.hitstun = 15; t2.damage = Math.min(999, t2.damage + 5);
-    }
-    hitEffects.push({ x: p.x, y: p.y - 35, life: 28, maxLife: 28, color: '#66FFFF', size: 200, type: 'ring' });
-    hitEffects.push({ x: p.x, y: p.y - 35, life: 24, maxLife: 24, color: '#88FFFF', size: 160, type: 'ring' });
-    hitEffects.push({ x: p.x, y: p.y - 35, life: 20, maxLife: 20, color: '#44DDEE', size: 120, type: 'ring' });
-    hitEffects.push({ x: p.x, y: p.y - 35, life: 16, maxLife: 16, color: '#AAFFFF', size: 80, type: 'ring' });
-    hitEffects.push({ x: p.x, y: p.y - 35, life: 22, maxLife: 22, color: '#88FFFF', size: 50, type: 'charGlow' });
-    triggerScreenShake(6, 12);
-    cmdNameDisplay.push({ text: 'Ultrasonic!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#88FFFF' });
-  } else if (ci === 18) {
-    // セン「大盛りパワー」: 大量の白く明るい湯気
-    p.senBuffTimer = 1200;
-    for (let i = 0; i < 20; i++) sparks.push({ x: p.x+(Math.random()-0.5)*35, y: p.y-25, vx:(Math.random()-0.5)*3, vy:-2-Math.random()*3, life:24, maxLife:24, color:i%3===0?'#FFFFFF':(i%3===1?'#FFEEDD':'#FFDDCC'), size:3+Math.random()*3, gravity:-0.05, drag:0.94 });
-    hitEffects.push({ x: p.x, y: p.y - 40, life: 25, maxLife: 25, color: '#FFFFFF', size: 40, type: 'charGlow' });
-    hitEffects.push({ x: p.x, y: p.y - 35, life: 18, maxLife: 18, color: '#FFEEDD', size: 35, type: 'ring' });
-    cmdNameDisplay.push({ text: 'Big Serving Power!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FF8844' });
-  } else if (ci === 19) {
-    // ドスボス「全弾発射」: 大きな3色爆発 + 強い紫フラッシュ
-    spawnProjectile(p, { speed:14, damage:11, kbBase:6, kbScale:0.10, kbAngle:-25, w:36, h:34, life:58, color:'#CC66FF', pcolor:'#9944CC' });
-    projectiles.push({ x: p.x + 30*dir, y: p.y - 50, vx: 12*dir, vy: -2, w:26, h:34,
-      damage:7, kbBase:3, kbScale:0.05, kbAngle:-15, life:52, ownerId: p.id,
-      color:'#44AA22', pcolor:'#33881A', shape:'rect', ownerCharIdx:ci, time:0, stun:true, stunFrames:30 });
-    const boomHitbox = { x: p.x - 98, y: p.y - 98, w: 196, h: 140 };
-    checkHitboxAgainstPlayers(p, boomHitbox, 15, 8, 0.14, -40, 'special');
-    p.damage = Math.min(999, p.damage + 6);
-    triggerScreenShake(10, 18);
-    hitFlash.alpha = 0.35; hitFlash.color = '#9944CC';
-    hitEffects.push({ x: p.x-40, y: p.y - 35, life: 22, maxLife: 22, color: '#CC66FF', size: 70 });
-    hitEffects.push({ x: p.x, y: p.y - 35, life: 20, maxLife: 20, color: '#FF6600', size: 85, type: 'ring' });
-    hitEffects.push({ x: p.x+40, y: p.y - 50, life: 18, maxLife: 18, color: '#44AA22', size: 60 });
-    hitEffects.push({ x: p.x, y: p.y - 40, life: 16, maxLife: 16, color: '#FFFFFF', size: 50, type: 'charGlow' });
-    for (let i = 0; i < 16; i++) { const cols=['#CC66FF','#FF6600','#44AA22']; sparks.push({ x: p.x+(Math.random()-0.5)*100, y: p.y-40+(Math.random()-0.5)*50, vx:(Math.random()-0.5)*8, vy:-3-Math.random()*4, life:18, maxLife:18, color:cols[i%3], size:3+Math.random()*3, gravity:0.1, drag:0.95 }); }
-    cmdNameDisplay.push({ text: 'Fire All!', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#CC66FF' });
-  } else if (ci === 20) {
-    // マイクロ「スター変身」: 3秒間無敵+攻撃力1.3倍 + 星形エフェクト
-    p.dSkillActive = true; p.dSkillTimer = 180; p.dSkillBuff = 'microStar';
-    p.invincibleTimer = Math.max(p.invincibleTimer, 180);
-    hitFlash.alpha = 0.2; hitFlash.color = '#FFD700';
-    hitEffects.push({ x: p.x, y: p.y - 40, life: 25, maxLife: 25, color: '#FFD700', size: 60, type: 'ring' });
-    hitEffects.push({ x: p.x, y: p.y - 40, life: 20, maxLife: 20, color: '#FFFFFF', size: 40, type: 'charGlow' });
-    for (let i = 0; i < 12; i++) {
-      const a = (i / 12) * Math.PI * 2;
-      sparks.push({ x: p.x + Math.cos(a)*25, y: p.y-40+Math.sin(a)*25, vx:Math.cos(a)*4, vy:Math.sin(a)*4-1, life:20, maxLife:20, color:i%3===0?'#FFD700':(i%3===1?'#FFFFFF':'#FFEE88'), size:3+Math.random()*2, gravity:0.02, drag:0.96 });
-    }
-    cmdNameDisplay.push({ text: 'Star Form!', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#FFD700' });
-  } else if (ci === 21) {
-    // ミスターツー「メガシャドーボール」: 巨大紫黒弾 + 画面フラッシュ
-    const pr = { x: p.x + 30 * dir, y: p.y - 40, vx: 10 * dir, vy: 0, w: 50, h: 50,
-      damage: 25, kbBase: 12, kbScale: 0.16, kbAngle: -30, life: 80, ownerId: p.id,
-      color: '#330044', pcolor: '#7733CC', shape: 'star', ownerCharIdx: ci, time: 0 };
-    projectiles.push(pr);
-    hitFlash.alpha = 0.3; hitFlash.color = '#7733CC';
-    triggerScreenShake(8, 15);
-    hitEffects.push({ x: p.x, y: p.y - 40, life: 25, maxLife: 25, color: '#7733CC', size: 80, type: 'ring' });
-    hitEffects.push({ x: p.x, y: p.y - 40, life: 20, maxLife: 20, color: '#440066', size: 60, type: 'charGlow' });
-    hitEffects.push({ x: p.x + dir*40, y: p.y - 40, life: 18, maxLife: 18, color: '#AA66FF', size: 50, type: 'ring' });
-    for (let i = 0; i < 15; i++) sparks.push({ x: p.x+(Math.random()-0.5)*40, y: p.y-40+(Math.random()-0.5)*40, vx:(Math.random()-0.5)*5+dir*3, vy:-2-Math.random()*3, life:18, maxLife:18, color:i%3===0?'#7733CC':(i%3===1?'#AA66FF':'#440066'), size:3+Math.random()*2, gravity:-0.02, drag:0.96 });
-    cmdNameDisplay.push({ text: 'Mega Shadow Ball!', x: p.x, y: p.y - 100, life: 70, maxLife: 70, color: '#AA66FF' });
-  } else if (ci === 22) {
-    // 金金「マネーボム」: 巨大金の爆弾 + 大爆発
-    const armorMult = p.kingkingArmorTimer > 0 ? 2.0 : 1.0;
-    const bombDmg = Math.floor(20 * armorMult);
-    const pr2 = { x: p.x + 30 * dir, y: p.y - 40, vx: 8 * dir, vy: -4, w: 35, h: 35,
-      damage: bombDmg, kbBase: 10, kbScale: 0.14, kbAngle: -40, life: 50, ownerId: p.id,
-      color: '#FFD700', pcolor: '#DAA520', shape: 'star', ownerCharIdx: ci, time: 0 };
-    projectiles.push(pr2);
-    hitFlash.alpha = 0.25; hitFlash.color = '#FFD700';
-    triggerScreenShake(7, 14);
-    hitEffects.push({ x: p.x, y: p.y - 40, life: 22, maxLife: 22, color: '#FFD700', size: 70, type: 'ring' });
-    hitEffects.push({ x: p.x, y: p.y - 40, life: 18, maxLife: 18, color: '#DAA520', size: 50, type: 'charGlow' });
-    for (let i = 0; i < 12; i++) sparks.push({ x: p.x+(Math.random()-0.5)*35, y: p.y-40+(Math.random()-0.5)*35, vx:(Math.random()-0.5)*6+dir*2, vy:-2-Math.random()*3, life:16, maxLife:16, color:i%2?'#FFD700':'#DAA520', size:3+Math.random()*2, gravity:0.12, drag:0.96 });
-    cmdNameDisplay.push({ text: 'Money Bomb!', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#FFD700' });
-  } else if (ci === 23) {
-    // サトル「海王類の覇気」: 3秒間無敵+攻撃力1.3倍 + 波エフェクト
-    p.dSkillActive = true; p.dSkillTimer = 180; p.dSkillBuff = 'satoruHaki';
-    p.invincibleTimer = Math.max(p.invincibleTimer, 180);
-    hitFlash.alpha = 0.2; hitFlash.color = '#2266AA';
-    triggerScreenShake(5, 10);
-    hitEffects.push({ x: p.x - 80, y: p.y - 20, life: 25, maxLife: 25, color: '#44AAFF', size: 80, type: 'ring' });
-    hitEffects.push({ x: p.x + 80, y: p.y - 20, life: 25, maxLife: 25, color: '#44AAFF', size: 80, type: 'ring' });
-    hitEffects.push({ x: p.x, y: p.y - 40, life: 20, maxLife: 20, color: '#2266AA', size: 50, type: 'charGlow' });
-    for (let i = 0; i < 14; i++) {
-      const a = (i / 14) * Math.PI * 2;
-      sparks.push({ x: p.x+Math.cos(a)*30, y: p.y-35+Math.sin(a)*20, vx:Math.cos(a)*5, vy:Math.sin(a)*3-1, life:18, maxLife:18, color:i%2?'#44AAFF':'#88DDFF', size:3+Math.random()*2, gravity:0.03, drag:0.96 });
-    }
-    cmdNameDisplay.push({ text: 'Sea King Aura!', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#44AAFF' });
-  } else if (ci === 24) {
-    // 怖「口裂け変身」: 2秒間透明化+攻撃力1.5倍
-    p.dSkillActive = true; p.dSkillTimer = 120; p.dSkillBuff = 'kowaiStealth';
-    p.invincibleTimer = Math.max(p.invincibleTimer, 120);
-    hitEffects.push({ x: p.x, y: p.y - 40, life: 20, maxLife: 20, color: '#220011', size: 50, type: 'charGlow' });
-    hitEffects.push({ x: p.x, y: p.y - 40, life: 16, maxLife: 16, color: '#440022', size: 40, type: 'ring' });
-    for (let i = 0; i < 10; i++) sparks.push({ x: p.x+(Math.random()-0.5)*35, y: p.y-40+(Math.random()-0.5)*35, vx:(Math.random()-0.5)*3, vy:-1-Math.random()*2, life:18, maxLife:18, color:i%2?'#440022':'#220011', size:2.5+Math.random()*2, gravity:-0.03, drag:0.96 });
-    cmdNameDisplay.push({ text: 'Slit Mouth Form!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#CC0044' });
-  } else if (ci === 25) {
-    // ヤッホ「ヤッホビーム」: 虹色ビーム+ランダム方向ノックバック
-    const randomAngle = (Math.random() - 0.5) * Math.PI;
-    const pr3 = { x: p.x + 30 * dir, y: p.y - 40, vx: 14 * dir, vy: 0, w: 20, h: 14,
-      damage: 18, kbBase: 10, kbScale: 0.13, kbAngle: Math.floor(randomAngle * 180 / Math.PI), life: 50, ownerId: p.id,
-      color: '#FF44FF', pcolor: '#44FFFF', shape: 'star', ownerCharIdx: ci, time: 0 };
-    projectiles.push(pr3);
-    hitFlash.alpha = 0.2; hitFlash.color = '#FFCC44';
-    triggerScreenShake(5, 10);
-    // 虹色エフェクト
-    const rainbowCols = ['#FF4444','#FF8800','#FFCC00','#44FF44','#4488FF','#8844FF'];
-    hitEffects.push({ x: p.x + dir*60, y: p.y - 40, life: 16, maxLife: 16, color: '#FF44FF', size: 50, type: 'charSlash' });
-    for (let i = 0; i < 10; i++) sparks.push({ x: p.x+dir*20, y: p.y-40, vx: dir*(4+Math.random()*4), vy:(Math.random()-0.5)*5, life:14, maxLife:14, color:rainbowCols[i%6], size:2.5+Math.random(), gravity:0.05, drag:0.96 });
-    cmdNameDisplay.push({ text: 'What the heck!', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#FF8800' });
-  } else if (ci === 26) {
-    // ぽよ「スーパースライム」: 3秒間巨大化+攻撃範囲・ダメージ1.5倍
-    p.dSkillActive = true; p.dSkillTimer = 180; p.dSkillBuff = 'poyoSuper';
-    hitEffects.push({ x: p.x, y: p.y - 30, life: 25, maxLife: 25, color: '#88EEFF', size: 60, type: 'ring' });
-    hitEffects.push({ x: p.x, y: p.y - 30, life: 20, maxLife: 20, color: '#44CCEE', size: 40, type: 'charGlow' });
-    for (let i = 0; i < 10; i++) {
-      const a = (i / 10) * Math.PI * 2;
-      sparks.push({ x: p.x+Math.cos(a)*25, y: p.y-30+Math.sin(a)*20, vx:Math.cos(a)*3, vy:Math.sin(a)*3-1, life:16, maxLife:16, color:i%2?'#88EEFF':'#AAEEFF', size:3+Math.random()*2, gravity:0.03, drag:0.96 });
-    }
-    cmdNameDisplay.push({ text: 'Super Slime!', x: p.x, y: p.y - 90, life: 60, maxLife: 60, color: '#44CCEE' });
-  } else if (ci === 27) {
-    // プル「超重力崩壊」: 全相手を引き寄せ→大爆発
-    for (const t2 of players) {
-      if (t2.id === p.id || !t2.alive || t2.invincibleTimer > 0) continue;
-      // 引き寄せ
-      const dx = p.x - t2.x, dy = (p.y - 35) - (t2.y - 35);
-      const dist = Math.sqrt(dx*dx + dy*dy) || 1;
-      t2.vx = (dx / dist) * 15;
-      t2.vy = (dy / dist) * 10;
-      t2.hitstun = 20;
-    }
-    // 1秒後に爆発（dSkillTimerで管理）
-    p.dSkillActive = true; p.dSkillTimer = 60; p.dSkillBuff = 'pullCollapse';
-    hitFlash.alpha = 0.25; hitFlash.color = '#6622AA';
-    triggerScreenShake(6, 12);
-    hitEffects.push({ x: p.x, y: p.y - 35, life: 25, maxLife: 25, color: '#6622AA', size: 100, type: 'ring' });
-    hitEffects.push({ x: p.x, y: p.y - 35, life: 20, maxLife: 20, color: '#330066', size: 70, type: 'charGlow' });
-    hitEffects.push({ x: p.x, y: p.y - 35, life: 18, maxLife: 18, color: '#CC88FF', size: 80, type: 'ring' });
-    for (let i = 0; i < 12; i++) sparks.push({ x: p.x+(Math.random()-0.5)*60, y: p.y-35+(Math.random()-0.5)*60, vx:(p.x-(p.x+(Math.random()-0.5)*120))*0.05, vy:(p.y-35-(p.y-35+(Math.random()-0.5)*80))*0.05, life:20, maxLife:20, color:i%2?'#9944DD':'#6622AA', size:3+Math.random()*2, gravity:-0.02, drag:0.96 });
-    cmdNameDisplay.push({ text: 'Super Gravity Collapse!', x: p.x, y: p.y - 100, life: 70, maxLife: 70, color: '#CC88FF' });
-  } else if (ci === 28) {
-    // ムッシー「虫の大群」: 全方向に虫の群れ + 毒
-    const swarm = { x: p.x - 80, y: p.y - 80, w: 160, h: 120 };
-    checkHitboxAgainstPlayers(p, swarm, 16, 7, 0.11, -40, 'special');
-    p.hitTargets = [];
-    // 毒付与
-    for (const t2 of players) {
-      if (t2.id === p.id || !t2.alive) continue;
-      const th = getPlayerHitbox(t2);
-      if (hitboxCollides(swarm.x, swarm.y, swarm.w, swarm.h, th.x, th.y, th.w, th.h)) t2.poisonTimer = 180;
-    }
-    triggerScreenShake(6, 12);
-    hitEffects.push({ x: p.x, y: p.y-35, life: 22, maxLife: 22, color: '#228822', size: 80, type: 'ring' });
-    hitEffects.push({ x: p.x, y: p.y-35, life: 18, maxLife: 18, color: '#88CC00', size: 60, type: 'charGlow' });
-    for (let i = 0; i < 20; i++) {
-      const a = Math.random() * Math.PI * 2;
-      sparks.push({ x: p.x+(Math.random()-0.5)*60, y: p.y-35+(Math.random()-0.5)*50, vx:Math.cos(a)*5, vy:Math.sin(a)*4-1, life:18, maxLife:18, color:i%3===0?'#111':(i%3===1?'#228822':'#88CC00'), size:2+Math.random()*2, gravity:0.05, drag:0.96 });
-    }
-    cmdNameDisplay.push({ text: 'Bug Swarm!', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#44CC44' });
-  } else if (ci === 29) {
-    // Bot「システムハック」: 背中の 腕を 展開して EMP。当たると 操作が 逆に なり、ゲージも 抜かれる
-    const emp = { x: p.x - 95, y: p.y - 85, w: 190, h: 130 };
-    checkHitboxAgainstPlayers(p, emp, 12, 6, 0.09, -30, 'special');
-    p.hitTargets = [];
-    for (const t2 of players) {
-      if (t2.id === p.id || !t2.alive || t2.invincibleTimer > 0) continue;
-      const th = getPlayerHitbox(t2);
-      if (!hitboxCollides(emp.x, emp.y, emp.w, emp.h, th.x, th.y, th.w, th.h)) continue;
-      t2.confused = Math.max(t2.confused || 0, 240);          // 4秒 操作が 逆に なる
-      const drained = Math.min(15, t2.ultimateGauge || 0);     // ゲージを 抜いて 半分 もらう
-      t2.ultimateGauge = Math.max(0, (t2.ultimateGauge || 0) - drained);
-      p.ultimateGauge = Math.min(100, (p.ultimateGauge || 0) + drained * 0.5);
-      if (drained > 0) {
-        cmdNameDisplay.push({ text: '-' + Math.round(drained) + '% GAUGE', x: t2.x, y: t2.y - 120,
-          life: 45, maxLife: 45, color: '#66E8FF' });
-      }
-    }
-    triggerScreenShake(7, 14);
-    hitFlash.alpha = Math.max(hitFlash.alpha, 0.22); hitFlash.color = '#66E8FF';
-    // 電磁リング 3重
-    hitEffects.push({ x: p.x, y: p.y - 40, life: 24, maxLife: 24, color: '#66E8FF', size: 110, type: 'ring' });
-    hitEffects.push({ x: p.x, y: p.y - 40, life: 18, maxLife: 18, color: '#FFFFFF', size: 70, type: 'ring' });
-    hitEffects.push({ x: p.x, y: p.y - 40, life: 20, maxLife: 20, color: '#1A3A4A', size: 85, type: 'charGlow' });
-    // 走る 電流
-    for (let i = 0; i < 22; i++) {
-      const a = Math.random() * Math.PI * 2, sp = 4 + Math.random() * 4;
-      sparks.push({ x: p.x + Math.cos(a) * 20, y: p.y - 40 + Math.sin(a) * 20,
-        vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: 16 + Math.random() * 8, maxLife: 24,
-        color: i % 3 === 0 ? '#FFFFFF' : '#66E8FF', size: 2 + Math.random() * 2, gravity: 0, drag: 0.93 });
-    }
-    cmdNameDisplay.push({ text: 'SYSTEM HACK!', x: p.x, y: p.y - 100, life: 65, maxLife: 65, color: '#66E8FF' });
-  }
-  playHitSound('cmd');
-}
-
-// --- D技更新（メインループから毎フレーム呼ぶ） ---
-function updateDSkill(p) {
-  if (p.dSkillCooldown > 0) p.dSkillCooldown--;
-  if (!p.dSkillActive) return;
-  p.dSkillTimer--;
-  if (p.dSkillTimer <= 0) { p.dSkillActive = false; p.dSkillBuff = null; return; }
-  const dir = p.facingLeft ? -1 : 1;
-
-  // --- バフ持続エフェクト ---
-  if (p.dSkillBuff === 'burnFist' && p.dSkillTimer % 8 === 0) {
-    // メテオ: 拳周囲に小さな炎
-    const d = p.facingLeft ? -1 : 1;
-    sparks.push({ x: p.x+d*15+(Math.random()-0.5)*8, y: p.y-45+(Math.random()-0.5)*8, vx:(Math.random()-0.5)*1.5, vy:-1-Math.random(), life:10, maxLife:10, color:Math.random()>0.5?'#FF6600':'#FFAA44', size:1.5+Math.random(), type:'fireball', gravity:0.05, drag:0.97 });
-  }
-  if (p.dSkillBuff === 'ironWall' && p.dSkillTimer % 12 === 0) {
-    // うる男: 紫オーラゆらゆら
-    sparks.push({ x: p.x+(Math.random()-0.5)*30, y: p.y-20, vx:(Math.random()-0.5)*0.5, vy:-0.8-Math.random()*0.5, life:14, maxLife:14, color:'#AA88CC', size:2+Math.random()*2, gravity:-0.02, drag:0.97 });
-  }
-  if (p.dSkillBuff === 'bearRage' && p.dSkillTimer % 15 === 0) {
-    // 熊太郎: 赤いオーラ
-    sparks.push({ x: p.x+(Math.random()-0.5)*20, y: p.y-30, vx:0, vy:-1-Math.random()*0.5, life:12, maxLife:12, color:'#FF4444', size:1.5+Math.random(), gravity:-0.02, drag:0.97 });
-  }
-  if (p.dSkillBuff === 'tensaiBoost' && p.dSkillTimer % 6 === 0) {
-    // 天才: 黒紫オーラ脈動
-    sparks.push({ x: p.x+(Math.random()-0.5)*25, y: p.y-40+(Math.random()-0.5)*25, vx:(Math.random()-0.5)*2, vy:-0.5-Math.random(), life:12, maxLife:12, color:Math.random()>0.5?'#6622AA':'#9944CC', size:2+Math.random(), gravity:-0.02, drag:0.96 });
-  }
-  if (p.dSkillBuff === 'fortress' && p.dSkillTimer % 10 === 0) {
-    // タンク: 金属光沢
-    sparks.push({ x: p.x+(Math.random()-0.5)*30, y: p.y-30+(Math.random()-0.5)*20, vx:(Math.random()-0.5)*0.5, vy:-0.3, life:10, maxLife:10, color:Math.random()>0.5?'#CCCCCC':'#EEEEEE', size:1.5+Math.random(), gravity:0, drag:0.97 });
-  }
-  if (p.dSkillBuff === 'killIntent' && p.dSkillTimer % 8 === 0) {
-    // とっこ: 緑の粒子が漂う
-    sparks.push({ x: p.x+(Math.random()-0.5)*25, y: p.y-40+(Math.random()-0.5)*30, vx:(Math.random()-0.5)*1.5, vy:-0.5-Math.random(), life:15, maxLife:15, color:Math.random()>0.5?'#44FF44':'#22CC22', size:1.5+Math.random()*1.5, gravity:-0.03, drag:0.97 });
-  }
-  if (p.dSkillBuff === 'microStar' && p.dSkillTimer % 6 === 0) {
-    // マイクロ: 黄色い星パーティクル
-    const a = Math.random() * Math.PI * 2;
-    sparks.push({ x: p.x+Math.cos(a)*20, y: p.y-35+Math.sin(a)*15, vx:Math.cos(a)*1.5, vy:-1-Math.random()*0.5, life:12, maxLife:12, color:Math.random()>0.5?'#FFD700':'#FFEE88', size:2+Math.random()*1.5, gravity:0.02, drag:0.97 });
-  }
-  // プル: 超重力崩壊の爆発
-  if (p.dSkillBuff === 'pullCollapse') {
-    // 持続引き寄せ
-    for (const t of players) {
-      if (t.id === p.id || !t.alive) continue;
-      const dx = p.x - t.x, dy = (p.y-35) - (t.y-35);
-      const dist = Math.max(Math.sqrt(dx*dx+dy*dy), 30);
-      t.vx += (dx/dist) * 0.8; t.vy += (dy/dist) * 0.5;
-    }
-    if (p.dSkillTimer <= 1) {
-      // 大爆発
-      const boom = { x: p.x - 60, y: p.y - 95, w: 120, h: 120 };
-      checkHitboxAgainstPlayers(p, boom, 20, 10, 0.14, -45, 'special');
-      p.hitTargets = [];
-      hitFlash.alpha = 0.4; hitFlash.color = '#330066';
-      triggerScreenShake(10, 18);
-      hitEffects.push({ x: p.x, y: p.y-35, life: 22, maxLife: 22, color: '#6622AA', size: 120, type: 'ring' });
-      hitEffects.push({ x: p.x, y: p.y-35, life: 18, maxLife: 18, color: '#CC88FF', size: 80 });
-      for (let i = 0; i < 15; i++) sparks.push({ x: p.x+(Math.random()-0.5)*80, y: p.y-35+(Math.random()-0.5)*60, vx:(Math.random()-0.5)*8, vy:-3-Math.random()*4, life:18, maxLife:18, color:i%3===0?'#6622AA':(i%3===1?'#9944DD':'#330066'), size:3+Math.random()*3, gravity:0.08, drag:0.95 });
-    }
-    if (p.dSkillTimer % 6 === 0) sparks.push({ x: p.x+(Math.random()-0.5)*50, y: p.y-35+(Math.random()-0.5)*40, vx:(p.x-(p.x+(Math.random()-0.5)*80))*0.03, vy:(p.y-35-(p.y+(Math.random()-0.5)*60))*0.03, life:12, maxLife:12, color:'#9944DD', size:2.5+Math.random(), gravity:-0.02, drag:0.97 });
-  }
-  if (p.dSkillBuff === 'poyoSuper' && p.dSkillTimer % 8 === 0) {
-    // ぽよ: 水色の光パーティクル
-    sparks.push({ x: p.x+(Math.random()-0.5)*30, y: p.y-25+(Math.random()-0.5)*20, vx:(Math.random()-0.5)*1.5, vy:-0.5-Math.random()*0.5, life:10, maxLife:10, color:Math.random()>0.5?'#88EEFF':'#AAEEFF', size:2+Math.random()*1.5, gravity:-0.02, drag:0.97 });
-  }
-  if (p.dSkillBuff === 'kowaiStealth' && p.dSkillTimer % 8 === 0) {
-    // 怖: 透明化中の黒い霧
-    sparks.push({ x: p.x+(Math.random()-0.5)*25, y: p.y-35+(Math.random()-0.5)*25, vx:(Math.random()-0.5)*1.5, vy:-0.5-Math.random()*0.5, life:14, maxLife:14, color:'#220011', size:2.5+Math.random()*2, gravity:-0.03, drag:0.96 });
-  }
-  if (p.dSkillBuff === 'satoruHaki' && p.dSkillTimer % 6 === 0) {
-    // サトル: 青いオーラ
-    sparks.push({ x: p.x+(Math.random()-0.5)*25, y: p.y-35+(Math.random()-0.5)*20, vx:(Math.random()-0.5)*1.5, vy:-1-Math.random()*0.5, life:12, maxLife:12, color:Math.random()>0.5?'#44AAFF':'#2266AA', size:2+Math.random()*1.5, gravity:-0.02, drag:0.97 });
-  }
-  // 金金: 鎧中の金色オーラ（updateDSkillとは別にメインループでも呼べるが、ここでまとめる）
-  if (p.charIdx === 22 && p.kingkingArmorTimer > 0 && p.dSkillTimer % 8 === 0) {
-    sparks.push({ x: p.x+(Math.random()-0.5)*30, y: p.y-35+(Math.random()-0.5)*25, vx:(Math.random()-0.5)*1.5, vy:-0.8-Math.random()*0.5, life:12, maxLife:12, color:Math.random()>0.5?'#FFD700':'#DAA520', size:2+Math.random()*1.5, gravity:-0.02, drag:0.97 });
-  }
-  // 分身（サイソク）: 毎フレーム分身が攻撃判定 + 残像エフェクト
-  if (p.dSkillBuff === 'bunshin') {
-    const bx = p.x - dir * 30, by = p.y;
-    const hitbox = { x: bx - 20, y: by - 50, w: 40, h: 50 };
-    if (p.dSkillTimer % 4 === 0) hitEffects.push({ x: bx, y: by - 40, life: 8, maxLife: 8, color: 'rgba(68,255,136,0.4)', size: 15, type: 'charGhost' });
-    for (const t of players) {
-      if (t.id === p.id || !t.alive || t.invincibleTimer > 0) continue;
-      const th = getPlayerHitbox(t);
-      if (hitboxCollides(hitbox.x, hitbox.y, hitbox.w, hitbox.h, th.x, th.y, th.w, th.h) && p.dSkillTimer % 6 === 0) {
-        applyHit(p, t, 3, 2, 0.02, -20, 'normal');
-      }
-    }
-  }
-  // 砲台展開（ロング）: 10Fごとに大弾発射 + 光跡フラッシュ
-  if (p.dSkillBuff === 'turret' && p.dSkillTimer % 10 === 0) {
-    projectiles.push({ x: p.x + 25*dir, y: p.y - 40, vx: 15*dir, vy: (Math.random()-0.5)*2,
-      w: 12, h: 8, damage: 4, kbBase: 3, kbScale: 0.04, kbAngle: -15, life: 39, ownerId: p.id,
-      color: '#66DDFF', pcolor: '#A0B4FF', shape: 'rect', ownerCharIdx: p.charIdx, time: 0 });
-    hitEffects.push({ x: p.x + dir*30, y: p.y - 40, life: 8, maxLife: 8, color: '#66DDFF', size: 15, type: 'charSpark' });
-    sparks.push({ x: p.x+dir*25, y: p.y-40, vx:dir*4, vy:(Math.random()-0.5)*1.5, life:8, maxLife:8, color:'#A0B4FF', size:2, gravity:0, drag:0.95 });
-  }
-  // Catbus全力疾走: ダッシュ中ヒット判定
-  if (p.dSkillBuff === 'catbusDash') {
-    const hitbox = { x: p.x - 30, y: p.y - 50, w: 60, h: 60 };
-    for (const t of players) {
-      if (t.id === p.id || !t.alive || t.invincibleTimer > 0) continue;
-      const th = getPlayerHitbox(t);
-      if (hitboxCollides(hitbox.x, hitbox.y, hitbox.w, hitbox.h, th.x, th.y, th.w, th.h) && p.dSkillTimer % 5 === 0) {
-        applyHit(p, t, 8, 6, 0.08, -30, 'strong');
-      }
-    }
-  }
-  // 波おじ ラッシュ: 3Fごとにパンチ判定 + 大きい衝撃波 + 派手な最終爆発
-  if (p.dSkillBuff === 'rush' && p.dSkillTimer % 3 === 0) {
-    const hitbox = { x: p.x + (dir > 0 ? 0 : -75), y: p.y - 65, w: 75, h: 75 };
-    const isLast = p.dSkillTimer <= 3;
-    checkHitboxAgainstPlayers(p, hitbox, isLast ? 8 : 3, isLast ? 6 : 2, isLast ? 0.08 : 0.03, isLast ? -35 : -15, isLast ? 'strong' : 'normal');
-    p.hitTargets = [];
-    hitEffects.push({ x: p.x + dir*30, y: p.y - 40, life: 8, maxLife: 8, color: '#FF4444', size: isLast ? 60 : 22, type: isLast ? 'ring' : 'charSpark' });
-    if (isLast) {
-      triggerScreenShake(6, 12);
-      hitEffects.push({ x: p.x + dir*30, y: p.y - 40, life: 16, maxLife: 16, color: '#FF6644', size: 70 });
-      hitEffects.push({ x: p.x + dir*30, y: p.y - 40, life: 12, maxLife: 12, color: '#FFFFFF', size: 45, type: 'ring' });
-      for (let i = 0; i < 6; i++) sparks.push({ x: p.x+dir*30+(Math.random()-0.5)*20, y: p.y-40, vx:dir*(2+Math.random()*4), vy:-2-Math.random()*3, life:12, maxLife:12, color:i%2?'#FF4444':'#FF8844', size:2.5+Math.random(), gravity:0.1, drag:0.95 });
-    }
-  }
-  // 要塞化（タンク）: 移動不可
-  if (p.dSkillBuff === 'fortress') {
-    p.vx = 0;
-  }
-}
-
-// --- Air dodge trigger ---
-// ======================================================================
-// 空中回避
-// ======================================================================
-function triggerAirDodge(p, dirKeys) {
-  // Catbus(11): 瞬間消滅 - 空中回避の代わりに透明無敵0.5秒（攻撃不可）
-  if (p.charIdx === 11) {
-    p.catbusVanishTimer = 30; // 0.5秒
-    p.invincibleTimer = 30;
-    p.airDodgeUsed = true;
-    p.attacking = false;
-    p.specialState = null;
-    p.attackFrame = 0;
-    // 消滅エフェクト
-    for (let i = 0; i < 8; i++) {
-      sparks.push({ x: p.x + (Math.random()-0.5)*30, y: p.y - 35 + (Math.random()-0.5)*30,
-        vx: (Math.random()-0.5)*3, vy: (Math.random()-0.5)*3, life: 12, maxLife: 12,
-        color: '#AADDFF', size: 2+Math.random()*3, gravity: 0, drag: 0.95 });
-    }
-    return;
-  }
-  p.airDodging = true;
-  p.airDodgeTimer = AIR_DODGE_INVINCIBLE_FRAMES;
-  p.airDodgeUsed = true;
-  p.attacking = false;
-  p.specialState = null;
-  p.attackFrame = 0;
-
-  // 方向入力に応じた回避ダッシュ
-  let dx = 0, dy = 0;
-  // Arrow keys (P1, or online remote)
-  if (dirKeys['ArrowLeft']) dx -= 1;
-  if (dirKeys['ArrowRight']) dx += 1;
-  if (dirKeys['ArrowUp']) dy -= 1;
-  if (dirKeys['ArrowDown']) dy += 1;
-  // WASD keys (P2 local)
-  if (dirKeys['a'] || dirKeys['A']) dx -= 1;
-  if (dirKeys['d'] || dirKeys['D']) dx += 1;
-  if (dirKeys['w'] || dirKeys['W']) dy -= 1;
-  // Note: S key is the air dodge trigger for P2, so don't count it as down direction here
-
-  // Clamp
-  if (dx > 1) dx = 1; if (dx < -1) dx = -1;
-  if (dy > 1) dy = 1; if (dy < -1) dy = -1;
-
-  if (dx !== 0 || dy !== 0) {
-    // 方向回避: 既存の慣性に回避方向の速度を加算
-    const len = Math.sqrt(dx * dx + dy * dy);
-    p.vx += (dx / len) * AIR_DODGE_SPEED;
-    p.vy += (dy / len) * AIR_DODGE_SPEED;
-    if (dx !== 0) p.facingLeft = dx < 0;
-  }
-  // 方向なし: 慣性を維持したまま回避（速度リセットしない）
-}
-
-function canAirDodge(p) {
-  return !p.grounded && !p.airDodging && !p.airDodgeUsed && p.airDodgeEndlag <= 0
-    && !p.attacking && p.hitstun <= 0 && !p.grabbed && !p.grabbing
-    && p.guardBreakStun <= 0 && p.alive;
-}
-
-// Process a keydown event for a specific player
 // ============================================================
 // ポーズメニュー（バトル中に ESC）
 // ============================================================
