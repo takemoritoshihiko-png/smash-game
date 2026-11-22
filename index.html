@@ -22,52 +22,52 @@
 //   目次が ずれたら  node tools/toc.mjs  で 作り直す。
 //
 //   80    CANVAS / 画面サイズ
-//   365   音の ロック解除（最初の 操作で 呼ぶ）
-//   394   キャラ画像（遅延読み込み）
-//   574   タイトル画面の 粒子
-//   613   キャラの 絵 ①メニュー用（選択画面・詳細画面）
-//   2273  キャラの 絵 ②バトル用
-//   4789  描画ユーティリティ
-//   4838  画面: タイトル
-//   4962  画面: キャラ選択
-//   5212  画面: 難易度選択（CPU戦）
-//   5312  画面: ステージ選択
-//   5543  バトルの 定数 と 状態
-//   5978  復帰技 / パワーモードの 表示
-//   6220  カメラ / 画面揺れ
-//   6239  効果音（Web Audio で 合成）
-//   6657  観客の 音
-//   7000  ヒット表示 / コミック文字
-//   7028  掴み・投げ の 定数と キャラ別テーブル
-//   7162  コマンド技（→→↓↓+Z など）
-//   7653  技データ
-//   8471  プレイヤー生成 / 試合の 初期化
-//   8816  ヒット処理（ダメージ・ノックバック）
-//   10155 当たり判定
-//   10256 飛び道具
-//   10299 技の 発動（通常技・復帰技・ジャブ）
-//   10558 掴み・投げ の 実行
-//   10783 CPU の 思考
-//   11129 バトルの 毎フレーム更新（中核）
-//   13547 物理（移動・重力・着地・撃墜判定）
-//   14069 バトル描画の 下準備（カメラ・影・2.5D）
-//   14169 バトル画面の 描画
-//   16200 技の エフェクト描画
-//   17275 画面: コンボ一覧 / 戦績
-//   17408 バトルの HUD
-//   17874 オンライン対戦（PeerJS / ホストが 正）
-//   18802 画面: VS イントロ
-//   19087 画面の 切り替え（フェード）
-//   19121 スマッシュ攻撃（方向2回 + X）
-//   19225 崖つかまり
-//   19318 D技 と 必殺技 の データ
-//   19915 D技の 中身（キャラ別）
-//   20433 空中回避
-//   20494 ポーズメニュー（バトル中に ESC）
-//   20575 画面: キャラ詳細（Iキー）
-//   20788 画面: 操作説明
-//   20912 キー入力の 振り分け（画面ごと）
-//   21466 メインループ（60FPS 固定タイムステップ）
+//   917   音の ロック解除（最初の 操作で 呼ぶ）
+//   946   キャラ画像（遅延読み込み）
+//   1126  タイトル画面の 粒子
+//   1165  キャラの 絵 ①メニュー用（選択画面・詳細画面）
+//   2825  キャラの 絵 ②バトル用
+//   5341  描画ユーティリティ
+//   5390  画面: タイトル
+//   5514  画面: キャラ選択
+//   5764  画面: 難易度選択（CPU戦）
+//   5864  画面: ステージ選択
+//   6095  バトルの 定数 と 状態
+//   6497  復帰技 / パワーモードの 表示
+//   6545  カメラ / 画面揺れ
+//   6564  効果音（Web Audio で 合成）
+//   6982  観客の 音
+//   7325  ヒット表示 / コミック文字
+//   7353  掴み・投げ の 定数と キャラ別テーブル
+//   7404  コマンド技（→→↓↓+Z など）
+//   7895  技データ
+//   8660  プレイヤー生成 / 試合の 初期化
+//   9005  ヒット処理（ダメージ・ノックバック）
+//   10344 当たり判定
+//   10376 飛び道具
+//   10419 技の 発動（通常技・復帰技・ジャブ）
+//   10678 掴み・投げ の 実行
+//   10903 CPU の 思考
+//   11249 バトルの 毎フレーム更新（中核）
+//   13667 物理（移動・重力・着地・撃墜判定）
+//   14154 バトル描画の 下準備（カメラ・影・2.5D）
+//   14254 バトル画面の 描画
+//   16285 技の エフェクト描画
+//   17360 画面: コンボ一覧 / 戦績
+//   17493 バトルの HUD
+//   17959 オンライン対戦（PeerJS / ホストが 正）
+//   18887 画面: VS イントロ
+//   19172 画面の 切り替え（フェード）
+//   19206 スマッシュ攻撃（方向2回 + X）
+//   19310 崖つかまり
+//   19403 D技 と 必殺技 の データ
+//   19967 D技の 中身（キャラ別）
+//   20485 空中回避
+//   20546 ポーズメニュー（バトル中に ESC）
+//   20627 画面: キャラ詳細（Iキー）
+//   20840 画面: 操作説明
+//   20964 キー入力の 振り分け（画面ごと）
+//   21518 メインループ（60FPS 固定タイムステップ）
 //
 // ### 目次ここまで
 // ======================================================================
@@ -358,6 +358,558 @@ const characters = [
     bodyColors: { main: '#E87BB8', sub: '#FF99DD', skin: '#F5B8DC' },
     moveSpeed: 8.4, jumpPower: -11.2, weight: 0.62 },
 ];
+
+// ======================================================================
+// キャラ別データ（31体ぶん）
+//
+// === キャラを 追加する ときの チェックリスト ===
+// 下の 表は ぜんぶ charIdx が キー。1つでも 抜けると その機能だけ 静かに 死ぬ。
+// node tools/smoketest.mjs が 抜けを 見つけてくれるので 追加後に 必ず 走らせること。
+//
+//   この区画に ある 表        : CHAR_GRAB_FRAMES, CHAR_THROW_DMG, CHAR_THROW_TYPE, CHAR_THROW_STATUS, CHAR_BODY, CHAR_REACH, CHAR_MOVE, CHARACTER_ATTACK_STYLE, COMBO_FINISHERS, COMBO_ROUTES, RECOVERY_MOVES, BOT_ROBOT_RECOVERY, POWER_GLOW, POWER_NAMES, POWER_DESCS, D_SKILL_NAMES, BALANCE_TWEAK
+//   この区画の 外に ある もの  :
+//     characters        … 名前・体重・速度・色（この すぐ上）
+//     SPRITE_SETS       … 画像。*Sprites の 定義より 後に 置く 必要が あるため 動かせない
+//     attackDefs        … 技データ。読み込み時の 調整IIFE と 順番が 決まっているため 動かせない
+//     commandDefs       … コマンド技。同上
+//     ultimateData      … 必殺技。ultimateFileNames と 対で 置いている
+//     drawCharacterBody / drawBattleCharacter … 手描きの 絵
+//     triggerDSkill     … D技の 中身（D_SKILL_NAMES と 対応させる）
+// ======================================================================
+
+// --- CHAR_GRAB_FRAMES : 掴みの 発生フレーム ---
+const CHAR_GRAB_FRAMES = [
+  26, // 0:ゼン (バランス型)
+  34, // 1:ドン (パワー型)
+  18, // 2:サイソク (スピード型)
+  30, // 3:メテオ (テクニック型→遠距離/特殊)
+  30, // 4:ロング (機械槍型→遠距離/特殊)
+  30, // 5:うる男 (ディフェンス型→遠距離/特殊)
+  26, // 6:熊太郎 (テクニック型→バランス)
+  30, // 7:バレット (完全遠距離型→遠距離/特殊)
+  18, // 8:シャうでん (スピード型)
+  26, // 9:ジャッジマン (バランス型)
+  30, // 10:天才 (変形型→遠距離/特殊)
+  18, // 11:Catbus (スピード型)
+  34, // 12:タンク (パワー型)
+  26, // 13:波おじ (テクニック型→バランス)
+  18, // 14:とっこ (超攻撃型→スピード)
+  18, // 15:サム (空中戦型→スピード)
+  26, // 16:キング (上級者型→バランス)
+  30, // 17:おんぱ (音波型→遠距離/特殊)
+  26, // 18:セン (テクニック型→バランス)
+  34, // 19:ドスボス (トリッキー型→パワー)
+  26, // 20:マイクロ (バランス型)
+  30, // 21:ミスターツー (超能力型→遠距離/特殊)
+  34, // 22:金金 (パワー型)
+  26, // 23:サトル (テクニック型→バランス)
+  30, // 24:怖 (ホラー型→遠距離/特殊)
+  26, // 25:ヤッホ (ふざけ型→バランス)
+  26, // 26:ぽよ (初心者型→バランス)
+  30, // 27:プル (重力操作型→遠距離/特殊)
+  18, // 28:ムッシー (虫合体型→スピード)
+  28, // 29:Bot (テクニック型・標準)
+  24, // 30:Chatta (軽量・素早い)
+];
+
+// --- CHAR_THROW_DMG : 投げの ダメージ（型ごと） ---
+// キャラ別投げダメージ { front, back, up, down }
+// 掴み速度に反比例: 速い=低ダメ, 遅い=高ダメ
+const CHAR_THROW_DMG = {
+  speed:   { front: 7,  back: 8,  up: 6,  down: 5  }, // コンボ系（KB小）
+  balance: { front: 9,  back: 10, up: 8,  down: 7  }, // バランス
+  ranged:  { front: 10, back: 11, up: 9,  down: 8  }, // 遠距離系
+  power:   { front: 15, back: 18, up: 12, down: 14 }, // パワー系（KB大）
+  status:  { front: 9,  back: 10, up: 8,  down: 7  }, // 状態異常系
+};
+
+// --- CHAR_THROW_TYPE : 投げの 型（上の 表の どれを 使うか） ---
+const CHAR_THROW_TYPE = [
+  'status',  // 0:ゼン（凍結投げ）
+  'power',   // 1:ドン
+  'speed',   // 2:サイソク
+  'status',  // 3:メテオ（燃焼投げ）
+  'ranged',  // 4:ロング
+  'power',   // 5:うる男
+  'power',   // 6:熊太郎
+  'speed',   // 7:バレット
+  'status',  // 8:シャうでん（感電投げ）
+  'status',  // 9:ジャッジマン（呪縛投げ）
+  'ranged',  // 10:天才
+  'speed',   // 11:Catbus
+  'power',   // 12:タンク
+  'balance', // 13:波おじ
+  'status',  // 14:とっこ（毒投げ）
+  'speed',   // 15:サム
+  'balance', // 16:キング
+  'ranged',  // 17:おんぱ
+  'balance', // 18:セン
+  'power',   // 19:ドスボス
+  'balance', // 20:マイクロ
+  'ranged',  // 21:ミスターツー
+  'power',   // 22:金金
+  'speed',   // 23:サトル
+  'ranged',  // 24:怖
+  'balance', // 25:ヤッホ
+  'balance', // 26:ぽよ
+  'ranged',  // 27:プル
+  'speed',   // 28:ムッシー
+  'balance', // 29:Bot（テクニック型）
+  'speed', // 30:Chatta
+];
+
+// --- CHAR_THROW_STATUS : 投げに 付く 状態異常（status型の キャラだけ） ---
+// キャラ投げ状態異常テーブル
+const CHAR_THROW_STATUS = {
+  0: { type: 'frozen', dur: 60 },      // ゼン: 凍結
+  3: { type: 'burning', dur: 120 },     // メテオ: 燃焼
+  8: { type: 'stunned', dur: 60 },      // シャうでん: 感電
+  9: { type: 'cursed', dur: 120 },      // ジャッジマン: 呪縛
+  14: { type: 'poisoned', dur: 180 },   // とっこ: 毒
+};
+
+// --- CHAR_BODY : やられ判定の 大きさ [横倍率, 縦倍率] ---
+// キャラ別体格 [width倍率, height倍率] (基準: 36w × 70h)
+const CHAR_BODY = [
+  [1.0, 1.0],   // 0 zen 標準
+  [1.3, 1.2],   // 1 don 巨漢
+  [0.8, 0.9],   // 2 saisoku 小さい
+  [0.9, 0.95],  // 3 meteo 軽量格闘家
+  [0.85,1.05],  // 4 long 細身
+  [1.4, 1.2],   // 5 uruo 装甲獣
+  [1.2, 1.1],   // 6 kumatarou 熊・丸い
+  [0.75,0.85],  // 7 bullet 最小・鳥
+  [0.85,0.9],   // 8 shawden スポンジ
+  [1.0, 1.1],   // 9 judgeman 標準やや大
+  [1.0, 1.05],  // 10 tensai 標準
+  [1.5, 0.85],  // 11 catbus 横長低め
+  [1.3, 0.85],  // 12 tank 横広低め
+  [1.05,0.9],   // 13 namioji 標準
+  [0.85,1.05],  // 14 tokko 細身
+  [0.8, 0.85],  // 15 sam 小鳥
+  [0.9, 1.1],   // 16 king スリム
+  [1.2, 1.0],   // 17 onpa 丸い
+  [1.15,1.0],   // 18 sen おにぎり
+  [1.25,0.9],   // 19 dosboss 横広
+  [1.0, 1.2],   // 20 micro 3体積み縦長
+  [1.25,1.0],   // 21 mrtwo 双頭横広
+  [1.15,1.0],   // 22 kinkin 太め
+  [0.85,0.95],  // 23 satoru 細身
+  [0.8, 1.1],   // 24 kowai 細長亡霊
+  [0.9, 0.9],   // 25 yaho 標準小
+  [0.85,0.85],  // 26 poyo 小さい
+  [1.0, 1.0],   // 27 pull 標準
+  [0.9, 0.9],   // 28 mussy 細め虫
+  [1.0, 1.0], // 29 bot
+  [0.92, 0.95], // 30 chatta (小柄)
+];
+
+// --- CHAR_REACH : 技の 間合い [弱, 横, 上, 下] ---
+// キャラ別リーチ倍率 [normalW, sideW, upH, downH]
+const CHAR_REACH = [
+  // [normal, side/strong, up, down] リーチ倍率
+  [1.6,1.6,1.6,1.6], // 0 zen (剣・長リーチ)
+  [1.0,1.0,1.0,1.0], // 1 don (標準)
+  [0.75,0.75,0.75,0.75], // 2 saisoku (短リーチ・高速)
+  [1.0,1.0,1.0,1.0], // 3 meteo (標準)
+  [2.0,2.0,2.0,2.0], // 4 long (超長リーチ・槍)
+  [1.0,1.0,1.0,1.0], // 5 uruo (標準)
+  [0.6,0.6,0.6,0.6], // 6 kumatarou (超短・密着パワー)
+  [0.75,0.75,0.75,0.75], // 7 bullet (短リーチ・飛び道具メイン)
+  [1.0,1.0,1.0,1.0], // 8 shawden (標準)
+  [2.0,2.0,2.0,2.0], // 9 judgeman (超長リーチ・扇形)
+  [1.6,1.6,1.6,1.6], // 10 tensai (長リーチ)
+  [1.0,1.0,1.0,1.0], // 11 catbus (標準)
+  [1.6,1.6,1.0,1.0], // 12 tank (横長リーチ)
+  [1.0,1.0,1.0,1.0], // 13 namioji (標準)
+  [1.0,1.0,1.0,1.0], // 14 tokko (標準)
+  [0.75,0.75,0.75,0.75], // 15 sam (短リーチ)
+  [1.6,1.6,1.6,1.6], // 16 king (長リーチ)
+  [1.0,1.0,1.0,1.0], // 17 onpa (標準)
+  [1.0,1.0,1.0,1.0], // 18 sen (標準)
+  [1.6,1.6,1.0,1.0], // 19 dosboss (横長リーチ)
+  [0.6,0.6,0.6,0.6], // 20 micro (超短・密着パワー)
+  [1.0,1.0,1.0,1.0], // 21 mrtwo (標準)
+  [1.0,1.0,1.0,1.0], // 22 kinkin (標準)
+  [0.75,0.75,0.75,0.75], // 23 satoru (短リーチ)
+  [1.0,1.0,1.0,1.0], // 24 kowai (標準)
+  [1.0,1.0,1.0,1.0], // 25 yaho (標準)
+  [0.75,0.75,0.75,0.75], // 26 poyo (短リーチ)
+  [1.0,1.0,1.0,1.0], // 27 pull (標準)
+  [1.0,1.0,1.0,1.0], // 28 mussy (標準)
+  [1.70,1.80,1.25,1.30], // 29 bot (機械の腕・長リーチ / バランス調整で 少し 短く)
+  [1.55,1.65,1.2,1.25], // 30 chatta (のびる腕)
+];
+
+// --- CHAR_MOVE : 動きの 味つけ [地上加速, 地上摩擦, 空中加速, 空中摩擦] ---
+// 慣性付き速度更新
+// キャラ別移動特性 [地上加速, 地上摩擦, 空中加速, 空中摩擦]
+const CHAR_MOVE = [
+  [0.70,0.75,0.45,0.88], // 0 zen 標準
+  [0.40,0.60,0.25,0.92], // 1 don 超重量
+  [1.20,0.88,0.85,0.82], // 2 saisoku 軽快
+  [1.00,0.85,0.75,0.83], // 3 meteo 軽量
+  [0.65,0.72,0.40,0.89], // 4 long 中量
+  [0.40,0.60,0.25,0.92], // 5 uruo 超重量
+  [0.50,0.65,0.30,0.91], // 6 kumatarou 重め
+  [1.10,0.87,0.82,0.82], // 7 bullet 軽快
+  [0.90,0.83,0.65,0.85], // 8 shawden 軽量
+  [0.60,0.70,0.38,0.90], // 9 judgeman 重め
+  [0.70,0.75,0.45,0.88], // 10 tensai 標準
+  [1.10,0.87,0.82,0.82], // 11 catbus 軽快
+  [0.35,0.55,0.20,0.93], // 12 tank 超重量
+  [0.55,0.68,0.35,0.90], // 13 namioji 中重量
+  [0.75,0.78,0.50,0.87], // 14 tokko 中量やや軽
+  [1.00,0.85,0.78,0.83], // 15 sam 軽量
+  [0.75,0.78,0.50,0.87], // 16 king 中量やや軽
+  [0.60,0.70,0.38,0.90], // 17 onpa 中重量
+  [0.50,0.65,0.30,0.91], // 18 sen 重め
+  [0.35,0.55,0.20,0.93], // 19 dosboss 超重量
+  [0.65,0.72,0.40,0.89], // 20 micro 中量
+  [0.50,0.65,0.30,0.91], // 21 mrtwo 重め
+  [0.50,0.65,0.30,0.91], // 22 kinkin 重め
+  [1.00,0.85,0.75,0.83], // 23 satoru 軽量
+  [0.85,0.82,0.62,0.85], // 24 kowai 中軽量
+  [0.90,0.83,0.65,0.85], // 25 yaho 中軽量
+  [1.05,0.86,0.80,0.83], // 26 poyo 軽量
+  [0.65,0.72,0.40,0.89], // 27 pull 中量
+  [0.70,0.75,0.45,0.88], // 28 mussy 標準
+  [0.72,0.78,0.50,0.88], // 29 bot テクニック型
+  [0.80,0.85,0.55,0.86], // 30 chatta 軽量・機動型
+];
+
+// --- CHARACTER_ATTACK_STYLE : ヒット時の 火花の 形と 色 ---
+const CHARACTER_ATTACK_STYLE = {
+  0:  { style:'sword',     color:'#88CCFF' },  // ゼン: 斬撃線
+  1:  { style:'heavyPunch', color:'#FF6644' },  // ドン: 巨大衝撃波
+  2:  { style:'ninjaSlash', color:'#44FFAA' },  // サイソク: 残像付き高速斬り
+  3:  { style:'flameKick',  color:'#FFAA22' },  // メテオ: 炎の蹴り
+  4:  { style:'spear',      color:'#A0B4FF' },  // ロング: 槍の直線
+  5:  { style:'beastSlam',  color:'#C8A878' },  // うる男: 獣の爪
+  6:  { style:'bearHug',    color:'#FF6B6B' },  // 熊太郎: 熊の一撃
+  7:  { style:'starShot',   color:'#FF66AA' },  // バレット: 星エフェクト
+  8:  { style:'electric',   color:'#FFFF44' },  // シャうでん: 電撃
+  9:  { style:'dark',       color:'#9966DD' },  // ジャッジマン: 暗黒
+  10: { style:'sword',      color:'#FF8833' },  // 天才: 剣（ドラゴン時は炎）
+  11: { style:'pounce',     color:'#66DDFF' },  // Catbus: 飛びかかり
+  12: { style:'cannon',     color:'#88AA66' },  // タンク: 砲撃
+  13: { style:'boxing',     color:'#FF4444' },  // 波おじ: ボクシング
+  14: { style:'multiSlash', color:'#CC44FF' },  // とっこ: 三刀流
+  15: { style:'feather',    color:'#EEEEFF' },  // サム: 羽エフェクト
+  16: { style:'standRush',  color:'#FFD700' },  // キング: スタンド残像
+  17: { style:'soundWave',  color:'#88FFFF' },  // おんぱ: 音波
+  18: { style:'ricePower',  color:'#FF8844' },  // セン: 米パワー
+  19: { style:'cannon',     color:'#CC66FF' },  // ドスボス: 砲撃
+  20: { style:'magic',      color:'#44DDFF' },  // マイクロ: 魔法陣
+  21: { style:'dualAttack', color:'#FF6688' },  // ミスターツー: 爆弾+炎
+  22: { style:'money',      color:'#FFD700' },  // 金金: コイン
+  23: { style:'waterKick',  color:'#66CCFF' },  // サトル: 水流蹴り
+  24: { style:'scissors',   color:'#CC0044' },  // 怖: ハサミ
+  25: { style:'random',     color:'#FFDD00' },  // ヤッホ: ランダム
+  26: { style:'bounce',     color:'#FF88CC' },  // ぽよ: バウンド
+  27: { style:'gravity',    color:'#AA66FF' },  // プル: 重力
+  28: { style:'poison',     color:'#66CC44' },  // ムッシー: 毒
+  29: { style:'electric',   color:'#66E8FF' },  // Bot: 機械の 電撃
+  30: { style:'standRush',  color:'#FF66CC' },  // Chatta: スタンドの 連打
+};
+
+// --- COMBO_FINISHERS : Cの フィニッシャー（15コンボ以上） ---
+const COMBO_FINISHERS = {
+  0:  { name:'Ice Dragon Crusher', damage:35, hits:1, effect:'frozen', effectDur:300, kb:12, kbAngle:-60, color:'#88DDFF', desc:'A frozen dragon charges in' },
+  1:  { name:'Heaven Rend Palm', damage:40, hits:1, effect:'bounce', effectDur:0, kb:15, kbAngle:-80, color:'#AA6622', desc:'Quake waves spread both ways' },
+  2:  { name:'Afterimage Dance', damage:8, hits:12, effect:'stunned', effectDur:180, kb:6, kbAngle:-45, color:'#66FFBB', desc:'12 afterimages attack all around' },
+  3:  { name:'Inferno Meteor', damage:50, hits:1, effect:'burning', effectDur:600, kb:18, kbAngle:-70, color:'#FF4400', desc:'A giant fireball covers the screen' },
+  4:  { name:'Water Dragon Pierce', damage:45, hits:1, effect:null, effectDur:0, kb:16, kbAngle:-30, color:'#44AAFF', desc:'Unleash a giant water dragon' },
+  5:  { name:'Beast King Crusher', damage:42, hits:1, effect:null, effectDur:0, kb:20, kbAngle:-50, color:'#4169E1', desc:'Beast spirit burst - KB x3' },
+  6:  { name:'Raging Bear Flurry EX', damage:3, hits:50, effect:null, effectDur:0, kb:10, kbAngle:-80, color:'#FF6B6B', desc:'50 hits + big blast', lastHitDmg:20 },
+  7:  { name:'Rainbow Explosion', damage:3, hits:10, effect:'confused', effectDur:300, kb:6, kbAngle:-60, color:'#FF66AA', desc:'10-way beam (weakened)' },
+  8:  { name:'Electromagnetic Storm', damage:32, hits:1, effect:'stunned', effectDur:300, kb:12, kbAngle:-50, color:'#66CCFF', desc:'Drain all gauge + shock', drainGauge:true },
+  9:  { name:'Dark Doomsday Judgment', damage:38, hits:1, effect:'cursed', effectDur:600, kb:14, kbAngle:-70, color:'#9966DD', desc:'Curse 10s' },
+  10: { name:'Dragon Flame Awakening', damage:45, hits:1, effect:'burning', effectDur:480, kb:16, kbAngle:-60, color:'#FF8833', desc:'Fullscreen Blaze', dragonBonus:15 },
+  11: { name:'Hyperspeed Teleport Dance', damage:12, hits:10, effect:'confused', effectDur:300, kb:8, kbAngle:-45, color:'#FFBB44', desc:'10 teleport attacks' },
+  12: { name:'Dreadnought Barrage', damage:5, hits:20, effect:null, effectDur:0, kb:6, kbAngle:-60, color:'#A0B858', desc:'Shell Rain' },
+  13: { name:'Raging 1000 Hits', damage:2, hits:50, effect:null, effectDur:0, kb:8, kbAngle:-85, color:'#FF6644', desc:'1000 Hits', lastHitDmg:15 },
+  14: { name:'Venom Fog Spread', damage:5, hits:10, effect:'poisoned', effectDur:180, kb:4, kbAngle:-30, color:'#CC44FF', desc:'Poison All 3s' },
+  15: { name:'Rainbow Feather Storm', damage:4, hits:30, effect:'confused', effectDur:480, kb:5, kbAngle:-50, color:'#FFD700', desc:'Feathers everywhere' },
+  16: { name:'Eternal Time Stop', damage:30, hits:1, effect:'frozen', effectDur:300, kb:10, kbAngle:-40, color:'#FFD700', desc:'Time stop 5s', timeStop:300 },
+  17: { name:'Resonance Collapse', damage:35, hits:1, effect:'stunned', effectDur:300, kb:14, kbAngle:-70, color:'#88FFFF', desc:'Shake all + stun' },
+  18: { name:'Stock Surge', damage:25, hits:5, effect:null, effectDur:0, kb:10, kbAngle:-60, color:'#FFD700', desc:'Gold bars fall + CEO mode', lastHitDmg:10 },
+  19: { name:'Violet Lightning Barrage', damage:8, hits:20, effect:'paralyzed', effectDur:600, kb:7, kbAngle:-55, color:'#CC66FF', desc:'Violet Shell Storm' },
+  20: { name:'Triple Fusion Cannon', damage:55, hits:1, effect:null, effectDur:0, kb:20, kbAngle:-40, color:'#3388FF', desc:'Giant Beam' },
+  21: { name:'Twin Head Blaze Fusion', damage:40, hits:2, effect:'burning', effectDur:600, kb:15, kbAngle:-50, color:'#AA66FF', desc:'Twin Flame Shot' },
+  22: { name:'Golden Billion Tornado', damage:35, hits:1, effect:null, effectDur:0, kb:14, kbAngle:-60, color:'#FFD700', desc:'Pull in + coin tornado', pullIn:true },
+  23: { name:'Taekwondo Kick Storm', damage:4, hits:25, effect:'stunned', effectDur:300, kb:6, kbAngle:-70, color:'#44AAFF', desc:'100 Kick Combo' },
+  24: { name:'Nightmare Devour', damage:20, hits:1, effect:'fear', effectDur:1200, kb:8, kbAngle:-40, color:'#CC0044', desc:'Terror 20s + blackout' },
+  25: { name:'Chaos Explosion EX', damage:0, hits:1, effect:'random', effectDur:600, kb:12, kbAngle:-60, color:'#FFCC44', desc:'Fully Random', randomDmg:true },
+  26: { name:'Double Slime Explosion', damage:30, hits:2, effect:null, effectDur:0, kb:12, kbAngle:-60, color:'#88EEFF', desc:'Giant Slime Blast' },
+  27: { name:'Gravity Collapse Black Hole', damage:50, hits:1, effect:null, effectDur:0, kb:18, kbAngle:-70, color:'#9944DD', desc:'Colossal Black Hole', pullIn:true },
+  28: { name:'Bug Swarm Storm', damage:3, hits:15, effect:'poisoned', effectDur:1200, kb:4, kbAngle:-30, color:'#44CC44', desc:'Bug swarm + poison + no movement' },
+  29: { name:'Homing Rocket x3', damage:11, hits:3, effect:null, effectDur:0, kb:9, kbAngle:-40, color:'#66E8FF', desc:'3 homing rockets chase the enemy' },
+  30: { name:'Little Chatta', damage:8, hits:1, effect:null, effectDur:0, kb:8, kbAngle:-45, color:'#FF66CC', desc:'A tiny copy chases the enemy and explodes', chattaMinion:true },
+};
+
+// --- COMBO_ROUTES : コンボ一覧画面 / 詳細画面に 出す ルート（表示だけ） ---
+const COMBO_ROUTES = {
+  0: [ // ゼン
+    { name: 'Iai Combo', route: 'Jab > UTilt > USmash', dmgRange: '0〜40%', diff: 2, hits: 3 },
+    { name: 'Freeze Chase', route: 'Freeze > FSmash', dmgRange: '40〜80%', diff: 1, hits: 2 },
+    { name: '💀 Azure Dragon Kill A', route: 'Jab > UTilt > Special (freeze) > USmash while frozen > Air > FSmash', dmgRange: '0%〜', diff: 3, hits: 6, instantKill: true },
+    { name: '💀 Azure Dragon Kill B', route: 'Special (freeze) > USmash while frozen', dmgRange: '80%〜', diff: 3, hits: 2, instantKill: true },
+  ],
+  1: [ // ドン
+    { name: 'Down Throw Chase', route: 'DThrow > USmash', dmgRange: '0〜60%', diff: 1, hits: 2 },
+    { name: 'Heavyweight Combo', route: 'FSmash > DSmash', dmgRange: '60〜100%', diff: 2, hits: 2 },
+  ],
+  2: [ // サイソク
+    { name: 'Ninja Rush', route: 'Jab x3 > UTilt > Air > Air > USmash', dmgRange: '0〜40%', diff: 3, hits: 7 },
+    { name: 'Rapid Combo', route: 'Jab x3 > FTilt > Dash Attack', dmgRange: '20〜60%', diff: 2, hits: 5 },
+    { name: '💀 Lightspeed Kill A', route: 'Jab x3 > UTilt > Air x2 > USmash > KO', dmgRange: '0%〜', diff: 3, hits: 8, instantKill: true },
+    { name: '💀 Lightspeed Kill B', route: 'Special (shock) > FSmash while shocked', dmgRange: '80%〜', diff: 3, hits: 2, instantKill: true },
+  ],
+  3: [ // メテオ
+    { name: 'Martial Combo', route: 'Jab > UTilt > UAir > Air', dmgRange: '0〜50%', diff: 2, hits: 4 },
+    { name: 'Rising Combo', route: 'Jab > Rising Fist > Aerial', dmgRange: '30〜70%', diff: 3, hits: 3 },
+    { name: '💀 Golden Inferno Kill A', route: 'Jab > UTilt > Special (burn) > FSmash while burning > USmash > Air', dmgRange: '0%〜', diff: 3, hits: 6, instantKill: true },
+    { name: '💀 Golden Inferno Kill B', route: 'Special (burn) > USmash while burning', dmgRange: '80%〜', diff: 3, hits: 2, instantKill: true },
+  ],
+  6: [ // 熊太郎
+    { name: 'Squishy Combo', route: 'Jab x3 > UThrow > Air > USmash', dmgRange: '0〜40%', diff: 2, hits: 5 },
+  ],
+  13: [ // 波おじ
+    { name: 'Boxer Rush', route: 'Jab x3 > FTilt > USmash', dmgRange: '0〜50%', diff: 2, hits: 5 },
+    { name: 'Guts Combo', route: 'Jab x3 > FTilt > FTilt > USmash', dmgRange: '0〜30%', diff: 3, hits: 6 },
+    { name: '💀 Raging Kill A', route: 'Jab x5 > FTilt > USmash > Air > DAir (meteor)', dmgRange: '0%〜', diff: 3, hits: 9, instantKill: true },
+    { name: '💀 Raging Kill B', route: 'FTilt > push to ledge > DAir (meteor)', dmgRange: '80%〜', diff: 3, hits: 3, instantKill: true },
+  ],
+  9: [ // ジャッジマン
+    { name: 'Judgment Combo', route: 'Curse > FSmash > DSmash', dmgRange: '30〜80%', diff: 2, hits: 3 },
+    { name: '💀 Dark Judgment A', route: 'Jab > curse > FSmash chain > DSmash (meteor)', dmgRange: '0%〜', diff: 3, hits: 5, instantKill: true },
+    { name: '💀 Dark Judgment B', route: 'Curse > DSmash (meteor)', dmgRange: '80%〜', diff: 3, hits: 2, instantKill: true },
+  ],
+  10: [ // 天才
+    { name: 'Human Combo', route: 'Jab > FTilt > UTilt', dmgRange: '0〜50%', diff: 1, hits: 3 },
+    { name: 'Dragon Mode Combo', route: 'Dragon Jab > Side > Up > Special', dmgRange: '0〜60%', diff: 3, hits: 4 },
+  ],
+  16: [ // キング
+    { name: 'Stand Rush', route: 'Z→Z→Z→X→C', dmgRange: '0〜50%', diff: 3, hits: 5 },
+    { name: '💀 Golden Kill A', route: 'Time Stop > FSmash x2 > USmash > Air > DSmash (meteor)', dmgRange: '0%〜', diff: 3, hits: 6, instantKill: true },
+    { name: '💀 Golden Kill B', route: 'Time Stop > DSmash (meteor)', dmgRange: '80%〜', diff: 3, hits: 2, instantKill: true },
+  ],
+  // === 軽量級（5〜8連） ===
+  7: [ // バレット（魔法少女）
+    { name: 'Star Rush', route: 'Jab > Jab > FTilt > Air > Air > USmash', dmgRange: '0〜50%', diff: 2, hits: 6 },
+    { name: 'Double Shot Combo', route: 'Jab (2 shots) > FTilt > Air > USmash', dmgRange: '0〜40%', diff: 2, hits: 5 },
+  ],
+  8: [ // シャうでん（電撃）
+    { name: 'Shock Rush', route: 'Jab > Jab > UTilt > Air > USmash', dmgRange: '0〜60%', diff: 2, hits: 5 },
+    { name: 'Shock Combo', route: 'Shock > Jab > FTilt > USmash', dmgRange: '20〜70%', diff: 2, hits: 4 },
+    { name: '💀 Electromagnetic Kill A', route: 'Jab x2 > UTilt > Special (shock+drain) > FSmash while shocked > USmash', dmgRange: '0%〜', diff: 3, hits: 6, instantKill: true },
+    { name: '💀 Electromagnetic Kill B', route: 'Special (shock) > USmash during shock stun', dmgRange: '80%〜', diff: 3, hits: 2, instantKill: true },
+  ],
+  11: [ // Catbus（瞬間移動）
+    { name: 'Vanish Combo', route: 'Teleport > back Jab > FTilt > Air > USmash', dmgRange: '0〜50%', diff: 3, hits: 5 },
+    { name: 'Rapid Chase', route: 'Jab > Jab > FTilt > Air > FSmash', dmgRange: '0〜40%', diff: 2, hits: 5 },
+  ],
+  15: [ // サム（鳥）
+    { name: 'Triple Jump Combo', route: 'Jab > UTilt > Air > Air > FSmash', dmgRange: '0〜60%', diff: 2, hits: 5 },
+    { name: 'Air Combo', route: 'Air > Air > Air > USmash', dmgRange: '0〜50%', diff: 3, hits: 4 },
+  ],
+  // === 中量級（3〜5連） ===
+  4: [ // ロング（槍）
+    { name: 'Spear Reach Combo', route: 'FTilt (max spear) > UTilt > Air > FSmash', dmgRange: '0〜50%', diff: 2, hits: 4 },
+    { name: 'Spear Rush Combo', route: 'Dash Attack > UTilt > USmash', dmgRange: '20〜60%', diff: 1, hits: 3 },
+  ],
+  14: [ // とっこ（毒刀）
+    { name: 'Venom Blade Combo', route: 'Jab (poison) > stack poison > FTilt > USmash', dmgRange: '0〜70%', diff: 2, hits: 3 },
+    { name: 'Triple Blade Combo', route: 'Jab > Jab > FTilt > Air > FSmash', dmgRange: '0〜50%', diff: 2, hits: 5 },
+  ],
+  17: [ // おんぱ（音波）
+    { name: 'Sonic Resonance Combo', route: 'Jab > Sonic stun > FSmash > USmash', dmgRange: '0〜60%', diff: 2, hits: 4 },
+    { name: 'Resonance Chase', route: 'Jab > Jab > UTilt > Air > FSmash', dmgRange: '0〜50%', diff: 2, hits: 5 },
+  ],
+  18: [ // セン（米サラリーマン）
+    { name: 'Full Belly Combo', route: 'Jab > FTilt > UTilt > USmash', dmgRange: '0〜50%', diff: 1, hits: 4 },
+    { name: 'Underdog Combo', route: '(high %) Jab > FTilt > FSmash', dmgRange: '80%〜', diff: 2, hits: 3 },
+  ],
+  20: [ // マイクロ（3体合体）
+    { name: 'Merge Rush', route: 'Jab x3 > UTilt > Air > FSmash', dmgRange: '0〜60%', diff: 2, hits: 6 },
+    { name: 'Split > Merge Combo', route: 'Split Jab > Merge > FTilt > USmash', dmgRange: '0〜40%', diff: 3, hits: 4 },
+  ],
+  21: [ // ミスターツー（双頭）
+    { name: 'Split Personality Combo', route: 'Twin attack > FTilt > USmash > Air', dmgRange: '0〜50%', diff: 2, hits: 4 },
+    { name: 'Blaze Combo', route: 'Bomb > Flame > FSmash', dmgRange: '30〜70%', diff: 2, hits: 3 },
+  ],
+  // === 重量級（2〜4連） ===
+  22: [ // 金金（黄金竜巻）
+    { name: 'Gold Combo', route: 'FTilt > pull in > USmash > air follow-up', dmgRange: '0〜60%', diff: 2, hits: 4 },
+    { name: 'Coin Collect Combo', route: 'Jab > FTilt > USmash (coins fly)', dmgRange: '0〜50%', diff: 1, hits: 3 },
+  ],
+  // === 超重量級（2〜3連） ===
+  5: [ // うる男（獣鎧）
+    { name: 'Beast Assault', route: 'FTilt > DSmash > USmash', dmgRange: '0〜40%', diff: 1, hits: 3 },
+    { name: 'Rage Combo', route: '(enraged) Jab > FSmash > USmash', dmgRange: '0〜60%', diff: 2, hits: 3 },
+  ],
+  12: [ // タンク（戦車）
+    { name: 'Cannon Combo', route: 'FTilt (cannon) > blast follow-up > USmash', dmgRange: '0〜40%', diff: 1, hits: 3 },
+    { name: 'Fortress Combo', route: 'DTilt > FSmash', dmgRange: '40〜80%', diff: 1, hits: 2 },
+  ],
+  19: [ // ドスボス（紫戦車）
+    { name: 'Tricky Combo', route: 'FTilt > paralyze > USmash while paralyzed', dmgRange: '0〜50%', diff: 2, hits: 3 },
+    { name: 'Decoy Combo', route: 'Set Decoy > FSmash > blast follow-up', dmgRange: '20〜60%', diff: 3, hits: 3 },
+  ],
+  // === 隠しキャラ ===
+  24: [ // 怖（恐怖）
+    { name: 'Terror Combo', route: 'Jab > terror > FSmash the fleeing foe > USmash', dmgRange: '0〜50%', diff: 2, hits: 4 },
+    { name: 'Dark Chase', route: 'Terror > FTilt > DSmash', dmgRange: '30〜70%', diff: 2, hits: 3 },
+    { name: '💀 Terror Kill A', route: 'Jab > Special (terror) > FTilt > FSmash > USmash > Air', dmgRange: '0%〜', diff: 3, hits: 6, instantKill: true },
+    { name: '💀 Terror Kill B', route: 'Special (terror) > FSmash while panicked', dmgRange: '80%〜', diff: 3, hits: 2, instantKill: true },
+  ],
+  25: [ // ヤッホ（ランダム）
+    { name: 'Random Combo', route: 'Jab > random status > FTilt > USmash', dmgRange: '0〜60%', diff: 2, hits: 4 },
+    { name: '? Rush', route: 'Jab x3 > FTilt > Air > FSmash', dmgRange: '0〜50%', diff: 2, hits: 6 },
+  ],
+  26: [ // ぽよ（スライム）
+    { name: 'Bounce Combo', route: 'Jab x4 > UTilt > USmash', dmgRange: '0〜60%', diff: 2, hits: 6 },
+    { name: 'Slime Flurry', route: 'Jab x3 > FTilt > FSmash', dmgRange: '0〜50%', diff: 1, hits: 5 },
+    { name: 'Double Slime Combo', route: '(Double Slime) Jab (2hit) > Jab (2hit) > UTilt (2hit) > USmash (2hit)', dmgRange: '0〜50%', diff: 1, hits: 8 },
+  ],
+  23: [ // サトル（テコンドー魚）
+    { name: 'Water Kick Combo', route: 'Front Kick > Spin Kick > High Kick > Jump Kick > USmash', dmgRange: '0〜50%', diff: 3, hits: 5 },
+    { name: 'Counter Combo', route: 'Air dodge > counter > FSmash > Air', dmgRange: '20〜60%', diff: 3, hits: 4 },
+  ],
+  27: [ // プル（重力）
+    { name: 'Gravity Combo A', route: 'Jab (pull) > Gravity Field > FTilt > Up Attack > DAir (meteor)', dmgRange: '0〜50%', diff: 2, hits: 5 },
+    { name: 'Gravity Combo B', route: 'Gravity Field > Gravity Slam > bounce follow-up FSmash', dmgRange: '50〜80%', diff: 2, hits: 3 },
+    { name: '💀 Gravity Kill A', route: 'Gravity Field > Gravity Slam > Gravity Flip > air follow-up > ledge DAir (meteor)', dmgRange: '0%〜', diff: 3, hits: 5, instantKill: true },
+    { name: '💀 Gravity Kill B', route: 'Black Hole (pull + blast) > air follow-up > DAir (meteor)', dmgRange: '80%〜', diff: 2, hits: 3, instantKill: true },
+  ],
+  28: [ // ムッシー（虫）
+    { name: 'Bug Combo A', route: 'Jab x2 > Bee Sting Rush (multi) > poison > UTilt > USmash', dmgRange: '0〜50%', diff: 2, hits: 6 },
+    { name: 'Bug Combo B', route: 'Jewel Beetle Flight (rush) > FTilt > Stag Mandible (spin KB)', dmgRange: '50〜80%', diff: 2, hits: 3 },
+    { name: '💀 Venom Fang Kill A', route: 'Jab > Down Attack (poison) > FTilt > Jewel Beetle Flight > Stag Mandible (meteor)', dmgRange: '0%〜', diff: 3, hits: 5, instantKill: true },
+    { name: '💀 Venom Fang Kill B', route: 'Special (bug swarm, poison) > Stag Mandible (meteor)', dmgRange: '80%〜', diff: 2, hits: 3, instantKill: true },
+  ],
+  29: [ // Bot
+    { name: 'Machine Rush', route: 'Jab > Jab > FTilt > Boost Dash', dmgRange: '0〜40%', diff: 1, hits: 4 },
+    { name: 'Drill Carry', route: 'UTilt > Air > Drill Dive (meteor)', dmgRange: '20〜70%', diff: 2, hits: 3 },
+    { name: 'Tackle Start', route: '->-> Up Up + Z (Boost Tackle) > USmash', dmgRange: '0〜60%', diff: 2, hits: 2 },
+    { name: '💀 Robot Overrun', route: 'Ultimate (robot form) > Jab x2 > FSmash > Boost Tackle', dmgRange: '60%〜', diff: 3, hits: 5, instantKill: true },
+  ],
+  30: [ // Chatta
+    { name: 'Claw String', route: 'Jab > Jab > FTilt > Stretch Swipe', dmgRange: '0〜40%', diff: 1, hits: 4 },
+    { name: 'Flight Pressure', route: 'Take Flight > Air Claw x3 > Dive Claw', dmgRange: '20〜80%', diff: 2, hits: 5 },
+    { name: 'Blink Punish', route: '->-> Down Down + Z (Blink) > USmash', dmgRange: '0〜60%', diff: 2, hits: 2 },
+    { name: '💀 Warp Spike', route: 'Hold D (Warp Meteor) off-stage > opponent cannot recover', dmgRange: '0%〜', diff: 3, hits: 1, instantKill: true },
+  ],
+};
+
+// --- RECOVERY_MOVES : 復帰技（空中で ↑+X） ---
+const RECOVERY_MOVES = {
+  // ダメ×0.4、高さ×0.65(超重量級除く)、角度を-80〜-90に統一
+  0:  { name:'Icicle Rise',     height:182, angle:-85, frames:20, dmg:1, color:'#88DDFF', status:'frozen' },
+  1:  { name:'Earth Leap',     height:200, angle:-90, frames:16, dmg:2, color:'#AA6622', status:null }, // 超重量級そのまま
+  2:  { name:'Lightspeed Rise',     height:247, angle:-80, frames:14, dmg:2, color:'#FFFFFF', status:null },
+  3:  { name:'Flame Rise',       height:182, angle:-85, frames:18, dmg:2, color:'#FF6600', status:'burning' },
+  4:  { name:'Sky Pierce',     height:182, angle:-85, frames:18, dmg:2, color:'#44FFCC', status:null },
+  5:  { name:'Beast Leap',       height:280, angle:-90, frames:16, dmg:2, color:'#4169E1', status:null }, // 超重量級そのまま
+  6:  { name:'Bear Rocket', height:130, angle:-90, frames:20, dmg:2, color:'#FF6B6B', status:null },
+  7:  { name:'Rainbow Rise',     height:182, angle:-85, frames:18, dmg:2, color:'#FF66AA', status:'confused' },
+  8:  { name:'Railgun',     height:247, angle:-80, frames:14, dmg:2, color:'#FFFF44', status:null },
+  9:  { name:'Dark Float',     height:247, angle:-90, frames:30, dmg:2, color:'#9400D3', status:'cursed' },
+  10: { name:'Dragon',         height:130, angle:-85, frames:16, dmg:2, color:'#FFD700', status:null },
+  11: { name:'Barricade Jump', height:247, angle:-90, frames:4, dmg:2, color:'#66DDFF', status:null },
+  12: { name:'Cannon Recoil',     height:200, angle:-80, frames:16, dmg:2, color:'#888888', status:null }, // 超重量級そのまま
+  13: { name:'Ascending Uppercut', height:130, angle:-90, frames:14, dmg:2, color:'#FF4444', status:null },
+  14: { name:'Venom Leap',     height:182, angle:-85, frames:18, dmg:2, color:'#44CC44', status:'poisoned' },
+  15: { name:'Wing Boost', height:247, angle:-90, frames:22, dmg:2, color:'#EEEEFF', status:null },
+  16: { name:'Time Leap',     height:247, angle:-90, frames:16, dmg:0, color:'#FFD700', status:null },
+  17: { name:'Sonic Rise',     height:182, angle:-85, frames:18, dmg:2, color:'#88FFFF', status:'stunned' },
+  18: { name:'Career Elevator', height:130, angle:-90, frames:20, dmg:2, color:'#FF8844', status:null },
+  19: { name:'Tank Cannon Rise',   height:200, angle:-80, frames:16, dmg:2, color:'#CC66FF', status:null }, // 超重量級そのまま
+  20: { name:'Triple Split Rise', height:182, angle:-85, frames:18, dmg:2, color:'#44DDFF', status:null },
+  21: { name:'Twin Blast',     height:182, angle:-85, frames:18, dmg:2, color:'#FF6688', status:'burning' },
+  22: { name:'Money Launch', height:130, angle:-85, frames:16, dmg:2, color:'#FFD700', status:null },
+  23: { name:'Jumping Spin Kick', height:182, angle:-85, frames:16, dmg:2, color:'#FF0000', status:null },
+  24: { name:'Dread Float',     height:247, angle:-90, frames:30, dmg:2, color:'#800080', status:null },
+  25: { name:'Chaos Leap',   height:100+Math.floor(Math.random()*150), angle:-85, frames:16, dmg:2, color:'#FF1493', status:null },
+  26: { name:'Slime Bound', height:182, angle:-90, frames:16, dmg:2, color:'#FFB6C1', status:null },
+  27: { name:'Gravity Flip',     height:247, angle:-90, frames:20, dmg:2, color:'#4B0082', status:null },
+  28: { name:'Insect Swarm Rise',   height:182, angle:-85, frames:18, dmg:2, color:'#228B22', status:'poisoned' },
+  29: { name:'Back Booster',    height:200, angle:-88, frames:18, dmg:2, color:'#66E8FF', status:null },
+  30: { name:'Spirit Updraft',  height:200, angle:-85, frames:18, dmg:1, color:'#FF99DD', status:null },
+};
+
+// --- BOT_ROBOT_RECOVERY : Bot の ロボット変身中だけ 使う 復帰技 ---
+// Bot(29) は ロボット変身中だけ ブースターが 強くなる（他の強化と そろえる）
+const BOT_ROBOT_RECOVERY = { name:'Jet Booster', height:266, angle:-88, frames:16, dmg:3, color:'#AAF4FF', status:null };
+
+// --- POWER_GLOW : パワーモード中の 光の 色 ---
+// キャラ別強化モードグローカラー
+const POWER_GLOW = {0:'#00BFFF',1:'#8B4513',2:'#FFFFFF',3:'#FF4500',4:'#00CED1',5:'#4169E1',6:'#FF4400',7:'#FF69B4',8:'#FFFF00',9:'#9400D3',10:'#FF8C00',11:'#66DDFF',12:'#808080',13:'#FF6600',14:'#00FF00',15:'#00FF7F',16:'#FFD700',17:'#7CFC00',18:'#FFD700',19:'#9400D3',20:'#DA70D6',21:'#FF6347',22:'#FFD700',23:'#FF0000',24:'#800080',25:'#FF1493',26:'#FFB6C1',27:'#4B0082',28:'#228B22',29:'#66E8FF',30:'#FF66CC'};
+
+// --- POWER_NAMES : パワーモードの 名前 ---
+// 強化モード名マップ
+const POWER_NAMES = {0:'Ice Power',1:'Quake Mode',2:'Lightspeed Mode',3:'Inferno Mode',4:'Dragon Spear Mode',5:'Wild Release',6:'Fury Mode',7:'Awakened Mode',8:'Overvolt',9:'Final Judgment',10:'Dragon Mode',11:'Teleport',12:'FULL LOAD',13:'Full Punch',14:'Toxin',15:'AIR MASTER',16:'Time Stop',17:'Resonance Mode',18:'CEO',19:'Armor',20:'Triple Merge',21:'Blaze Fusion',22:'Billionaire',23:'Taekwondo Master',24:'Nightmare',25:'Chaos',26:'Double Slime',27:'Gravity Collapse',28:'Swarm',29:'ROBOT MODE',30:'FLIGHT'};
+
+// --- POWER_DESCS : パワーモードの 説明 ---
+const POWER_DESCS = {0:'Freeze DMG x1.5',1:'KB×1.4',2:'Speed x2',3:'Burn chance +60%',4:'Reach x1.5',5:'KB×1.5',6:'DMG x1.5',7:'Confusion',8:'Shock Lock',9:'DMG x1.4',10:'DMG x1.5',12:'Power x2',13:'DMG x1.5',14:'Poison DMG x2',17:'Edge Attack',21:'DMG x1.5',22:'DMG x1.5',23:'Kick DMG x2',26:'All Attacks x2',27:'Gravity x3',28:'Poison DMG x3',29:'Attack & Speed UP',30:'Fly for 8s',11:'Teleport attacks',15:'Air control UP',16:'Enemy frozen in time',18:'Attack range UP',19:'Super armor',20:'Three bodies',24:'Fear DMG x2',25:'Random effect'};
+
+// --- D_SKILL_NAMES : D技の 名前（兼「D技を 持つか」の 判定） ---
+const D_SKILL_NAMES = {
+  0: "Iai Slash",
+  1: "Earthquake",
+  2: "Clone",
+  3: "Burning Fist",
+  4: "Deploy Cannon",
+  5: "Iron Wall",
+  6: "Bear Rage",
+  7: "Sniper",
+  8: "Ink Spray",
+  9: "Not Guilty...",
+  10: "Awakened",
+  11: "Full Sprint",
+  12: "Fortify",
+  13: "Raging Rush",
+  14: "Killing Intent",
+  15: "Carnival",
+  16: "Royal Pressure",
+  17: "Ultrasonic",
+  18: "Big Serving Power",
+  19: "Fire All",
+  20: "Star Form",
+  21: "Mega Shadow Ball",
+  22: "Money Bomb",
+  23: "Sea King Aura",
+  24: "Slit Mouth Form",
+  25: "What the heck",
+  26: "Super Slime",
+  27: "Super Gravity Collapse",
+  28: "Bug Swarm",
+  29: "SYSTEM HACK",
+  // 30 (Chatta) は D を 押した 瞬間に Warp Meteor が 出るので D技は 無し
+};
+
+// --- BALANCE_TWEAK : キャラ別の 強さ 微調整（dmg / kb / frames 倍率） ---
+// === キャラ別 バランス調整（2026-11）===
+// 30キャラの「平均ダメージ・技の効率(ダメージ÷全体フレーム)・リーチ・
+// ノックバック・体重・移動速度」を 数値化して 比べ、中央値から
+// 離れすぎている キャラだけ 寄せる。
+//   dmg    ... ダメージの 倍率
+//   kb     ... 吹っ飛ばしの 倍率
+//   frames ... 発生と 硬直の 倍率（小さいほど 技が 速くなる）
+// 1.0 は 変更なし。数字を いじるだけで 調整できる。
+const BALANCE_TWEAK = {
+  12: { dmg: 0.88, kb: 0.88 },      // Tank   : 総合1位。ダメージ・KB・体重・リーチが 全部 上位
+  4:  { dmg: 0.90 },                // Long   : リーチが 突出（リーチは 持ち味なので 残し ダメージで 調整）
+  9:  { dmg: 0.92 },                // Judgeman: リーチと ダメージの 両立が 強い
+  1:  { dmg: 0.95 },                // Don    : ダメージ最高。重く 遅いので 少しだけ
+  29: { dmg: 0.94 },                // Bot    : 新キャラ。リーチが 長すぎた
+  18: { dmg: 1.18, frames: 0.92 },  // Sen    : 総合 最下位
+  22: { dmg: 1.10, frames: 0.86 },  // Kinkin : 技の 効率が 極端に 低い（遅すぎる）
+  20: { dmg: 1.12 },                // Micro  : ダメージも リーチも 下位
+  26: { dmg: 1.12 },                // Poyo   : 下位
+  2:  { kb: 1.10, dmg: 1.05 },      // Saisoku: 吹っ飛ばしが 弱すぎて 相手を 倒しきれない
+};
 
 // --- Audio unlock on first interaction ---
 let audioUnlocked = false;
@@ -5659,39 +6211,6 @@ let comboFinisherReadyDisplay = { active: false, timer: 0, playerId: -1 };
 let comboFinisherActive = { active: false, timer: 0, maxTimer: 0, playerId: -1, charIdx: -1 };
 let comboFinisherSlowmo = 0; // スローモーション残りフレーム
 
-const COMBO_FINISHERS = {
-  0:  { name:'Ice Dragon Crusher', damage:35, hits:1, effect:'frozen', effectDur:300, kb:12, kbAngle:-60, color:'#88DDFF', desc:'A frozen dragon charges in' },
-  1:  { name:'Heaven Rend Palm', damage:40, hits:1, effect:'bounce', effectDur:0, kb:15, kbAngle:-80, color:'#AA6622', desc:'Quake waves spread both ways' },
-  2:  { name:'Afterimage Dance', damage:8, hits:12, effect:'stunned', effectDur:180, kb:6, kbAngle:-45, color:'#66FFBB', desc:'12 afterimages attack all around' },
-  3:  { name:'Inferno Meteor', damage:50, hits:1, effect:'burning', effectDur:600, kb:18, kbAngle:-70, color:'#FF4400', desc:'A giant fireball covers the screen' },
-  4:  { name:'Water Dragon Pierce', damage:45, hits:1, effect:null, effectDur:0, kb:16, kbAngle:-30, color:'#44AAFF', desc:'Unleash a giant water dragon' },
-  5:  { name:'Beast King Crusher', damage:42, hits:1, effect:null, effectDur:0, kb:20, kbAngle:-50, color:'#4169E1', desc:'Beast spirit burst - KB x3' },
-  6:  { name:'Raging Bear Flurry EX', damage:3, hits:50, effect:null, effectDur:0, kb:10, kbAngle:-80, color:'#FF6B6B', desc:'50 hits + big blast', lastHitDmg:20 },
-  7:  { name:'Rainbow Explosion', damage:3, hits:10, effect:'confused', effectDur:300, kb:6, kbAngle:-60, color:'#FF66AA', desc:'10-way beam (weakened)' },
-  8:  { name:'Electromagnetic Storm', damage:32, hits:1, effect:'stunned', effectDur:300, kb:12, kbAngle:-50, color:'#66CCFF', desc:'Drain all gauge + shock', drainGauge:true },
-  9:  { name:'Dark Doomsday Judgment', damage:38, hits:1, effect:'cursed', effectDur:600, kb:14, kbAngle:-70, color:'#9966DD', desc:'Curse 10s' },
-  10: { name:'Dragon Flame Awakening', damage:45, hits:1, effect:'burning', effectDur:480, kb:16, kbAngle:-60, color:'#FF8833', desc:'Fullscreen Blaze', dragonBonus:15 },
-  11: { name:'Hyperspeed Teleport Dance', damage:12, hits:10, effect:'confused', effectDur:300, kb:8, kbAngle:-45, color:'#FFBB44', desc:'10 teleport attacks' },
-  12: { name:'Dreadnought Barrage', damage:5, hits:20, effect:null, effectDur:0, kb:6, kbAngle:-60, color:'#A0B858', desc:'Shell Rain' },
-  13: { name:'Raging 1000 Hits', damage:2, hits:50, effect:null, effectDur:0, kb:8, kbAngle:-85, color:'#FF6644', desc:'1000 Hits', lastHitDmg:15 },
-  14: { name:'Venom Fog Spread', damage:5, hits:10, effect:'poisoned', effectDur:180, kb:4, kbAngle:-30, color:'#CC44FF', desc:'Poison All 3s' },
-  15: { name:'Rainbow Feather Storm', damage:4, hits:30, effect:'confused', effectDur:480, kb:5, kbAngle:-50, color:'#FFD700', desc:'Feathers everywhere' },
-  16: { name:'Eternal Time Stop', damage:30, hits:1, effect:'frozen', effectDur:300, kb:10, kbAngle:-40, color:'#FFD700', desc:'Time stop 5s', timeStop:300 },
-  17: { name:'Resonance Collapse', damage:35, hits:1, effect:'stunned', effectDur:300, kb:14, kbAngle:-70, color:'#88FFFF', desc:'Shake all + stun' },
-  18: { name:'Stock Surge', damage:25, hits:5, effect:null, effectDur:0, kb:10, kbAngle:-60, color:'#FFD700', desc:'Gold bars fall + CEO mode', lastHitDmg:10 },
-  19: { name:'Violet Lightning Barrage', damage:8, hits:20, effect:'paralyzed', effectDur:600, kb:7, kbAngle:-55, color:'#CC66FF', desc:'Violet Shell Storm' },
-  20: { name:'Triple Fusion Cannon', damage:55, hits:1, effect:null, effectDur:0, kb:20, kbAngle:-40, color:'#3388FF', desc:'Giant Beam' },
-  21: { name:'Twin Head Blaze Fusion', damage:40, hits:2, effect:'burning', effectDur:600, kb:15, kbAngle:-50, color:'#AA66FF', desc:'Twin Flame Shot' },
-  22: { name:'Golden Billion Tornado', damage:35, hits:1, effect:null, effectDur:0, kb:14, kbAngle:-60, color:'#FFD700', desc:'Pull in + coin tornado', pullIn:true },
-  23: { name:'Taekwondo Kick Storm', damage:4, hits:25, effect:'stunned', effectDur:300, kb:6, kbAngle:-70, color:'#44AAFF', desc:'100 Kick Combo' },
-  24: { name:'Nightmare Devour', damage:20, hits:1, effect:'fear', effectDur:1200, kb:8, kbAngle:-40, color:'#CC0044', desc:'Terror 20s + blackout' },
-  25: { name:'Chaos Explosion EX', damage:0, hits:1, effect:'random', effectDur:600, kb:12, kbAngle:-60, color:'#FFCC44', desc:'Fully Random', randomDmg:true },
-  26: { name:'Double Slime Explosion', damage:30, hits:2, effect:null, effectDur:0, kb:12, kbAngle:-60, color:'#88EEFF', desc:'Giant Slime Blast' },
-  27: { name:'Gravity Collapse Black Hole', damage:50, hits:1, effect:null, effectDur:0, kb:18, kbAngle:-70, color:'#9944DD', desc:'Colossal Black Hole', pullIn:true },
-  28: { name:'Bug Swarm Storm', damage:3, hits:15, effect:'poisoned', effectDur:1200, kb:4, kbAngle:-30, color:'#44CC44', desc:'Bug swarm + poison + no movement' },
-  29: { name:'Homing Rocket x3', damage:11, hits:3, effect:null, effectDur:0, kb:9, kbAngle:-40, color:'#66E8FF', desc:'3 homing rockets chase the enemy' },
-  30: { name:'Little Chatta', damage:8, hits:1, effect:null, effectDur:0, kb:8, kbAngle:-45, color:'#FF66CC', desc:'A tiny copy chases the enemy and explodes', chattaMinion:true },
-};
 
 function canComboFinisher(playerId) {
   const cd = comboDisplay[playerId];
@@ -5978,42 +6497,6 @@ let instantKillDisplay = { active: false, timer: 0, maxTimer: 0 };
 // 復帰技 / パワーモードの 表示
 // キャラを 足したら ここにも 必ず 足す。抜けると ↑+X が 無反応に なる
 // ======================================================================
-const RECOVERY_MOVES = {
-  // ダメ×0.4、高さ×0.65(超重量級除く)、角度を-80〜-90に統一
-  0:  { name:'Icicle Rise',     height:182, angle:-85, frames:20, dmg:1, color:'#88DDFF', status:'frozen' },
-  1:  { name:'Earth Leap',     height:200, angle:-90, frames:16, dmg:2, color:'#AA6622', status:null }, // 超重量級そのまま
-  2:  { name:'Lightspeed Rise',     height:247, angle:-80, frames:14, dmg:2, color:'#FFFFFF', status:null },
-  3:  { name:'Flame Rise',       height:182, angle:-85, frames:18, dmg:2, color:'#FF6600', status:'burning' },
-  4:  { name:'Sky Pierce',     height:182, angle:-85, frames:18, dmg:2, color:'#44FFCC', status:null },
-  5:  { name:'Beast Leap',       height:280, angle:-90, frames:16, dmg:2, color:'#4169E1', status:null }, // 超重量級そのまま
-  6:  { name:'Bear Rocket', height:130, angle:-90, frames:20, dmg:2, color:'#FF6B6B', status:null },
-  7:  { name:'Rainbow Rise',     height:182, angle:-85, frames:18, dmg:2, color:'#FF66AA', status:'confused' },
-  8:  { name:'Railgun',     height:247, angle:-80, frames:14, dmg:2, color:'#FFFF44', status:null },
-  9:  { name:'Dark Float',     height:247, angle:-90, frames:30, dmg:2, color:'#9400D3', status:'cursed' },
-  10: { name:'Dragon',         height:130, angle:-85, frames:16, dmg:2, color:'#FFD700', status:null },
-  11: { name:'Barricade Jump', height:247, angle:-90, frames:4, dmg:2, color:'#66DDFF', status:null },
-  12: { name:'Cannon Recoil',     height:200, angle:-80, frames:16, dmg:2, color:'#888888', status:null }, // 超重量級そのまま
-  13: { name:'Ascending Uppercut', height:130, angle:-90, frames:14, dmg:2, color:'#FF4444', status:null },
-  14: { name:'Venom Leap',     height:182, angle:-85, frames:18, dmg:2, color:'#44CC44', status:'poisoned' },
-  15: { name:'Wing Boost', height:247, angle:-90, frames:22, dmg:2, color:'#EEEEFF', status:null },
-  16: { name:'Time Leap',     height:247, angle:-90, frames:16, dmg:0, color:'#FFD700', status:null },
-  17: { name:'Sonic Rise',     height:182, angle:-85, frames:18, dmg:2, color:'#88FFFF', status:'stunned' },
-  18: { name:'Career Elevator', height:130, angle:-90, frames:20, dmg:2, color:'#FF8844', status:null },
-  19: { name:'Tank Cannon Rise',   height:200, angle:-80, frames:16, dmg:2, color:'#CC66FF', status:null }, // 超重量級そのまま
-  20: { name:'Triple Split Rise', height:182, angle:-85, frames:18, dmg:2, color:'#44DDFF', status:null },
-  21: { name:'Twin Blast',     height:182, angle:-85, frames:18, dmg:2, color:'#FF6688', status:'burning' },
-  22: { name:'Money Launch', height:130, angle:-85, frames:16, dmg:2, color:'#FFD700', status:null },
-  23: { name:'Jumping Spin Kick', height:182, angle:-85, frames:16, dmg:2, color:'#FF0000', status:null },
-  24: { name:'Dread Float',     height:247, angle:-90, frames:30, dmg:2, color:'#800080', status:null },
-  25: { name:'Chaos Leap',   height:100+Math.floor(Math.random()*150), angle:-85, frames:16, dmg:2, color:'#FF1493', status:null },
-  26: { name:'Slime Bound', height:182, angle:-90, frames:16, dmg:2, color:'#FFB6C1', status:null },
-  27: { name:'Gravity Flip',     height:247, angle:-90, frames:20, dmg:2, color:'#4B0082', status:null },
-  28: { name:'Insect Swarm Rise',   height:182, angle:-85, frames:18, dmg:2, color:'#228B22', status:'poisoned' },
-  29: { name:'Back Booster',    height:200, angle:-88, frames:18, dmg:2, color:'#66E8FF', status:null },
-  30: { name:'Spirit Updraft',  height:200, angle:-85, frames:18, dmg:1, color:'#FF99DD', status:null },
-};
-// Bot(29) は ロボット変身中だけ ブースターが 強くなる（他の強化と そろえる）
-const BOT_ROBOT_RECOVERY = { name:'Jet Booster', height:266, angle:-88, frames:16, dmg:3, color:'#AAF4FF', status:null };
 // ゲージMAXエフェクト
 let gaugeMaxEffect = { active: false, timer: 0, playerId: -1, color: '#FFD700', text: '' };
 // ゲージ増減ポップアップ
@@ -6021,11 +6504,6 @@ let gaugePopups = []; // {x, y, text, life, color}
 function addGaugePopup(x, y, amount, color) {
   gaugePopups.push({ x: x, y: y - 60, text: (amount > 0 ? '+' : '') + amount, life: 30, maxLife: 30, color: color || '#FFD700' });
 }
-// キャラ別強化モードグローカラー
-const POWER_GLOW = {0:'#00BFFF',1:'#8B4513',2:'#FFFFFF',3:'#FF4500',4:'#00CED1',5:'#4169E1',6:'#FF4400',7:'#FF69B4',8:'#FFFF00',9:'#9400D3',10:'#FF8C00',11:'#66DDFF',12:'#808080',13:'#FF6600',14:'#00FF00',15:'#00FF7F',16:'#FFD700',17:'#7CFC00',18:'#FFD700',19:'#9400D3',20:'#DA70D6',21:'#FF6347',22:'#FFD700',23:'#FF0000',24:'#800080',25:'#FF1493',26:'#FFB6C1',27:'#4B0082',28:'#228B22',29:'#66E8FF',30:'#FF66CC'};
-// 強化モード名マップ
-const POWER_NAMES = {0:'Ice Power',1:'Quake Mode',2:'Lightspeed Mode',3:'Inferno Mode',4:'Dragon Spear Mode',5:'Wild Release',6:'Fury Mode',7:'Awakened Mode',8:'Overvolt',9:'Final Judgment',10:'Dragon Mode',11:'Teleport',12:'FULL LOAD',13:'Full Punch',14:'Toxin',15:'AIR MASTER',16:'Time Stop',17:'Resonance Mode',18:'CEO',19:'Armor',20:'Triple Merge',21:'Blaze Fusion',22:'Billionaire',23:'Taekwondo Master',24:'Nightmare',25:'Chaos',26:'Double Slime',27:'Gravity Collapse',28:'Swarm',29:'ROBOT MODE',30:'FLIGHT'};
-const POWER_DESCS = {0:'Freeze DMG x1.5',1:'KB×1.4',2:'Speed x2',3:'Burn chance +60%',4:'Reach x1.5',5:'KB×1.5',6:'DMG x1.5',7:'Confusion',8:'Shock Lock',9:'DMG x1.4',10:'DMG x1.5',12:'Power x2',13:'DMG x1.5',14:'Poison DMG x2',17:'Edge Attack',21:'DMG x1.5',22:'DMG x1.5',23:'Kick DMG x2',26:'All Attacks x2',27:'Gravity x3',28:'Poison DMG x3',29:'Attack & Speed UP',30:'Fly for 8s',11:'Teleport attacks',15:'Air control UP',16:'Enemy frozen in time',18:'Attack range UP',19:'Super armor',20:'Three bodies',24:'Fear DMG x2',25:'Random effect'};
 function getActivePowerMode(p) {
   const timers = [
     [p.kumaFuryMode,6],[p.saisokuLightSpeed,2],[p.uruoWildRelease,5],[p.bulletAwaken,7],
@@ -6045,159 +6523,6 @@ function triggerGaugeMaxEffect(p, text, color) {
 }
 
 // ========== コンボルート定義 ==========
-const COMBO_ROUTES = {
-  0: [ // ゼン
-    { name: 'Iai Combo', route: 'Jab > UTilt > USmash', dmgRange: '0〜40%', diff: 2, hits: 3 },
-    { name: 'Freeze Chase', route: 'Freeze > FSmash', dmgRange: '40〜80%', diff: 1, hits: 2 },
-    { name: '💀 Azure Dragon Kill A', route: 'Jab > UTilt > Special (freeze) > USmash while frozen > Air > FSmash', dmgRange: '0%〜', diff: 3, hits: 6, instantKill: true },
-    { name: '💀 Azure Dragon Kill B', route: 'Special (freeze) > USmash while frozen', dmgRange: '80%〜', diff: 3, hits: 2, instantKill: true },
-  ],
-  1: [ // ドン
-    { name: 'Down Throw Chase', route: 'DThrow > USmash', dmgRange: '0〜60%', diff: 1, hits: 2 },
-    { name: 'Heavyweight Combo', route: 'FSmash > DSmash', dmgRange: '60〜100%', diff: 2, hits: 2 },
-  ],
-  2: [ // サイソク
-    { name: 'Ninja Rush', route: 'Jab x3 > UTilt > Air > Air > USmash', dmgRange: '0〜40%', diff: 3, hits: 7 },
-    { name: 'Rapid Combo', route: 'Jab x3 > FTilt > Dash Attack', dmgRange: '20〜60%', diff: 2, hits: 5 },
-    { name: '💀 Lightspeed Kill A', route: 'Jab x3 > UTilt > Air x2 > USmash > KO', dmgRange: '0%〜', diff: 3, hits: 8, instantKill: true },
-    { name: '💀 Lightspeed Kill B', route: 'Special (shock) > FSmash while shocked', dmgRange: '80%〜', diff: 3, hits: 2, instantKill: true },
-  ],
-  3: [ // メテオ
-    { name: 'Martial Combo', route: 'Jab > UTilt > UAir > Air', dmgRange: '0〜50%', diff: 2, hits: 4 },
-    { name: 'Rising Combo', route: 'Jab > Rising Fist > Aerial', dmgRange: '30〜70%', diff: 3, hits: 3 },
-    { name: '💀 Golden Inferno Kill A', route: 'Jab > UTilt > Special (burn) > FSmash while burning > USmash > Air', dmgRange: '0%〜', diff: 3, hits: 6, instantKill: true },
-    { name: '💀 Golden Inferno Kill B', route: 'Special (burn) > USmash while burning', dmgRange: '80%〜', diff: 3, hits: 2, instantKill: true },
-  ],
-  6: [ // 熊太郎
-    { name: 'Squishy Combo', route: 'Jab x3 > UThrow > Air > USmash', dmgRange: '0〜40%', diff: 2, hits: 5 },
-  ],
-  13: [ // 波おじ
-    { name: 'Boxer Rush', route: 'Jab x3 > FTilt > USmash', dmgRange: '0〜50%', diff: 2, hits: 5 },
-    { name: 'Guts Combo', route: 'Jab x3 > FTilt > FTilt > USmash', dmgRange: '0〜30%', diff: 3, hits: 6 },
-    { name: '💀 Raging Kill A', route: 'Jab x5 > FTilt > USmash > Air > DAir (meteor)', dmgRange: '0%〜', diff: 3, hits: 9, instantKill: true },
-    { name: '💀 Raging Kill B', route: 'FTilt > push to ledge > DAir (meteor)', dmgRange: '80%〜', diff: 3, hits: 3, instantKill: true },
-  ],
-  9: [ // ジャッジマン
-    { name: 'Judgment Combo', route: 'Curse > FSmash > DSmash', dmgRange: '30〜80%', diff: 2, hits: 3 },
-    { name: '💀 Dark Judgment A', route: 'Jab > curse > FSmash chain > DSmash (meteor)', dmgRange: '0%〜', diff: 3, hits: 5, instantKill: true },
-    { name: '💀 Dark Judgment B', route: 'Curse > DSmash (meteor)', dmgRange: '80%〜', diff: 3, hits: 2, instantKill: true },
-  ],
-  10: [ // 天才
-    { name: 'Human Combo', route: 'Jab > FTilt > UTilt', dmgRange: '0〜50%', diff: 1, hits: 3 },
-    { name: 'Dragon Mode Combo', route: 'Dragon Jab > Side > Up > Special', dmgRange: '0〜60%', diff: 3, hits: 4 },
-  ],
-  16: [ // キング
-    { name: 'Stand Rush', route: 'Z→Z→Z→X→C', dmgRange: '0〜50%', diff: 3, hits: 5 },
-    { name: '💀 Golden Kill A', route: 'Time Stop > FSmash x2 > USmash > Air > DSmash (meteor)', dmgRange: '0%〜', diff: 3, hits: 6, instantKill: true },
-    { name: '💀 Golden Kill B', route: 'Time Stop > DSmash (meteor)', dmgRange: '80%〜', diff: 3, hits: 2, instantKill: true },
-  ],
-  // === 軽量級（5〜8連） ===
-  7: [ // バレット（魔法少女）
-    { name: 'Star Rush', route: 'Jab > Jab > FTilt > Air > Air > USmash', dmgRange: '0〜50%', diff: 2, hits: 6 },
-    { name: 'Double Shot Combo', route: 'Jab (2 shots) > FTilt > Air > USmash', dmgRange: '0〜40%', diff: 2, hits: 5 },
-  ],
-  8: [ // シャうでん（電撃）
-    { name: 'Shock Rush', route: 'Jab > Jab > UTilt > Air > USmash', dmgRange: '0〜60%', diff: 2, hits: 5 },
-    { name: 'Shock Combo', route: 'Shock > Jab > FTilt > USmash', dmgRange: '20〜70%', diff: 2, hits: 4 },
-    { name: '💀 Electromagnetic Kill A', route: 'Jab x2 > UTilt > Special (shock+drain) > FSmash while shocked > USmash', dmgRange: '0%〜', diff: 3, hits: 6, instantKill: true },
-    { name: '💀 Electromagnetic Kill B', route: 'Special (shock) > USmash during shock stun', dmgRange: '80%〜', diff: 3, hits: 2, instantKill: true },
-  ],
-  11: [ // Catbus（瞬間移動）
-    { name: 'Vanish Combo', route: 'Teleport > back Jab > FTilt > Air > USmash', dmgRange: '0〜50%', diff: 3, hits: 5 },
-    { name: 'Rapid Chase', route: 'Jab > Jab > FTilt > Air > FSmash', dmgRange: '0〜40%', diff: 2, hits: 5 },
-  ],
-  15: [ // サム（鳥）
-    { name: 'Triple Jump Combo', route: 'Jab > UTilt > Air > Air > FSmash', dmgRange: '0〜60%', diff: 2, hits: 5 },
-    { name: 'Air Combo', route: 'Air > Air > Air > USmash', dmgRange: '0〜50%', diff: 3, hits: 4 },
-  ],
-  // === 中量級（3〜5連） ===
-  4: [ // ロング（槍）
-    { name: 'Spear Reach Combo', route: 'FTilt (max spear) > UTilt > Air > FSmash', dmgRange: '0〜50%', diff: 2, hits: 4 },
-    { name: 'Spear Rush Combo', route: 'Dash Attack > UTilt > USmash', dmgRange: '20〜60%', diff: 1, hits: 3 },
-  ],
-  14: [ // とっこ（毒刀）
-    { name: 'Venom Blade Combo', route: 'Jab (poison) > stack poison > FTilt > USmash', dmgRange: '0〜70%', diff: 2, hits: 3 },
-    { name: 'Triple Blade Combo', route: 'Jab > Jab > FTilt > Air > FSmash', dmgRange: '0〜50%', diff: 2, hits: 5 },
-  ],
-  17: [ // おんぱ（音波）
-    { name: 'Sonic Resonance Combo', route: 'Jab > Sonic stun > FSmash > USmash', dmgRange: '0〜60%', diff: 2, hits: 4 },
-    { name: 'Resonance Chase', route: 'Jab > Jab > UTilt > Air > FSmash', dmgRange: '0〜50%', diff: 2, hits: 5 },
-  ],
-  18: [ // セン（米サラリーマン）
-    { name: 'Full Belly Combo', route: 'Jab > FTilt > UTilt > USmash', dmgRange: '0〜50%', diff: 1, hits: 4 },
-    { name: 'Underdog Combo', route: '(high %) Jab > FTilt > FSmash', dmgRange: '80%〜', diff: 2, hits: 3 },
-  ],
-  20: [ // マイクロ（3体合体）
-    { name: 'Merge Rush', route: 'Jab x3 > UTilt > Air > FSmash', dmgRange: '0〜60%', diff: 2, hits: 6 },
-    { name: 'Split > Merge Combo', route: 'Split Jab > Merge > FTilt > USmash', dmgRange: '0〜40%', diff: 3, hits: 4 },
-  ],
-  21: [ // ミスターツー（双頭）
-    { name: 'Split Personality Combo', route: 'Twin attack > FTilt > USmash > Air', dmgRange: '0〜50%', diff: 2, hits: 4 },
-    { name: 'Blaze Combo', route: 'Bomb > Flame > FSmash', dmgRange: '30〜70%', diff: 2, hits: 3 },
-  ],
-  // === 重量級（2〜4連） ===
-  22: [ // 金金（黄金竜巻）
-    { name: 'Gold Combo', route: 'FTilt > pull in > USmash > air follow-up', dmgRange: '0〜60%', diff: 2, hits: 4 },
-    { name: 'Coin Collect Combo', route: 'Jab > FTilt > USmash (coins fly)', dmgRange: '0〜50%', diff: 1, hits: 3 },
-  ],
-  // === 超重量級（2〜3連） ===
-  5: [ // うる男（獣鎧）
-    { name: 'Beast Assault', route: 'FTilt > DSmash > USmash', dmgRange: '0〜40%', diff: 1, hits: 3 },
-    { name: 'Rage Combo', route: '(enraged) Jab > FSmash > USmash', dmgRange: '0〜60%', diff: 2, hits: 3 },
-  ],
-  12: [ // タンク（戦車）
-    { name: 'Cannon Combo', route: 'FTilt (cannon) > blast follow-up > USmash', dmgRange: '0〜40%', diff: 1, hits: 3 },
-    { name: 'Fortress Combo', route: 'DTilt > FSmash', dmgRange: '40〜80%', diff: 1, hits: 2 },
-  ],
-  19: [ // ドスボス（紫戦車）
-    { name: 'Tricky Combo', route: 'FTilt > paralyze > USmash while paralyzed', dmgRange: '0〜50%', diff: 2, hits: 3 },
-    { name: 'Decoy Combo', route: 'Set Decoy > FSmash > blast follow-up', dmgRange: '20〜60%', diff: 3, hits: 3 },
-  ],
-  // === 隠しキャラ ===
-  24: [ // 怖（恐怖）
-    { name: 'Terror Combo', route: 'Jab > terror > FSmash the fleeing foe > USmash', dmgRange: '0〜50%', diff: 2, hits: 4 },
-    { name: 'Dark Chase', route: 'Terror > FTilt > DSmash', dmgRange: '30〜70%', diff: 2, hits: 3 },
-    { name: '💀 Terror Kill A', route: 'Jab > Special (terror) > FTilt > FSmash > USmash > Air', dmgRange: '0%〜', diff: 3, hits: 6, instantKill: true },
-    { name: '💀 Terror Kill B', route: 'Special (terror) > FSmash while panicked', dmgRange: '80%〜', diff: 3, hits: 2, instantKill: true },
-  ],
-  25: [ // ヤッホ（ランダム）
-    { name: 'Random Combo', route: 'Jab > random status > FTilt > USmash', dmgRange: '0〜60%', diff: 2, hits: 4 },
-    { name: '? Rush', route: 'Jab x3 > FTilt > Air > FSmash', dmgRange: '0〜50%', diff: 2, hits: 6 },
-  ],
-  26: [ // ぽよ（スライム）
-    { name: 'Bounce Combo', route: 'Jab x4 > UTilt > USmash', dmgRange: '0〜60%', diff: 2, hits: 6 },
-    { name: 'Slime Flurry', route: 'Jab x3 > FTilt > FSmash', dmgRange: '0〜50%', diff: 1, hits: 5 },
-    { name: 'Double Slime Combo', route: '(Double Slime) Jab (2hit) > Jab (2hit) > UTilt (2hit) > USmash (2hit)', dmgRange: '0〜50%', diff: 1, hits: 8 },
-  ],
-  23: [ // サトル（テコンドー魚）
-    { name: 'Water Kick Combo', route: 'Front Kick > Spin Kick > High Kick > Jump Kick > USmash', dmgRange: '0〜50%', diff: 3, hits: 5 },
-    { name: 'Counter Combo', route: 'Air dodge > counter > FSmash > Air', dmgRange: '20〜60%', diff: 3, hits: 4 },
-  ],
-  27: [ // プル（重力）
-    { name: 'Gravity Combo A', route: 'Jab (pull) > Gravity Field > FTilt > Up Attack > DAir (meteor)', dmgRange: '0〜50%', diff: 2, hits: 5 },
-    { name: 'Gravity Combo B', route: 'Gravity Field > Gravity Slam > bounce follow-up FSmash', dmgRange: '50〜80%', diff: 2, hits: 3 },
-    { name: '💀 Gravity Kill A', route: 'Gravity Field > Gravity Slam > Gravity Flip > air follow-up > ledge DAir (meteor)', dmgRange: '0%〜', diff: 3, hits: 5, instantKill: true },
-    { name: '💀 Gravity Kill B', route: 'Black Hole (pull + blast) > air follow-up > DAir (meteor)', dmgRange: '80%〜', diff: 2, hits: 3, instantKill: true },
-  ],
-  28: [ // ムッシー（虫）
-    { name: 'Bug Combo A', route: 'Jab x2 > Bee Sting Rush (multi) > poison > UTilt > USmash', dmgRange: '0〜50%', diff: 2, hits: 6 },
-    { name: 'Bug Combo B', route: 'Jewel Beetle Flight (rush) > FTilt > Stag Mandible (spin KB)', dmgRange: '50〜80%', diff: 2, hits: 3 },
-    { name: '💀 Venom Fang Kill A', route: 'Jab > Down Attack (poison) > FTilt > Jewel Beetle Flight > Stag Mandible (meteor)', dmgRange: '0%〜', diff: 3, hits: 5, instantKill: true },
-    { name: '💀 Venom Fang Kill B', route: 'Special (bug swarm, poison) > Stag Mandible (meteor)', dmgRange: '80%〜', diff: 2, hits: 3, instantKill: true },
-  ],
-  29: [ // Bot
-    { name: 'Machine Rush', route: 'Jab > Jab > FTilt > Boost Dash', dmgRange: '0〜40%', diff: 1, hits: 4 },
-    { name: 'Drill Carry', route: 'UTilt > Air > Drill Dive (meteor)', dmgRange: '20〜70%', diff: 2, hits: 3 },
-    { name: 'Tackle Start', route: '->-> Up Up + Z (Boost Tackle) > USmash', dmgRange: '0〜60%', diff: 2, hits: 2 },
-    { name: '💀 Robot Overrun', route: 'Ultimate (robot form) > Jab x2 > FSmash > Boost Tackle', dmgRange: '60%〜', diff: 3, hits: 5, instantKill: true },
-  ],
-  30: [ // Chatta
-    { name: 'Claw String', route: 'Jab > Jab > FTilt > Stretch Swipe', dmgRange: '0〜40%', diff: 1, hits: 4 },
-    { name: 'Flight Pressure', route: 'Take Flight > Air Claw x3 > Dive Claw', dmgRange: '20〜80%', diff: 2, hits: 5 },
-    { name: 'Blink Punish', route: '->-> Down Down + Z (Blink) > USmash', dmgRange: '0〜60%', diff: 2, hits: 2 },
-    { name: '💀 Warp Spike', route: 'Hold D (Warp Meteor) off-stage > opponent cannot recover', dmgRange: '0%〜', diff: 3, hits: 1, instantKill: true },
-  ],
-};
 
 // Dynamic camera system
 const cam = {
@@ -7027,92 +7352,9 @@ const THROW_EXEC_FRAMES = 10;   // 投げ実行モーション（10F）
 // ======================================================================
 // 掴み・投げ の 定数と キャラ別テーブル
 // ======================================================================
-const CHAR_GRAB_FRAMES = [
-  26, // 0:ゼン (バランス型)
-  34, // 1:ドン (パワー型)
-  18, // 2:サイソク (スピード型)
-  30, // 3:メテオ (テクニック型→遠距離/特殊)
-  30, // 4:ロング (機械槍型→遠距離/特殊)
-  30, // 5:うる男 (ディフェンス型→遠距離/特殊)
-  26, // 6:熊太郎 (テクニック型→バランス)
-  30, // 7:バレット (完全遠距離型→遠距離/特殊)
-  18, // 8:シャうでん (スピード型)
-  26, // 9:ジャッジマン (バランス型)
-  30, // 10:天才 (変形型→遠距離/特殊)
-  18, // 11:Catbus (スピード型)
-  34, // 12:タンク (パワー型)
-  26, // 13:波おじ (テクニック型→バランス)
-  18, // 14:とっこ (超攻撃型→スピード)
-  18, // 15:サム (空中戦型→スピード)
-  26, // 16:キング (上級者型→バランス)
-  30, // 17:おんぱ (音波型→遠距離/特殊)
-  26, // 18:セン (テクニック型→バランス)
-  34, // 19:ドスボス (トリッキー型→パワー)
-  26, // 20:マイクロ (バランス型)
-  30, // 21:ミスターツー (超能力型→遠距離/特殊)
-  34, // 22:金金 (パワー型)
-  26, // 23:サトル (テクニック型→バランス)
-  30, // 24:怖 (ホラー型→遠距離/特殊)
-  26, // 25:ヤッホ (ふざけ型→バランス)
-  26, // 26:ぽよ (初心者型→バランス)
-  30, // 27:プル (重力操作型→遠距離/特殊)
-  18, // 28:ムッシー (虫合体型→スピード)
-  28, // 29:Bot (テクニック型・標準)
-  24, // 30:Chatta (軽量・素早い)
-];
 function getGrabFrames(charIdx) {
   return CHAR_GRAB_FRAMES[charIdx] || THROW_GRAB_FRAMES;
 }
-// キャラ別投げダメージ { front, back, up, down }
-// 掴み速度に反比例: 速い=低ダメ, 遅い=高ダメ
-const CHAR_THROW_DMG = {
-  speed:   { front: 7,  back: 8,  up: 6,  down: 5  }, // コンボ系（KB小）
-  balance: { front: 9,  back: 10, up: 8,  down: 7  }, // バランス
-  ranged:  { front: 10, back: 11, up: 9,  down: 8  }, // 遠距離系
-  power:   { front: 15, back: 18, up: 12, down: 14 }, // パワー系（KB大）
-  status:  { front: 9,  back: 10, up: 8,  down: 7  }, // 状態異常系
-};
-const CHAR_THROW_TYPE = [
-  'status',  // 0:ゼン（凍結投げ）
-  'power',   // 1:ドン
-  'speed',   // 2:サイソク
-  'status',  // 3:メテオ（燃焼投げ）
-  'ranged',  // 4:ロング
-  'power',   // 5:うる男
-  'power',   // 6:熊太郎
-  'speed',   // 7:バレット
-  'status',  // 8:シャうでん（感電投げ）
-  'status',  // 9:ジャッジマン（呪縛投げ）
-  'ranged',  // 10:天才
-  'speed',   // 11:Catbus
-  'power',   // 12:タンク
-  'balance', // 13:波おじ
-  'status',  // 14:とっこ（毒投げ）
-  'speed',   // 15:サム
-  'balance', // 16:キング
-  'ranged',  // 17:おんぱ
-  'balance', // 18:セン
-  'power',   // 19:ドスボス
-  'balance', // 20:マイクロ
-  'ranged',  // 21:ミスターツー
-  'power',   // 22:金金
-  'speed',   // 23:サトル
-  'ranged',  // 24:怖
-  'balance', // 25:ヤッホ
-  'balance', // 26:ぽよ
-  'ranged',  // 27:プル
-  'speed',   // 28:ムッシー
-  'balance', // 29:Bot（テクニック型）
-  'speed', // 30:Chatta
-];
-// キャラ投げ状態異常テーブル
-const CHAR_THROW_STATUS = {
-  0: { type: 'frozen', dur: 60 },      // ゼン: 凍結
-  3: { type: 'burning', dur: 120 },     // メテオ: 燃焼
-  8: { type: 'stunned', dur: 60 },      // シャうでん: 感電
-  9: { type: 'cursed', dur: 120 },      // ジャッジマン: 呪縛
-  14: { type: 'poisoned', dur: 180 },   // とっこ: 毒
-};
 function getThrowDmg(charIdx) {
   return CHAR_THROW_DMG[CHAR_THROW_TYPE[charIdx]] || CHAR_THROW_DMG.balance;
 }
@@ -7652,39 +7894,6 @@ function executeCommand(player, cmd) {
 // ======================================================================
 // 技データ
 // ======================================================================
-const CHARACTER_ATTACK_STYLE = {
-  0:  { style:'sword',     color:'#88CCFF' },  // ゼン: 斬撃線
-  1:  { style:'heavyPunch', color:'#FF6644' },  // ドン: 巨大衝撃波
-  2:  { style:'ninjaSlash', color:'#44FFAA' },  // サイソク: 残像付き高速斬り
-  3:  { style:'flameKick',  color:'#FFAA22' },  // メテオ: 炎の蹴り
-  4:  { style:'spear',      color:'#A0B4FF' },  // ロング: 槍の直線
-  5:  { style:'beastSlam',  color:'#C8A878' },  // うる男: 獣の爪
-  6:  { style:'bearHug',    color:'#FF6B6B' },  // 熊太郎: 熊の一撃
-  7:  { style:'starShot',   color:'#FF66AA' },  // バレット: 星エフェクト
-  8:  { style:'electric',   color:'#FFFF44' },  // シャうでん: 電撃
-  9:  { style:'dark',       color:'#9966DD' },  // ジャッジマン: 暗黒
-  10: { style:'sword',      color:'#FF8833' },  // 天才: 剣（ドラゴン時は炎）
-  11: { style:'pounce',     color:'#66DDFF' },  // Catbus: 飛びかかり
-  12: { style:'cannon',     color:'#88AA66' },  // タンク: 砲撃
-  13: { style:'boxing',     color:'#FF4444' },  // 波おじ: ボクシング
-  14: { style:'multiSlash', color:'#CC44FF' },  // とっこ: 三刀流
-  15: { style:'feather',    color:'#EEEEFF' },  // サム: 羽エフェクト
-  16: { style:'standRush',  color:'#FFD700' },  // キング: スタンド残像
-  17: { style:'soundWave',  color:'#88FFFF' },  // おんぱ: 音波
-  18: { style:'ricePower',  color:'#FF8844' },  // セン: 米パワー
-  19: { style:'cannon',     color:'#CC66FF' },  // ドスボス: 砲撃
-  20: { style:'magic',      color:'#44DDFF' },  // マイクロ: 魔法陣
-  21: { style:'dualAttack', color:'#FF6688' },  // ミスターツー: 爆弾+炎
-  22: { style:'money',      color:'#FFD700' },  // 金金: コイン
-  23: { style:'waterKick',  color:'#66CCFF' },  // サトル: 水流蹴り
-  24: { style:'scissors',   color:'#CC0044' },  // 怖: ハサミ
-  25: { style:'random',     color:'#FFDD00' },  // ヤッホ: ランダム
-  26: { style:'bounce',     color:'#FF88CC' },  // ぽよ: バウンド
-  27: { style:'gravity',    color:'#AA66FF' },  // プル: 重力
-  28: { style:'poison',     color:'#66CC44' },  // ムッシー: 毒
-  29: { style:'electric',   color:'#66E8FF' },  // Bot: 機械の 電撃
-  30: { style:'standRush',  color:'#FF66CC' },  // Chatta: スタンドの 連打
-};
 
 const attackDefs = {
   // Zen - Sword [タイプ別調整: Z3-6, X8-14, C12-20]
@@ -8309,26 +8518,6 @@ const dragonAttackDefs = {
   }
 })();
 
-// === キャラ別 バランス調整（2026-11）===
-// 30キャラの「平均ダメージ・技の効率(ダメージ÷全体フレーム)・リーチ・
-// ノックバック・体重・移動速度」を 数値化して 比べ、中央値から
-// 離れすぎている キャラだけ 寄せる。
-//   dmg    ... ダメージの 倍率
-//   kb     ... 吹っ飛ばしの 倍率
-//   frames ... 発生と 硬直の 倍率（小さいほど 技が 速くなる）
-// 1.0 は 変更なし。数字を いじるだけで 調整できる。
-const BALANCE_TWEAK = {
-  12: { dmg: 0.88, kb: 0.88 },      // Tank   : 総合1位。ダメージ・KB・体重・リーチが 全部 上位
-  4:  { dmg: 0.90 },                // Long   : リーチが 突出（リーチは 持ち味なので 残し ダメージで 調整）
-  9:  { dmg: 0.92 },                // Judgeman: リーチと ダメージの 両立が 強い
-  1:  { dmg: 0.95 },                // Don    : ダメージ最高。重く 遅いので 少しだけ
-  29: { dmg: 0.94 },                // Bot    : 新キャラ。リーチが 長すぎた
-  18: { dmg: 1.18, frames: 0.92 },  // Sen    : 総合 最下位
-  22: { dmg: 1.10, frames: 0.86 },  // Kinkin : 技の 効率が 極端に 低い（遅すぎる）
-  20: { dmg: 1.12 },                // Micro  : ダメージも リーチも 下位
-  26: { dmg: 1.12 },                // Poyo   : 下位
-  2:  { kb: 1.10, dmg: 1.05 },      // Saisoku: 吹っ飛ばしが 弱すぎて 相手を 倒しきれない
-};
 (function applyBalanceTweak() {
   function tweak(atk, t) {
     if (t.dmg) {
@@ -10158,40 +10347,6 @@ function hitboxCollides(ax, ay, aw, ah, bx, by, bw, bh) {
   return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
 }
 
-// キャラ別体格 [width倍率, height倍率] (基準: 36w × 70h)
-const CHAR_BODY = [
-  [1.0, 1.0],   // 0 zen 標準
-  [1.3, 1.2],   // 1 don 巨漢
-  [0.8, 0.9],   // 2 saisoku 小さい
-  [0.9, 0.95],  // 3 meteo 軽量格闘家
-  [0.85,1.05],  // 4 long 細身
-  [1.4, 1.2],   // 5 uruo 装甲獣
-  [1.2, 1.1],   // 6 kumatarou 熊・丸い
-  [0.75,0.85],  // 7 bullet 最小・鳥
-  [0.85,0.9],   // 8 shawden スポンジ
-  [1.0, 1.1],   // 9 judgeman 標準やや大
-  [1.0, 1.05],  // 10 tensai 標準
-  [1.5, 0.85],  // 11 catbus 横長低め
-  [1.3, 0.85],  // 12 tank 横広低め
-  [1.05,0.9],   // 13 namioji 標準
-  [0.85,1.05],  // 14 tokko 細身
-  [0.8, 0.85],  // 15 sam 小鳥
-  [0.9, 1.1],   // 16 king スリム
-  [1.2, 1.0],   // 17 onpa 丸い
-  [1.15,1.0],   // 18 sen おにぎり
-  [1.25,0.9],   // 19 dosboss 横広
-  [1.0, 1.2],   // 20 micro 3体積み縦長
-  [1.25,1.0],   // 21 mrtwo 双頭横広
-  [1.15,1.0],   // 22 kinkin 太め
-  [0.85,0.95],  // 23 satoru 細身
-  [0.8, 1.1],   // 24 kowai 細長亡霊
-  [0.9, 0.9],   // 25 yaho 標準小
-  [0.85,0.85],  // 26 poyo 小さい
-  [1.0, 1.0],   // 27 pull 標準
-  [0.9, 0.9],   // 28 mussy 細め虫
-  [1.0, 1.0], // 29 bot
-  [0.92, 0.95], // 30 chatta (小柄)
-];
 function getPlayerHitbox(p) {
   const b = CHAR_BODY[p.charIdx] || [1.0, 1.0];
   // マイクロ(20): 分離時は食らい判定が小さくなる
@@ -10200,41 +10355,6 @@ function getPlayerHitbox(p) {
   return { x: p.x - bw / 2, y: p.y - bh, w: bw, h: bh };
 }
 
-// キャラ別リーチ倍率 [normalW, sideW, upH, downH]
-const CHAR_REACH = [
-  // [normal, side/strong, up, down] リーチ倍率
-  [1.6,1.6,1.6,1.6], // 0 zen (剣・長リーチ)
-  [1.0,1.0,1.0,1.0], // 1 don (標準)
-  [0.75,0.75,0.75,0.75], // 2 saisoku (短リーチ・高速)
-  [1.0,1.0,1.0,1.0], // 3 meteo (標準)
-  [2.0,2.0,2.0,2.0], // 4 long (超長リーチ・槍)
-  [1.0,1.0,1.0,1.0], // 5 uruo (標準)
-  [0.6,0.6,0.6,0.6], // 6 kumatarou (超短・密着パワー)
-  [0.75,0.75,0.75,0.75], // 7 bullet (短リーチ・飛び道具メイン)
-  [1.0,1.0,1.0,1.0], // 8 shawden (標準)
-  [2.0,2.0,2.0,2.0], // 9 judgeman (超長リーチ・扇形)
-  [1.6,1.6,1.6,1.6], // 10 tensai (長リーチ)
-  [1.0,1.0,1.0,1.0], // 11 catbus (標準)
-  [1.6,1.6,1.0,1.0], // 12 tank (横長リーチ)
-  [1.0,1.0,1.0,1.0], // 13 namioji (標準)
-  [1.0,1.0,1.0,1.0], // 14 tokko (標準)
-  [0.75,0.75,0.75,0.75], // 15 sam (短リーチ)
-  [1.6,1.6,1.6,1.6], // 16 king (長リーチ)
-  [1.0,1.0,1.0,1.0], // 17 onpa (標準)
-  [1.0,1.0,1.0,1.0], // 18 sen (標準)
-  [1.6,1.6,1.0,1.0], // 19 dosboss (横長リーチ)
-  [0.6,0.6,0.6,0.6], // 20 micro (超短・密着パワー)
-  [1.0,1.0,1.0,1.0], // 21 mrtwo (標準)
-  [1.0,1.0,1.0,1.0], // 22 kinkin (標準)
-  [0.75,0.75,0.75,0.75], // 23 satoru (短リーチ)
-  [1.0,1.0,1.0,1.0], // 24 kowai (標準)
-  [1.0,1.0,1.0,1.0], // 25 yaho (標準)
-  [0.75,0.75,0.75,0.75], // 26 poyo (短リーチ)
-  [1.0,1.0,1.0,1.0], // 27 pull (標準)
-  [1.0,1.0,1.0,1.0], // 28 mussy (標準)
-  [1.70,1.80,1.25,1.30], // 29 bot (機械の腕・長リーチ / バランス調整で 少し 短く)
-  [1.55,1.65,1.2,1.25], // 30 chatta (のびる腕)
-];
 function getAttackHitbox(p, atk) {
   const dir = p.facingLeft ? -1 : 1;
   const r = CHAR_REACH[p.charIdx] || [1,1,1,1];
@@ -13617,41 +13737,6 @@ function getGravity(p) {
   return grav * wm * stageGravMult;
 }
 
-// 慣性付き速度更新
-// キャラ別移動特性 [地上加速, 地上摩擦, 空中加速, 空中摩擦]
-const CHAR_MOVE = [
-  [0.70,0.75,0.45,0.88], // 0 zen 標準
-  [0.40,0.60,0.25,0.92], // 1 don 超重量
-  [1.20,0.88,0.85,0.82], // 2 saisoku 軽快
-  [1.00,0.85,0.75,0.83], // 3 meteo 軽量
-  [0.65,0.72,0.40,0.89], // 4 long 中量
-  [0.40,0.60,0.25,0.92], // 5 uruo 超重量
-  [0.50,0.65,0.30,0.91], // 6 kumatarou 重め
-  [1.10,0.87,0.82,0.82], // 7 bullet 軽快
-  [0.90,0.83,0.65,0.85], // 8 shawden 軽量
-  [0.60,0.70,0.38,0.90], // 9 judgeman 重め
-  [0.70,0.75,0.45,0.88], // 10 tensai 標準
-  [1.10,0.87,0.82,0.82], // 11 catbus 軽快
-  [0.35,0.55,0.20,0.93], // 12 tank 超重量
-  [0.55,0.68,0.35,0.90], // 13 namioji 中重量
-  [0.75,0.78,0.50,0.87], // 14 tokko 中量やや軽
-  [1.00,0.85,0.78,0.83], // 15 sam 軽量
-  [0.75,0.78,0.50,0.87], // 16 king 中量やや軽
-  [0.60,0.70,0.38,0.90], // 17 onpa 中重量
-  [0.50,0.65,0.30,0.91], // 18 sen 重め
-  [0.35,0.55,0.20,0.93], // 19 dosboss 超重量
-  [0.65,0.72,0.40,0.89], // 20 micro 中量
-  [0.50,0.65,0.30,0.91], // 21 mrtwo 重め
-  [0.50,0.65,0.30,0.91], // 22 kinkin 重め
-  [1.00,0.85,0.75,0.83], // 23 satoru 軽量
-  [0.85,0.82,0.62,0.85], // 24 kowai 中軽量
-  [0.90,0.83,0.65,0.85], // 25 yaho 中軽量
-  [1.05,0.86,0.80,0.83], // 26 poyo 軽量
-  [0.65,0.72,0.40,0.89], // 27 pull 中量
-  [0.70,0.75,0.45,0.88], // 28 mussy 標準
-  [0.72,0.78,0.50,0.88], // 29 bot テクニック型
-  [0.80,0.85,0.55,0.86], // 30 chatta 軽量・機動型
-];
 function applyMovement(p, moveX, ch) {
   const cm = CHAR_MOVE[p.charIdx] || [0.70,0.75,0.45,0.88];
   // 空中慣性強化: airAccel×0.4（コンボ中は×1.4で追撃しやすく）
@@ -19319,39 +19404,6 @@ const D_SKILL_COOLDOWN = 600;     // 10秒クールダウン
 // D_SKILL_NAMES は 表示名 兼「D技を 持っているか」の 判定に 使う。
 // triggerDSkill の 分岐と 必ず 対応させること
 // ======================================================================
-const D_SKILL_NAMES = {
-  0: "Iai Slash",
-  1: "Earthquake",
-  2: "Clone",
-  3: "Burning Fist",
-  4: "Deploy Cannon",
-  5: "Iron Wall",
-  6: "Bear Rage",
-  7: "Sniper",
-  8: "Ink Spray",
-  9: "Not Guilty...",
-  10: "Awakened",
-  11: "Full Sprint",
-  12: "Fortify",
-  13: "Raging Rush",
-  14: "Killing Intent",
-  15: "Carnival",
-  16: "Royal Pressure",
-  17: "Ultrasonic",
-  18: "Big Serving Power",
-  19: "Fire All",
-  20: "Star Form",
-  21: "Mega Shadow Ball",
-  22: "Money Bomb",
-  23: "Sea King Aura",
-  24: "Slit Mouth Form",
-  25: "What the heck",
-  26: "Super Slime",
-  27: "Super Gravity Collapse",
-  28: "Bug Swarm",
-  29: "SYSTEM HACK",
-  // 30 (Chatta) は D を 押した 瞬間に Warp Meteor が 出るので D技は 無し
-};
 
 // 必殺技（アルティメット）システム
 let ultimateActive = false;
