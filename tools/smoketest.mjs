@@ -49,6 +49,15 @@ try {
   }
   console.log(`ok  構文チェック   (<script> ${scriptBodies.length}個)`);
 
+  // ---------- 目次が 本文と ずれていないか ----------
+  try {
+    execFileSync(process.execPath, [join(ROOT, 'tools', 'toc.mjs'), '--check'], { stdio: 'pipe' });
+    console.log('ok  目次');
+  } catch (e) {
+    console.error('FAIL 目次が ずれています → node tools/toc.mjs');
+    process.exitCode = 1;
+  }
+
   // ---------- 2. ブラウザで 実際に 動かす ----------
   for (const dir of ['images', 'sounds']) {
     if (existsSync(join(ROOT, dir))) cpSync(join(ROOT, dir), join(work, dir), { recursive: true });

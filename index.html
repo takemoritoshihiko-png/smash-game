@@ -14,10 +14,71 @@
 <body>
 <canvas id="gameCanvas"></canvas>
 <script>
+// ======================================================================
+// ### 目次
+//
+//   このファイルは 1枚の HTML で 完結している（ビルド不要・file:// で 動く）。
+//   変更したら  node tools/smoketest.mjs  を 必ず 走らせること。
+//   目次が ずれたら  node tools/toc.mjs  で 作り直す。
+//
+//   80    CANVAS / 画面サイズ
+//   365   音の ロック解除（最初の 操作で 呼ぶ）
+//   394   キャラ画像（遅延読み込み）
+//   574   タイトル画面の 粒子
+//   613   キャラの 絵 ①メニュー用（選択画面・詳細画面）
+//   2273  キャラの 絵 ②バトル用
+//   4789  描画ユーティリティ
+//   4838  画面: タイトル
+//   4962  画面: キャラ選択
+//   5212  画面: 難易度選択（CPU戦）
+//   5312  画面: ステージ選択
+//   5543  バトルの 定数 と 状態
+//   5978  復帰技 / パワーモードの 表示
+//   6220  カメラ / 画面揺れ
+//   6239  効果音（Web Audio で 合成）
+//   6657  観客の 音
+//   7000  ヒット表示 / コミック文字
+//   7028  掴み・投げ の 定数と キャラ別テーブル
+//   7162  コマンド技（→→↓↓+Z など）
+//   7653  技データ
+//   8471  プレイヤー生成 / 試合の 初期化
+//   8816  ヒット処理（ダメージ・ノックバック）
+//   10155 当たり判定
+//   10256 飛び道具
+//   10299 技の 発動（通常技・復帰技・ジャブ）
+//   10558 掴み・投げ の 実行
+//   10783 CPU の 思考
+//   11129 バトルの 毎フレーム更新（中核）
+//   13547 物理（移動・重力・着地・撃墜判定）
+//   14069 バトル描画の 下準備（カメラ・影・2.5D）
+//   14169 バトル画面の 描画
+//   16200 技の エフェクト描画
+//   17275 画面: コンボ一覧 / 戦績
+//   17408 バトルの HUD
+//   17874 オンライン対戦（PeerJS / ホストが 正）
+//   18802 画面: VS イントロ
+//   19087 画面の 切り替え（フェード）
+//   19121 スマッシュ攻撃（方向2回 + X）
+//   19225 崖つかまり
+//   19318 D技 と 必殺技 の データ
+//   19915 D技の 中身（キャラ別）
+//   20433 空中回避
+//   20494 ポーズメニュー（バトル中に ESC）
+//   20575 画面: キャラ詳細（Iキー）
+//   20788 画面: 操作説明
+//   20912 キー入力の 振り分け（画面ごと）
+//   21466 メインループ（60FPS 固定タイムステップ）
+//
+// ### 目次ここまで
+// ======================================================================
+
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
 // --- Canvas sizing ---
+// ======================================================================
+// CANVAS / 画面サイズ
+// ======================================================================
 function resize() {
   canvas.width = 960;
   canvas.height = 640;
@@ -300,6 +361,9 @@ const characters = [
 
 // --- Audio unlock on first interaction ---
 let audioUnlocked = false;
+// ======================================================================
+// 音の ロック解除（最初の 操作で 呼ぶ）
+// ======================================================================
 function unlockAudio() {
   if (audioUnlocked) return;
   audioUnlocked = true;
@@ -326,6 +390,11 @@ document.addEventListener('keyup', (e) => {
 // スプライトは「最初に描こうとした瞬間」に読み込む（遅延ロード）。
 // 起動時に全29キャラ分 約18MBを読んでいたのをやめ、使うキャラの分だけ読む。
 // 戻り値は Image と同じ使い方ができる（obj[key].complete / .naturalWidth）。
+// ======================================================================
+// キャラ画像（遅延読み込み）
+// 最初に 描こうとした 瞬間に 読み込む。起動時に 全キャラ分を 読まない
+// SPRITE_SETS は 全 *Sprites の 後に 置くこと（読み込み時に 評価される）
+// ======================================================================
 function lazySprites(keys, resolve) {
   const valid = new Set(keys);
   const cache = Object.create(null);
@@ -501,6 +570,9 @@ const bg5Img = new Image();
 bg5Img.src = 'images/bg5.webp';
 
 // --- Particles ---
+// ======================================================================
+// タイトル画面の 粒子
+// ======================================================================
 function spawnTitleParticle() {
   titleParticles.push({
     x: Math.random() * 960,
@@ -537,6 +609,10 @@ function drawParticles() {
 }
 
 // --- Draw character body ---
+// ======================================================================
+// キャラの 絵 ①メニュー用（選択画面・詳細画面）
+// 31キャラ分の if (charIndex === N) が 並ぶ。バトル用は 次の区画
+// ======================================================================
 function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
   const ch = characters[charIndex];
   const c = ch.bodyColors;
@@ -2193,6 +2269,10 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
 }
 
 // Draw character for battle (with animation transforms)
+// ======================================================================
+// キャラの 絵 ②バトル用
+// 画像が あれば 画像、無ければ 手描き。animData で ポーズが 変わる
+// ======================================================================
 function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData) {
   const s = scale;
 
@@ -4705,6 +4785,10 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
   ctx.restore();
 }
 
+// ======================================================================
+// 描画ユーティリティ
+// グラデーションは 必ず cachedLinGrad() を 使う（毎フレーム 作ると 無駄）
+// ======================================================================
 function drawStar(cx, cy, r, points, ctx) {
   ctx.beginPath();
   for (let i = 0; i < points * 2; i++) {
@@ -4751,7 +4835,7 @@ function roundRect(ctx, x, y, w, h, r) {
 
 
 // ============================================================
-// TITLE SCREEN
+// 画面: タイトル
 // ============================================================
 function drawTitle(dt) {
   titleTime += dt;
@@ -4875,7 +4959,7 @@ function drawTitle(dt) {
 }
 
 // ============================================================
-// CHARACTER SELECT SCREEN (2P)
+// 画面: キャラ選択
 // ============================================================
 // キャラ選択グリッドの列数（上下移動の歩幅もこれ）
 const SELECT_COLS = 8;
@@ -5125,7 +5209,7 @@ function drawSelectPanel(px, py, charIdx, label, color, isConfirmed) {
 }
 
 // ============================================================
-// DIFFICULTY SELECT SCREEN (CPU mode only)
+// 画面: 難易度選択（CPU戦）
 // ============================================================
 function drawDifficulty(dt) {
   difficultyTime += dt;
@@ -5225,7 +5309,7 @@ function drawDifficulty(dt) {
 }
 
 // ============================================================
-// STAGE SELECT SCREEN
+// 画面: ステージ選択
 // ============================================================
 function drawStageSelect(dt) {
   stageSelectTime += dt;
@@ -5456,7 +5540,7 @@ function drawStageSelect(dt) {
 }
 
 // ============================================================
-// BATTLE SYSTEM
+// バトルの 定数 と 状態
 // ============================================================
 // 旧値: GRAVITY=0.66, RISE=0.52, FALL=0.78, APEX=0.32, MAX_FALL=16.8
 const GRAVITY = 0.858;            // 通常重力（旧0.66×1.3）
@@ -5890,6 +5974,10 @@ let instantKillDisplay = { active: false, timer: 0, maxTimer: 0 };
 
 // === 復帰技データ（全28キャラ） ===
 // height: 上昇px, angle: 角度(度,-90=真上), frames: 持続F, dmg: ダメージ, color: エフェクト色, status: 状態異常
+// ======================================================================
+// 復帰技 / パワーモードの 表示
+// キャラを 足したら ここにも 必ず 足す。抜けると ↑+X が 無反応に なる
+// ======================================================================
 const RECOVERY_MOVES = {
   // ダメ×0.4、高さ×0.65(超重量級除く)、角度を-80〜-90に統一
   0:  { name:'Icicle Rise',     height:182, angle:-85, frames:20, dmg:1, color:'#88DDFF', status:'frozen' },
@@ -6128,6 +6216,9 @@ const cam = {
 
 // Screen shake system
 let screenShake = { x: 0, y: 0, intensity: 0, duration: 0 };
+// ======================================================================
+// カメラ / 画面揺れ
+// ======================================================================
 function triggerScreenShake(intensity, duration) {
   screenShake.intensity = Math.max(screenShake.intensity, intensity);
   screenShake.duration = Math.max(screenShake.duration, duration);
@@ -6144,6 +6235,10 @@ function updateScreenShake() {
 
 // === Web Audio API Sound Effects ===
 let audioCtx = null;
+// ======================================================================
+// 効果音（Web Audio で 合成）
+// 打撃音を 変えたいときは HIT_VOICES の 数字だけ いじれば よい
+// ======================================================================
 function getAudioCtx() {
   if (!audioCtx) {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -6558,6 +6653,9 @@ let audienceBaseFilter = null;
 let audienceActive = false;
 let audienceCountdownStarted = false;
 
+// ======================================================================
+// 観客の 音
+// ======================================================================
 function startAudienceBase() {
   try {
     const ac = getAudioCtx();
@@ -6898,6 +6996,9 @@ let stockLossAnim = { active: false, playerId: -1, life: 0, maxLife: 30, x: 0, y
 
 // HIT/MISS display system
 let hitMissDisplays = [];
+// ======================================================================
+// ヒット表示 / コミック文字
+// ======================================================================
 function showHitDisplay(x, y, isHit) {
   hitMissDisplays.push({
     text: isHit ? 'HIT!' : 'MISS',
@@ -6923,6 +7024,9 @@ const GRAB_DURATION = 90;       // max frames holding grabbed opponent
 const THROW_GRAB_FRAMES = 20;   // 掴みモーション デフォルト（20F）※10F→20Fに延長
 const THROW_EXEC_FRAMES = 10;   // 投げ実行モーション（10F）
 // キャラ別掴み拘束フレーム数（2倍に延長）
+// ======================================================================
+// 掴み・投げ の 定数と キャラ別テーブル
+// ======================================================================
 const CHAR_GRAB_FRAMES = [
   26, // 0:ゼン (バランス型)
   34, // 1:ドン (パワー型)
@@ -7054,6 +7158,9 @@ let cmdNameDisplay = []; // {text, x, y, life, maxLife, color}
 
 // Command definitions per character
 // dir: 'D'=down, 'U'=up, 'L'=left, 'R'=right (relative to facing)
+// ======================================================================
+// コマンド技（→→↓↓+Z など）
+// ======================================================================
 const commandDefs = {
   0: [ // Zen
     { name:'Vacuum Wave', seq:['F','F','D','D'], cooldownKey:'cmd1',
@@ -7542,6 +7649,9 @@ function executeCommand(player, cmd) {
 }
 
 // === キャラ別攻撃スタイル定義 ===
+// ======================================================================
+// 技データ
+// ======================================================================
 const CHARACTER_ATTACK_STYLE = {
   0:  { style:'sword',     color:'#88CCFF' },  // ゼン: 斬撃線
   1:  { style:'heavyPunch', color:'#FF6644' },  // ドン: 巨大衝撃波
@@ -8357,6 +8467,9 @@ function playMeteorSE() {
   } catch(e) {}
 }
 
+// ======================================================================
+// プレイヤー生成 / 試合の 初期化
+// ======================================================================
 function createPlayer(id, charIdx, startX) {
   return {
     id, charIdx,
@@ -8699,6 +8812,10 @@ function initBattle() {
 // REP_WINDOW: 何フレーム以内に 当てたら「連発」とみなすか（45F = 0.75秒）
 // REP_FLOOR : 3発目・4発目・5発目以降の ノックバック下限（これ未満には ならない）
 const REP_WINDOW = 45;
+// ======================================================================
+// ヒット処理（ダメージ・ノックバック）
+// REP_FLOOR は 同じ技の 連発ハメ 防止。applyHit は この ファイル最大級の 関数
+// ======================================================================
 const REP_FLOOR = [3.2, 4.6, 6.0];
 
 // --- Knockback calculation ---
@@ -10034,6 +10151,9 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
 }
 
 // --- Hitbox collision ---
+// ======================================================================
+// 当たり判定
+// ======================================================================
 function hitboxCollides(ax, ay, aw, ah, bx, by, bw, bh) {
   return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
 }
@@ -10132,6 +10252,9 @@ function getAttackHitbox(p, atk) {
 }
 
 // --- Projectile spawning ---
+// ======================================================================
+// 飛び道具
+// ======================================================================
 function spawnProjectile(p, projDef) {
   const dir = p.facingLeft ? -1 : 1;
   let vx, vy;
@@ -10172,6 +10295,9 @@ function spawnProjectile(p, projDef) {
 
 // --- Start attack ---
 // ① キャンセル攻撃: 攻撃中でもヒット確認後にキャンセルして次の技に繋ぐ
+// ======================================================================
+// 技の 発動（通常技・復帰技・ジャブ）
+// ======================================================================
 function tryCancelAttack(p, type) {
   if (p.cancelWindow <= 0 || !p.attacking) return false;
   const from = p.attackType;
@@ -10428,6 +10554,9 @@ function startAttack(p, type) {
 }
 
 // --- Grab / Throw ---
+// ======================================================================
+// 掴み・投げ の 実行
+// ======================================================================
 function releaseGrab(grabber) {
   if (grabber.grabTarget !== null) {
     const target = players.find(pp => pp.id === grabber.grabTarget);
@@ -10650,6 +10779,9 @@ function executeThrow(grabber, dirX, dirY) {
 let cpuActionTimer = 0;
 let cpuAttackCooldown = 0;
 
+// ======================================================================
+// CPU の 思考
+// ======================================================================
 function getCpuGuard(cpu, target) {
   if (!cpu.grounded || cpu.attacking || cpu.grabbing || cpu.grabbed) return false;
   if (cpu.guardDurability <= 10) return false; // Don't guard with low durability
@@ -10993,6 +11125,10 @@ function getCpuInput(cpu, target) {
   return result;
 }
 
+// ======================================================================
+// バトルの 毎フレーム更新（中核）
+// 「Nフレームに1回」の 判定は battleFrame を 使うこと。battleTime は ミリ秒
+// ======================================================================
 function updateBattle(dt) {
   battleTime += dt;
   battleFrame++;
@@ -13407,6 +13543,9 @@ function updateBattle(dt) {
 }
 
 // キャラクター同士の衝突：ヒットボックスが重なったら左右に5pxずらすだけ
+// ======================================================================
+// 物理（移動・重力・着地・撃墜判定）
+// ======================================================================
 function resolvePlayerCollisions() {
   if (players.length < 2) return;
   const a = players[0];
@@ -13927,7 +14066,7 @@ function blastCheck(p) {
 }
 
 // ============================================================
-// BATTLE DRAWING
+// バトル描画の 下準備（カメラ・影・2.5D）
 // ============================================================
 function updateCamera() {
   // Find alive players to track
@@ -14026,6 +14165,9 @@ function drawCharacterShadow(p) {
 }
 
 // 台形ステージ描画ヘルパー
+// ======================================================================
+// バトル画面の 描画
+// ======================================================================
 function drawBattle(dt) {
   // Update camera
   updateCamera();
@@ -16054,6 +16196,9 @@ function drawBattle(dt) {
   }
 }
 
+// ======================================================================
+// 技の エフェクト描画
+// ======================================================================
 function drawAttackEffect(p) {
   const atk = p.attackData;
   if (!atk) return;
@@ -17126,6 +17271,9 @@ function drawGrabEffect(p) {
 }
 
 // ========== コンボリスト画面 ==========
+// ======================================================================
+// 画面: コンボ一覧 / 戦績
+// ======================================================================
 function drawComboList() {
   ctx.fillStyle = '#0a0a1a'; ctx.fillRect(0, 0, 960, 640);
   ctx.font = 'bold 24px sans-serif'; ctx.textAlign = 'center';
@@ -17256,6 +17404,9 @@ function drawStats() {
   }
 }
 
+// ======================================================================
+// バトルの HUD
+// ======================================================================
 function drawBattleHUD() {
   // Timer
   const mins = Math.floor(battleTimer / 60);
@@ -17720,7 +17871,7 @@ function drawPlayerHUD(x, y, player, label, color) {
 }
 
 // ============================================================
-// ONLINE LOBBY
+// オンライン対戦（PeerJS / ホストが 正）
 // ============================================================
 function generateRoomId() {
   return Math.floor(100000 + Math.random() * 900000).toString();
@@ -18648,7 +18799,7 @@ function drawOnlineLobby(dt) {
 }
 
 // ============================================================
-// VS INTRO SCREEN
+// 画面: VS イントロ
 // ============================================================
 function playVsIntroFanfare() {
   try {
@@ -18933,7 +19084,7 @@ function drawVsIntro(dt) {
 }
 
 // ============================================================
-// TRANSITIONS & INPUT
+// 画面の 切り替え（フェード）
 // ============================================================
 function startTransition(target) {
   if (transitioning) return;
@@ -18966,6 +19117,9 @@ function drawTransition() {
 // --- スマッシュ攻撃システム ---
 // 方向キーを 押した 瞬間に 呼ぶ。同じ方向を 素早く 2回 押すと スマッシュが 構える。
 // 呼び元: handleKeyDown の P1 方向キー / gameLoop の リモート入力（ゲスト）
+// ======================================================================
+// スマッシュ攻撃（方向2回 + X）
+// ======================================================================
 function trackSmashInput(p, dir) {
   if (!p || !p.alive) return;
   if (p.smashInputDir === dir && (battleFrame - p.smashInputTime) < SMASH_INPUT_WINDOW) {
@@ -19067,6 +19221,9 @@ const LEDGE_Y_BELOW = 80;        // 崖上端より下の判定範囲
 const LEDGE_MAX_TIME = 180;       // 最大つかまり時間(3秒)
 const LEDGE_COOLDOWN = 60;        // 連続つかまり制限(1秒)
 
+// ======================================================================
+// 崖つかまり
+// ======================================================================
 function checkLedgeGrab(p) {
   if (p.ledgeGrab || p.grounded || p.ledgeCooldown > 0 || !p.alive) return;
   if (p.hitstun > 0 || p.attacking || p.airDodging) return;
@@ -19157,6 +19314,11 @@ function updateLedge(p) {
 const D_SKILL_HOLD_FRAMES = 30;   // 0.5秒長押し
 const D_SKILL_COOLDOWN = 600;     // 10秒クールダウン
 // 詳細画面に 出すための D技の 名前（triggerDSkill の 中身と そろえること）
+// ======================================================================
+// D技 と 必殺技 の データ
+// D_SKILL_NAMES は 表示名 兼「D技を 持っているか」の 判定に 使う。
+// triggerDSkill の 分岐と 必ず 対応させること
+// ======================================================================
 const D_SKILL_NAMES = {
   0: "Iai Slash",
   1: "Earthquake",
@@ -19749,6 +19911,9 @@ function drawUltimateOverlay() {
   }
 }
 
+// ======================================================================
+// D技の 中身（キャラ別）
+// ======================================================================
 function triggerDSkill(p) {
   if (p.dSkillCooldown > 0 || p.dSkillActive || !p.alive || p.hitstun > 0 || p.grabbed) return;
   // D技を 持たないキャラ（Chatta は D＝ワープメテオ）で クールダウンだけ 取られないように、
@@ -20264,6 +20429,9 @@ function updateDSkill(p) {
 }
 
 // --- Air dodge trigger ---
+// ======================================================================
+// 空中回避
+// ======================================================================
 function triggerAirDodge(p, dirKeys) {
   // Catbus(11): 瞬間消滅 - 空中回避の代わりに透明無敵0.5秒（攻撃不可）
   if (p.charIdx === 11) {
@@ -20323,7 +20491,7 @@ function canAirDodge(p) {
 
 // Process a keydown event for a specific player
 // ============================================================
-// PAUSE MENU（バトル中に ESC）
+// ポーズメニュー（バトル中に ESC）
 // ============================================================
 const PAUSE_ITEM_DESC = {
   'RESUME':           'Back to the fight',
@@ -20403,6 +20571,9 @@ function drawPauseMenu() {
   ctx.restore();
 }
 
+// ======================================================================
+// 画面: キャラ詳細（Iキー）
+// ======================================================================
 function drawCharDetail() {
   const ch = characters[charDetailIdx];
   const atk = attackDefs[charDetailIdx];
@@ -20613,6 +20784,9 @@ function drawCharDetail() {
   ctx.textAlign = 'right'; ctx.fillText('\u25B6', 952, 50);
 }
 
+// ======================================================================
+// 画面: 操作説明
+// ======================================================================
 function drawHowToPlay() {
   drawHowToPlayContent(0, 0, 960, 640, 1.0);
   ctx.font = '13px sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#555';
@@ -20734,6 +20908,11 @@ function drawHowToPlayContent(ox, oy, w, h, alpha) {
   ctx.restore();
 }
 
+// ======================================================================
+// キー入力の 振り分け（画面ごと）
+// バトル中の P1 入力は ここ。ゲスト(P2)の 同じ処理は gameLoopInner の 中に ある。
+// 片方だけ 直すと「ゲストだけ 技が 出ない」が 起きる
+// ======================================================================
 function handleKeyDown(e) {
   // Init audio context on first interaction (required by browsers)
   if (!audioCtx) { try { getAudioCtx(); } catch(ex) {} }
@@ -21284,7 +21463,7 @@ canvas.addEventListener('click', (e) => {
 });
 
 // ============================================================
-// MAIN LOOP - 60FPS固定タイムステップ
+// メインループ（60FPS 固定タイムステップ）
 // ============================================================
 let lastTime = performance.now();
 const FIXED_DT = 1000 / 60; // 16.667ms per frame
