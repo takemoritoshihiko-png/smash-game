@@ -21,54 +21,55 @@
 //   変更したら  node tools/smoketest.mjs  を 必ず 走らせること。
 //   目次が ずれたら  node tools/toc.mjs  で 作り直す。
 //
-//   81    CANVAS / 画面サイズ
-//   918   音の ロック解除（最初の 操作で 呼ぶ）
-//   947   キャラ画像（遅延読み込み）
-//   1127  タイトル画面の 粒子
-//   1166  キャラの 絵 ①メニュー用（選択画面・詳細画面）
-//   2826  キャラの 絵 ②バトル用
-//   5342  描画ユーティリティ
-//   5391  画面: タイトル
-//   5515  画面: キャラ選択
-//   5765  画面: 難易度選択（CPU戦）
-//   5865  画面: ステージ選択
-//   6096  バトルの 定数 と 状態
-//   6498  復帰技 / パワーモードの 表示
-//   6546  カメラ / 画面揺れ
-//   6565  効果音（Web Audio で 合成）
-//   6983  観客の 音
-//   7326  ヒット表示 / コミック文字
-//   7354  掴み・投げ の 定数と キャラ別テーブル
-//   7405  コマンド技（→→↓↓+Z など）
-//   7896  技データ
-//   8661  プレイヤー生成 / 試合の 初期化
-//   9006  ヒット処理（ダメージ・ノックバック）
-//   10345 当たり判定
-//   10377 飛び道具
-//   10420 技の 発動（通常技・復帰技・ジャブ）
-//   10679 掴み・投げ の 実行
-//   10904 CPU の 思考
-//   11250 バトルの 毎フレーム更新（中核）
-//   13668 物理（移動・重力・着地・撃墜判定）
-//   14225 スマッシュ攻撃（方向2回 + X）
-//   14329 崖つかまり
-//   14423 D技 と 必殺技 の データ
-//   14818 D技の 中身（キャラ別）
-//   15337 空中回避
-//   15399 バトル描画の 下準備（カメラ・影・2.5D）
-//   15499 バトル画面の 描画
-//   17530 技の エフェクト描画
-//   18605 必殺技 / 即死技 の 全画面オーバーレイ
-//   18778 画面: コンボ一覧 / 戦績
-//   18911 バトルの HUD
-//   19377 オンライン対戦（PeerJS / ホストが 正）
-//   20305 画面: VS イントロ
-//   20590 画面の 切り替え（フェード）
-//   20625 ポーズメニュー（バトル中に ESC）
-//   20706 画面: キャラ詳細（Iキー）
-//   20919 画面: 操作説明
-//   21043 キー入力の 振り分け（画面ごと）
-//   21524 メインループ（60FPS 固定タイムステップ）
+//   82    CANVAS / 画面サイズ
+//   919   音の ロック解除（最初の 操作で 呼ぶ）
+//   948   キャラ画像（遅延読み込み）
+//   1128  タイトル画面の 粒子
+//   1167  キャラの 絵 ①メニュー用（選択画面・詳細画面）
+//   2827  キャラの 絵 ②バトル用
+//   5343  描画ユーティリティ
+//   5392  画面: タイトル
+//   5516  画面: キャラ選択
+//   5766  画面: 難易度選択（CPU戦）
+//   5866  画面: ステージ選択
+//   6097  バトルの 定数 と 状態
+//   6499  復帰技 / パワーモードの 表示
+//   6547  カメラ / 画面揺れ
+//   6566  効果音（Web Audio で 合成）
+//   6984  観客の 音
+//   7327  ヒット表示 / コミック文字
+//   7355  掴み・投げ の 定数と キャラ別テーブル
+//   7406  コマンド技（→→↓↓+Z など）
+//   7897  技データ
+//   8662  プレイヤー生成 / 試合の 初期化
+//   9007  ヒット処理（ダメージ・ノックバック）
+//   10346 当たり判定
+//   10378 飛び道具
+//   10421 技の 発動（通常技・復帰技・ジャブ）
+//   10680 掴み・投げ の 実行
+//   10905 CPU の 思考
+//   11251 バトルの 毎フレーム更新（中核）
+//   13669 物理（移動・重力・着地・撃墜判定）
+//   14226 スマッシュ攻撃（方向2回 + X）
+//   14330 崖つかまり
+//   14424 D技 と 必殺技 の データ
+//   15237 D技の 中身（キャラ別）
+//   15386 空中回避
+//   15448 バトル描画の 下準備（カメラ・影・2.5D）
+//   15548 バトル画面の 描画
+//   17579 技の エフェクト描画
+//   18654 必殺技 / 即死技 の 全画面オーバーレイ
+//   18827 画面: コンボ一覧 / 戦績
+//   18959 キャラ別 ゲージの 描画（HUDの 下に 出る 細い バー）
+//   19170 バトルの HUD
+//   19441 オンライン対戦（PeerJS / ホストが 正）
+//   20369 画面: VS イントロ
+//   20654 画面の 切り替え（フェード）
+//   20689 ポーズメニュー（バトル中に ESC）
+//   20770 画面: キャラ詳細（Iキー）
+//   20983 画面: 操作説明
+//   21107 キー入力の 振り分け（画面ごと）
+//   21588 メインループ（60FPS 固定タイムステップ）
 //
 // ### 目次ここまで
 // ======================================================================
@@ -14813,21 +14814,19 @@ function updateUltimate() {
     fadeInBGM(0.5);
   }
 }
-
 // ======================================================================
 // D技の 中身（キャラ別）
+//
+// D_SKILL_NAMES と 必ず 1対1 に すること。
+// ここに 無い キャラは triggerDSkill の 入口で はじかれる（クールダウンも 減らない）。
+//   p      : 使った プレイヤー
+//   target : 相手（居ない ことも ある）
+//   dir    : 向き 1 / -1
+//   ci     : p.charIdx と 同じ。飛び道具の ownerCharIdx に 使う
 // ======================================================================
-function triggerDSkill(p) {
-  if (p.dSkillCooldown > 0 || p.dSkillActive || !p.alive || p.hitstun > 0 || p.grabbed) return;
-  // D技を 持たないキャラ（Chatta は D＝ワープメテオ）で クールダウンだけ 取られないように、
-  // 分岐が ある ことを 先に 確かめる
-  if (!D_SKILL_NAMES[p.charIdx]) return;
-  p.dSkillCooldown = D_SKILL_COOLDOWN;
-  const target = players.find(pp => pp.id !== p.id && pp.alive);
-  const dir = p.facingLeft ? -1 : 1;
-  const ci = p.charIdx;
-
-  if (ci === 0 && target) {
+const D_SKILL_IMPL = {
+  0: (p, target, dir, ci) => {
+    if (!target) return;   // 元は if (ci === 0 && target) だった
     // ゼン「居合い」: 残像3枚 + 長く太い斬撃ライン
     const oldX = p.x, oldY = p.y;
     const behindDir = target.facingLeft ? 1 : -1;
@@ -14846,7 +14845,8 @@ function triggerDSkill(p) {
     hitEffects.push({ x: p.x, y: p.y - 40, life: 20, maxLife: 20, color: '#FFFFFF', size: 55, type: 'charSlash' });
     hitEffects.push({ x: p.x, y: p.y - 40, life: 16, maxLife: 16, color: '#88CCFF', size: 40, type: 'charSlash' });
     cmdNameDisplay.push({ text: 'Iai Slash!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#AADDFF' });
-  } else if (ci === 1) {
+  },
+  1: (p, target, dir, ci) => {
     // ドン「大地震」: 画面端まで亀裂 + 大量土煙
     if (p.grounded) {
       const hitbox = { x: p.x - 126, y: p.y - 45, w: 252, h: 70 };
@@ -14859,35 +14859,40 @@ function triggerDSkill(p) {
       for (let i = 0; i < 20; i++) sparks.push({ x: p.x+(Math.random()-0.5)*200, y: p.y, vx:(Math.random()-0.5)*7, vy:-3-Math.random()*5, life:22, maxLife:22, color:i%3===0?'#8B6914':(i%3===1?'#AA8855':'#CC9966'), size:3+Math.random()*4, gravity:0.15, drag:0.95 });
       cmdNameDisplay.push({ text: 'Earthquake!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FF4422' });
     }
-  } else if (ci === 2) {
+  },
+  2: (p, target, dir, ci) => {
     // サイソク「分身」: 残像2枚 + 鮮明
     p.dSkillActive = true; p.dSkillTimer = 30; p.dSkillBuff = 'bunshin';
     hitEffects.push({ x: p.x - dir*30, y: p.y - 40, life: 24, maxLife: 24, color: 'rgba(68,255,136,0.6)', size: 30, type: 'charGhost' });
     hitEffects.push({ x: p.x + dir*20, y: p.y - 40, life: 20, maxLife: 20, color: 'rgba(68,255,136,0.4)', size: 25, type: 'charGhost' });
     for (let i = 0; i < 10; i++) sparks.push({ x: p.x+(Math.random()-0.5)*35, y: p.y-40+(Math.random()-0.5)*35, vx:(Math.random()-0.5)*3, vy:-1.5-Math.random(), life:16, maxLife:16, color:'#44FF88', size:2+Math.random(), gravity:0.03, drag:0.97 });
     cmdNameDisplay.push({ text: 'Clone!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#44FF88' });
-  } else if (ci === 3) {
+  },
+  3: (p, target, dir, ci) => {
     // メテオ「燃焼拳」: 多めの炎 + 明るいオレンジ
     p.dSkillActive = true; p.dSkillTimer = 600; p.dSkillBuff = 'burnFist';
     for (let i = 0; i < 16; i++) sparks.push({ x: p.x+dir*15+(Math.random()-0.5)*15, y: p.y-45+(Math.random()-0.5)*20, vx:(Math.random()-0.5)*4+dir*2, vy:-2-Math.random()*3, life:20, maxLife:20, color:i%3===0?'#FF4400':(i%3===1?'#FFAA33':'#FFCC55'), size:2.5+Math.random()*2.5, type:'fireball', gravity:0.06, drag:0.97 });
     hitEffects.push({ x: p.x + dir*20, y: p.y - 45, life: 22, maxLife: 22, color: '#FFAA33', size: 25, type: 'charGlow' });
     hitEffects.push({ x: p.x + dir*15, y: p.y - 45, life: 16, maxLife: 16, color: '#FF6600', size: 18, type: 'ring' });
     cmdNameDisplay.push({ text: 'Burning Fist!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FF8833' });
-  } else if (ci === 4) {
+  },
+  4: (p, target, dir, ci) => {
     // ロング「砲台展開」: 大弾 + 水色光跡
     p.dSkillActive = true; p.dSkillTimer = 60; p.dSkillBuff = 'turret';
     hitEffects.push({ x: p.x + dir*30, y: p.y - 40, life: 16, maxLife: 16, color: '#66DDFF', size: 35, type: 'charGlow' });
     hitEffects.push({ x: p.x, y: p.y - 40, life: 18, maxLife: 18, color: '#A0B4FF', size: 40, type: 'ring' });
     for (let i = 0; i < 5; i++) sparks.push({ x: p.x+dir*25, y: p.y-40, vx:dir*(2+Math.random()*3), vy:(Math.random()-0.5)*2, life:10, maxLife:10, color:'#66DDFF', size:2+Math.random(), gravity:0, drag:0.95 });
     cmdNameDisplay.push({ text: 'Deploy Cannon!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#66DDFF' });
-  } else if (ci === 5) {
+  },
+  5: (p, target, dir, ci) => {
     // うる男「鉄壁」: 大きく鮮明な紫バリア
     p.dSkillActive = true; p.dSkillTimer = 180; p.dSkillBuff = 'ironWall';
     hitEffects.push({ x: p.x, y: p.y - 35, life: 30, maxLife: 30, color: '#BB77EE', size: 65, type: 'ring' });
     hitEffects.push({ x: p.x, y: p.y - 35, life: 25, maxLife: 25, color: '#CC99FF', size: 45, type: 'charGlow' });
     hitEffects.push({ x: p.x, y: p.y - 35, life: 20, maxLife: 20, color: '#9966CC', size: 55, type: 'ring' });
     cmdNameDisplay.push({ text: 'Iron Wall!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#BB77EE' });
-  } else if (ci === 6) {
+  },
+  6: (p, target, dir, ci) => {
     // 熊太郎「熊の怒り」: 全身赤く染める
     p.dSkillActive = true; p.dSkillTimer = 600; p.dSkillBuff = 'bearRage';
     hitFlash.alpha = 0.2; hitFlash.color = '#FF2222';
@@ -14895,7 +14900,8 @@ function triggerDSkill(p) {
     hitEffects.push({ x: p.x, y: p.y - 40, life: 20, maxLife: 20, color: '#FF4444', size: 35, type: 'ring' });
     for (let i = 0; i < 10; i++) sparks.push({ x: p.x+(Math.random()-0.5)*30, y: p.y-40+(Math.random()-0.5)*35, vx:(Math.random()-0.5)*3, vy:-2-Math.random()*1.5, life:18, maxLife:18, color:i%2?'#FF4444':'#FF6B6B', size:2.5+Math.random(), gravity:0.05, drag:0.96 });
     cmdNameDisplay.push({ text: 'Bear Rage!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FF4444' });
-  } else if (ci === 7) {
+  },
+  7: (p, target, dir, ci) => {
     // バレット「スナイパー」: 太いビーム + 大きな着弾爆発
     const pr = { x: p.x + 30 * dir, y: p.y - 40, vx: 23 * dir, vy: 0, w: 16, h: 8,
       damage: 15, kbBase: 9, kbScale: 0.12, kbAngle: -20, life: 78, ownerId: p.id,
@@ -14907,7 +14913,9 @@ function triggerDSkill(p) {
     hitEffects.push({ x: p.x + dir*15, y: p.y - 40, life: 10, maxLife: 10, color: '#FFFFFF', size: 20, type: 'charSpark' });
     for (let i = 0; i < 8; i++) sparks.push({ x: p.x+dir*25, y: p.y-40, vx: dir*(3+Math.random()*3), vy:(Math.random()-0.5)*4, life:12, maxLife:12, color:i%2?'#FFEE44':'#FFFFFF', size:2+Math.random(), gravity:0.08, drag:0.96 });
     cmdNameDisplay.push({ text: 'Sniper!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FFEE44' });
-  } else if (ci === 8 && target) {
+  },
+  8: (p, target, dir, ci) => {
+    if (!target) return;   // 元は if (ci === 8 && target) だった
     // シャうでん「墨吐き」: 広範囲の黒い液体 + 大量しぶき
     const hitbox = { x: p.x + (dir > 0 ? 0 : -120), y: p.y - 65, w: 120, h: 90 };
     for (let i = 0; i < 14; i++) sparks.push({ x: p.x+dir*25, y: p.y-40, vx: dir*(3+Math.random()*6), vy:(Math.random()-0.5)*5, life:22, maxLife:22, color:i%3===0?'#111133':(i%3===1?'#222244':'#333355'), size:3+Math.random()*3, gravity:0.1, drag:0.94 });
@@ -14922,7 +14930,9 @@ function triggerDSkill(p) {
       }
     }
     cmdNameDisplay.push({ text: 'Ink Spray!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#222266' });
-  } else if (ci === 9 && target) {
+  },
+  9: (p, target, dir, ci) => {
+    if (!target) return;   // 元は if (ci === 9 && target) だった
     // ジャッジマン「判決」: 太い光の柱 + 大きなJUDGEMENT!
     cmdNameDisplay.push({ text: 'JUDGEMENT!', x: 480, y: 180, life: 75, maxLife: 75, color: '#FFD700' });
     // 太い金色の光の柱
@@ -14939,7 +14949,8 @@ function triggerDSkill(p) {
     } else {
       cmdNameDisplay.push({ text: 'Not Guilty...', x: target.x, y: target.y - 100, life: 50, maxLife: 50, color: '#888888' });
     }
-  } else if (ci === 10) {
+  },
+  10: (p, target, dir, ci) => {
     // 天才「覚醒」: 大きな黒紫オーラ + 速い脈動
     p.dSkillActive = true; p.dSkillTimer = 120; p.dSkillBuff = 'tensaiBoost';
     hitEffects.push({ x: p.x, y: p.y - 40, life: 30, maxLife: 30, color: '#6622AA', size: 55, type: 'charGlow' });
@@ -14947,7 +14958,8 @@ function triggerDSkill(p) {
     hitEffects.push({ x: p.x, y: p.y - 40, life: 20, maxLife: 20, color: '#9944CC', size: 50, type: 'ring' });
     for (let i = 0; i < 15; i++) sparks.push({ x: p.x+(Math.random()-0.5)*40, y: p.y-40+(Math.random()-0.5)*40, vx:(Math.random()-0.5)*4, vy:-2-Math.random()*2.5, life:22, maxLife:22, color:i%3===0?'#6622AA':(i%3===1?'#9944CC':'#440088'), size:2.5+Math.random()*2.5, gravity:-0.04, drag:0.96 });
     cmdNameDisplay.push({ text: 'Awakened!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FF6600' });
-  } else if (ci === 11) {
+  },
+  11: (p, target, dir, ci) => {
     // Catbus「全力疾走」: 太いスピードライン + 大きな風
     p.vx = dir * 25; p.vy = 0;
     p.dSkillActive = true; p.dSkillTimer = 15; p.dSkillBuff = 'catbusDash';
@@ -14957,7 +14969,8 @@ function triggerDSkill(p) {
     hitEffects.push({ x: p.x, y: p.y - 35, life: 16, maxLife: 16, color: '#FFBB44', size: 45, type: 'charSlash' });
     hitEffects.push({ x: p.x - dir*40, y: p.y - 35, life: 12, maxLife: 12, color: '#FFE8AA', size: 35, type: 'charSlash' });
     cmdNameDisplay.push({ text: 'Full Sprint!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FFBB44' });
-  } else if (ci === 12) {
+  },
+  12: (p, target, dir, ci) => {
     // タンク「要塞化」: 大きなバリア + 強い金属光沢
     p.dSkillActive = true; p.dSkillTimer = 180; p.dSkillBuff = 'fortress';
     hitEffects.push({ x: p.x, y: p.y - 35, life: 30, maxLife: 30, color: '#999999', size: 65, type: 'ring' });
@@ -14965,14 +14978,16 @@ function triggerDSkill(p) {
     hitEffects.push({ x: p.x, y: p.y - 35, life: 20, maxLife: 20, color: '#AAAAAA', size: 55, type: 'ring' });
     for (let i = 0; i < 8; i++) sparks.push({ x: p.x+(Math.random()-0.5)*35, y: p.y-30, vx:(Math.random()-0.5)*2.5, vy:-1.5-Math.random(), life:15, maxLife:15, color:i%2?'#EEEEEE':'#CCCCCC', size:2+Math.random()*1.5, gravity:0.04, drag:0.96 });
     cmdNameDisplay.push({ text: 'Fortify!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#A0B858' });
-  } else if (ci === 13) {
+  },
+  13: (p, target, dir, ci) => {
     // 波おじ「怒涛のラッシュ」: 大きい赤いオーラ
     p.dSkillActive = true; p.dSkillTimer = 30; p.dSkillBuff = 'rush';
     hitEffects.push({ x: p.x, y: p.y - 40, life: 20, maxLife: 20, color: '#FF2222', size: 45, type: 'charGlow' });
     hitEffects.push({ x: p.x, y: p.y - 40, life: 16, maxLife: 16, color: '#FF4444', size: 35, type: 'ring' });
     for (let i = 0; i < 10; i++) sparks.push({ x: p.x+(Math.random()-0.5)*25, y: p.y-40+(Math.random()-0.5)*25, vx:(Math.random()-0.5)*5, vy:-2-Math.random()*2.5, life:15, maxLife:15, color:i%2?'#FF4444':'#FF6644', size:2.5+Math.random(), gravity:0.08, drag:0.95 });
     cmdNameDisplay.push({ text: 'Raging Rush!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FF6644' });
-  } else if (ci === 14) {
+  },
+  14: (p, target, dir, ci) => {
     // とっこ「殺意の波動」: 大きな緑オーラ + 多い粒子
     p.dSkillActive = true; p.dSkillTimer = 300; p.dSkillBuff = 'killIntent';
     hitEffects.push({ x: p.x, y: p.y - 40, life: 30, maxLife: 30, color: '#44FF44', size: 50, type: 'charGlow' });
@@ -14980,7 +14995,8 @@ function triggerDSkill(p) {
     hitEffects.push({ x: p.x, y: p.y - 40, life: 20, maxLife: 20, color: '#44FF44', size: 50, type: 'ring' });
     for (let i = 0; i < 14; i++) sparks.push({ x: p.x+(Math.random()-0.5)*35, y: p.y-40+(Math.random()-0.5)*40, vx:(Math.random()-0.5)*3, vy:-1.5-Math.random()*2.5, life:24, maxLife:24, color:i%3===0?'#44FF44':(i%3===1?'#22CC22':'#66FF66'), size:2.5+Math.random()*2, gravity:-0.04, drag:0.97 });
     cmdNameDisplay.push({ text: 'Killing Intent!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#CC44FF' });
-  } else if (ci === 15) {
+  },
+  15: (p, target, dir, ci) => {
     // サム「カーニバル」: カラフルな軌跡
     const samCols = ['#FFD700','#FF4444','#4488FF','#44FF88','#FF88AA'];
     for (let i = 0; i < 5; i++) {
@@ -14995,7 +15011,9 @@ function triggerDSkill(p) {
     hitEffects.push({ x: p.x, y: p.y - 40, life: 20, maxLife: 20, color: '#FFD700', size: 45, type: 'charGlow' });
     hitEffects.push({ x: p.x, y: p.y - 40, life: 15, maxLife: 15, color: '#FF4444', size: 35, type: 'ring' });
     cmdNameDisplay.push({ text: 'Carnival!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FFD700' });
-  } else if (ci === 16 && target) {
+  },
+  16: (p, target, dir, ci) => {
+    if (!target) return;   // 元は if (ci === 16 && target) だった
     // キング「王の威圧」: 画面半分まで広がる圧力波 + 大きな王冠マーク
     target.gravityDebuffTimer = Math.max(target.gravityDebuffTimer, 180);
     hitEffects.push({ x: p.x + dir*120, y: p.y - 35, life: 24, maxLife: 24, color: '#FFD700', size: 120, type: 'ring' });
@@ -15004,7 +15022,8 @@ function triggerDSkill(p) {
     hitEffects.push({ x: target.x, y: target.y - 70, life: 30, maxLife: 30, color: '#FFD700', size: 25, type: 'charGlow' });
     cmdNameDisplay.push({ text: '👑', x: target.x, y: target.y - 90, life: 40, maxLife: 40, color: '#FFD700' });
     cmdNameDisplay.push({ text: 'Royal Pressure!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FFD700' });
-  } else if (ci === 17) {
+  },
+  17: (p, target, dir, ci) => {
     // おんぱ「超音波」: 3重の大きな鮮明波紋
     for (const t2 of players) {
       if (t2.id === p.id || !t2.alive || t2.invincibleTimer > 0) continue;
@@ -15018,14 +15037,16 @@ function triggerDSkill(p) {
     hitEffects.push({ x: p.x, y: p.y - 35, life: 22, maxLife: 22, color: '#88FFFF', size: 50, type: 'charGlow' });
     triggerScreenShake(6, 12);
     cmdNameDisplay.push({ text: 'Ultrasonic!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#88FFFF' });
-  } else if (ci === 18) {
+  },
+  18: (p, target, dir, ci) => {
     // セン「大盛りパワー」: 大量の白く明るい湯気
     p.senBuffTimer = 1200;
     for (let i = 0; i < 20; i++) sparks.push({ x: p.x+(Math.random()-0.5)*35, y: p.y-25, vx:(Math.random()-0.5)*3, vy:-2-Math.random()*3, life:24, maxLife:24, color:i%3===0?'#FFFFFF':(i%3===1?'#FFEEDD':'#FFDDCC'), size:3+Math.random()*3, gravity:-0.05, drag:0.94 });
     hitEffects.push({ x: p.x, y: p.y - 40, life: 25, maxLife: 25, color: '#FFFFFF', size: 40, type: 'charGlow' });
     hitEffects.push({ x: p.x, y: p.y - 35, life: 18, maxLife: 18, color: '#FFEEDD', size: 35, type: 'ring' });
     cmdNameDisplay.push({ text: 'Big Serving Power!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#FF8844' });
-  } else if (ci === 19) {
+  },
+  19: (p, target, dir, ci) => {
     // ドスボス「全弾発射」: 大きな3色爆発 + 強い紫フラッシュ
     spawnProjectile(p, { speed:14, damage:11, kbBase:6, kbScale:0.10, kbAngle:-25, w:36, h:34, life:58, color:'#CC66FF', pcolor:'#9944CC' });
     projectiles.push({ x: p.x + 30*dir, y: p.y - 50, vx: 12*dir, vy: -2, w:26, h:34,
@@ -15042,7 +15063,8 @@ function triggerDSkill(p) {
     hitEffects.push({ x: p.x, y: p.y - 40, life: 16, maxLife: 16, color: '#FFFFFF', size: 50, type: 'charGlow' });
     for (let i = 0; i < 16; i++) { const cols=['#CC66FF','#FF6600','#44AA22']; sparks.push({ x: p.x+(Math.random()-0.5)*100, y: p.y-40+(Math.random()-0.5)*50, vx:(Math.random()-0.5)*8, vy:-3-Math.random()*4, life:18, maxLife:18, color:cols[i%3], size:3+Math.random()*3, gravity:0.1, drag:0.95 }); }
     cmdNameDisplay.push({ text: 'Fire All!', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#CC66FF' });
-  } else if (ci === 20) {
+  },
+  20: (p, target, dir, ci) => {
     // マイクロ「スター変身」: 3秒間無敵+攻撃力1.3倍 + 星形エフェクト
     p.dSkillActive = true; p.dSkillTimer = 180; p.dSkillBuff = 'microStar';
     p.invincibleTimer = Math.max(p.invincibleTimer, 180);
@@ -15054,7 +15076,8 @@ function triggerDSkill(p) {
       sparks.push({ x: p.x + Math.cos(a)*25, y: p.y-40+Math.sin(a)*25, vx:Math.cos(a)*4, vy:Math.sin(a)*4-1, life:20, maxLife:20, color:i%3===0?'#FFD700':(i%3===1?'#FFFFFF':'#FFEE88'), size:3+Math.random()*2, gravity:0.02, drag:0.96 });
     }
     cmdNameDisplay.push({ text: 'Star Form!', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#FFD700' });
-  } else if (ci === 21) {
+  },
+  21: (p, target, dir, ci) => {
     // ミスターツー「メガシャドーボール」: 巨大紫黒弾 + 画面フラッシュ
     const pr = { x: p.x + 30 * dir, y: p.y - 40, vx: 10 * dir, vy: 0, w: 50, h: 50,
       damage: 25, kbBase: 12, kbScale: 0.16, kbAngle: -30, life: 80, ownerId: p.id,
@@ -15067,7 +15090,8 @@ function triggerDSkill(p) {
     hitEffects.push({ x: p.x + dir*40, y: p.y - 40, life: 18, maxLife: 18, color: '#AA66FF', size: 50, type: 'ring' });
     for (let i = 0; i < 15; i++) sparks.push({ x: p.x+(Math.random()-0.5)*40, y: p.y-40+(Math.random()-0.5)*40, vx:(Math.random()-0.5)*5+dir*3, vy:-2-Math.random()*3, life:18, maxLife:18, color:i%3===0?'#7733CC':(i%3===1?'#AA66FF':'#440066'), size:3+Math.random()*2, gravity:-0.02, drag:0.96 });
     cmdNameDisplay.push({ text: 'Mega Shadow Ball!', x: p.x, y: p.y - 100, life: 70, maxLife: 70, color: '#AA66FF' });
-  } else if (ci === 22) {
+  },
+  22: (p, target, dir, ci) => {
     // 金金「マネーボム」: 巨大金の爆弾 + 大爆発
     const armorMult = p.kingkingArmorTimer > 0 ? 2.0 : 1.0;
     const bombDmg = Math.floor(20 * armorMult);
@@ -15081,7 +15105,8 @@ function triggerDSkill(p) {
     hitEffects.push({ x: p.x, y: p.y - 40, life: 18, maxLife: 18, color: '#DAA520', size: 50, type: 'charGlow' });
     for (let i = 0; i < 12; i++) sparks.push({ x: p.x+(Math.random()-0.5)*35, y: p.y-40+(Math.random()-0.5)*35, vx:(Math.random()-0.5)*6+dir*2, vy:-2-Math.random()*3, life:16, maxLife:16, color:i%2?'#FFD700':'#DAA520', size:3+Math.random()*2, gravity:0.12, drag:0.96 });
     cmdNameDisplay.push({ text: 'Money Bomb!', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#FFD700' });
-  } else if (ci === 23) {
+  },
+  23: (p, target, dir, ci) => {
     // サトル「海王類の覇気」: 3秒間無敵+攻撃力1.3倍 + 波エフェクト
     p.dSkillActive = true; p.dSkillTimer = 180; p.dSkillBuff = 'satoruHaki';
     p.invincibleTimer = Math.max(p.invincibleTimer, 180);
@@ -15095,7 +15120,8 @@ function triggerDSkill(p) {
       sparks.push({ x: p.x+Math.cos(a)*30, y: p.y-35+Math.sin(a)*20, vx:Math.cos(a)*5, vy:Math.sin(a)*3-1, life:18, maxLife:18, color:i%2?'#44AAFF':'#88DDFF', size:3+Math.random()*2, gravity:0.03, drag:0.96 });
     }
     cmdNameDisplay.push({ text: 'Sea King Aura!', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#44AAFF' });
-  } else if (ci === 24) {
+  },
+  24: (p, target, dir, ci) => {
     // 怖「口裂け変身」: 2秒間透明化+攻撃力1.5倍
     p.dSkillActive = true; p.dSkillTimer = 120; p.dSkillBuff = 'kowaiStealth';
     p.invincibleTimer = Math.max(p.invincibleTimer, 120);
@@ -15103,7 +15129,8 @@ function triggerDSkill(p) {
     hitEffects.push({ x: p.x, y: p.y - 40, life: 16, maxLife: 16, color: '#440022', size: 40, type: 'ring' });
     for (let i = 0; i < 10; i++) sparks.push({ x: p.x+(Math.random()-0.5)*35, y: p.y-40+(Math.random()-0.5)*35, vx:(Math.random()-0.5)*3, vy:-1-Math.random()*2, life:18, maxLife:18, color:i%2?'#440022':'#220011', size:2.5+Math.random()*2, gravity:-0.03, drag:0.96 });
     cmdNameDisplay.push({ text: 'Slit Mouth Form!', x: p.x, y: p.y - 100, life: 50, maxLife: 50, color: '#CC0044' });
-  } else if (ci === 25) {
+  },
+  25: (p, target, dir, ci) => {
     // ヤッホ「ヤッホビーム」: 虹色ビーム+ランダム方向ノックバック
     const randomAngle = (Math.random() - 0.5) * Math.PI;
     const pr3 = { x: p.x + 30 * dir, y: p.y - 40, vx: 14 * dir, vy: 0, w: 20, h: 14,
@@ -15117,7 +15144,8 @@ function triggerDSkill(p) {
     hitEffects.push({ x: p.x + dir*60, y: p.y - 40, life: 16, maxLife: 16, color: '#FF44FF', size: 50, type: 'charSlash' });
     for (let i = 0; i < 10; i++) sparks.push({ x: p.x+dir*20, y: p.y-40, vx: dir*(4+Math.random()*4), vy:(Math.random()-0.5)*5, life:14, maxLife:14, color:rainbowCols[i%6], size:2.5+Math.random(), gravity:0.05, drag:0.96 });
     cmdNameDisplay.push({ text: 'What the heck!', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#FF8800' });
-  } else if (ci === 26) {
+  },
+  26: (p, target, dir, ci) => {
     // ぽよ「スーパースライム」: 3秒間巨大化+攻撃範囲・ダメージ1.5倍
     p.dSkillActive = true; p.dSkillTimer = 180; p.dSkillBuff = 'poyoSuper';
     hitEffects.push({ x: p.x, y: p.y - 30, life: 25, maxLife: 25, color: '#88EEFF', size: 60, type: 'ring' });
@@ -15127,7 +15155,8 @@ function triggerDSkill(p) {
       sparks.push({ x: p.x+Math.cos(a)*25, y: p.y-30+Math.sin(a)*20, vx:Math.cos(a)*3, vy:Math.sin(a)*3-1, life:16, maxLife:16, color:i%2?'#88EEFF':'#AAEEFF', size:3+Math.random()*2, gravity:0.03, drag:0.96 });
     }
     cmdNameDisplay.push({ text: 'Super Slime!', x: p.x, y: p.y - 90, life: 60, maxLife: 60, color: '#44CCEE' });
-  } else if (ci === 27) {
+  },
+  27: (p, target, dir, ci) => {
     // プル「超重力崩壊」: 全相手を引き寄せ→大爆発
     for (const t2 of players) {
       if (t2.id === p.id || !t2.alive || t2.invincibleTimer > 0) continue;
@@ -15147,7 +15176,8 @@ function triggerDSkill(p) {
     hitEffects.push({ x: p.x, y: p.y - 35, life: 18, maxLife: 18, color: '#CC88FF', size: 80, type: 'ring' });
     for (let i = 0; i < 12; i++) sparks.push({ x: p.x+(Math.random()-0.5)*60, y: p.y-35+(Math.random()-0.5)*60, vx:(p.x-(p.x+(Math.random()-0.5)*120))*0.05, vy:(p.y-35-(p.y-35+(Math.random()-0.5)*80))*0.05, life:20, maxLife:20, color:i%2?'#9944DD':'#6622AA', size:3+Math.random()*2, gravity:-0.02, drag:0.96 });
     cmdNameDisplay.push({ text: 'Super Gravity Collapse!', x: p.x, y: p.y - 100, life: 70, maxLife: 70, color: '#CC88FF' });
-  } else if (ci === 28) {
+  },
+  28: (p, target, dir, ci) => {
     // ムッシー「虫の大群」: 全方向に虫の群れ + 毒
     const swarm = { x: p.x - 80, y: p.y - 80, w: 160, h: 120 };
     checkHitboxAgainstPlayers(p, swarm, 16, 7, 0.11, -40, 'special');
@@ -15166,7 +15196,8 @@ function triggerDSkill(p) {
       sparks.push({ x: p.x+(Math.random()-0.5)*60, y: p.y-35+(Math.random()-0.5)*50, vx:Math.cos(a)*5, vy:Math.sin(a)*4-1, life:18, maxLife:18, color:i%3===0?'#111':(i%3===1?'#228822':'#88CC00'), size:2+Math.random()*2, gravity:0.05, drag:0.96 });
     }
     cmdNameDisplay.push({ text: 'Bug Swarm!', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#44CC44' });
-  } else if (ci === 29) {
+  },
+  29: (p, target, dir, ci) => {
     // Bot「システムハック」: 背中の 腕を 展開して EMP。当たると 操作が 逆に なり、ゲージも 抜かれる
     const emp = { x: p.x - 95, y: p.y - 85, w: 190, h: 130 };
     checkHitboxAgainstPlayers(p, emp, 12, 6, 0.09, -30, 'special');
@@ -15198,7 +15229,25 @@ function triggerDSkill(p) {
         color: i % 3 === 0 ? '#FFFFFF' : '#66E8FF', size: 2 + Math.random() * 2, gravity: 0, drag: 0.93 });
     }
     cmdNameDisplay.push({ text: 'SYSTEM HACK!', x: p.x, y: p.y - 100, life: 65, maxLife: 65, color: '#66E8FF' });
-  }
+  },
+};
+
+
+// ======================================================================
+// D技の 中身（キャラ別）
+// ======================================================================
+function triggerDSkill(p) {
+  if (p.dSkillCooldown > 0 || p.dSkillActive || !p.alive || p.hitstun > 0 || p.grabbed) return;
+  // D技を 持たないキャラ（Chatta は D＝ワープメテオ）で クールダウンだけ 取られないように、
+  // 分岐が ある ことを 先に 確かめる
+  if (!D_SKILL_NAMES[p.charIdx]) return;
+  p.dSkillCooldown = D_SKILL_COOLDOWN;
+  const target = players.find(pp => pp.id !== p.id && pp.alive);
+  const dir = p.facingLeft ? -1 : 1;
+  const ci = p.charIdx;
+
+  const impl = D_SKILL_IMPL[ci];
+  if (impl) impl(p, target, dir, ci);
   playHitSound('cmd');
 }
 
@@ -18906,6 +18955,216 @@ function drawStats() {
     if (sy > 580) break;
   }
 }
+// ======================================================================
+// キャラ別 ゲージの 描画（HUDの 下に 出る 細い バー）
+//
+// 中身は 元の if (gp.charIdx === N) の 本体を そのまま 移したもの。
+//   gp  : 対象の プレイヤー
+//   ggx : バーの 左端   ggy : バーの 上端（高さ 5 / 幅 80 が 基本）
+// 持っていない キャラ（Bot/Chatta）は ここに 無い。
+// ======================================================================
+const CHAR_GAUGE_DRAW = {
+  // ゼン: 氷ゲージ
+  0: (gp, ggx, ggy) => {
+      const r = (gp.zenIceGauge || 0) / 100;
+      ctx.fillStyle = '#0a0a2a'; ctx.fillRect(ggx, ggy, 80, 5);
+      ctx.fillStyle = r >= 1 ? '#AAEEFF' : '#44AADD'; ctx.fillRect(ggx, ggy, 80 * r, 5);
+      ctx.fillStyle = '#88DDFF'; ctx.fillText('ICE ' + Math.floor(gp.zenIceGauge || 0) + '%', ggx + 40, ggy - 2);
+  },
+  // ドン(1): 大地
+  1: (gp, ggx, ggy) => {
+      const r = (gp.donEarthGauge||0)/100; ctx.fillStyle='#1a0a00'; ctx.fillRect(ggx,ggy,80,5);
+      ctx.fillStyle = r>=0.8?'#AA6622':'#886644'; ctx.fillRect(ggx,ggy,80*r,5);
+      ctx.fillStyle='#AA6622'; ctx.fillText(r>=0.8?'EARTHQUAKE!':'EARTH '+Math.floor(gp.donEarthGauge||0),ggx+40,ggy-2);
+  },
+  // サイソク(2): 加速
+  2: (gp, ggx, ggy) => {
+      const r = (gp.saisokuAccelGauge||0)/100; ctx.fillStyle='#0a0a0a'; ctx.fillRect(ggx,ggy,80,5);
+      ctx.fillStyle = gp.saisokuLightSpeed>0?'#FFFFFF':'#CCDDFF'; ctx.fillRect(ggx,ggy,80*r,5);
+      ctx.fillStyle='#FFFFFF'; ctx.fillText(gp.saisokuLightSpeed>0?'LIGHT SPEED!':'ACCEL '+Math.floor(gp.saisokuAccelGauge||0),ggx+40,ggy-2);
+  },
+  // メテオ(3): 燃焼ゲージ
+  3: (gp, ggx, ggy) => {
+      const r = (gp.meteoBurnGauge || 0) / 100;
+      ctx.fillStyle = '#1a0a00'; ctx.fillRect(ggx, ggy, 80, 5);
+      ctx.fillStyle = r >= 0.7 ? '#FF4400' : '#FF8844'; ctx.fillRect(ggx, ggy, 80 * r, 5);
+      ctx.fillStyle = '#FF6600'; ctx.fillText(r >= 0.7 ? 'INFERNO!' : 'BURN ' + Math.floor(gp.meteoBurnGauge || 0), ggx + 40, ggy - 2);
+  },
+  // ロング(4): 穿孔
+  4: (gp, ggx, ggy) => {
+      const r = (gp.longPierceGauge || 0) / 100;
+      ctx.fillStyle = '#0a1a1a'; ctx.fillRect(ggx, ggy, 80, 5);
+      ctx.fillStyle = gp.longDragonSpear > 0 ? '#44FFCC' : '#4488AA'; ctx.fillRect(ggx, ggy, 80 * r, 5);
+      ctx.fillStyle = '#44FFCC'; ctx.fillText(gp.longDragonSpear > 0 ? 'DRAGON SPEAR!' : 'PIERCE ' + Math.floor(gp.longPierceGauge || 0), ggx + 40, ggy - 2);
+  },
+  // うる男(5): 野性
+  5: (gp, ggx, ggy) => {
+      const r = (gp.uruoWildGauge||0)/100; ctx.fillStyle='#0a0a1a'; ctx.fillRect(ggx,ggy,80,5);
+      ctx.fillStyle = gp.uruoWildRelease>0?'#88CCFF':'#4488AA'; ctx.fillRect(ggx,ggy,80*r,5);
+      ctx.fillStyle='#88CCFF'; ctx.fillText(gp.uruoWildRelease>0?'WILD!':'WILD '+Math.floor(gp.uruoWildGauge||0),ggx+40,ggy-2);
+  },
+  // 熊太郎(6): テンション
+  6: (gp, ggx, ggy) => {
+      const r = (gp.kumaFury || 0) / 100;
+      ctx.fillStyle = '#1a0a0a'; ctx.fillRect(ggx, ggy, 80, 5);
+      ctx.fillStyle = gp.kumaFuryMode > 0 ? '#FF2222' : '#FF6644'; ctx.fillRect(ggx, ggy, 80 * r, 5);
+      ctx.fillStyle = '#FF4444'; ctx.fillText(gp.kumaFuryMode > 0 ? 'FURY!' : 'TENSION ' + Math.floor(gp.kumaFury || 0), ggx + 40, ggy - 2);
+  },
+  // バレット(7): 魔法
+  7: (gp, ggx, ggy) => {
+      const r = (gp.bulletMagicGauge||0)/100; ctx.fillStyle='#1a0a1a'; ctx.fillRect(ggx,ggy,80,5);
+      ctx.fillStyle = gp.bulletAwaken>0?'#FF66AA':'#CC3366'; ctx.fillRect(ggx,ggy,80*r,5);
+      ctx.fillStyle='#FF66AA'; ctx.fillText(gp.bulletAwaken>0?'MAGICAL!':'MAGIC '+Math.floor(gp.bulletMagicGauge||0),ggx+40,ggy-2);
+  },
+  // シャうでん(8): 電圧
+  8: (gp, ggx, ggy) => {
+      const r = (gp.shawdenVoltage || 0) / 100;
+      ctx.fillStyle = '#1a1a0a'; ctx.fillRect(ggx, ggy, 80, 5);
+      ctx.fillStyle = gp.shawdenOvercharge > 0 ? '#FFFF00' : '#FFDD44'; ctx.fillRect(ggx, ggy, 80 * r, 5);
+      ctx.fillStyle = '#FFFF44'; ctx.fillText(gp.shawdenOvercharge > 0 ? 'OVERCHARGE!' : 'VOLT ' + Math.floor(gp.shawdenVoltage || 0), ggx + 40, ggy - 2);
+  },
+  // ジャッジマン: 審判マーク
+  9: (gp, ggx, ggy) => {
+      ctx.fillStyle = '#9966DD';
+      let markStr = '';
+      for (let mi2 = 0; mi2 < 5; mi2++) markStr += mi2 < (gp.judgeMarks || 0) ? '▲' : '△';
+      ctx.fillText(markStr, ggx + 40, ggy - 2);
+      if (gp.judgeFinalMode > 0) { ctx.fillStyle = '#CC44FF'; ctx.fillText('FINAL JUDGE!', ggx + 40, ggy - 12); }
+  },
+  // 天才: 龍気ゲージ
+  10: (gp, ggx, ggy) => {
+      const r = (gp.tensaiDragonGauge || 0) / 100;
+      ctx.fillStyle = '#1a1a0a'; ctx.fillRect(ggx, ggy, 80, 5);
+      ctx.fillStyle = gp.dragonMode ? '#FF6600' : '#FFD700'; ctx.fillRect(ggx, ggy, 80 * r, 5);
+      ctx.fillStyle = '#FFD700'; ctx.fillText('DRAGON ' + Math.floor(gp.tensaiDragonGauge || 0) + '%', ggx + 40, ggy - 2);
+  },
+  // Catbus: テレポートチャージ
+  11: (gp, ggx, ggy) => {
+      ctx.fillStyle = '#44DDFF';
+      let chargeStr = '';
+      for (let ci5 = 0; ci5 < 3; ci5++) chargeStr += ci5 < (gp.catbusTeleCharges || 0) ? '◆' : '◇';
+      ctx.fillText('TELE ' + chargeStr, ggx + 40, ggy - 2);
+  },
+  // タンク(12): 弾薬
+  12: (gp, ggx, ggy) => {
+      ctx.fillStyle='#888888'; let amStr=''; for(let ai=0;ai<5;ai++) amStr+=ai<(gp.tankAmmo||0)?'●':'○';
+      ctx.fillText('AMMO '+amStr,ggx+40,ggy-2);
+      if(gp.tankAmmo>=5){ctx.fillStyle='#FFD700';ctx.fillText('FULL LOAD!',ggx+40,ggy-12);}
+  },
+  // 波おじ: スタミナ
+  13: (gp, ggx, ggy) => {
+      const r = (gp.namiojiStamina || 0) / 100;
+      ctx.fillStyle = '#1a1a0a'; ctx.fillRect(ggx, ggy, 80, 5);
+      ctx.fillStyle = r > 0.5 ? '#FF8844' : r > 0.2 ? '#FFAA00' : '#FF4444';
+      ctx.fillRect(ggx, ggy, 80 * r, 5);
+      ctx.fillStyle = '#FFAA44'; ctx.fillText('STA ' + Math.floor(gp.namiojiStamina || 0), ggx + 40, ggy - 2);
+      if (gp.namiojiFullPower > 0) { ctx.fillStyle = '#FFD700'; ctx.fillText('FULL POWER!', ggx + 40, ggy - 12); }
+  },
+  // とっこ(14): 毒蓄積
+  14: (gp, ggx, ggy) => {
+      const r = (gp.tokkoPoisonGauge || 0) / 100;
+      ctx.fillStyle = '#0a1a0a'; ctx.fillRect(ggx, ggy, 80, 5);
+      ctx.fillStyle = r >= 1 ? '#00FF00' : '#44CC44'; ctx.fillRect(ggx, ggy, 80 * r, 5);
+      ctx.fillStyle = '#66CC44'; ctx.fillText(r >= 1 ? 'Toxin!' : 'POISON ' + Math.floor(gp.tokkoPoisonGauge || 0), ggx + 40, ggy - 2);
+  },
+  // サム(15): 飛翔チャージ
+  15: (gp, ggx, ggy) => {
+      ctx.fillStyle = '#88DDFF';
+      let fStr = ''; for (let fi2 = 0; fi2 < 3; fi2++) fStr += fi2 < Math.floor(gp.samFlightCharges || 0) ? '●' : '○';
+      ctx.fillText('FLY ' + fStr, ggx + 40, ggy - 2);
+  },
+  // キング: 時計ゲージ
+  16: (gp, ggx, ggy) => {
+      const r = (gp.kingClockGauge || 0) / 100;
+      ctx.fillStyle = '#1a1a0a'; ctx.fillRect(ggx, ggy, 80, 5);
+      ctx.fillStyle = '#FFD700'; ctx.fillRect(ggx, ggy, 80 * r, 5);
+      ctx.fillStyle = '#FFD700'; ctx.fillText('CLOCK ' + Math.floor(gp.kingClockGauge || 0) + '%', ggx + 40, ggy - 2);
+      if (gp.kingTimeStop > 0) { ctx.fillStyle = '#FF4444'; ctx.fillText('TIME STOP!', ggx + 40, ggy - 12); }
+  },
+  // おんぱ(17): 周波数
+  17: (gp, ggx, ggy) => {
+      const r = (gp.onpaFreqGauge||0)/100; ctx.fillStyle='#0a1a1a'; ctx.fillRect(ggx,ggy,80,5);
+      ctx.fillStyle = gp.onpaResonance>0?'#88FFFF':'#44AAAA'; ctx.fillRect(ggx,ggy,80*r,5);
+      ctx.fillStyle='#88FFFF'; ctx.fillText(gp.onpaResonance>0?'RESONANCE!':'FREQ '+Math.floor(gp.onpaFreqGauge||0),ggx+40,ggy-2);
+  },
+  // セン(18): 出世
+  18: (gp, ggx, ggy) => {
+      const titles = ['Rookie','Chief','Manager','Director','CEO'];
+      ctx.fillStyle = gp.senRank >= 5 ? '#FFD700' : '#FF8844';
+      ctx.fillText(titles[(gp.senRank || 1) - 1] + ' Lv' + (gp.senRank || 1), ggx + 40, ggy - 2);
+  },
+  // ドスボス(19): 装甲
+  19: (gp, ggx, ggy) => {
+      const r = (gp.dosbossArmor || 0) / 100;
+      ctx.fillStyle = '#1a0a1a'; ctx.fillRect(ggx, ggy, 80, 5);
+      ctx.fillStyle = gp.dosbossBroken > 0 ? '#FF4444' : (r > 0.5 ? '#CC66FF' : '#FF8844');
+      ctx.fillRect(ggx, ggy, 80 * r, 5);
+      ctx.fillStyle = '#CC66FF'; ctx.fillText(gp.dosbossBroken > 0 ? 'Smashed!' : 'ARMOR ' + Math.floor(gp.dosbossArmor || 0), ggx + 40, ggy - 2);
+  },
+  // マイクロ(20): 合体数
+  20: (gp, ggx, ggy) => {
+      ctx.fillStyle = '#44DDFF';
+      let bStr = ''; for (let bi = 0; bi < 3; bi++) bStr += bi < (gp.microBodies || 3) ? '■' : '□';
+      ctx.fillText('BODY ' + bStr, ggx + 40, ggy - 2);
+  },
+  // ミスターツー(21): 双炎
+  21: (gp, ggx, ggy) => {
+      ctx.fillStyle='#FF8844'; ctx.fillText('L:'+Math.floor(gp.mrtwoDualL||0)+' R:'+Math.floor(gp.mrtwoDualR||0),ggx+40,ggy-2);
+      if(gp.mrtwoDualBlast>0){ctx.fillStyle='#FF4444';ctx.fillText('DUAL BLAST!',ggx+40,ggy-12);}
+  },
+  // 金金(22): 資産
+  22: (gp, ggx, ggy) => {
+      const r = (gp.kinkinAssetGauge || 0) / 100;
+      ctx.fillStyle = '#1a1a0a'; ctx.fillRect(ggx, ggy, 80, 5);
+      ctx.fillStyle = (gp.kinkinComboGold > 0 || gp.kinkinGoldMode > 0) ? '#FFD700' : '#DAA520'; ctx.fillRect(ggx, ggy, 80 * r, 5);
+      const goldLabel = gp.kinkinComboGold > 0 ? 'Gold Mode! x2' : (gp.kinkinGoldMode > 0 ? 'GOLD RUSH!' : 'GOLD ' + Math.floor(gp.kinkinAssetGauge || 0));
+      ctx.fillStyle = gp.kinkinComboGold > 0 ? '#FFEE00' : '#FFD700'; ctx.fillText(goldLabel, ggx + 40, ggy - 2);
+  },
+  // サトル(23): 闘志
+  23: (gp, ggx, ggy) => {
+      const r = (gp.satoruFightGauge || 0) / 100;
+      ctx.fillStyle = '#1a0a0a'; ctx.fillRect(ggx, ggy, 80, 5);
+      ctx.fillStyle = gp.satoruMasterMode > 0 ? '#FF2222' : '#4488FF'; ctx.fillRect(ggx, ggy, 80 * r, 5);
+      ctx.fillStyle = '#FF4444'; ctx.fillText(gp.satoruMasterMode > 0 ? 'MASTER!' : 'FIGHT ' + Math.floor(gp.satoruFightGauge || 0), ggx + 40, ggy - 2);
+  },
+  // 怖(24): 恐怖ゲージ
+  24: (gp, ggx, ggy) => {
+      const r = (gp.kowaiFearGauge2 || 0) / 100;
+      ctx.fillStyle = '#0a001a'; ctx.fillRect(ggx, ggy, 80, 5);
+      ctx.fillStyle = r >= 0.8 ? '#880044' : '#440022'; ctx.fillRect(ggx, ggy, 80 * r, 5);
+      ctx.fillStyle = '#CC0044'; ctx.fillText(r >= 0.8 ? 'NIGHTMARE!' : 'FEAR ' + Math.floor(gp.kowaiFearGauge2 || 0), ggx + 40, ggy - 2);
+  },
+  // ヤッホ(25): カオス
+  25: (gp, ggx, ggy) => {
+      ctx.fillStyle = gp.yahoChaosEvent > 0 ? '#FF00FF' : '#FFDD00';
+      ctx.fillText(gp.yahoChaosEvent > 0 ? 'CHAOS!' : 'CHAOS ' + Math.floor(gp.yahoChaosGauge || 0), ggx + 40, ggy - 2);
+  },
+  // ぽよ(26): スライムゲージ
+  26: (gp, ggx, ggy) => {
+      const r = (gp.poyoSlimeGauge || 0) / 100;
+      // ぷるぷるアニメーション
+      const wobble = Math.sin(battleTime * 0.15) * 2;
+      ctx.fillStyle = '#1a0a1a'; ctx.fillRect(ggx, ggy + wobble * 0.3, 80, 5);
+      ctx.fillStyle = gp.poyoDoubleSlime > 0 ? '#FF44AA' : (r >= 0.5 ? '#FF88CC' : '#CC6699');
+      ctx.fillRect(ggx, ggy + wobble * 0.3, 80 * r, 5);
+      ctx.fillStyle = '#FF88CC';
+      ctx.fillText(gp.poyoDoubleSlime > 0 ? 'DOUBLE SLIME!' : (r >= 0.5 ? 'COATING!' : 'SLIME ' + Math.floor(gp.poyoSlimeGauge || 0)), ggx + 40, ggy - 2 + wobble * 0.5);
+  },
+  // プル(27): 引力
+  27: (gp, ggx, ggy) => {
+      const r = (gp.pullGravGauge || 0) / 100;
+      ctx.fillStyle = '#0a0a1a'; ctx.fillRect(ggx, ggy, 80, 5);
+      ctx.fillStyle = gp.pullCollapseMode > 0 ? '#AA66FF' : '#6644AA'; ctx.fillRect(ggx, ggy, 80 * r, 5);
+      ctx.fillStyle = '#AA66FF'; ctx.fillText(gp.pullCollapseMode > 0 ? 'COLLAPSE!' : 'GRAV ' + Math.floor(gp.pullGravGauge || 0), ggx + 40, ggy - 2);
+  },
+  // ムッシー(28): 群れ
+  28: (gp, ggx, ggy) => {
+      ctx.fillStyle = '#44CC44';
+      let swStr = ''; for (let si4 = 0; si4 < 5; si4++) swStr += si4 < (gp.mussySwarmCount || 1) ? '🐛' : '·';
+      ctx.fillText(swStr, ggx + 40, ggy - 2);
+  },
+};
+
 
 // ======================================================================
 // バトルの HUD
@@ -19010,205 +19269,10 @@ function drawBattleHUD() {
       ctx.fillText(secLeft + 's', ggx + 60, ggy - 10);
       ctx.globalAlpha = 1;
     }
-    // ゼン: 氷ゲージ
-    if (gp.charIdx === 0) {
-      const r = (gp.zenIceGauge || 0) / 100;
-      ctx.fillStyle = '#0a0a2a'; ctx.fillRect(ggx, ggy, 80, 5);
-      ctx.fillStyle = r >= 1 ? '#AAEEFF' : '#44AADD'; ctx.fillRect(ggx, ggy, 80 * r, 5);
-      ctx.fillStyle = '#88DDFF'; ctx.fillText('ICE ' + Math.floor(gp.zenIceGauge || 0) + '%', ggx + 40, ggy - 2);
-    }
-    // 波おじ: スタミナ
-    if (gp.charIdx === 13) {
-      const r = (gp.namiojiStamina || 0) / 100;
-      ctx.fillStyle = '#1a1a0a'; ctx.fillRect(ggx, ggy, 80, 5);
-      ctx.fillStyle = r > 0.5 ? '#FF8844' : r > 0.2 ? '#FFAA00' : '#FF4444';
-      ctx.fillRect(ggx, ggy, 80 * r, 5);
-      ctx.fillStyle = '#FFAA44'; ctx.fillText('STA ' + Math.floor(gp.namiojiStamina || 0), ggx + 40, ggy - 2);
-      if (gp.namiojiFullPower > 0) { ctx.fillStyle = '#FFD700'; ctx.fillText('FULL POWER!', ggx + 40, ggy - 12); }
-    }
-    // キング: 時計ゲージ
-    if (gp.charIdx === 16) {
-      const r = (gp.kingClockGauge || 0) / 100;
-      ctx.fillStyle = '#1a1a0a'; ctx.fillRect(ggx, ggy, 80, 5);
-      ctx.fillStyle = '#FFD700'; ctx.fillRect(ggx, ggy, 80 * r, 5);
-      ctx.fillStyle = '#FFD700'; ctx.fillText('CLOCK ' + Math.floor(gp.kingClockGauge || 0) + '%', ggx + 40, ggy - 2);
-      if (gp.kingTimeStop > 0) { ctx.fillStyle = '#FF4444'; ctx.fillText('TIME STOP!', ggx + 40, ggy - 12); }
-    }
-    // ジャッジマン: 審判マーク
-    if (gp.charIdx === 9) {
-      ctx.fillStyle = '#9966DD';
-      let markStr = '';
-      for (let mi2 = 0; mi2 < 5; mi2++) markStr += mi2 < (gp.judgeMarks || 0) ? '▲' : '△';
-      ctx.fillText(markStr, ggx + 40, ggy - 2);
-      if (gp.judgeFinalMode > 0) { ctx.fillStyle = '#CC44FF'; ctx.fillText('FINAL JUDGE!', ggx + 40, ggy - 12); }
-    }
-    // 天才: 龍気ゲージ
-    if (gp.charIdx === 10) {
-      const r = (gp.tensaiDragonGauge || 0) / 100;
-      ctx.fillStyle = '#1a1a0a'; ctx.fillRect(ggx, ggy, 80, 5);
-      ctx.fillStyle = gp.dragonMode ? '#FF6600' : '#FFD700'; ctx.fillRect(ggx, ggy, 80 * r, 5);
-      ctx.fillStyle = '#FFD700'; ctx.fillText('DRAGON ' + Math.floor(gp.tensaiDragonGauge || 0) + '%', ggx + 40, ggy - 2);
-    }
-    // Catbus: テレポートチャージ
-    if (gp.charIdx === 11) {
-      ctx.fillStyle = '#44DDFF';
-      let chargeStr = '';
-      for (let ci5 = 0; ci5 < 3; ci5++) chargeStr += ci5 < (gp.catbusTeleCharges || 0) ? '◆' : '◇';
-      ctx.fillText('TELE ' + chargeStr, ggx + 40, ggy - 2);
-    }
-    // 熊太郎(6): テンション
-    if (gp.charIdx === 6) {
-      const r = (gp.kumaFury || 0) / 100;
-      ctx.fillStyle = '#1a0a0a'; ctx.fillRect(ggx, ggy, 80, 5);
-      ctx.fillStyle = gp.kumaFuryMode > 0 ? '#FF2222' : '#FF6644'; ctx.fillRect(ggx, ggy, 80 * r, 5);
-      ctx.fillStyle = '#FF4444'; ctx.fillText(gp.kumaFuryMode > 0 ? 'FURY!' : 'TENSION ' + Math.floor(gp.kumaFury || 0), ggx + 40, ggy - 2);
-    }
-    // シャうでん(8): 電圧
-    if (gp.charIdx === 8) {
-      const r = (gp.shawdenVoltage || 0) / 100;
-      ctx.fillStyle = '#1a1a0a'; ctx.fillRect(ggx, ggy, 80, 5);
-      ctx.fillStyle = gp.shawdenOvercharge > 0 ? '#FFFF00' : '#FFDD44'; ctx.fillRect(ggx, ggy, 80 * r, 5);
-      ctx.fillStyle = '#FFFF44'; ctx.fillText(gp.shawdenOvercharge > 0 ? 'OVERCHARGE!' : 'VOLT ' + Math.floor(gp.shawdenVoltage || 0), ggx + 40, ggy - 2);
-    }
-    // とっこ(14): 毒蓄積
-    if (gp.charIdx === 14) {
-      const r = (gp.tokkoPoisonGauge || 0) / 100;
-      ctx.fillStyle = '#0a1a0a'; ctx.fillRect(ggx, ggy, 80, 5);
-      ctx.fillStyle = r >= 1 ? '#00FF00' : '#44CC44'; ctx.fillRect(ggx, ggy, 80 * r, 5);
-      ctx.fillStyle = '#66CC44'; ctx.fillText(r >= 1 ? 'Toxin!' : 'POISON ' + Math.floor(gp.tokkoPoisonGauge || 0), ggx + 40, ggy - 2);
-    }
-    // サム(15): 飛翔チャージ
-    if (gp.charIdx === 15) {
-      ctx.fillStyle = '#88DDFF';
-      let fStr = ''; for (let fi2 = 0; fi2 < 3; fi2++) fStr += fi2 < Math.floor(gp.samFlightCharges || 0) ? '●' : '○';
-      ctx.fillText('FLY ' + fStr, ggx + 40, ggy - 2);
-    }
-    // セン(18): 出世
-    if (gp.charIdx === 18) {
-      const titles = ['Rookie','Chief','Manager','Director','CEO'];
-      ctx.fillStyle = gp.senRank >= 5 ? '#FFD700' : '#FF8844';
-      ctx.fillText(titles[(gp.senRank || 1) - 1] + ' Lv' + (gp.senRank || 1), ggx + 40, ggy - 2);
-    }
-    // マイクロ(20): 合体数
-    if (gp.charIdx === 20) {
-      ctx.fillStyle = '#44DDFF';
-      let bStr = ''; for (let bi = 0; bi < 3; bi++) bStr += bi < (gp.microBodies || 3) ? '■' : '□';
-      ctx.fillText('BODY ' + bStr, ggx + 40, ggy - 2);
-    }
-    // ドスボス(19): 装甲
-    if (gp.charIdx === 19) {
-      const r = (gp.dosbossArmor || 0) / 100;
-      ctx.fillStyle = '#1a0a1a'; ctx.fillRect(ggx, ggy, 80, 5);
-      ctx.fillStyle = gp.dosbossBroken > 0 ? '#FF4444' : (r > 0.5 ? '#CC66FF' : '#FF8844');
-      ctx.fillRect(ggx, ggy, 80 * r, 5);
-      ctx.fillStyle = '#CC66FF'; ctx.fillText(gp.dosbossBroken > 0 ? 'Smashed!' : 'ARMOR ' + Math.floor(gp.dosbossArmor || 0), ggx + 40, ggy - 2);
-    }
-    // メテオ(3): 燃焼ゲージ
-    if (gp.charIdx === 3) {
-      const r = (gp.meteoBurnGauge || 0) / 100;
-      ctx.fillStyle = '#1a0a00'; ctx.fillRect(ggx, ggy, 80, 5);
-      ctx.fillStyle = r >= 0.7 ? '#FF4400' : '#FF8844'; ctx.fillRect(ggx, ggy, 80 * r, 5);
-      ctx.fillStyle = '#FF6600'; ctx.fillText(r >= 0.7 ? 'INFERNO!' : 'BURN ' + Math.floor(gp.meteoBurnGauge || 0), ggx + 40, ggy - 2);
-    }
-    // ヤッホ(25): カオス
-    if (gp.charIdx === 25) {
-      ctx.fillStyle = gp.yahoChaosEvent > 0 ? '#FF00FF' : '#FFDD00';
-      ctx.fillText(gp.yahoChaosEvent > 0 ? 'CHAOS!' : 'CHAOS ' + Math.floor(gp.yahoChaosGauge || 0), ggx + 40, ggy - 2);
-    }
-    // 怖(24): 恐怖ゲージ
-    if (gp.charIdx === 24) {
-      const r = (gp.kowaiFearGauge2 || 0) / 100;
-      ctx.fillStyle = '#0a001a'; ctx.fillRect(ggx, ggy, 80, 5);
-      ctx.fillStyle = r >= 0.8 ? '#880044' : '#440022'; ctx.fillRect(ggx, ggy, 80 * r, 5);
-      ctx.fillStyle = '#CC0044'; ctx.fillText(r >= 0.8 ? 'NIGHTMARE!' : 'FEAR ' + Math.floor(gp.kowaiFearGauge2 || 0), ggx + 40, ggy - 2);
-    }
-    // サトル(23): 闘志
-    if (gp.charIdx === 23) {
-      const r = (gp.satoruFightGauge || 0) / 100;
-      ctx.fillStyle = '#1a0a0a'; ctx.fillRect(ggx, ggy, 80, 5);
-      ctx.fillStyle = gp.satoruMasterMode > 0 ? '#FF2222' : '#4488FF'; ctx.fillRect(ggx, ggy, 80 * r, 5);
-      ctx.fillStyle = '#FF4444'; ctx.fillText(gp.satoruMasterMode > 0 ? 'MASTER!' : 'FIGHT ' + Math.floor(gp.satoruFightGauge || 0), ggx + 40, ggy - 2);
-    }
-    // プル(27): 引力
-    if (gp.charIdx === 27) {
-      const r = (gp.pullGravGauge || 0) / 100;
-      ctx.fillStyle = '#0a0a1a'; ctx.fillRect(ggx, ggy, 80, 5);
-      ctx.fillStyle = gp.pullCollapseMode > 0 ? '#AA66FF' : '#6644AA'; ctx.fillRect(ggx, ggy, 80 * r, 5);
-      ctx.fillStyle = '#AA66FF'; ctx.fillText(gp.pullCollapseMode > 0 ? 'COLLAPSE!' : 'GRAV ' + Math.floor(gp.pullGravGauge || 0), ggx + 40, ggy - 2);
-    }
-    // ムッシー(28): 群れ
-    if (gp.charIdx === 28) {
-      ctx.fillStyle = '#44CC44';
-      let swStr = ''; for (let si4 = 0; si4 < 5; si4++) swStr += si4 < (gp.mussySwarmCount || 1) ? '🐛' : '·';
-      ctx.fillText(swStr, ggx + 40, ggy - 2);
-    }
-    // 金金(22): 資産
-    if (gp.charIdx === 22) {
-      const r = (gp.kinkinAssetGauge || 0) / 100;
-      ctx.fillStyle = '#1a1a0a'; ctx.fillRect(ggx, ggy, 80, 5);
-      ctx.fillStyle = (gp.kinkinComboGold > 0 || gp.kinkinGoldMode > 0) ? '#FFD700' : '#DAA520'; ctx.fillRect(ggx, ggy, 80 * r, 5);
-      const goldLabel = gp.kinkinComboGold > 0 ? 'Gold Mode! x2' : (gp.kinkinGoldMode > 0 ? 'GOLD RUSH!' : 'GOLD ' + Math.floor(gp.kinkinAssetGauge || 0));
-      ctx.fillStyle = gp.kinkinComboGold > 0 ? '#FFEE00' : '#FFD700'; ctx.fillText(goldLabel, ggx + 40, ggy - 2);
-    }
-    // ロング(4): 穿孔
-    if (gp.charIdx === 4) {
-      const r = (gp.longPierceGauge || 0) / 100;
-      ctx.fillStyle = '#0a1a1a'; ctx.fillRect(ggx, ggy, 80, 5);
-      ctx.fillStyle = gp.longDragonSpear > 0 ? '#44FFCC' : '#4488AA'; ctx.fillRect(ggx, ggy, 80 * r, 5);
-      ctx.fillStyle = '#44FFCC'; ctx.fillText(gp.longDragonSpear > 0 ? 'DRAGON SPEAR!' : 'PIERCE ' + Math.floor(gp.longPierceGauge || 0), ggx + 40, ggy - 2);
-    }
-    // ドン(1): 大地
-    if (gp.charIdx === 1) {
-      const r = (gp.donEarthGauge||0)/100; ctx.fillStyle='#1a0a00'; ctx.fillRect(ggx,ggy,80,5);
-      ctx.fillStyle = r>=0.8?'#AA6622':'#886644'; ctx.fillRect(ggx,ggy,80*r,5);
-      ctx.fillStyle='#AA6622'; ctx.fillText(r>=0.8?'EARTHQUAKE!':'EARTH '+Math.floor(gp.donEarthGauge||0),ggx+40,ggy-2);
-    }
-    // サイソク(2): 加速
-    if (gp.charIdx === 2) {
-      const r = (gp.saisokuAccelGauge||0)/100; ctx.fillStyle='#0a0a0a'; ctx.fillRect(ggx,ggy,80,5);
-      ctx.fillStyle = gp.saisokuLightSpeed>0?'#FFFFFF':'#CCDDFF'; ctx.fillRect(ggx,ggy,80*r,5);
-      ctx.fillStyle='#FFFFFF'; ctx.fillText(gp.saisokuLightSpeed>0?'LIGHT SPEED!':'ACCEL '+Math.floor(gp.saisokuAccelGauge||0),ggx+40,ggy-2);
-    }
-    // うる男(5): 野性
-    if (gp.charIdx === 5) {
-      const r = (gp.uruoWildGauge||0)/100; ctx.fillStyle='#0a0a1a'; ctx.fillRect(ggx,ggy,80,5);
-      ctx.fillStyle = gp.uruoWildRelease>0?'#88CCFF':'#4488AA'; ctx.fillRect(ggx,ggy,80*r,5);
-      ctx.fillStyle='#88CCFF'; ctx.fillText(gp.uruoWildRelease>0?'WILD!':'WILD '+Math.floor(gp.uruoWildGauge||0),ggx+40,ggy-2);
-    }
-    // バレット(7): 魔法
-    if (gp.charIdx === 7) {
-      const r = (gp.bulletMagicGauge||0)/100; ctx.fillStyle='#1a0a1a'; ctx.fillRect(ggx,ggy,80,5);
-      ctx.fillStyle = gp.bulletAwaken>0?'#FF66AA':'#CC3366'; ctx.fillRect(ggx,ggy,80*r,5);
-      ctx.fillStyle='#FF66AA'; ctx.fillText(gp.bulletAwaken>0?'MAGICAL!':'MAGIC '+Math.floor(gp.bulletMagicGauge||0),ggx+40,ggy-2);
-    }
-    // タンク(12): 弾薬
-    if (gp.charIdx === 12) {
-      ctx.fillStyle='#888888'; let amStr=''; for(let ai=0;ai<5;ai++) amStr+=ai<(gp.tankAmmo||0)?'●':'○';
-      ctx.fillText('AMMO '+amStr,ggx+40,ggy-2);
-      if(gp.tankAmmo>=5){ctx.fillStyle='#FFD700';ctx.fillText('FULL LOAD!',ggx+40,ggy-12);}
-    }
-    // おんぱ(17): 周波数
-    if (gp.charIdx === 17) {
-      const r = (gp.onpaFreqGauge||0)/100; ctx.fillStyle='#0a1a1a'; ctx.fillRect(ggx,ggy,80,5);
-      ctx.fillStyle = gp.onpaResonance>0?'#88FFFF':'#44AAAA'; ctx.fillRect(ggx,ggy,80*r,5);
-      ctx.fillStyle='#88FFFF'; ctx.fillText(gp.onpaResonance>0?'RESONANCE!':'FREQ '+Math.floor(gp.onpaFreqGauge||0),ggx+40,ggy-2);
-    }
-    // ミスターツー(21): 双炎
-    if (gp.charIdx === 21) {
-      ctx.fillStyle='#FF8844'; ctx.fillText('L:'+Math.floor(gp.mrtwoDualL||0)+' R:'+Math.floor(gp.mrtwoDualR||0),ggx+40,ggy-2);
-      if(gp.mrtwoDualBlast>0){ctx.fillStyle='#FF4444';ctx.fillText('DUAL BLAST!',ggx+40,ggy-12);}
-    }
-    // ぽよ(26): スライムゲージ
-    if (gp.charIdx === 26) {
-      const r = (gp.poyoSlimeGauge || 0) / 100;
-      // ぷるぷるアニメーション
-      const wobble = Math.sin(battleTime * 0.15) * 2;
-      ctx.fillStyle = '#1a0a1a'; ctx.fillRect(ggx, ggy + wobble * 0.3, 80, 5);
-      ctx.fillStyle = gp.poyoDoubleSlime > 0 ? '#FF44AA' : (r >= 0.5 ? '#FF88CC' : '#CC6699');
-      ctx.fillRect(ggx, ggy + wobble * 0.3, 80 * r, 5);
-      ctx.fillStyle = '#FF88CC';
-      ctx.fillText(gp.poyoDoubleSlime > 0 ? 'DOUBLE SLIME!' : (r >= 0.5 ? 'COATING!' : 'SLIME ' + Math.floor(gp.poyoSlimeGauge || 0)), ggx + 40, ggy - 2 + wobble * 0.5);
-    }
+
+    // キャラ別の ゲージ（表は CHAR_GAUGE_DRAW）
+    const gaugeDraw = CHAR_GAUGE_DRAW[gp.charIdx];
+    if (gaugeDraw) gaugeDraw(gp, ggx, ggy);
   }
 
   // === 強化モードバナー ===
