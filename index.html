@@ -5497,6 +5497,7 @@ const CHATTA_FLY_FRAMES = 480;     // 8秒
 const CHATTA_FLY_COOLDOWN = 1800;  // 30秒
 const CHATTA_FLY_TOP = -380;       // これより 上には 行けない（上の 撃墜ラインの 手前）
 const CHATTA_SHOT_INTERVAL = 26;   // 指カッターの 間隔（遅め）
+const CHATTA_WARP_COST = 40;       // ワープメテオの ゲージ消費（%）
 const BLAST_TOP = -450;
 const BLAST_BOTTOM = 1400;   // 1000→1400（+400px下に拡大）
 let BLAST_LEFT = -800;     // -600→-800（左に200px拡大）
@@ -11442,11 +11443,17 @@ function updateBattle(dt) {
     }
     // 攻撃強化: 削除済み
 
-    // Chatta: ゲージが たまっていなくても D長押しで「相手に ワープして 下に メテオ」
-    if (dKeyHeld && p.charIdx === 30 && p.alive && !ultimateActive && (p.ultimateGauge || 0) < 100
-        && p.chattaWarpCd <= 0 && !p.attacking && p.hitstun <= 0 && p.sealMagic <= 0) {
+    // Chatta: ゲージ100%未満のとき D長押しで「相手に ワープして 下に メテオ」
+    // ゲージを CHATTA_WARP_COST% 消費する。足りなければ 出ない
+    const chattaWarpReady = p.charIdx === 30 && p.alive && !ultimateActive && (p.ultimateGauge || 0) < 100
+        && p.chattaWarpCd <= 0 && !p.attacking && p.hitstun <= 0 && p.sealMagic <= 0;
+    if (dKeyHeld && chattaWarpReady && (p.ultimateGauge || 0) >= CHATTA_WARP_COST) {
       const tg = players.find(pp => pp.id !== p.id && pp.alive);
       if (tg) {
+        p.ultimateGauge = Math.max(0, (p.ultimateGauge || 0) - CHATTA_WARP_COST);
+        // この D入力は 使い切った。下の ゲージキャンセル／バースト／エアダッシュに
+        // 流用されると、出した 直後の ワープメテオが その場で 消されてしまう
+        p.dHoldTimer = -1;
         p.chattaWarpCd = 90;   // 1.5秒に 1回
         for (let i = 0; i < 14; i++) {
           const a2 = Math.random() * Math.PI * 2;
@@ -11470,6 +11477,11 @@ function updateBattle(dt) {
         }
         playHitSound('special', 8, 30);
       }
+    } else if (dKeyHeld && chattaWarpReady && p.dHoldTimer === 0) {
+      // ゲージ不足: 何も 起きない 理由を 見せる
+      cmdNameDisplay.push({ text: 'NEED ' + CHATTA_WARP_COST + '% GAUGE', x: p.x, y: p.y - 80,
+        life: 40, maxLife: 40, color: '#FF88BB' });
+      playHitSound('guard');
     }
     if (dKeyHeld && p.alive && !ultimateActive && p.sealMagic <= 0) {
       // === 優先順位2: 攻撃中にD → ゲージキャンセル（30%消費） ===
