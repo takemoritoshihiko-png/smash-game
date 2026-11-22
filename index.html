@@ -50,25 +50,25 @@
 //   10904 CPU の 思考
 //   11250 バトルの 毎フレーム更新（中核）
 //   13668 物理（移動・重力・着地・撃墜判定）
-//   14155 スマッシュ攻撃（方向2回 + X）
-//   14259 崖つかまり
-//   14353 D技 と 必殺技 の データ
-//   14748 D技の 中身（キャラ別）
-//   15267 空中回避
-//   15329 バトル描画の 下準備（カメラ・影・2.5D）
-//   15429 バトル画面の 描画
-//   17460 技の エフェクト描画
-//   18535 必殺技 / 即死技 の 全画面オーバーレイ
-//   18708 画面: コンボ一覧 / 戦績
-//   18841 バトルの HUD
-//   19307 オンライン対戦（PeerJS / ホストが 正）
-//   20235 画面: VS イントロ
-//   20520 画面の 切り替え（フェード）
-//   20555 ポーズメニュー（バトル中に ESC）
-//   20636 画面: キャラ詳細（Iキー）
-//   20849 画面: 操作説明
-//   20973 キー入力の 振り分け（画面ごと）
-//   21527 メインループ（60FPS 固定タイムステップ）
+//   14225 スマッシュ攻撃（方向2回 + X）
+//   14329 崖つかまり
+//   14423 D技 と 必殺技 の データ
+//   14818 D技の 中身（キャラ別）
+//   15337 空中回避
+//   15399 バトル描画の 下準備（カメラ・影・2.5D）
+//   15499 バトル画面の 描画
+//   17530 技の エフェクト描画
+//   18605 必殺技 / 即死技 の 全画面オーバーレイ
+//   18778 画面: コンボ一覧 / 戦績
+//   18911 バトルの HUD
+//   19377 オンライン対戦（PeerJS / ホストが 正）
+//   20305 画面: VS イントロ
+//   20590 画面の 切り替え（フェード）
+//   20625 ポーズメニュー（バトル中に ESC）
+//   20706 画面: キャラ詳細（Iキー）
+//   20919 画面: 操作説明
+//   21043 キー入力の 振り分け（画面ごと）
+//   21524 メインループ（60FPS 固定タイムステップ）
 //
 // ### 目次ここまで
 // ======================================================================
@@ -14152,6 +14152,76 @@ function blastCheck(p) {
 }
 
 // ======================================================================
+// 攻撃ボタンの 処理（P1ローカル と オンラインのゲスト で 共通）
+//
+// 以前は この中身が 2か所に 書き写されていて、片方だけ 直した 結果
+// 「ゲストだけ 復帰技が 出ない」「ゲストだけ 上空中が 出ない」
+// 「ゲストだけ フィニッシャーが 使えない」などが 起きていた。
+// 新しい 技を 足すときは ここだけ 直せば 両方に 効く。
+//
+//   p   : 動かす プレイヤー
+//   dirs: 今 押されている 方向 { left, right, up, down }（true/false）
+// ======================================================================
+function pressZ(p, dirs) {
+  if (p.grabbing) {
+    // 掴み中の Z = 掴み攻撃
+    const gt = players.find(pp => pp.id === p.grabTarget);
+    if (gt) { gt.damage = Math.min(999, gt.damage + 2); hitEffects.push({x:gt.x,y:gt.y-40,life:6,maxLife:6,color:'#FFF',size:10}); }
+    return;
+  }
+  const cmd = checkCommandInput(p);
+  if (cmd && cmd.chargeCmd) {
+    if (!p.charging && !p.attacking) { p.charging = true; p.chargeTime = 0; p.chargeCmd = cmd; }
+  } else if (cmd && executeCommand(p, cmd)) {
+    // コマンド技が 出た
+  } else if (!p.grounded && dirs.down) { startAttack(p, 'downair');
+  } else if (!p.grounded && dirs.up) { startAttack(p, 'airup');
+  } else if (!p.grounded && ((dirs.right && !p.facingLeft) || (dirs.left && p.facingLeft))) { startAttack(p, 'airfront');
+  } else if (!p.grounded && ((dirs.left && !p.facingLeft) || (dirs.right && p.facingLeft))) { startAttack(p, 'airback');
+  } else if (!p.grounded) { startAttack(p, 'aerial');
+  } else if (p.grounded && Math.abs(p.vx) > 3 && (dirs.left || dirs.right)) { startAttack(p, 'dash');
+  } else if (dirs.up) { startAttack(p, 'up');
+  } else if (dirs.left || dirs.right) { startAttack(p, 'side');
+  } else if (dirs.down) { startAttack(p, 'down');
+  } else if (p.jabTimer > 0 && p.jabCount >= 2) { startJabCombo(p);
+  } else { p.jabCount++; p.jabTimer = 18; startAttack(p, 'normal'); }
+}
+
+function pressX(p, dirs) {
+  // 空中で 上+X = 復帰技
+  if (dirs.up && !p.grounded && !p.recoveryUsed) { executeRecovery(p); return; }
+  // 方向2回入力の 直後なら スマッシュ攻撃（押したまま 溜められる）
+  const smash = checkSmashReady(p);
+  if (smash && p.grounded) { startSmashAttack(p, smash); return; }
+  if (!tryCancelAttack(p, 'strong')) startAttack(p, 'strong');
+}
+
+function pressA(p) {
+  if (p.grabbed && p.throwTechWindow > 0) {
+    const grabber = players.find(pp => pp.id === p.grabbedBy);
+    if (grabber) throwTech(grabber, p);
+  } else if (!p.grabbing && p.grounded && !p.attacking && p.hitstun <= 0 && !p.grabbed) {
+    tryGrab(p);
+  }
+}
+
+function pressC(p) {
+  // 15コンボ以上なら フィニッシャーが 優先
+  if (canComboFinisher(p.id)) { executeComboFinisher(p); return; }
+  // 天才(10): 変形条件を 満たしている ときは 長押し変形を 邪魔しない
+  if (p.charIdx === 10 && !p.dragonMode && p.damage >= 80 && p.dragonCooldown <= 0 && p.grounded) return;
+  if (!tryCancelAttack(p, 'special')) startAttack(p, 'special');
+}
+
+// 方向キーを 押した 瞬間。コマンド技の 履歴と スマッシュの 2回入力を 記録する
+function pressDirection(p, playerId, dir, isRepeat) {
+  const CODE = { down: 'D', up: 'U', left: 'L', right: 'R' };
+  const SMASH = { down: 'down', up: 'up', left: 'side', right: 'side' };
+  addCmdInput(playerId, CODE[dir]);
+  if (!isRepeat) trackSmashInput(p, SMASH[dir]);   // キーの 自動リピートで 暴発させない
+}
+
+// ======================================================================
 // スマッシュ攻撃（方向2回 + X）
 // ======================================================================
 function trackSmashInput(p, dir) {
@@ -21344,90 +21414,17 @@ function handleKeyDown(e) {
       return;
     }
 
-    // P1 direction input for commands (host or offline)
-    // e.repeat を 弾かないと キーの 自動リピートで スマッシュが 暴発する
-    if (e.key === 'ArrowDown') { addCmdInput(0, 'D'); if (!e.repeat) trackSmashInput(p1, 'down'); }
-    if (e.key === 'ArrowUp') { addCmdInput(0, 'U'); if (!e.repeat) trackSmashInput(p1, 'up'); }
-    if (e.key === 'ArrowLeft') { addCmdInput(0, 'L'); if (!e.repeat) trackSmashInput(p1, 'side'); }
-    if (e.key === 'ArrowRight') { addCmdInput(0, 'R'); if (!e.repeat) trackSmashInput(p1, 'side'); }
-
-    // P1 attacks: Z X C
-    if (e.key === 'z' || e.key === 'Z') {
-      if (p1.grabbing) {
-        const target = players.find(pp => pp.id === p1.grabTarget);
-        if (target) { target.damage = Math.min(999, target.damage + 2); hitEffects.push({x:target.x,y:target.y-40,life:6,maxLife:6,color:'#FFF',size:10}); }
-      } else {
-        // Check command input first
-        const cmd = checkCommandInput(p1);
-        if (cmd && cmd.chargeCmd) {
-          // Charge command: start charging
-          if (!p1.charging && !p1.attacking) {
-            p1.charging = true; p1.chargeTime = 0; p1.chargeCmd = cmd;
-          }
-        } else if (cmd && executeCommand(p1, cmd)) {
-          // Command executed
-        } else if (!p1.grounded && keys['ArrowDown']) {
-          startAttack(p1, 'downair');
-        } else if (!p1.grounded && keys['ArrowUp']) {
-          startAttack(p1, 'airup');
-        } else if (!p1.grounded && ((keys['ArrowRight'] && !p1.facingLeft) || (keys['ArrowLeft'] && p1.facingLeft))) {
-          startAttack(p1, 'airfront');
-        } else if (!p1.grounded && ((keys['ArrowLeft'] && !p1.facingLeft) || (keys['ArrowRight'] && p1.facingLeft))) {
-          startAttack(p1, 'airback');
-        } else if (!p1.grounded) {
-          startAttack(p1, 'aerial');
-        } else if (p1.grounded && Math.abs(p1.vx) > 3 && (keys['ArrowLeft'] || keys['ArrowRight'])) {
-          startAttack(p1, 'dash');
-        } else if (keys['ArrowUp']) {
-          startAttack(p1, 'up');
-        } else if (keys['ArrowLeft'] || keys['ArrowRight']) {
-          startAttack(p1, 'side');
-        } else if (keys['ArrowDown']) {
-          startAttack(p1, 'down');
-        } else {
-          if (p1.jabTimer > 0 && p1.jabCount >= 2) {
-            startJabCombo(p1);
-          } else {
-            p1.jabCount++;
-            p1.jabTimer = 18;
-            startAttack(p1, 'normal');
-          }
-        }
-      }
-    }
-    if (e.key === 'x' || e.key === 'X') {
-      // ↑+X で復帰技（空中のみ）
-      if (keys['ArrowUp'] && !p1.grounded && !p1.recoveryUsed) {
-        executeRecovery(p1);
-      } else {
-        // 方向2回入力の 直後なら スマッシュ攻撃（溜めて 離すと 強くなる）
-        const smash = checkSmashReady(p1);
-        if (smash && p1.grounded) startSmashAttack(p1, smash);
-        else if (!tryCancelAttack(p1, 'strong')) startAttack(p1, 'strong');
-      }
-    }
-    // P1 Throw (A key) / 投げ抜け
-    if (e.key === 'a' || e.key === 'A') {
-      if (p1.grabbed && p1.throwTechWindow > 0) {
-        // 投げ抜け
-        const grabber = players.find(pp => pp.id === p1.grabbedBy);
-        if (grabber) throwTech(grabber, p1);
-      } else if (!p1.grabbing && p1.grounded && !p1.attacking && p1.hitstun <= 0 && !p1.grabbed) {
-        tryGrab(p1);
-      }
-    }
-    if (e.key === 'c' || e.key === 'C') {
-      // コンボフィニッシャー: 10コンボ以上でC → 発動
-      if (canComboFinisher(p1.id)) {
-        executeComboFinisher(p1);
-      }
-      // 天才: 変形条件を満たしている場合はspecial攻撃を抑制（長押し変形用）
-      else if (!(p1.charIdx === 10 && !p1.dragonMode && p1.damage >= 80 && p1.dragonCooldown <= 0 && p1.grounded)) {
-        if (!tryCancelAttack(p1, 'special')) {
-          startAttack(p1, 'special');
-        }
-      }
-    }
+    // P1 の 入力。中身は pressZ/pressX/pressA/pressC に まとめてある
+    // （ゲストの 入力も 同じ関数を 通る。片方だけ 直すと ずれる）
+    const d1 = { left: !!keys['ArrowLeft'], right: !!keys['ArrowRight'], up: !!keys['ArrowUp'], down: !!keys['ArrowDown'] };
+    if (e.key === 'ArrowDown') pressDirection(p1, 0, 'down', e.repeat);
+    if (e.key === 'ArrowUp') pressDirection(p1, 0, 'up', e.repeat);
+    if (e.key === 'ArrowLeft') pressDirection(p1, 0, 'left', e.repeat);
+    if (e.key === 'ArrowRight') pressDirection(p1, 0, 'right', e.repeat);
+    if (e.key === 'z' || e.key === 'Z') pressZ(p1, d1);
+    if (e.key === 'x' || e.key === 'X') pressX(p1, d1);
+    if (e.key === 'a' || e.key === 'A') pressA(p1);
+    if (e.key === 'c' || e.key === 'C') pressC(p1);
     // P1 Guard (ground) / Air Dodge (air) - Shift key
     if (e.key === 'Shift') {
       if (p1.grounded) {
@@ -21609,64 +21606,17 @@ function gameLoopInner(timestamp) {
         if (rp && rp.alive && battleStarted && !gameOver) {
           const rk = remoteKeys;
           const prk = prevRemoteKeys;
-          // Z pressed  ※ P1(ローカル)の 処理と 同じに なるよう そろえること
-          if (rk.z && !prk.z) {
-            if (rp.grabbing) {
-              // 掴み中の Z = 掴み攻撃
-              const gt = players.find(pp => pp.id === rp.grabTarget);
-              if (gt) { gt.damage = Math.min(999, gt.damage + 2); hitEffects.push({x:gt.x,y:gt.y-40,life:6,maxLife:6,color:'#FFF',size:10}); }
-            } else {
-              const cmd = checkCommandInput(rp);
-              if (cmd && cmd.chargeCmd) {
-                if (!rp.charging && !rp.attacking) { rp.charging = true; rp.chargeTime = 0; rp.chargeCmd = cmd; }
-              } else if (cmd && executeCommand(rp, cmd)) {
-              } else if (!rp.grounded && rk.down) { startAttack(rp, 'downair');
-              } else if (!rp.grounded && rk.up) { startAttack(rp, 'airup');
-              } else if (!rp.grounded && ((rk.right && !rp.facingLeft) || (rk.left && rp.facingLeft))) { startAttack(rp, 'airfront');
-              } else if (!rp.grounded && ((rk.left && !rp.facingLeft) || (rk.right && rp.facingLeft))) { startAttack(rp, 'airback');
-              } else if (!rp.grounded) { startAttack(rp, 'aerial');
-              } else if (rp.grounded && Math.abs(rp.vx) > 3 && (rk.left || rk.right)) { startAttack(rp, 'dash');
-              } else if (rk.up) { startAttack(rp, 'up');
-              } else if (rk.left || rk.right) { startAttack(rp, 'side');
-              } else if (rk.down) { startAttack(rp, 'down');
-              } else {
-                if (rp.jabTimer > 0 && rp.jabCount >= 2) { startJabCombo(rp); }
-                else { rp.jabCount++; rp.jabTimer = 18; startAttack(rp, 'normal'); }
-              }
-            }
-          }
-          // X pressed - 上入力中なら 復帰技（これが 無く、ゲストは 崖外から 戻れなかった）
-          if (rk.x && !prk.x) {
-            if (rk.up && !rp.grounded && !rp.recoveryUsed) {
-              executeRecovery(rp);
-            } else {
-              const rsmash = checkSmashReady(rp);
-              if (rsmash && rp.grounded) startSmashAttack(rp, rsmash);
-              else if (!tryCancelAttack(rp, 'strong')) startAttack(rp, 'strong');
-            }
-          }
-          // A pressed - 投げ / 投げ抜け
-          if (rk.a && !prk.a) {
-            if (rp.grabbed && rp.throwTechWindow > 0) {
-              const grabber = players.find(pp => pp.id === rp.grabbedBy);
-              if (grabber) throwTech(grabber, rp);
-            } else if (!rp.grabbing && rp.grounded && !rp.attacking && rp.hitstun <= 0 && !rp.grabbed) {
-              tryGrab(rp);
-            }
-          }
-          // C pressed - コンボフィニッシャー優先（これが 無く、ゲストは 一生 使えなかった）
-          if (rk.c && !prk.c) {
-            if (canComboFinisher(rp.id)) {
-              executeComboFinisher(rp);
-            } else if (!(rp.charIdx === 10 && !rp.dragonMode && rp.damage >= 80 && rp.dragonCooldown <= 0 && rp.grounded)) {
-              if (!tryCancelAttack(rp, 'special')) { startAttack(rp, 'special'); }
-            }
-          }
-          // Direction commands（スマッシュの 2回入力も ここで 記録する）
-          if (rk.down && !prk.down) { addCmdInput(1, 'D'); trackSmashInput(rp, 'down'); }
-          if (rk.up && !prk.up) { addCmdInput(1, 'U'); trackSmashInput(rp, 'up'); }
-          if (rk.left && !prk.left) { addCmdInput(1, 'L'); trackSmashInput(rp, 'side'); }
-          if (rk.right && !prk.right) { addCmdInput(1, 'R'); trackSmashInput(rp, 'side'); }
+          // ゲストの 入力。P1 と 同じ関数を 通すので 差が 出ない。
+          // 方向は P1 と 同じく 攻撃より 先に 記録する（順番が ずれると
+          // コマンド技の 成立判定が 1フレーム ずれる）
+          if (rk.down && !prk.down) pressDirection(rp, 1, 'down', false);
+          if (rk.up && !prk.up) pressDirection(rp, 1, 'up', false);
+          if (rk.left && !prk.left) pressDirection(rp, 1, 'left', false);
+          if (rk.right && !prk.right) pressDirection(rp, 1, 'right', false);
+          if (rk.z && !prk.z) pressZ(rp, rk);
+          if (rk.x && !prk.x) pressX(rp, rk);
+          if (rk.a && !prk.a) pressA(rp);
+          if (rk.c && !prk.c) pressC(rp);
           // S pressed - Air Dodge
           if (rk.s && !prk.s) {
             if (canAirDodge(rp)) {

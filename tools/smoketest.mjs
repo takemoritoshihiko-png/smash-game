@@ -258,6 +258,67 @@ try {
       } catch (e) { tickBad.push('threw: ' + e.message); }
       check('per-frame ticks', tickBad.length === 0, tickBad.join(' | ') || 'gauge decays at the designed rate');
 
+      // --- P1(ローカル) と ゲスト で 同じ 入力 → 同じ 技 に なるか ---
+      //     入力処理は pressZ/pressX/pressA/pressC に 一本化してある。
+      //     ここが ずれたら 「ゲストだけ 技が 出ない」が 再発している
+      var parityBad = [];
+      try {
+        var DIRMAP = { left:'ArrowLeft', right:'ArrowRight', up:'ArrowUp', down:'ArrowDown' };
+        var PCASES = [
+          ['ground Z',     {},          'z', false], ['ground fwd+Z', {right:1},  'z', false],
+          ['ground down+Z',{down:1},    'z', false], ['air Z',        {},         'z', true ],
+          ['air down+Z',   {down:1},    'z', true ], ['air up+Z',     {up:1},     'z', true ],
+          ['air fwd+Z',    {right:1},   'z', true ], ['ground X',     {},         'x', false],
+          ['air up+X',     {up:1},      'x', true ], ['ground A',     {},         'a', false],
+          ['ground C',     {},          'c', false]
+        ];
+        var floorY = 0;
+        function pReset(q, air){
+          q.x=480; q.y = air ? floorY-220 : floorY; q.vx=0; q.vy=0;
+          q.attacking=false; q.attackType=null; q.attackFrame=0; q.hitstun=0;
+          q.facingLeft=false; q.grounded=!air; q.jumps=air?1:2; q.landLag=0;
+          q.recoveryUsed=false; q.grabbing=false; q.grabbed=false; q.charging=false;
+          q.jabTimer=0; q.jabCount=0; q.smashCharging=false; q.smashInputCount=0;
+          cmdInputBuffers[q.id]=[]; cmdInputFrames[q.id]=[];
+        }
+        function pSnap(q){ return (q.attackType||'-')+'/'+(q.recoveryUsed?'r':'-')+'/'+(q.grabbing?'g':'-')+'/'+(q.smashCharging?'s':'-'); }
+        function rkOf(o){ var b={left:0,right:0,up:0,down:0,z:0,x:0,c:0,s:0,a:0,d:0}; for (var k in o) b[k]=o[k]; return b; }
+
+        gameMode='cpu'; cpuDifficulty=0; p1Select=0; p2Select=0; selectedStage=0;
+        onlineMode=false; isHost=false; scene='battle'; transitioning=false; initBattle(); run(400);
+        players[1].x=3000; players[1].alive=false;
+        var PA = players[0]; PA.invincibleTimer=99999; PA.x=480; PA.vx=0; run(30); floorY = PA.y;
+        var res1 = [];
+        PCASES.forEach(function(c){
+          for (var k in keys) delete keys[k];
+          pReset(PA, c[3]);
+          for (var d in c[1]) if (c[1][d]) keys[DIRMAP[d]] = true;
+          run(1);
+          handleKeyDown({ key: c[2], repeat: false, preventDefault: function(){} });
+          res1.push(pSnap(PA));
+        });
+        for (var k3 in keys) delete keys[k3];
+
+        gameMode='vs'; onlineMode=true; isHost=true; peerConn=null;
+        p1Select=0; p2Select=0; scene='battle'; transitioning=false; initBattle(); run(400);
+        remoteKeys={}; prevRemoteKeys={};
+        players[0].x=3000; players[0].alive=false;
+        var PB = players[1]; PB.invincibleTimer=99999; PB.x=480; PB.vx=0; run(30);
+        PCASES.forEach(function(c, i){
+          remoteKeys=rkOf({}); prevRemoteKeys=rkOf({});
+          pReset(PB, c[3]);
+          var dirOnly={}; for (var d in c[1]) if (c[1][d]) dirOnly[d]=1;
+          remoteKeys=rkOf(dirOnly); run(1);
+          var withBtn={}; for (var d2 in dirOnly) withBtn[d2]=1; withBtn[c[2]]=1;
+          remoteKeys=rkOf(withBtn); run(1);
+          var got = pSnap(PB);
+          if (got !== res1[i]) parityBad.push(c[0] + ' P1=' + res1[i] + ' guest=' + got);
+        });
+        remoteKeys={}; prevRemoteKeys={}; onlineMode=false; isHost=false;
+      } catch (e) { parityBad.push('threw: ' + e.message); }
+      onlineMode=false; isHost=false;
+      check('local vs guest parity', parityBad.length === 0, parityBad.slice(0,3).join(' | ') || '11 inputs identical');
+
       // --- ポーズメニュー ---
       var pauseBad = [];
       try {
