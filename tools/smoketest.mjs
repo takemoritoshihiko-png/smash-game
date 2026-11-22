@@ -76,9 +76,17 @@ try {
   function say(k, v){ LOG.push(k + ' = ' + v); }
   function check(k, cond, detail){ LOG.push((cond ? 'ok  ' : 'FAIL') + '  ' + k + (detail ? '  (' + detail + ')' : '')); }
 
-  // gameLoop を 手で 回す。実時間より 必ず 先に 進める（巻き戻すと 更新が 止まる）
+  // gameLoop を 手で 回す。
+  // ・requestAnimationFrame を 止める: 止めないと 手で 呼ぶ たびに 別の ループが
+  //   増えていき、進むフレーム数が 毎回 変わって テストが 不安定に なる
+  // ・刻みは FIXED_DT と 同じ 1000/60。16 だと 4% の 呼び出しが 空振りする
+  window.requestAnimationFrame = function(){ return 0; };
+  var STEP = 1000 / 60;
   var T = performance.now() + 50;
-  function run(n){ for (var i = 0; i < n; i++) { T += 16; gameLoop(T); } }
+  function run(n){ for (var i = 0; i < n; i++) { T += STEP; gameLoop(T); } }
+  // 乱数を 固定（CPU の 行動や ヤッホの ランダム効果で 結果が ぶれないように）
+  var _seed = 12345;
+  Math.random = function(){ _seed = (_seed * 1103515245 + 12345) & 0x7fffffff; return _seed / 0x7fffffff; };
 
   setTimeout(function(){
     try {
@@ -318,6 +326,317 @@ try {
       } catch (e) { parityBad.push('threw: ' + e.message); }
       onlineMode=false; isHost=false;
       check('local vs guest parity', parityBad.length === 0, parityBad.slice(0,3).join(' | ') || '11 inputs identical');
+
+      // ============================================================
+      // ここから: 試合の ルールが 壊れていないか
+      // ============================================================
+      function battle(ci1, ci2, frames){
+        gameMode='cpu'; cpuDifficulty=0; p1Select=ci1; p2Select=ci2; selectedStage=0;
+        onlineMode=false; isHost=false; bossRushMode=false;
+        scene='battle'; transitioning=false; selectTransition=0;
+        initBattle(); run(frames || 400);
+        return [players[0], players[1]];
+      }
+
+      // --- 撃墜 → ストック減 → 復活 ---
+      var koBad = [];
+      try {
+        var r = battle(0, 1), ka = r[0];
+        r[1].x = 3000; r[1].alive = false;
+        var st0 = ka.stocks;
+        ka.damage = 150; ka.x = BLAST_LEFT - 200; ka.invincibleTimer = 0;
+        run(10);
+        if (ka.stocks !== st0 - 1) koBad.push('stock ' + st0 + '->' + ka.stocks);
+        if (ka.alive) koBad.push('still alive after blast');
+        if (!(ka.respawnTimer > 0)) koBad.push('no respawn timer');
+        for (var f = 0; f < 600 && !ka.alive; f++) { T += 16; gameLoop(T); }
+        if (!ka.alive) koBad.push('never respawned');
+        if (ka.damage !== 0) koBad.push('damage not reset: ' + ka.damage);
+        if (!(ka.invincibleTimer > 0)) koBad.push('no respawn invincibility');
+      } catch (e) { koBad.push('threw: ' + e.message); }
+      check('KO / stock / respawn', koBad.length === 0, koBad.join(' | ') || 'blast -> -1 stock -> respawn clean');
+
+      // --- 時間切れは 引き分け ---
+      var drawBad = [];
+      try {
+        var r2 = battle(0, 1);
+        r2[0].stocks = 3; r2[1].stocks = 1; r2[0].damage = 0; r2[1].damage = 200;
+        battleTimer = 0; battleFrameAcc = 59;
+        run(20);
+        if (!gameOver) drawBad.push('not gameOver');
+        if (!isDraw) drawBad.push('isDraw false (should be a draw regardless of stocks)');
+      } catch (e) { drawBad.push('threw: ' + e.message); }
+      check('timeout = DRAW', drawBad.length === 0, drawBad.join(' | ') || 'stock/damage lead ignored');
+
+      // --- ダメージが 増えると 吹っ飛ぶ ---
+      var kbBad = [];
+      try {
+        var r3 = battle(0, 0), A3 = r3[0], B3 = r3[1];
+        function hitOnce(dmg){
+          B3.x = A3.x + 50; B3.y = A3.y; B3.vx = 0; B3.vy = 0;
+          B3.hitstun = 0; B3.invincibleTimer = 0; B3.guarding = false;
+          A3.hitTargets = []; A3.repMove = null; A3.repCount = 0;
+          B3.damage = dmg;
+          applyHit(A3, B3, 10, 6, 0.1, -30, 'normal');
+          return Math.abs(B3.vx) + Math.abs(B3.vy);
+        }
+        var low = hitOnce(0), high = hitOnce(150);
+        if (!(high > low * 1.5)) kbBad.push('150% knockback (' + high.toFixed(1) + ') not well above 0% (' + low.toFixed(1) + ')');
+        if (!(B3.damage > 150)) kbBad.push('damage did not accumulate');
+      } catch (e) { kbBad.push('threw: ' + e.message); }
+      check('damage scales knockback', kbBad.length === 0, kbBad.join(' | ') || '0% vs 150%');
+
+      // --- 同じ技の 連発は ノックバック下限で ハメに ならない ---
+      var repBad = [];
+      try {
+        var r4 = battle(0, 0), A4 = r4[0], B4 = r4[1];
+        var kbs = [];
+        for (var h = 0; h < 6; h++) {
+          B4.x = A4.x + 50; B4.y = A4.y; B4.vx = 0; B4.vy = 0;
+          B4.hitstun = 0; B4.invincibleTimer = 0; B4.guarding = false; B4.damage = 20;
+          A4.hitTargets = [];
+          A4.attackType = 'normal';
+          applyHit(A4, B4, 4, 3, 0.05, -20, 'normal');
+          kbs.push(Math.hypot(B4.vx, B4.vy));
+        }
+        var tail = Math.min(kbs[3], kbs[4], kbs[5]);
+        if (!(tail >= REP_FLOOR[0] * 0.8)) repBad.push('5th+ knockback ' + tail.toFixed(2) + ' below floor ' + REP_FLOOR[0]);
+      } catch (e) { repBad.push('threw: ' + e.message); }
+      check('anti-spam knockback floor', repBad.length === 0, repBad.join(' | ') || 'repeated jab pushes away');
+
+      // --- ガードは ダメージを 減らし、耐久が 減る ---
+      var gdBad = [];
+      try {
+        var r5 = battle(0, 0), A5 = r5[0], B5 = r5[1];
+        B5.x = A5.x + 50; B5.y = A5.y; B5.invincibleTimer = 0; B5.hitstun = 0;
+        B5.damage = 0; B5.guarding = false; A5.hitTargets = [];
+        applyHit(A5, B5, 20, 6, 0.1, -30, 'normal');
+        var noGuard = B5.damage;
+        B5.damage = 0; B5.guarding = true; B5.guardDurability = GUARD_MAX_DURABILITY;
+        B5.hitstun = 0; B5.invincibleTimer = 0; A5.hitTargets = [];
+        applyHit(A5, B5, 20, 6, 0.1, -30, 'normal');
+        if (!(B5.damage < noGuard)) gdBad.push('guard did not reduce damage (' + B5.damage + ' vs ' + noGuard + ')');
+        if (!(B5.guardDurability < GUARD_MAX_DURABILITY)) gdBad.push('guard durability did not drop');
+      } catch (e) { gdBad.push('threw: ' + e.message); }
+      check('guard reduces damage', gdBad.length === 0, gdBad.join(' | ') || 'damage down, durability down');
+
+      // --- 掴み → 投げ ---
+      var grBad = [];
+      try {
+        var r6 = battle(0, 0), A6 = r6[0], B6 = r6[1];
+        B6.x = A6.x + 35; B6.y = A6.y; B6.grounded = true; B6.invincibleTimer = 0;
+        B6.hitstun = 0; B6.damage = 0;
+        A6.grounded = true; A6.attacking = false; A6.hitstun = 0; A6.throwCooldown = 0;
+        tryGrab(A6); run(20);
+        if (!A6.grabbing) grBad.push('grab failed');
+        else { executeThrow(A6, 1, 0); run(10);
+               if (!(B6.damage > 0)) grBad.push('throw dealt no damage'); }
+      } catch (e) { grBad.push('threw: ' + e.message); }
+      check('grab and throw', grBad.length === 0, grBad.join(' | ') || 'grab -> throw damage');
+
+      // --- フィニッシャーは 15コンボ以上でのみ ---
+      var finBad = [];
+      try {
+        battle(0, 0);
+        comboDisplay[0] = { count: 14, timer: 120, maxTimer: 120 };
+        if (canComboFinisher(0)) finBad.push('allowed at 14 combos');
+        comboDisplay[0] = { count: 15, timer: 120, maxTimer: 120 };
+        if (!canComboFinisher(0)) finBad.push('blocked at 15 combos');
+        comboDisplay[0] = null;
+      } catch (e) { finBad.push('threw: ' + e.message); }
+      check('finisher needs 15 combos', finBad.length === 0, finBad.join(' | ') || '14 no / 15 yes');
+
+      // --- 試合を やり直しても 前の 状態が 残らない ---
+      var leakBad = [];
+      try {
+        battle(0, 1, 200);
+        comboDisplay[0] = { count: 9, timer: 60, maxTimer: 60 };
+        hitFlash.alpha = 0.9; screenShake.intensity = 20;
+        ultimateVideoShowing = true; ultimateActive = true;
+        gaugePopups.push({ x: 0, y: 0, text: 'x', life: 60, color: '#fff' });
+        instantKillDisplay = { active: true, timer: 10, maxTimer: 60 };
+        initBattle();
+        if (comboDisplay[0]) leakBad.push('comboDisplay');
+        if (hitFlash.alpha !== 0) leakBad.push('hitFlash');
+        if (screenShake.intensity !== 0) leakBad.push('screenShake');
+        if (ultimateVideoShowing) leakBad.push('ultimateVideoShowing (battle would never draw)');
+        if (ultimateActive) leakBad.push('ultimateActive');
+        if (gaugePopups.length) leakBad.push('gaugePopups');
+        if (instantKillDisplay.active) leakBad.push('instantKillDisplay');
+      } catch (e) { leakBad.push('threw: ' + e.message); }
+      check('no state leak into a rematch', leakBad.length === 0, leakBad.join(' | ') || '7 globals cleared');
+
+      // --- BGM が 無音の まま 残らない ---
+      var bgmBad = [];
+      try {
+        battle(0, 1, 60);
+        fadeOutBGM(0.1);
+        if (currentBgmAudio) currentBgmAudio.volume = 0;   // フェード完了を 模す
+        stopBGM();
+        fadeInBGM(0.5);                                     // bgmPlaying=false なので 何も しない
+        startBGM();
+        if (currentBgmAudio && currentBgmAudio.volume !== BGM_VOLUME)
+          bgmBad.push('volume stuck at ' + currentBgmAudio.volume);
+      } catch (e) { bgmBad.push('threw: ' + e.message); }
+      check('BGM does not stay muted', bgmBad.length === 0, bgmBad.join(' | ') || 'volume restored on restart');
+
+      // --- 壊れた セーブデータで 落ちない ---
+      var saveBad = [];
+      try {
+        var keep1 = localStorage.getItem('smash_battle_stats');
+        var keep2 = localStorage.getItem('smash_unlocks');
+        ['null', '123', '"x"', '[]', '{"charGames":5}', '{}'].forEach(function (junk) {
+          try {
+            localStorage.setItem('smash_battle_stats', junk);
+            localStorage.setItem('smash_unlocks', junk);
+            loadBattleStats(); loadUnlocks();
+            recordBattleResult(0, 1, true);
+            checkBossRushUnlocks(3, 'Flawless Champ');
+            drawStats();
+          } catch (e) { saveBad.push(junk + ' -> ' + e.message); }
+        });
+        localStorage.removeItem('smash_battle_stats');
+        localStorage.removeItem('smash_unlocks');
+        if (keep1) localStorage.setItem('smash_battle_stats', keep1);
+        if (keep2) localStorage.setItem('smash_unlocks', keep2);
+        loadBattleStats(); loadUnlocks();
+      } catch (e) { saveBad.push('threw: ' + e.message); }
+      check('corrupt save data survives', saveBad.length === 0, saveBad.slice(0,2).join(' | ') || '6 bad payloads');
+
+      // --- 壊れた 通信パケットで 座標が NaN に ならない ---
+      var netBad = [];
+      try {
+        gameMode='vs'; onlineMode=true; isHost=false; peerConn=null;
+        p1Select=0; p2Select=0; scene='battle'; transitioning=false; initBattle(); run(200);
+        var gx = players[0].x, gy = players[0].y;
+        var handler = null;
+        // setupPeerConnection を 通さず 直接 applyHostState / frame 相当を 叩く
+        [{}, { x: NaN, y: 0, vx: 0, vy: 0 }, { x: 'a', y: 0, vx: 0, vy: 0 }, null].forEach(function (junk) {
+          applyHostState({ type: 'state', p1: junk, p2: junk });
+          if (!Number.isFinite(players[0].x) || !Number.isFinite(players[0].y))
+            netBad.push('payload ' + JSON.stringify(junk) + ' broke the position');
+        });
+        players[0].x = gx; players[0].y = gy;
+        onlineMode=false; isHost=false;
+      } catch (e) {
+        // 例外は 出てよい（捕まえている）。座標が 壊れていなければ 合格
+        if (!Number.isFinite(players[0] && players[0].x)) netBad.push('x became NaN');
+        onlineMode=false; isHost=false;
+      }
+      check('bad network packet keeps positions finite', netBad.length === 0, netBad.join(' | ') || 'x/y stay finite');
+
+      // --- 復帰技が 設計どおりの 高さまで 上がる ---
+      var recBad = [];
+      try {
+        [0, 5, 29, 30].forEach(function (ci) {
+          var rr = battle(ci, 0, 300);
+          var rp2 = rr[0]; rr[1].x = 3000; rr[1].alive = false;
+          rp2.x = 480; rp2.y = -150; rp2.grounded = false; rp2.jumps = 0;
+          rp2.vx = 0; rp2.vy = 0; rp2.recoveryUsed = false; rp2.attacking = false;
+          rp2.hitstun = 0; rp2.invincibleTimer = 900;
+          if (!executeRecovery(rp2)) { recBad.push(ci + ': would not fire'); return; }
+          var y0 = rp2.y, top = rp2.y;
+          for (var f = 0; f < 600 && rp2.recoveryActive > 0; f++) { T += 16; gameLoop(T); if (rp2.y < top) top = rp2.y; }
+          var spec = RECOVERY_MOVES[ci];
+          var want = Math.round(spec.height * Math.abs(Math.sin(spec.angle * Math.PI / 180)));
+          var got = Math.round(y0 - top);
+          if (Math.abs(got - want) > 5) recBad.push(ci + ': rose ' + got + ' want ' + want);
+        });
+      } catch (e) { recBad.push('threw: ' + e.message); }
+      check('recovery reaches its designed height', recBad.length === 0, recBad.join(' | ') || 'chars 0/5/29/30');
+
+      // --- 全キャラ × 全技キー が 存在し、実際に 出るか ---
+      //     「例外が 出ない」だけでは 技が 無くても 気づけない（startAttack は 黙って 帰る）
+      var keyBad = [];
+      try {
+        var MOVEKEYS = ['normal','strong','side','up','down','special','aerial','downair','airfront','airback','airup','dash'];
+        for (var ci = 0; ci < characters.length; ci++) {
+          var defs = attackDefs[ci];
+          MOVEKEYS.forEach(function (mv) { if (!defs || !defs[mv]) keyBad.push(ci + ':' + mv + ' 未定義'); });
+        }
+        var rr0 = battle(0, 0, 250), ap = rr0[0];
+        rr0[1].x = 3000; rr0[1].alive = false;
+        for (var ci2 = 0; ci2 < characters.length; ci2 += (QUICK_MODE ? 7 : 1)) {
+          ap.charIdx = ci2;
+          MOVEKEYS.forEach(function (mv) {
+            if (!attackDefs[ci2] || !attackDefs[ci2][mv]) return;
+            ap.attacking=false; ap.attackType=null; ap.attackFrame=0; ap.hitstun=0;
+            ap.charging=false; ap.grabbing=false; ap.chattaFly=0;
+            ap.grounded = (mv.indexOf('air') !== 0 && mv !== 'downair');
+            startAttack(ap, mv);
+            // Chatta の strong は「飛行」なので attacking には ならない
+            var ok = (ci2 === 30 && mv === 'strong') ? (ap.chattaFly > 0) : (ap.attacking && ap.attackType === mv);
+            if (!ok) keyBad.push(ci2 + ':' + mv + ' 出ない(' + ap.attackType + ')');
+          });
+        }
+      } catch (e) { keyBad.push('threw: ' + e.message); }
+      check('every move key exists and fires', keyBad.length === 0, keyBad.slice(0,4).join(' | ') || '31 chars x 12 moves');
+
+      // --- スマッシュが 威力ゼロに ならないか ---
+      //     元にする 技（strong）が 飛び道具の キャラは 空振りに なっていた
+      var smBad = [];
+      try {
+        var rs = battle(0, 0, 250), sp2 = rs[0];
+        rs[1].x = 3000; rs[1].alive = false;
+        for (var ci3 = 0; ci3 < characters.length; ci3++) {
+          sp2.charIdx = ci3;
+          ['upSmash','sideSmash','downSmash'].forEach(function (t) {
+            sp2.attacking=false; sp2.hitstun=0; sp2.grounded=true;
+            sp2.smashCharging = true; sp2.smashChargeTime = 0; sp2.smashType = t;
+            executeSmash(sp2);
+            var ad = sp2.attackData;
+            if (!ad || !(ad.damage > 0) || !(ad.hw > 0)) smBad.push(ci3 + '/' + t + ' dmg=' + (ad && ad.damage) + ' hw=' + (ad && ad.hw));
+          });
+        }
+      } catch (e) { smBad.push('threw: ' + e.message); }
+      check('smash attacks are never empty', smBad.length === 0, smBad.slice(0,4).join(' | ') || '31 chars x 3 smashes');
+
+      // --- 方向2回で ダッシュ / Micro の ↓↓分裂 ---
+      //     どちらも ミリ秒を フレーム数として 比べていて 一度も 成立しなかった
+      var dashBad = [];
+      try {
+        var rd = battle(2, 0, 300), dp = rd[0];
+        rd[1].x = 3000; rd[1].alive = false;
+        for (var k in keys) delete keys[k];
+        dp.x = 480; dp.vx = 0; dp.grounded = true; dp.dashing = false; dp.lastMoveDirTime = 0;
+        keys['ArrowRight'] = true; run(2);
+        keys['ArrowRight'] = false; run(2);
+        keys['ArrowRight'] = true; run(4);
+        if (!dp.dashing) dashBad.push('dash never triggered');
+        for (var k2 in keys) delete keys[k2];
+
+        var rm = battle(20, 0, 300), mp = rm[0];
+        rm[1].x = 3000; rm[1].alive = false;
+        for (var k3 in keys) delete keys[k3];
+        mp.grounded = true; mp.microSplit = false; mp._microDownTime = 0;
+        keys['ArrowDown'] = true; run(1);
+        keys['ArrowDown'] = false; run(1);
+        keys['ArrowDown'] = true; run(3);
+        if (!mp.microSplit) dashBad.push('Micro split never triggered');
+        for (var k4 in keys) delete keys[k4];
+      } catch (e) { dashBad.push('threw: ' + e.message); }
+      check('double-tap dash / Micro split', dashBad.length === 0, dashBad.join(' | ') || 'both fire');
+
+      // --- トレーニングに 入っても 戦績が 止まらない ---
+      var trBad = [];
+      try {
+        gameMode = 'training'; scene='battle'; transitioning=false; initBattle(); run(10);
+        if (!trainingMode) trBad.push('training did not set trainingMode');
+        battle(0, 1, 60);
+        if (trainingMode) trBad.push('trainingMode stuck true after a normal match (stats stop recording)');
+      } catch (e) { trBad.push('threw: ' + e.message); }
+      check('training mode does not stick', trBad.length === 0, trBad.join(' | ') || 'reset on every initBattle');
+
+      // --- BGM の フェードタイマーが 置き去りに ならない ---
+      var fadeBad = [];
+      try {
+        battle(0, 1, 30);
+        startBGM(); fadeOutBGM(0.3);
+        if (!bgmFadeInterval) fadeBad.push('fadeOut did not start a timer');
+        stopBGM();
+        if (bgmFadeInterval) fadeBad.push('stopBGM left the fade timer running (next match goes silent)');
+      } catch (e) { fadeBad.push('threw: ' + e.message); }
+      check('BGM fade timer is cleared', fadeBad.length === 0, fadeBad.join(' | ') || 'stopBGM clears it');
 
       // --- ポーズメニュー ---
       var pauseBad = [];

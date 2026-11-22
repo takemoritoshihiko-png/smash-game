@@ -22,54 +22,54 @@
 //   目次が ずれたら  node tools/toc.mjs  で 作り直す。
 //
 //   82    CANVAS / 画面サイズ
-//   919   音の ロック解除（最初の 操作で 呼ぶ）
-//   948   キャラ画像（遅延読み込み）
-//   1128  タイトル画面の 粒子
-//   1167  キャラの 絵 ①メニュー用（選択画面・詳細画面）
-//   2827  キャラの 絵 ②バトル用
-//   5343  描画ユーティリティ
-//   5392  画面: タイトル
-//   5516  画面: キャラ選択
-//   5766  画面: 難易度選択（CPU戦）
-//   5866  画面: ステージ選択
-//   6097  バトルの 定数 と 状態
-//   6499  復帰技 / パワーモードの 表示
-//   6547  カメラ / 画面揺れ
-//   6566  効果音（Web Audio で 合成）
-//   6984  観客の 音
-//   7327  ヒット表示 / コミック文字
-//   7355  掴み・投げ の 定数と キャラ別テーブル
-//   7406  コマンド技（→→↓↓+Z など）
-//   7897  技データ
-//   8662  プレイヤー生成 / 試合の 初期化
-//   9007  ヒット処理（ダメージ・ノックバック）
-//   10346 当たり判定
-//   10378 飛び道具
-//   10421 技の 発動（通常技・復帰技・ジャブ）
-//   10680 掴み・投げ の 実行
-//   10905 CPU の 思考
-//   11251 バトルの 毎フレーム更新（中核）
-//   13669 物理（移動・重力・着地・撃墜判定）
-//   14226 スマッシュ攻撃（方向2回 + X）
-//   14330 崖つかまり
-//   14424 D技 と 必殺技 の データ
-//   15237 D技の 中身（キャラ別）
-//   15386 空中回避
-//   15448 バトル描画の 下準備（カメラ・影・2.5D）
-//   15548 バトル画面の 描画
-//   17579 技の エフェクト描画
-//   18654 必殺技 / 即死技 の 全画面オーバーレイ
-//   18827 画面: コンボ一覧 / 戦績
-//   18959 キャラ別 ゲージの 描画（HUDの 下に 出る 細い バー）
-//   19170 バトルの HUD
-//   19441 オンライン対戦（PeerJS / ホストが 正）
-//   20369 画面: VS イントロ
-//   20654 画面の 切り替え（フェード）
-//   20689 ポーズメニュー（バトル中に ESC）
-//   20770 画面: キャラ詳細（Iキー）
-//   20983 画面: 操作説明
-//   21107 キー入力の 振り分け（画面ごと）
-//   21588 メインループ（60FPS 固定タイムステップ）
+//   920   音の ロック解除（最初の 操作で 呼ぶ）
+//   949   キャラ画像（遅延読み込み）
+//   1129  タイトル画面の 粒子
+//   1168  キャラの 絵 ①メニュー用（選択画面・詳細画面）
+//   2828  キャラの 絵 ②バトル用
+//   5344  描画ユーティリティ
+//   5393  画面: タイトル
+//   5517  画面: キャラ選択
+//   5767  画面: 難易度選択（CPU戦）
+//   5867  画面: ステージ選択
+//   6098  バトルの 定数 と 状態
+//   6500  復帰技 / パワーモードの 表示
+//   6548  カメラ / 画面揺れ
+//   6567  効果音（Web Audio で 合成）
+//   6988  観客の 音
+//   7331  ヒット表示 / コミック文字
+//   7359  掴み・投げ の 定数と キャラ別テーブル
+//   7410  コマンド技（→→↓↓+Z など）
+//   7901  技データ
+//   8666  プレイヤー生成 / 試合の 初期化
+//   9014  ヒット処理（ダメージ・ノックバック）
+//   10353 当たり判定
+//   10385 飛び道具
+//   10428 技の 発動（通常技・復帰技・ジャブ）
+//   10687 掴み・投げ の 実行
+//   10912 CPU の 思考
+//   11258 バトルの 毎フレーム更新（中核）
+//   13676 物理（移動・重力・着地・撃墜判定）
+//   14233 スマッシュ攻撃（方向2回 + X）
+//   14345 崖つかまり
+//   14439 D技 と 必殺技 の データ
+//   15252 D技の 中身（キャラ別）
+//   15401 空中回避
+//   15463 バトル描画の 下準備（カメラ・影・2.5D）
+//   15563 バトル画面の 描画
+//   17594 技の エフェクト描画
+//   18669 必殺技 / 即死技 の 全画面オーバーレイ
+//   18842 画面: コンボ一覧 / 戦績
+//   18974 キャラ別 ゲージの 描画（HUDの 下に 出る 細い バー）
+//   19185 バトルの HUD
+//   19456 オンライン対戦（PeerJS / ホストが 正）
+//   20388 画面: VS イントロ
+//   20673 画面の 切り替え（フェード）
+//   20708 ポーズメニュー（バトル中に ESC）
+//   20789 画面: キャラ詳細（Iキー）
+//   21002 画面: 操作説明
+//   21126 キー入力の 振り分け（画面ごと）
+//   21607 メインループ（60FPS 固定タイムステップ）
 //
 // ### 目次ここまで
 // ======================================================================
@@ -122,6 +122,7 @@ function runPauseItem(label) {
   if (label === 'RESUME') { closePause(); return; }
   if (label === 'RETRY') {
     closePause();
+    stopBGM();        // 止めないと 観客音の 初期化が 走らず、残り10秒の 歓声が 出なくなる
     initBattle();
     return;
   }
@@ -6876,6 +6877,9 @@ function startBGM() {
 }
 
 function stopBGM() {
+  // 走っている フェードを 先に 止める。残すと 次に 鳴らした 曲を
+  // 勝手に 絞って 止めてしまい、以後 ずっと 無音に なる
+  if (bgmFadeInterval) { clearInterval(bgmFadeInterval); bgmFadeInterval = null; }
   if (!bgmPlaying) return;
   currentBgmAudio.pause();
   currentBgmAudio.currentTime = 0;
@@ -8421,7 +8425,7 @@ const attackDefs = {
 
 // Auto-generate aerial direction attacks from existing aerial data
 (function() {
-  for (let ci = 0; ci <= 28; ci++) {
+  for (let ci = 0; ci < characters.length; ci++) {   // キャラを 足したら 自動で 含まれる
     const defs = attackDefs[ci];
     if (!defs || !defs.aerial) continue;
     const a = defs.aerial;
@@ -8886,6 +8890,9 @@ function createPlayer(id, charIdx, startX) {
 
 function initBattle() {
   pauseOpen = false; pauseAnim = 0; pauseSel = 0;
+  // トレーニングは そこへ 入った ときだけ true。
+  // 残ると 以後 戦績が 記録されなく なる
+  trainingMode = (gameMode === 'training');
   // 戦う 2人分の スプライトを 先に 用意しておく（描き始めで カクつかないように）
   preloadSprites(p1Select);
   preloadSprites(p2Select);
@@ -13327,7 +13334,7 @@ function updateBattle(dt) {
 
     // --- ダッシュ検出: 同方向に素早く2回入力 ---
     if (moveX !== 0 && p.grounded && !p.dashing) {
-      if (moveX === p.lastMoveDir && (battleTime - p.lastMoveDirTime) < DASH_INPUT_WINDOW && p.lastMoveDirTime > 0) {
+      if (moveX === p.lastMoveDir && (battleFrame - p.lastMoveDirTime) < DASH_INPUT_WINDOW && p.lastMoveDirTime > 0) {
         p.dashing = true;
         // ダッシュ開始時の土煙パーティクル
         for (let di = 0; di < 4; di++) {
@@ -13336,7 +13343,7 @@ function updateBattle(dt) {
       }
       if (moveX !== p.lastMoveDir) {
         p.lastMoveDir = moveX;
-        p.lastMoveDirTime = battleTime;
+        p.lastMoveDirTime = battleFrame;
       }
     }
     if (p.dashing && !p.grounded) p.dashing = false; // 空中ではダッシュ解除
@@ -13349,7 +13356,7 @@ function updateBattle(dt) {
       else if (gameMode === 'cpu' || bossRushMode) { downKeyPress = false; }
       else { downKeyPress = !!(keys['s'] || keys['S']); }
       if (downKeyPress && !p._microDownPrev) {
-        if (battleTime - (p._microDownTime || 0) < 15) {
+        if (battleFrame - (p._microDownTime || 0) < 15) {
           // ↓↓ 成立 → 切り替え
           p.microSplit = !p.microSplit;
           p.microSplitCooldown = 30; // 0.5秒クールダウン
@@ -13358,7 +13365,7 @@ function updateBattle(dt) {
           cmdNameDisplay.push({ text: txt, x: p.x, y: p.y - 100, life: 45, maxLife: 45, color: '#44DDFF' });
           hitEffects.push({ x: p.x, y: p.y - 35, life: 10, maxLife: 10, color: '#44DDFF', size: 30 });
         } else {
-          p._microDownTime = battleTime;
+          p._microDownTime = battleFrame;
         }
       }
       p._microDownPrev = downKeyPress;
@@ -14262,11 +14269,19 @@ function executeSmash(p) {
   const chargeMult = 1 + chargeRatio * SMASH_CHARGE_BONUS;
   const defs = (p.charIdx === 10 && p.dragonMode) ? dragonAttackDefs : attackDefs[p.charIdx];
   if (!defs) return;
-  const baseAtk = defs.strong;
+  // strong が 飛び道具や 判定ゼロの キャラ（音波・Sen など）だと
+  // スマッシュが 威力0 の 空振りに なるので、使える 技を 選び直す
+  // 元に する 技の 威力。飛び道具の キャラ（バレット など）は damage が 0 で
+  // projectile 側に 入っている ので、そちらも 見る
+  const atkDmg = (a) => !a ? 0 : (a.damage > 0 ? a.damage : (a.projectile ? (a.projectile.damage || 0) : 0));
+  let baseAtk = defs.strong;
+  if (atkDmg(baseAtk) <= 0) {
+    baseAtk = [defs.side, defs.down, defs.up, defs.normal].find(a => atkDmg(a) > 0) || baseAtk;
+  }
   if (!baseAtk) { p.smashCharging = false; return; }
   const dir = p.facingLeft ? -1 : 1;
   const mult = SMASH_DAMAGE_MULT[p.smashType] || 1.5;
-  const smashDmg = baseAtk.damage * mult * chargeMult;
+  const smashDmg = atkDmg(baseAtk) * mult * chargeMult;
 
   p.smashCharging = false;
   p.attacking = true;
@@ -19850,6 +19865,10 @@ function applyHostState(data) {
   const LERP_POS = 0.25;
   const LERP_VEL = 0.4;
   const applyFields = (target, src) => {
+    // 壊れた / 欠けた パケットで 座標が NaN に なると 二度と 戻らないので、
+    // 数字で ない ものは 位置と 速度に 入れない
+    if (!src || !Number.isFinite(src.x) || !Number.isFinite(src.y) ||
+        !Number.isFinite(src.vx) || !Number.isFinite(src.vy)) return;
     // ラグ補正: lag分だけ先の位置を予測
     const lagX = src.x + src.vx * onlineLagFrames;
     const lagY = src.y + src.vy * onlineLagFrames;
