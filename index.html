@@ -5520,9 +5520,6 @@ const LAND_LAG_NORMAL = 2;       // 通常着地硬直
 const LAND_LAG_FASTFALL = 4;     // 急降下着地硬直
 
 // 壁バウンドパラメータ
-const WALL_BOUNCE_THRESHOLD = 10; // この速度以上で壁バウンド発生
-const WALL_BOUNCE_FACTOR = -0.6;  // バウンド時の速度反転率
-const CEILING_BOUNCE_FACTOR = -0.5;
 const MAX_STOCKS = 3;
 const RESPAWN_TIME = 90;
 
@@ -5816,7 +5813,18 @@ function updateComboFinisherReady() {
 // ========== 戦績システム ==========
 let battleStats = { totalGames: 0, totalWins: 0, charWins: {}, charGames: {}, vsRecord: {}, maxCombo: 0 };
 function loadBattleStats() {
-  try { const s = localStorage.getItem('smash_battle_stats'); if (s) battleStats = JSON.parse(s); } catch(e) {}
+  try {
+    const s = localStorage.getItem('smash_battle_stats');
+    if (s) {
+      const parsed = JSON.parse(s);
+      // 形が 違う 保存データ（古い版・手で いじった もの・"null"）で 落ちないように
+      if (parsed && typeof parsed === 'object') {
+        for (const k in battleStats) {
+          if (parsed[k] !== undefined && typeof parsed[k] === typeof battleStats[k]) battleStats[k] = parsed[k];
+        }
+      }
+    }
+  } catch(e) {}
 }
 function saveBattleStats() {
   try { localStorage.setItem('smash_battle_stats', JSON.stringify(battleStats)); } catch(e) {}
@@ -5837,7 +5845,17 @@ loadBattleStats();
 // ========== アンロックシステム ==========
 let unlockData = { stages: [], chars: [], titles: [] };
 function loadUnlocks() {
-  try { const s = localStorage.getItem('smash_unlocks'); if (s) unlockData = JSON.parse(s); } catch(e) {}
+  try {
+    const s = localStorage.getItem('smash_unlocks');
+    if (s) {
+      const parsed = JSON.parse(s);
+      if (parsed && typeof parsed === 'object') {
+        for (const k in unlockData) {
+          if (parsed[k] !== undefined && typeof parsed[k] === typeof unlockData[k]) unlockData[k] = parsed[k];
+        }
+      }
+    }
+  } catch(e) {}
 }
 function saveUnlocks() {
   try { localStorage.setItem('smash_unlocks', JSON.stringify(unlockData)); } catch(e) {}
@@ -5919,13 +5937,14 @@ function addGaugePopup(x, y, amount, color) {
 const POWER_GLOW = {0:'#00BFFF',1:'#8B4513',2:'#FFFFFF',3:'#FF4500',4:'#00CED1',5:'#4169E1',6:'#FF4400',7:'#FF69B4',8:'#FFFF00',9:'#9400D3',10:'#FF8C00',11:'#66DDFF',12:'#808080',13:'#FF6600',14:'#00FF00',15:'#00FF7F',16:'#FFD700',17:'#7CFC00',18:'#FFD700',19:'#9400D3',20:'#DA70D6',21:'#FF6347',22:'#FFD700',23:'#FF0000',24:'#800080',25:'#FF1493',26:'#FFB6C1',27:'#4B0082',28:'#228B22',29:'#66E8FF',30:'#FF66CC'};
 // 強化モード名マップ
 const POWER_NAMES = {0:'Ice Power',1:'Quake Mode',2:'Lightspeed Mode',3:'Inferno Mode',4:'Dragon Spear Mode',5:'Wild Release',6:'Fury Mode',7:'Awakened Mode',8:'Overvolt',9:'Final Judgment',10:'Dragon Mode',11:'Teleport',12:'FULL LOAD',13:'Full Punch',14:'Toxin',15:'AIR MASTER',16:'Time Stop',17:'Resonance Mode',18:'CEO',19:'Armor',20:'Triple Merge',21:'Blaze Fusion',22:'Billionaire',23:'Taekwondo Master',24:'Nightmare',25:'Chaos',26:'Double Slime',27:'Gravity Collapse',28:'Swarm',29:'ROBOT MODE',30:'FLIGHT'};
-const POWER_DESCS = {0:'Freeze DMG x1.5',1:'KB×1.4',2:'Speed x2',3:'Burn chance +60%',4:'Reach x1.5',5:'KB×1.5',6:'DMG x1.5',7:'Confusion',8:'Shock Lock',9:'DMG x1.4',10:'DMG x1.5',12:'Power x2',13:'DMG x1.5',14:'Poison DMG x2',17:'Edge Attack',21:'DMG x1.5',22:'DMG x1.5',23:'Kick DMG x2',26:'All Attacks x2',27:'Gravity x3',28:'Poison DMG x3',29:'Attack & Speed UP',30:'Fly for 8s'};
+const POWER_DESCS = {0:'Freeze DMG x1.5',1:'KB×1.4',2:'Speed x2',3:'Burn chance +60%',4:'Reach x1.5',5:'KB×1.5',6:'DMG x1.5',7:'Confusion',8:'Shock Lock',9:'DMG x1.4',10:'DMG x1.5',12:'Power x2',13:'DMG x1.5',14:'Poison DMG x2',17:'Edge Attack',21:'DMG x1.5',22:'DMG x1.5',23:'Kick DMG x2',26:'All Attacks x2',27:'Gravity x3',28:'Poison DMG x3',29:'Attack & Speed UP',30:'Fly for 8s',11:'Teleport attacks',15:'Air control UP',16:'Enemy frozen in time',18:'Attack range UP',19:'Super armor',20:'Three bodies',24:'Fear DMG x2',25:'Random effect'};
 function getActivePowerMode(p) {
   const timers = [
     [p.kumaFuryMode,6],[p.saisokuLightSpeed,2],[p.uruoWildRelease,5],[p.bulletAwaken,7],
     [p.shawdenOvercharge,8],[p.judgeFinalMode,9],[p.onpaResonance,17],[p.mrtwoDualBlast,21],
     [p.kinkinComboGold,22],[p.kinkinGoldMode,22],[p.longDragonSpear,4],[p.pullCollapseMode,27],[p.satoruMasterMode,23],
     [p.poyoDoubleSlime,26],[p.kingTimeStop,16],[p.meteoBurnGauge>=70?1:0,3],[p.donEarthGauge>=80?1:0,1],
+    [p.botRobot,29],[p.chattaFly,30],
   ];
   for (const [t, ci2] of timers) { if (t > 0) return { timer: t, charIdx: ci2 }; }
   return null;
@@ -6077,6 +6096,18 @@ const COMBO_ROUTES = {
     { name: 'Bug Combo B', route: 'Jewel Beetle Flight (rush) > FTilt > Stag Mandible (spin KB)', dmgRange: '50〜80%', diff: 2, hits: 3 },
     { name: '💀 Venom Fang Kill A', route: 'Jab > Down Attack (poison) > FTilt > Jewel Beetle Flight > Stag Mandible (meteor)', dmgRange: '0%〜', diff: 3, hits: 5, instantKill: true },
     { name: '💀 Venom Fang Kill B', route: 'Special (bug swarm, poison) > Stag Mandible (meteor)', dmgRange: '80%〜', diff: 2, hits: 3, instantKill: true },
+  ],
+  29: [ // Bot
+    { name: 'Machine Rush', route: 'Jab > Jab > FTilt > Boost Dash', dmgRange: '0〜40%', diff: 1, hits: 4 },
+    { name: 'Drill Carry', route: 'UTilt > Air > Drill Dive (meteor)', dmgRange: '20〜70%', diff: 2, hits: 3 },
+    { name: 'Tackle Start', route: '->-> Up Up + Z (Boost Tackle) > USmash', dmgRange: '0〜60%', diff: 2, hits: 2 },
+    { name: '💀 Robot Overrun', route: 'Ultimate (robot form) > Jab x2 > FSmash > Boost Tackle', dmgRange: '60%〜', diff: 3, hits: 5, instantKill: true },
+  ],
+  30: [ // Chatta
+    { name: 'Claw String', route: 'Jab > Jab > FTilt > Stretch Swipe', dmgRange: '0〜40%', diff: 1, hits: 4 },
+    { name: 'Flight Pressure', route: 'Take Flight > Air Claw x3 > Dive Claw', dmgRange: '20〜80%', diff: 2, hits: 5 },
+    { name: 'Blink Punish', route: '->-> Down Down + Z (Blink) > USmash', dmgRange: '0〜60%', diff: 2, hits: 2 },
+    { name: '💀 Warp Spike', route: 'Hold D (Warp Meteor) off-stage > opponent cannot recover', dmgRange: '0%〜', diff: 3, hits: 1, instantKill: true },
   ],
 };
 
@@ -6417,6 +6448,7 @@ function startBGM() {
   const stage = stages[selectedStage];
   currentBgmAudio = bgmMap[stage.bgmSrc] || bgmAudio;
   currentBgmAudio.currentTime = 0;
+  currentBgmAudio.volume = BGM_VOLUME;   // フェードアウト中に 試合が 終わると 音量0 の まま 残る
   currentBgmAudio.play().catch(() => {});
   bgmPlaying = true;
 }
@@ -6524,7 +6556,6 @@ let audienceBaseSource = null;
 let audienceBaseGain = null;
 let audienceBaseFilter = null;
 let audienceActive = false;
-let audienceLastCombo = [0, 0]; // 前フレームのコンボ数を記録
 let audienceCountdownStarted = false;
 
 function startAudienceBase() {
@@ -6881,14 +6912,11 @@ const BATTLE_TIME_LIMIT = 180;
 let battleTimer = BATTLE_TIME_LIMIT;
 let battleFrameAcc = 0;
 
-// --- Attack Definitions ---
+// --- 掴み・投げの 定数と キャラ別テーブル（attackDefs は もっと下）---
 // Each attack: { startup, active, recovery, damage, kbBase, kbScale, hx, hy, hw, hh, type, ... }
 // hx/hy are offset from player center (positive = forward), hw/hh = hitbox size
 const GRAB_RANGE = 55;          // 投げ間合い（密着距離）
-const GRAB_HOLD_FRAMES = 20;    // (legacy, unused)
 const GRAB_DURATION = 90;       // max frames holding grabbed opponent
-const THROW_BASE_KB = 8;
-const THROW_KB_SCALE = 0.10;
 const THROW_GRAB_FRAMES = 20;   // 掴みモーション デフォルト（20F）※10F→20Fに延長
 const THROW_EXEC_FRAMES = 10;   // 投げ実行モーション（10F）
 // キャラ別掴み拘束フレーム数（2倍に延長）
@@ -6979,7 +7007,7 @@ const CHAR_THROW_STATUS = {
   14: { type: 'poisoned', dur: 180 },   // とっこ: 毒
 };
 function getThrowDmg(charIdx) {
-  return CHAR_THROW_DMG[CHAR_THROW_TYPE[charIdx] || 'balance'];
+  return CHAR_THROW_DMG[CHAR_THROW_TYPE[charIdx]] || CHAR_THROW_DMG.balance;
 }
 // 相手ダメージに応じた掴み持続ボーナスフレーム
 function getGrabDurationBonus(targetDamage) {
@@ -7003,8 +7031,6 @@ const THROW_TECH_WINDOW = 10;   // 投げ抜け受付フレーム（10F）
 // Guard system
 const GUARD_MAX_DURABILITY = 100;
 const GUARD_REGEN_RATE = 0.3; // 毎フレーム0.3ずつ自動回復
-const GUARD_DAMAGE_REDUCTION = 0; // 完全ガード: ダメージ0
-const GUARD_DURABILITY_COST = 1.5; // 攻撃力の1.5倍削れる
 const GUARD_DECAY_RATE = 100 / 60 / (100/15); // ガード維持中の自然減少
 const GUARD_BREAK_STUN = 120; // 2 seconds at 60fps
 const JUST_GUARD_WINDOW = 5; // frames of perfect guard at start
@@ -7543,6 +7569,8 @@ const CHARACTER_ATTACK_STYLE = {
   26: { style:'bounce',     color:'#FF88CC' },  // ぽよ: バウンド
   27: { style:'gravity',    color:'#AA66FF' },  // プル: 重力
   28: { style:'poison',     color:'#66CC44' },  // ムッシー: 毒
+  29: { style:'electric',   color:'#66E8FF' },  // Bot: 機械の 電撃
+  30: { style:'standRush',  color:'#FF66CC' },  // Chatta: スタンドの 連打
 };
 
 const attackDefs = {
@@ -8637,6 +8665,17 @@ function initBattle() {
     createPlayer(1, p2Select, 610),
   ];
   ultimateActive = false; ultimatePhase = ''; ultimateTimer = 0; ultimateHitTarget = -1;
+  ultimatePlayerId = -1;
+  // 動画が 出たままだと「!ultimateVideoShowing」の ガードで バトルが 描かれなくなる
+  try { removeUltimateVideo(); } catch (ex) {}
+  ultimateVideoShowing = false;
+  // 前の 試合の 表示が 残らないように（コンボ数・画面の 光り・揺れ・ゲージ演出）
+  comboDisplay[0] = null; comboDisplay[1] = null;
+  hitFlash = { alpha: 0, color: '#FFFFFF' };
+  screenShake = { x: 0, y: 0, intensity: 0, duration: 0 };
+  gaugeMaxEffect = { active: false, timer: 0, playerId: -1, color: '#FFD700', text: '' };
+  gaugePopups = [];
+  instantKillDisplay = { active: false, timer: 0, maxTimer: 0 };
   // Boss Rush: apply boss stat buffs to P2
   if (bossRushMode) {
     gameMode = 'cpu';
@@ -9517,7 +9556,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
       if (other.id !== attacker.id && other.id !== target.id && other.alive && other.invincibleTimer <= 0) {
         if (Math.hypot(other.x - target.x, other.y - target.y) < 120) {
           other.damage = Math.min(999, other.damage + 1);
-          damageNumbers.push({ x: other.x, y: other.y - 60, text: '1', vy: -2, life: 20, color: '#88FFFF' });
+          damageNumbers.push({ x: other.x, y: other.y - 60, value: 1, vy: -2, life: 20, maxLife: 20, color: '#88FFFF', scale: 1 });
         }
       }
     }
@@ -10284,6 +10323,7 @@ function startAttack(p, type) {
   // Context-sensitive attack type
   // 天才: ドラゴンモード時は別のattackDefsを使用
   const defs = (p.charIdx === 10 && p.dragonMode) ? dragonAttackDefs : attackDefs[p.charIdx];
+  if (!defs) return;
   let actualType = type;
   // downair/airfront/airback/airup は空中専用
   if ((type === 'downair' || type === 'airfront' || type === 'airback' || type === 'airup') && p.grounded) return;
@@ -10545,7 +10585,7 @@ function executeThrow(grabber, dirX, dirY) {
   hitEffects.push({ x: target.x, y: target.y - 40, life: 12, maxLife: 12, color: '#FFFFFF', size: 60, type: 'ring' });
 
   // ダメージ数値表示
-  damageNumbers.push({ x: target.x, y: target.y - 60, value: throwDmg, life: 40, maxLife: 40, color: '#FFAA00' });
+  damageNumbers.push({ x: target.x, y: target.y - 60, value: Math.floor(throwDmg), life: 40, maxLife: 40, color: '#FFAA00', scale: 1 });
 
   // コンボシステム連携
   if (grabber.id !== undefined) {
@@ -10604,7 +10644,6 @@ function executeThrow(grabber, dirX, dirY) {
 
 // --- CPU AI ---
 let cpuActionTimer = 0;
-let cpuJumpTimer = 0;
 let cpuAttackCooldown = 0;
 
 function getCpuGuard(cpu, target) {
@@ -11738,7 +11777,7 @@ function updateBattle(dt) {
         if (p.id === 0 && isHost) {
           if (keys['ArrowUp']) {
             if (keys['z']||keys['Z']||keys['x']||keys['X']) releaseLedge(p, 'attack');
-            else if (keys['s']||keys['S']) releaseLedge(p, 'dodge');
+            else if (keys['Shift']) releaseLedge(p, 'dodge');   // ガードは Shift（他の 崖上がり処理と そろえる）
             else releaseLedge(p, 'normal');
             continue;
           }
@@ -11967,6 +12006,8 @@ function updateBattle(dt) {
       { t: p.pullCollapseMode, prev: '_prevPullCM' },
       { t: p.satoruMasterMode, prev: '_prevSatoruMM' },
       { t: p.poyoDoubleSlime, prev: '_prevPoyoDS' },
+      { t: p.botRobot, prev: '_prevBotRobot' },
+      { t: p.chattaFly, prev: '_prevChattaFly' },
     ];
     for (const mc of modeCheck) {
       if (mc.t > 0 && !p[mc.prev]) {
@@ -13980,29 +14021,6 @@ function drawCharacterShadow(p) {
 }
 
 // 台形ステージ描画ヘルパー
-function drawTrapezoidStage(leftTop, rightTop, leftBot, rightBot, topY, botY, topGrad, sideColor) {
-  // 上面（台形）
-  ctx.fillStyle = topGrad;
-  ctx.beginPath();
-  ctx.moveTo(leftTop, topY);
-  ctx.lineTo(rightTop, topY);
-  ctx.lineTo(rightBot, botY);
-  ctx.lineTo(leftBot, botY);
-  ctx.closePath();
-  ctx.fill();
-
-  // 側面（厚み）
-  const sideH = 22;
-  ctx.fillStyle = sideColor;
-  ctx.beginPath();
-  ctx.moveTo(leftBot, botY);
-  ctx.lineTo(rightBot, botY);
-  ctx.lineTo(rightBot + 3, botY + sideH);
-  ctx.lineTo(leftBot - 3, botY + sideH);
-  ctx.closePath();
-  ctx.fill();
-}
-
 function drawBattle(dt) {
   // Update camera
   updateCamera();
@@ -17315,7 +17333,7 @@ function drawBattleHUD() {
       gp.kumaFuryMode, gp.saisokuLightSpeed, gp.uruoWildRelease, gp.bulletAwaken,
       gp.shawdenOvercharge, gp.judgeFinalMode, gp.onpaResonance, gp.mrtwoDualBlast,
       gp.kinkinComboGold, gp.kinkinGoldMode, gp.longDragonSpear, gp.pullCollapseMode, gp.satoruMasterMode,
-      gp.poyoDoubleSlime, gp.kingTimeStop
+      gp.poyoDoubleSlime, gp.kingTimeStop, gp.botRobot, gp.chattaFly
     ];
     const activeMode = modeTimers.find(t => t > 0);
     if (activeMode) {
@@ -17715,6 +17733,7 @@ function teardownOnlineSession() {
   onlineInputId = '';
   remoteKeys = {}; prevRemoteKeys = {};   // 残ると 相手が キーを 押しっぱなしに なる
   hostLastSentState = null; lastGuestKeys = null;
+  gameMode = 'cpu';   // 'vs' のまま 残ると 到達しないはずの ローカル2人対戦に 入ってしまう
   onlineTeardown = false;
 }
 
@@ -17732,6 +17751,19 @@ function handleOnlineDisconnect(msg) {
     bossRushMode = false;
     if (!transitioning) startTransition('online');
   }
+}
+
+// 相手から 来た 番号を そのまま 使うと、別バージョンや 壊れたパケットで
+// テーブル参照が undefined に なって ゲームが 固まる
+function safeCharIdx(v, fallback) {
+  const n = Math.floor(Number(v));
+  if (!Number.isFinite(n) || n < 0 || n > characters.length) return (fallback || 0);
+  return n;   // characters.length は「ランダム」枠なので 許す
+}
+function safeStageIdx(v, fallback) {
+  const n = Math.floor(Number(v));
+  if (!Number.isFinite(n) || n < 0 || n >= stages.length) return (fallback || 0);
+  return n;
 }
 
 function setupPeerConnection(conn) {
@@ -17755,16 +17787,19 @@ function setupPeerConnection(conn) {
   conn.on('data', (data) => {
     if (data.type === 'charSelect') {
       // Received remote player's character selection
-      if (isHost) { p2Select = data.charIdx; }
-      else { p1Select = data.charIdx; }
+      if (isHost) { p2Select = safeCharIdx(data.charIdx, p2Select); }
+      else { p1Select = safeCharIdx(data.charIdx, p1Select); }
     } else if (data.type === 'charConfirm') {
-      if (isHost) { p2Select = data.charIdx; p2Confirmed = true; }
-      else { p1Select = data.charIdx; p1Confirmed = true; }
+      if (isHost) { p2Select = safeCharIdx(data.charIdx, p2Select); p2Confirmed = true; }
+      else { p1Select = safeCharIdx(data.charIdx, p1Select); p1Confirmed = true; }
     } else if (data.type === 'startBattle') {
-      if (isHost) { p2Select = data.charIdx; }
-      else { p1Select = data.charIdx; }
+      if (isHost) { p2Select = safeCharIdx(data.charIdx, p2Select); }
+      else { p1Select = safeCharIdx(data.charIdx, p1Select); }
+      // 「ランダム」枠の ままだと キャラ番号として 使えないので ここで 決める
+      if (p1Select >= characters.length) p1Select = Math.floor(Math.random() * characters.length);
+      if (p2Select >= characters.length) p2Select = Math.floor(Math.random() * characters.length);
       p1Confirmed = true; p2Confirmed = true;
-      if (typeof data.stageIdx === 'number') selectedStage = data.stageIdx;
+      selectedStage = safeStageIdx(data.stageIdx, selectedStage);
       if (scene === 'select' || scene === 'stageselect') startTransition('vsintro');
     } else if (data.type === 'input') {
       // Host receives guest input
@@ -17805,6 +17840,10 @@ function setupPeerConnection(conn) {
     } else if (data.type === 'frame') {
       // Guest receives lightweight frame packet (position/velocity only)
       if (!isHost && players[0] && players[1]) {
+        // 1つでも 数字で なければ 捨てる。入れてしまうと 座標が NaN に なり 元に 戻らない
+        const okNum = ['p1x','p1y','p1vx','p1vy','p2x','p2y','p2vx','p2vy']
+          .every(k => Number.isFinite(data[k]));
+        if (!okNum) return;
         if (data._ts) { onlineRTT = Date.now() - data._ts; onlineLagFrames = Math.min(4, Math.round(onlineRTT / 32)); }
         const lp = 0.25;
         // P1
@@ -17849,8 +17888,19 @@ const PEER_CONFIG = {
 };
 let onlineConnectTimeout = null;
 
+// PeerJS は CDN 読み込み。落ちていると new Peer で ReferenceError に なるので 先に 見る
+function peerLibReady() {
+  if (typeof Peer === 'undefined') {
+    onlineError = 'Online library failed to load. Check your connection and reload.';
+    onlineState = 'menu';
+    return false;
+  }
+  return true;
+}
+
 function startHosting() {
   teardownOnlineSession();   // 前のセッションを 必ず 捨ててから 始める
+  if (!peerLibReady()) return;
   onlineRoomId = generateRoomId();
   onlineState = 'hosting';
   onlineError = '';
@@ -17882,6 +17932,7 @@ function joinRoom(roomId) {
   roomId = (roomId || '').trim();
   if (!roomId || roomId.length < 4) { onlineError = 'Enter an ID of 4 or more characters'; return; }
   teardownOnlineSession();   // 前のセッションを 必ず 捨ててから 始める
+  if (!peerLibReady()) return;
   onlineState = 'joining';
   onlineError = '';
   isHost = false;
@@ -17980,6 +18031,7 @@ function serializePlayer(p) {
     techState: p.techState || '', techTimer: p.techTimer || 0,
     guardShrink: p.guardShrink || 0, bounceStun: p.bounceStun || 0, downThrowBounce: p.downThrowBounce || false,
     chattaWarpLeft: p.chattaWarpLeft, botRobot: p.botRobot || 0,
+    chattaFly: p.chattaFly || 0, chattaFlyCd: p.chattaFlyCd || 0,
   };
 }
 
@@ -18047,7 +18099,6 @@ function sendHostState() {
 
 // オンラインRTT計測
 let onlineRTT = 0; // ミリ秒
-let onlinePingTime = 0;
 let onlineLagFrames = 0;
 
 function applyHostState(data) {
@@ -18103,7 +18154,8 @@ function applyHostState(data) {
     target.spinAngle = src.spinAngle; target.damageTint = src.damageTint;
     target.invincibleTimer = src.invincibleTimer;
     target.dragonMode = src.dragonMode; target.dragonTimer = src.dragonTimer;
-    target.charging = src.charging; target.chargeTime = src.chargeTime; target.chargeMaxTime = src.chargeMaxTime;
+    target.charging = src.charging; target.chargeTime = src.chargeTime || 0;
+    target.chargeMaxTime = src.chargeMaxTime || 120;   // 0 だと 割り算が NaN に なり 描画が 落ちる
     target.grabbing = src.grabbing; target.grabbed = src.grabbed;
     target.grabTarget = src.grabTarget; target.grabbedBy = src.grabbedBy;
     target.respawnTimer = src.respawnTimer; target.landSquash = src.landSquash; target.jumpSquash = src.jumpSquash;
@@ -18113,7 +18165,8 @@ function applyHostState(data) {
     target.dragonCooldown = src.dragonCooldown; target.dragonTransforming = src.dragonTransforming;
     target.dragonTransformTimer = src.dragonTransformTimer;
     target.throwCooldown = src.throwCooldown; target.inkBlindTimer = src.inkBlindTimer;
-    target.animTimer = src.animTimer; target.charIdx = src.charIdx;
+    target.animTimer = src.animTimer;
+    if (Number.isFinite(src.charIdx) && src.charIdx >= 0 && src.charIdx < characters.length) target.charIdx = src.charIdx;
     target.kingComboHits = src.kingComboHits; target.kingComboTimer = src.kingComboTimer;
     target.senBuffTimer = src.senBuffTimer;
     target.dosbossRandomPattern = src.dosbossRandomPattern || 0; target.gravityDebuffTimer = src.gravityDebuffTimer || 0;
@@ -18131,6 +18184,8 @@ function applyHostState(data) {
     target.bounceStun = src.bounceStun || 0;
     target.chattaWarpLeft = src.chattaWarpLeft != null ? src.chattaWarpLeft : CHATTA_WARP_USES;
     target.botRobot = src.botRobot || 0;
+    target.chattaFly = src.chattaFly || 0;
+    target.chattaFlyCd = src.chattaFlyCd || 0;
     target.downThrowBounce = src.downThrowBounce || false;
     // ゲージ同期
     target.ultimateGauge = src.ultimateGauge || 0;
@@ -18903,6 +18958,9 @@ function drawTransition() {
 }
 
 // --- スマッシュ攻撃システム ---
+// ※ 2026-11 時点で 未使用。方向2回入力の スマッシュ攻撃は どこからも 呼ばれておらず、
+//    README と 詳細画面が 載せている「-> -> + Z」は 実際には 動いていない。
+//    復活させる なら handleKeyDown の X処理で checkSmashReady() を 呼ぶ。
 function trackSmashInput(p, dir) {
   if (p.smashInputDir === dir && (battleTime - p.smashInputTime) < SMASH_INPUT_WINDOW) {
     p.smashInputCount++;
@@ -18937,6 +18995,7 @@ function executeSmash(p) {
   const chargeRatio = Math.min(p.smashChargeTime / SMASH_CHARGE_MAX, 1);
   const chargeMult = 1 + chargeRatio * SMASH_CHARGE_BONUS;
   const defs = (p.charIdx === 10 && p.dragonMode) ? dragonAttackDefs : attackDefs[p.charIdx];
+  if (!defs) return;
   const baseAtk = defs.strong;
   if (!baseAtk) { p.smashCharging = false; return; }
   const dir = p.facingLeft ? -1 : 1;
@@ -19275,7 +19334,7 @@ function startUltimateVideo() {
 
   // 再生できる 状態に なってから 画面に 出す（読み込み中の 真っ黒を 見せない）
   function show() {
-    if (finished || ultimateVideo.shown) return;
+    if (finished || !ultimateVideo || ultimateVideo.shown) return;
     ultimateVideo.shown = true;
     ultimateVideoShowing = true;
     video.muted = false;
@@ -19298,14 +19357,15 @@ function startUltimateVideo() {
     video.oncanplay = show;
     // 1.2秒 待って まだ 再生できないなら 動画は あきらめて 先へ進む。
     // 真っ黒な 画面で 待たせない
-    setTimeout(function () { if (!finished && !ultimateVideo.shown) onFinish(); }, 1200);
+    setTimeout(function () { if (!finished && (!ultimateVideo || !ultimateVideo.shown)) onFinish(); }, 1200);
   }
   // 見張り: 画面に 出したのに 再生が 進んでいない（固まっている）なら 打ち切る。
   // 読み込みが 遅い 回線で 止まったまま 待たされるのを 防ぐ
   let lastT = -1, stuck = 0;
   const watch = setInterval(function () {
     if (finished) { clearInterval(watch); return; }
-    if (!ultimateVideo || !ultimateVideo.shown) return;
+    if (!ultimateVideo) { clearInterval(watch); return; }   // 消えた後も 300msごとに 回り続けていた
+    if (!ultimateVideo.shown) return;
     const ct = video.currentTime;
     if (ct <= lastT + 0.001) { stuck++; } else { stuck = 0; }
     lastT = ct;
@@ -19684,6 +19744,9 @@ function drawUltimateOverlay() {
 
 function triggerDSkill(p) {
   if (p.dSkillCooldown > 0 || p.dSkillActive || !p.alive || p.hitstun > 0 || p.grabbed) return;
+  // D技を 持たないキャラ（Chatta は D＝ワープメテオ）で クールダウンだけ 取られないように、
+  // 分岐が ある ことを 先に 確かめる
+  if (!D_SKILL_NAMES[p.charIdx]) return;
   p.dSkillCooldown = D_SKILL_COOLDOWN;
   const target = players.find(pp => pp.id !== p.id && pp.alive);
   const dir = p.facingLeft ? -1 : 1;
@@ -20252,96 +20315,6 @@ function canAirDodge(p) {
 }
 
 // Process a keydown event for a specific player
-function processPlayerKeydown(key, p, playerId, keyState) {
-  // Direction commands + スマッシュ入力トラッキング
-  if (key === 'ArrowDown') { addCmdInput(playerId, 'D'); trackSmashInput(p, 'down'); }
-  if (key === 'ArrowUp') { addCmdInput(playerId, 'U'); trackSmashInput(p, 'up'); }
-  if (key === 'ArrowLeft') { addCmdInput(playerId, 'L'); trackSmashInput(p, 'side'); }
-  if (key === 'ArrowRight') { addCmdInput(playerId, 'R'); trackSmashInput(p, 'side'); }
-  // Normal attack (Z)
-  if (key === 'z' || key === 'Z') {
-    if (p.grabbing) {
-      const target = players.find(pp => pp.id === p.grabTarget);
-      if (target) { target.damage = Math.min(999, target.damage + 2); hitEffects.push({x:target.x,y:target.y-40,life:6,maxLife:6,color:'#FFF',size:10}); }
-    } else {
-      const cmd = checkCommandInput(p);
-      if (cmd && executeCommand(p, cmd)) { }
-      else if (!p.grounded && keyState['ArrowDown']) startAttack(p, 'downair');
-      else if (!p.grounded && keyState['ArrowUp']) startAttack(p, 'airup');
-      else if (!p.grounded && ((keyState['ArrowRight'] && !p.facingLeft) || (keyState['ArrowLeft'] && p.facingLeft))) startAttack(p, 'airfront');
-      else if (!p.grounded && ((keyState['ArrowLeft'] && !p.facingLeft) || (keyState['ArrowRight'] && p.facingLeft))) startAttack(p, 'airback');
-      else if (!p.grounded) startAttack(p, 'aerial');
-      else if (keyState['ArrowUp']) startAttack(p, 'up');
-      else if (keyState['ArrowLeft'] || keyState['ArrowRight']) startAttack(p, 'side');
-      else if (keyState['ArrowDown']) startAttack(p, 'down');
-      else {
-        // Jab combo: track consecutive normal attacks
-        if (p.jabTimer > 0 && p.jabCount >= 2) {
-          startJabCombo(p);
-        } else {
-          p.jabCount++;
-          p.jabTimer = 18;
-          startAttack(p, 'normal');
-        }
-      }
-    }
-  }
-  // Strong attack (X) - キャンセル対応
-  if (key === 'x' || key === 'X') {
-    if (p.grabbing) {
-      let dx = 0, dy = 0;
-      if (keyState['ArrowLeft']) dx = -1;
-      if (keyState['ArrowRight']) dx = 1;
-      if (keyState['ArrowUp']) dy = -1;
-      if (keyState['ArrowDown']) dy = 1;
-      executeThrow(p, dx, dy);
-    } else {
-      // スマッシュ攻撃チェック（方向2回+X）
-      const smash = checkSmashReady(p);
-      if (smash && p.grounded) {
-        startSmashAttack(p, smash);
-      } else if (!tryCancelAttack(p, 'strong')) {
-        startAttack(p, 'strong');
-      }
-    }
-  }
-  // Special (C) - キャンセル対応
-  if (key === 'c' || key === 'C') {
-    // コンボフィニッシャー: 10コンボ以上でC → 発動
-    if (canComboFinisher(p.id)) {
-      executeComboFinisher(p);
-    } else if (!(p.charIdx === 10 && !p.dragonMode && p.damage >= 80 && p.dragonCooldown <= 0 && p.grounded)) {
-      if (!tryCancelAttack(p, 'special')) {
-        startAttack(p, 'special');
-      }
-    }
-  }
-  // Guard (ground) / Air Dodge (air) - S key
-  if (key === 's' || key === 'S') {
-    if (p.grounded) {
-      // 地上: ガード
-      if (!p.attacking && !p.guarding && p.guardDurability > 0 && p.guardBreakStun <= 0) {
-        p.guarding = true;
-        p.justGuardTimer = typeof JUST_GUARD_WINDOW !== 'undefined' ? JUST_GUARD_WINDOW : 6;
-      }
-    } else {
-      // 空中: 空中回避
-      if (canAirDodge(p)) {
-        triggerAirDodge(p, keyState);
-      }
-    }
-  }
-  // Throw (A key) / 投げ抜け
-  if (key === 'a' || key === 'A') {
-    if (p.grabbed && p.throwTechWindow > 0) {
-      const grabber = players.find(pp => pp.id === p.grabbedBy);
-      if (grabber) throwTech(grabber, p);
-    } else if (!p.grabbing && p.grounded && !p.attacking && p.hitstun <= 0 && !p.grabbed) {
-      tryGrab(p);
-    }
-  }
-}
-
 // ============================================================
 // PAUSE MENU（バトル中に ESC）
 // ============================================================
@@ -21306,7 +21279,24 @@ let lastTime = performance.now();
 const FIXED_DT = 1000 / 60; // 16.667ms per frame
 let accumulator = 0;
 
+let loopErrorCount = 0;
+let lastLoopError = '';
 function gameLoop(timestamp) {
+  // 例外が 出ても 次のフレームを 必ず 予約する。
+  // これが 無いと 1回の 例外で ゲームが 永久に 固まる
+  try {
+    gameLoopInner(timestamp);
+  } catch (err) {
+    loopErrorCount++;
+    if (String(err && err.message) !== lastLoopError) {
+      lastLoopError = String(err && err.message);
+      console.error('[LOOP] ' + lastLoopError, err);
+    }
+  }
+  requestAnimationFrame(gameLoop);
+}
+
+function gameLoopInner(timestamp) {
   let elapsed = timestamp - lastTime;
   lastTime = timestamp;
 
@@ -21491,8 +21481,6 @@ function gameLoop(timestamp) {
 
   drawTransition();
   if (showHowToPlay) drawHowToPlayOverlay();
-
-  requestAnimationFrame(gameLoop);
 }
 
 requestAnimationFrame(gameLoop);
