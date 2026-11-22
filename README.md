@@ -171,13 +171,44 @@ sounds/               BGM
 ## 自動チェック
 
 ```
-node tools/smoketest.mjs          # 全31キャラ分。1〜2分
-node tools/smoketest.mjs --quick  # 5体おきに 抜き取り。20秒
+node tools/smoketest.mjs          # 全31キャラ分。2〜3分
+node tools/smoketest.mjs --quick  # 抜き取り。30秒
+node tools/toc.mjs                # 先頭の 目次を 作り直す
+node tools/toc.mjs --check        # 目次が ずれていないか 見るだけ
 ```
 
-ヘッドレスChrome で 実際に ゲームを 動かし、全キャラの 技・全画面の 描画・
-オンラインの ゲスト入力・ポーズ・スマッシュ・周期処理を 確かめる。
+ヘッドレスChrome で 本物の `gameLoop` を 回して 24項目を 確かめる。
 **index.html を いじったら 必ず 走らせること。**
+
+GitHub Actions で 自動実行する 設定も 用意してあります（`tools/github-workflow-test.yml`）。
+ただし いまの push 用トークンに workflow 権限が 無いため、まだ 有効に なっていません。
+有効に するには:
+
+```
+mkdir -p .github/workflows
+cp tools/github-workflow-test.yml .github/workflows/test.yml
+git add -A && git commit -m "add CI" && git push
+```
+
+| 見ているもの | 落ちたら 疑うこと |
+|---|---|
+| キャラ別テーブルの 抜け | キャラを 足して 登録を 忘れた |
+| 全画面の 描画 / 詳細画面 93ページ | 描画の 中で 例外 |
+| 全31キャラ × 12技 が **実際に 出るか** | `attackDefs` の キー抜け（出なくても 例外は 出ない）|
+| スマッシュ3種が 威力ゼロで ないか | 元に する 技が 飛び道具に なった |
+| 撃墜→ストック→復活 / 時間切れ＝引き分け | `blastCheck` の 条件を いじった |
+| ダメージで 吹っ飛びが 伸びるか | ノックバック計算の 壊れ |
+| 同じ技 連発の 下限 / ガード / 掴み投げ | 該当システムの 退行 |
+| コンボ15の 境界 | `canComboFinisher` の 条件 |
+| **ローカルと ゲストで 同じ技が 出るか** | 入力処理を 片方だけ 直した |
+| 試合やり直しで 状態が 残らないか | `initBattle` の リセット漏れ |
+| BGMが 無音の まま 残らないか | フェードの 止め忘れ |
+| 壊れたセーブ / 壊れた通信パケット | 入力検証の 外し |
+| 周期処理が フレーム基準か | `battleTime`（ミリ秒）を 使ってしまった |
+
+テストが 届かない ところ（人の目が 要る）:
+**必殺技動画の 実再生**、**本物の オンライン通信**（PeerJSはCDN依存）、
+**音の 聞こえ方**、**絵が 正しいか**。
 
 ## バランス調整
 

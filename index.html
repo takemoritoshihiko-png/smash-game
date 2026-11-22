@@ -67,9 +67,9 @@
 //   20673 画面の 切り替え（フェード）
 //   20708 ポーズメニュー（バトル中に ESC）
 //   20789 画面: キャラ詳細（Iキー）
-//   21002 画面: 操作説明
-//   21126 キー入力の 振り分け（画面ごと）
-//   21607 メインループ（60FPS 固定タイムステップ）
+//   21006 画面: 操作説明
+//   21130 キー入力の 振り分け（画面ごと）
+//   21611 メインループ（60FPS 固定タイムステップ）
 //
 // ### 目次ここまで
 // ======================================================================
@@ -11208,7 +11208,7 @@ function getCpuInput(cpu, target) {
       }
     }
 
-    // === コンボフィニッシャー: 10コンボ以上でCキー ===
+    // === コンボフィニッシャー: 15コンボ以上でCキー（canComboFinisher）===
     if (canComboFinisher(cpu.id) && target.hitstun > 0 && dist < 120) {
       result.comboFinisher = true;
     }
@@ -18902,7 +18902,7 @@ function drawComboList() {
     ctx.font = 'bold 16px sans-serif'; ctx.fillStyle = finisher.color;
     ctx.fillText('💥 ' + finisher.name, 120, fy + 25);
     ctx.font = '14px sans-serif'; ctx.fillStyle = '#FFFFFF';
-    ctx.fillText('Requires 10+ combo, then press C  |  ' + finisher.desc, 120, fy + 48);
+    ctx.fillText('Requires 15+ combo, then press C  |  ' + finisher.desc, 120, fy + 48);
     ctx.font = '12px sans-serif'; ctx.fillStyle = '#AAAAAA';
     const totalDmg = finisher.hits > 1 ? (finisher.damage + '×' + finisher.hits + (finisher.lastHitDmg ? '+' + finisher.lastHitDmg : '')) : finisher.damage;
     let effText = finisher.effect ? (' | Effect: ' + finisher.effect) : '';
@@ -20940,52 +20940,70 @@ function drawCharDetail() {
     // ======== MOVES ========
     ctx.font = 'bold 12px sans-serif'; ctx.fillStyle = ch.accent;
     ctx.fillText('MOVE LIST', moveX + 14, moveY + 22);
-    const colX = [moveX + 14, moveX + 180, moveX + 430, moveX + 580, moveX + 710];
+    // 技が 増えて 1列では はみ出すので 2列。左右の 列頭 x
+    const COL_W = 440;
+    const colLeft = [moveX + 14, moveX + 14 + COL_W];
+    const off = [0, 112, 248, 310, 372];   // 列の 中の 項目オフセット
     const headerY = moveY + 42;
     ctx.font = 'bold 9px sans-serif'; ctx.fillStyle = '#555';
-    ['INPUT', 'MOVE NAME', 'DAMAGE', 'STARTUP', 'KNOCKBACK'].forEach((h, i) => ctx.fillText(h, colX[i], headerY));
+    for (const cx of colLeft) {
+      ['INPUT', 'MOVE NAME', 'DMG', 'START', 'KB'].forEach((h, i) => ctx.fillText(h, cx + off[i], headerY));
+    }
     ctx.strokeStyle = '#222'; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(moveX + 14, headerY + 5); ctx.lineTo(moveX + 886, headerY + 5); ctx.stroke();
 
     const moves = [];
     if (atk) {
       const getDmg = (a) => a.projectile ? a.projectile.damage : a.damage;
-      moves.push({ input: 'Z (normal attack)', name: atk.normal?.name || '-', dmg: getDmg(atk.normal || {}), startup: atk.normal?.startup || '-', kb: atk.normal?.kbBase || '-' });
-      moves.push({ input: 'Z (FTilt)', name: atk.strong?.name || '-', dmg: getDmg(atk.strong || {}), startup: atk.strong?.startup || '-', kb: atk.strong?.kbBase || '-' });
-      moves.push({ input: '-> -> + Z (Side Smash)', name: atk.side?.name || '-', dmg: getDmg(atk.side || {}), startup: atk.side?.startup || '-', kb: atk.side?.kbBase || '-' });
-      moves.push({ input: 'Up Up + Z (Up Smash)', name: atk.up?.name || '-', dmg: getDmg(atk.up || {}), startup: atk.up?.startup || '-', kb: atk.up?.kbBase || '-' });
-      moves.push({ input: 'Down Down + Z (Down Smash)', name: atk.down?.name || '-', dmg: getDmg(atk.down || {}), startup: atk.down?.startup || '-', kb: atk.down?.kbBase || '-' });
+      moves.push({ input: 'Z', name: atk.normal?.name || '-', dmg: getDmg(atk.normal || {}), startup: atk.normal?.startup || '-', kb: atk.normal?.kbBase || '-' });
+      moves.push({ input: 'X (strong)', name: atk.strong?.name || '-', dmg: getDmg(atk.strong || {}), startup: atk.strong?.startup || '-', kb: atk.strong?.kbBase || '-' });
+      moves.push({ input: '-> + Z', name: atk.side?.name || '-', dmg: getDmg(atk.side || {}), startup: atk.side?.startup || '-', kb: atk.side?.kbBase || '-' });
+      moves.push({ input: 'Up + Z', name: atk.up?.name || '-', dmg: getDmg(atk.up || {}), startup: atk.up?.startup || '-', kb: atk.up?.kbBase || '-' });
+      moves.push({ input: 'Down + Z', name: atk.down?.name || '-', dmg: getDmg(atk.down || {}), startup: atk.down?.startup || '-', kb: atk.down?.kbBase || '-' });
+      moves.push({ input: 'Air + Z', name: atk.aerial?.name || '-', dmg: getDmg(atk.aerial || {}), startup: atk.aerial?.startup || '-', kb: atk.aerial?.kbBase || '-' });
+      moves.push({ input: 'Air Down + Z', name: atk.downair?.name || '-', dmg: getDmg(atk.downair || {}), startup: atk.downair?.startup || '-', kb: atk.downair?.kbBase || '-' });
+      moves.push({ input: '-> -> + X', name: 'Smash (chargeable)',
+        dmg: 'x' + SMASH_DAMAGE_MULT.sideSmash, startup: '-', kb: 'x' + (1 + SMASH_CHARGE_BONUS) + ' full' });
       moves.push({ input: 'C (special)', name: atk.special?.name || '-', dmg: getDmg(atk.special || {}), startup: atk.special?.startup || '-', kb: atk.special?.kbBase || '-' });
     }
     moves.push(rec
       ? { input: 'Up + X (recovery)', name: rec.name, dmg: rec.dmg || '-', startup: '-', kb: '-' }
       : { input: 'Up + X (recovery)', name: 'none (double jump only)', dmg: '-', startup: '-', kb: '-' });
     moves.push(charDetailIdx === 30
-      ? { input: 'Hold D', name: 'Warp Meteor', dmg: 16, startup: '-', kb: CHATTA_WARP_USES + 'x per stock' }
-      : { input: 'Hold D (D skill)', name: D_SKILL_NAMES[charDetailIdx] || 'none', dmg: '-', startup: '-', kb: '10s cooldown' });
-    moves.push({ input: 'A + direction', name: 'Grab & Throw', dmg: '-', startup: '-', kb: '-' });
-    moves.push({ input: 'Air + direction + D', name: 'Air Dash', dmg: '-', startup: '-', kb: '-' });
-    if (ult) moves.push({ input: 'Gauge 100% + hold D', name: ult.name, dmg: ult.dmg, startup: '-', kb: '-' });
+      ? { input: 'Hold D', name: 'Warp Meteor', dmg: 16, startup: '-', kb: CHATTA_WARP_USES + 'x / stock' }
+      : { input: 'Hold D', name: D_SKILL_NAMES[charDetailIdx] || 'none', dmg: '-', startup: '-', kb: '10s CD' });
+    moves.push({ input: 'A + dir', name: 'Grab & Throw', dmg: '-', startup: '-', kb: '-' });
+    moves.push({ input: 'Air dir + D', name: 'Air Dash', dmg: '-', startup: '-', kb: '25% gauge' });
+    if (ult) moves.push({ input: 'D at 100%', name: ult.name, dmg: ult.dmg, startup: '-', kb: 'ultimate' });
     if (fin) moves.push({ input: '15 combo + C', name: fin.name, dmg: fin.hits > 1 ? fin.damage + '\u00D7' + fin.hits : fin.damage, startup: '-', kb: fin.kb || '-' });
 
+    const perCol = Math.ceil(moves.length / 2);
     for (let i = 0; i < moves.length; i++) {
-      const ry = headerY + 14 + i * 21;
-      if (ry + 10 > moveY + panelH) break;
+      const col = Math.floor(i / perCol), row = i % perCol;
+      const cx = colLeft[col];
+      const ry = headerY + 14 + row * 21;
+      if (ry + 10 > moveY + panelH) continue;
       const m = moves[i];
       ctx.font = '10px sans-serif'; ctx.fillStyle = '#aaa';
-      ctx.fillText(m.input, colX[0], ry + 8);
-      ctx.fillStyle = '#e0e0e0'; ctx.font = 'bold 11px sans-serif';
-      ctx.fillText(m.name, colX[1], ry + 8);
+      ctx.fillText(m.input, cx + off[0], ry + 8);
+      ctx.fillStyle = '#e0e0e0'; ctx.font = 'bold 10px sans-serif';
+      ctx.fillText(m.name, cx + off[1], ry + 8);
       ctx.fillStyle = '#FF6666'; ctx.font = '10px sans-serif';
-      ctx.fillText(m.dmg, colX[2], ry + 8);
+      ctx.fillText(m.dmg, cx + off[2], ry + 8);
       ctx.fillStyle = '#88AAFF';
-      ctx.fillText(m.startup + (typeof m.startup === 'number' ? 'F' : ''), colX[3], ry + 8);
+      ctx.fillText(m.startup + (typeof m.startup === 'number' ? 'F' : ''), cx + off[3], ry + 8);
       ctx.fillStyle = '#FFD700';
-      ctx.fillText(m.kb, colX[4], ry + 8);
-      if (i < moves.length - 1) {
-        ctx.strokeStyle = '#141420'; ctx.beginPath(); ctx.moveTo(moveX + 14, ry + 14); ctx.lineTo(moveX + 886, ry + 14); ctx.stroke();
+      ctx.fillText(m.kb, cx + off[4], ry + 8);
+      if (row < perCol - 1) {
+        ctx.strokeStyle = '#141420'; ctx.beginPath();
+        ctx.moveTo(cx, ry + 14); ctx.lineTo(cx + COL_W - 16, ry + 14); ctx.stroke();
       }
     }
+    // 列の あいだの 仕切り
+    ctx.strokeStyle = '#1b1b28'; ctx.beginPath();
+    ctx.moveTo(moveX + 14 + COL_W - 8, headerY + 8);
+    ctx.lineTo(moveX + 14 + COL_W - 8, headerY + 14 + perCol * 21);
+    ctx.stroke();
   }
 
   // Navigation

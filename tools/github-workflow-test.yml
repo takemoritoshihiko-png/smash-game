@@ -1,0 +1,36 @@
+# GitHub Actions の テスト設定。
+#
+# このファイルは .github/workflows/ に 置くと 有効に なります。
+# いまは そこに 置けていません（push に 使っている トークンに
+# workflow 権限が 無く、GitHub に 弾かれるため）。
+#
+# 有効に するには ターミナルで 1行:
+#
+#   mkdir -p .github/workflows && cp tools/github-workflow-test.yml .github/workflows/test.yml && git add -A && git commit -m "add CI" && git push
+#
+# それでも 弾かれる 場合は トークンに workflow 権限を 足してください
+# （gh auth login を やり直す か、Personal Access Token に workflow を チェック）。
+#
+name: Smoke test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  smoketest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - uses: browser-actions/setup-chrome@v1
+      - name: 目次が 本文と そろっているか
+        run: node tools/toc.mjs --check
+      - name: ゲームが 壊れていないか（全31キャラ）
+        run: node tools/smoketest.mjs

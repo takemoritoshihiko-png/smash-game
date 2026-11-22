@@ -19,14 +19,19 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const QUICK = process.argv.includes('--quick');
 
 const CHROME = [
+  process.env.CHROME_PATH,
   '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
   '/Applications/Chromium.app/Contents/MacOS/Chromium',
   '/usr/bin/google-chrome',
+  '/usr/bin/google-chrome-stable',
   '/usr/bin/chromium',
-].find(existsSync);
+  '/usr/bin/chromium-browser',
+].filter(Boolean).find(existsSync);
 
 if (!CHROME) {
-  console.error('Chrome が 見つかりません。テストを 飛ばします。');
+  const msg = 'Chrome が 見つかりません（CHROME_PATH で 指定できます）';
+  if (process.env.CI) { console.error('FAIL ' + msg); process.exit(1); }
+  console.error(msg + ' — テストを 飛ばします。');
   process.exit(0);
 }
 
