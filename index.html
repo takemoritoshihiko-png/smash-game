@@ -5497,7 +5497,7 @@ const CHATTA_FLY_FRAMES = 480;     // 8秒
 const CHATTA_FLY_COOLDOWN = 1800;  // 30秒
 const CHATTA_FLY_TOP = -380;       // これより 上には 行けない（上の 撃墜ラインの 手前）
 const CHATTA_SHOT_INTERVAL = 26;   // 指カッターの 間隔（遅め）
-const CHATTA_WARP_COST = 40;       // ワープメテオの ゲージ消費（%）
+const CHATTA_WARP_USES = 3;        // ワープメテオは 1ストック(1機)につき 3回。3ストックなので 1試合 9回
 const BLAST_TOP = -450;
 const BLAST_BOTTOM = 1400;   // 1000→1400（+400px下に拡大）
 let BLAST_LEFT = -800;     // -600→-800（左に200px拡大）
@@ -8377,7 +8377,7 @@ function createPlayer(id, charIdx, startX) {
     botRobot: 0,              // Bot: ロボット変身の 残りフレーム（20秒=1200）
     botRocketsLeft: 0, botRocketTimer: 0, botRocketDmg: 0, botRocketKb: 0, botRocketAngle: -40, botRocketColor: '#66E8FF',
     chattaFly: 0, chattaFlyCd: 0, chattaShotCd: 0,   // Chatta: 飛行 残りF / 次に 飛べるまで / 指カッターの 間隔
-    chattaWarpCd: 0, chattaClawsLeft: 0, chattaClawTimer: 0,   // Chatta: ワープメテオの 間隔 / 必殺の 爪 残り
+    chattaWarpCd: 0, chattaWarpLeft: CHATTA_WARP_USES, chattaClawsLeft: 0, chattaClawTimer: 0,   // Chatta: ワープメテオの 間隔 / 残り回数 / 必殺の 爪 残り
     guardDurability: GUARD_MAX_DURABILITY,
     guardBreakStun: 0, // frames of stun after guard break
     guardShrink: 0,    // ガード収縮アニメ残りフレーム
@@ -11358,6 +11358,8 @@ function updateBattle(dt) {
         p.animState = 'fall'; p.spinAngle = 0; p.damageTint = 0; p.landSquash = 0; p.jumpSquash = 0;
         p.senBuffTimer = 0;
         p.gravityDebuffTimer = 0;
+        p.chattaWarpLeft = CHATTA_WARP_USES;   // Chatta: ワープメテオは 1機につき 3回
+        p.chattaWarpCd = 0;
       }
       continue;
     }
@@ -11444,13 +11446,13 @@ function updateBattle(dt) {
     // 攻撃強化: 削除済み
 
     // Chatta: ゲージ100%未満のとき D長押しで「相手に ワープして 下に メテオ」
-    // ゲージを CHATTA_WARP_COST% 消費する。足りなければ 出ない
+    // 1ストック(1機)につき CHATTA_WARP_USES 回まで。やられて 復活すると 回数は 戻る
     const chattaWarpReady = p.charIdx === 30 && p.alive && !ultimateActive && (p.ultimateGauge || 0) < 100
         && p.chattaWarpCd <= 0 && !p.attacking && p.hitstun <= 0 && p.sealMagic <= 0;
-    if (dKeyHeld && chattaWarpReady && (p.ultimateGauge || 0) >= CHATTA_WARP_COST) {
+    if (dKeyHeld && chattaWarpReady && (p.chattaWarpLeft || 0) > 0) {
       const tg = players.find(pp => pp.id !== p.id && pp.alive);
       if (tg) {
-        p.ultimateGauge = Math.max(0, (p.ultimateGauge || 0) - CHATTA_WARP_COST);
+        p.chattaWarpLeft--;    // 1機につき 3回。やられて 復活すると また 3回
         // この D入力は 使い切った。下の ゲージキャンセル／バースト／エアダッシュに
         // 流用されると、出した 直後の ワープメテオが その場で 消されてしまう
         p.dHoldTimer = -1;
@@ -11468,7 +11470,7 @@ function updateBattle(dt) {
         hitFlash.alpha = Math.max(hitFlash.alpha, 0.35);
         hitFlash.color = '#FF66CC';
         triggerScreenShake(9, 14);
-        cmdNameDisplay.push({ text: 'WARP METEOR!', x: p.x, y: p.y - 70, life: 50, maxLife: 50, color: '#FF66CC' });
+        cmdNameDisplay.push({ text: 'WARP METEOR!  ' + p.chattaWarpLeft + ' LEFT', x: p.x, y: p.y - 70, life: 50, maxLife: 50, color: '#FF66CC' });
         for (let i = 0; i < 22; i++) {
           sparks.push({ x: p.x + (Math.random()-0.5)*40, y: p.y - 40 + Math.random()*120,
             vx: (Math.random()-0.5)*2, vy: -2 - Math.random()*2,
@@ -11478,8 +11480,8 @@ function updateBattle(dt) {
         playHitSound('special', 8, 30);
       }
     } else if (dKeyHeld && chattaWarpReady && p.dHoldTimer === 0) {
-      // ゲージ不足: 何も 起きない 理由を 見せる
-      cmdNameDisplay.push({ text: 'NEED ' + CHATTA_WARP_COST + '% GAUGE', x: p.x, y: p.y - 80,
+      // 残り0回: 何も 起きない 理由を 見せる
+      cmdNameDisplay.push({ text: 'NO WARP LEFT', x: p.x, y: p.y - 80,
         life: 40, maxLife: 40, color: '#FF88BB' });
       playHitSound('guard');
     }
@@ -17674,6 +17676,21 @@ function drawPlayerHUD(x, y, player, label, color) {
     }
   }
 
+  // Chatta: ワープメテオの 残り回数（1機につき 3回）
+  if (player.charIdx === 30) {
+    ctx.font = 'bold 9px sans-serif'; ctx.textAlign = 'right'; ctx.fillStyle = '#C97BA8';
+    ctx.fillText('WARP', x + w - 10 - CHATTA_WARP_USES * 13, y + 20);
+    for (let i = 0; i < CHATTA_WARP_USES; i++) {
+      const dx = x + w - 10 - (CHATTA_WARP_USES - 1 - i) * 13, dy = y + 16;
+      ctx.beginPath();
+      ctx.moveTo(dx - 4, dy); ctx.lineTo(dx, dy - 5); ctx.lineTo(dx + 4, dy); ctx.lineTo(dx, dy + 5);
+      ctx.closePath();
+      if (i < (player.chattaWarpLeft || 0)) { ctx.fillStyle = '#FF66CC'; ctx.fill(); }
+      else { ctx.strokeStyle = '#553348'; ctx.lineWidth = 1; ctx.stroke(); }
+    }
+    ctx.textAlign = 'left';
+  }
+
   // Guard durability bar
   const guardRatio = player.guardDurability / GUARD_MAX_DURABILITY;
   const gbX = x + 120, gbY = y + h - 14, gbW = 110, gbH = 6;
@@ -17921,6 +17938,7 @@ function serializePlayer(p) {
     rageActive: p.rageActive || false, rageGauge: p.rageGauge || 0, powerUpTimer: p.powerUpTimer || 0,
     techState: p.techState || '', techTimer: p.techTimer || 0,
     guardShrink: p.guardShrink || 0, bounceStun: p.bounceStun || 0, downThrowBounce: p.downThrowBounce || false,
+    chattaWarpLeft: p.chattaWarpLeft, botRobot: p.botRobot || 0,
   };
 }
 
@@ -18061,6 +18079,8 @@ function applyHostState(data) {
     target.techTimer = src.techTimer || 0;
     target.guardShrink = src.guardShrink || 0;
     target.bounceStun = src.bounceStun || 0;
+    target.chattaWarpLeft = src.chattaWarpLeft != null ? src.chattaWarpLeft : CHATTA_WARP_USES;
+    target.botRobot = src.botRobot || 0;
     target.downThrowBounce = src.downThrowBounce || false;
     // ゲージ同期
     target.ultimateGauge = src.ultimateGauge || 0;
@@ -20526,7 +20546,7 @@ function drawCharDetail() {
       ? { input: 'Up + X (recovery)', name: rec.name, dmg: rec.dmg || '-', startup: '-', kb: '-' }
       : { input: 'Up + X (recovery)', name: 'none (double jump only)', dmg: '-', startup: '-', kb: '-' });
     moves.push(charDetailIdx === 30
-      ? { input: 'Hold D (gauge)', name: 'Warp Meteor', dmg: 16, startup: '-', kb: 'costs ' + CHATTA_WARP_COST + '% gauge' }
+      ? { input: 'Hold D', name: 'Warp Meteor', dmg: 16, startup: '-', kb: CHATTA_WARP_USES + 'x per stock' }
       : { input: 'Hold D (D skill)', name: D_SKILL_NAMES[charDetailIdx] || 'none', dmg: '-', startup: '-', kb: '10s cooldown' });
     moves.push({ input: 'A + direction', name: 'Grab & Throw', dmg: '-', startup: '-', kb: '-' });
     moves.push({ input: 'Air + direction + D', name: 'Air Dash', dmg: '-', startup: '-', kb: '-' });
