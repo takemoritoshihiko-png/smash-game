@@ -21,55 +21,56 @@
 //   変更したら  node tools/smoketest.mjs  を 必ず 走らせること。
 //   目次が ずれたら  node tools/toc.mjs  で 作り直す。
 //
-//   82    CANVAS / 画面サイズ
-//   922   音の ロック解除（最初の 操作で 呼ぶ）
-//   957   キャラ画像（遅延読み込み）
-//   1137  タイトル画面の 粒子
-//   1176  キャラの 絵 ①メニュー用（選択画面・詳細画面）
-//   2836  キャラの 絵 ②バトル用
-//   5357  描画ユーティリティ
-//   5406  画面: タイトル
-//   5530  画面: キャラ選択
-//   5780  画面: 難易度選択（CPU戦）
-//   5880  画面: ステージ選択
-//   6111  バトルの 定数 と 状態
-//   6518  復帰技 / パワーモードの 表示
-//   6566  カメラ / 画面揺れ
-//   6585  効果音（Web Audio で 合成）
-//   7006  観客の 音
-//   7349  ヒット表示 / コミック文字
-//   7377  掴み・投げ の 定数と キャラ別テーブル
-//   7428  コマンド技（→→↓↓+Z など）
-//   7919  技データ
-//   8684  プレイヤー生成 / 試合の 初期化
-//   9032  ヒット処理（ダメージ・ノックバック）
-//   10373 当たり判定
-//   10405 飛び道具
-//   10448 技の 発動（通常技・復帰技・ジャブ）
-//   10707 掴み・投げ の 実行
-//   10934 CPU の 思考
-//   11280 バトルの 毎フレーム更新（中核）
-//   13730 物理（移動・重力・着地・撃墜判定）
-//   14297 スマッシュ攻撃（方向2回 + X）
-//   14413 崖つかまり
-//   14510 D技 と 必殺技 の データ
-//   15377 D技の 中身（キャラ別）
-//   15530 空中回避
-//   15592 バトル描画の 下準備（カメラ・影・2.5D）
-//   15692 バトル画面の 描画
-//   17727 技の エフェクト描画
-//   18802 必殺技 / 即死技 の 全画面オーバーレイ
-//   18975 画面: コンボ一覧 / 戦績
-//   19107 キャラ別 ゲージの 描画（HUDの 下に 出る 細い バー）
-//   19318 バトルの HUD
-//   19587 オンライン対戦（PeerJS / ホストが 正）
-//   20541 画面: VS イントロ
-//   20826 画面の 切り替え（フェード）
-//   20861 ポーズメニュー（バトル中に ESC）
-//   20942 画面: キャラ詳細（Iキー）
-//   21173 画面: 操作説明
-//   21297 キー入力の 振り分け（画面ごと）
-//   21778 メインループ（60FPS 固定タイムステップ）
+//   83    CANVAS / 画面サイズ
+//   923   音の ロック解除（最初の 操作で 呼ぶ）
+//   958   キャラ画像（遅延読み込み）
+//   1138  タイトル画面の 粒子
+//   1177  キャラの 絵 ①メニュー用（選択画面・詳細画面）
+//   2837  キャラの 絵 ②バトル用
+//   5358  描画ユーティリティ
+//   5407  画面: タイトル
+//   5531  画面: キャラ選択
+//   5781  画面: 難易度選択（CPU戦）
+//   5881  画面: ステージ選択
+//   6112  バトルの 定数 と 状態
+//   6519  復帰技 / パワーモードの 表示
+//   6567  カメラ / 画面揺れ
+//   6586  効果音（Web Audio で 合成）
+//   7007  観客の 音
+//   7350  ヒット表示 / コミック文字
+//   7378  掴み・投げ の 定数と キャラ別テーブル
+//   7429  コマンド技（→→↓↓+Z など）
+//   7920  技データ
+//   8685  プレイヤー生成 / 試合の 初期化
+//   9033  ヒット処理（ダメージ・ノックバック）
+//   10374 当たり判定
+//   10406 飛び道具
+//   10449 技の 発動（通常技・復帰技・ジャブ）
+//   10708 掴み・投げ の 実行
+//   10935 CPU の 思考
+//   11281 バトルの 毎フレーム更新（中核）
+//   13731 物理（移動・重力・着地・撃墜判定）
+//   14298 スマッシュ攻撃（方向2回 + X）
+//   14414 崖つかまり
+//   14511 D技 と 必殺技 の データ
+//   15378 D技の 中身（キャラ別）
+//   15531 空中回避
+//   15593 バトル描画の 下準備（カメラ・影・2.5D）
+//   15693 バトル画面の 描画
+//   17727 技エフェクトの 描画（effect 名 → 描き方）
+//   18384 技の エフェクト描画
+//   18818 必殺技 / 即死技 の 全画面オーバーレイ
+//   18991 画面: コンボ一覧 / 戦績
+//   19123 キャラ別 ゲージの 描画（HUDの 下に 出る 細い バー）
+//   19334 バトルの HUD
+//   19603 オンライン対戦（PeerJS / ホストが 正）
+//   20557 画面: VS イントロ
+//   20842 画面の 切り替え（フェード）
+//   20877 ポーズメニュー（バトル中に ESC）
+//   20958 画面: キャラ詳細（Iキー）
+//   21189 画面: 操作説明
+//   21313 キー入力の 振り分け（画面ごと）
+//   21794 メインループ（60FPS 固定タイムステップ）
 //
 // ### 目次ここまで
 // ======================================================================
@@ -17722,28 +17723,16 @@ function drawBattle(dt) {
     if (hitFlash.alpha < 0.01) hitFlash.alpha = 0;
   }
 }
-
 // ======================================================================
-// 技の エフェクト描画
+// 技エフェクトの 描画（effect 名 → 描き方）
+//
+// 以前は if (atk.effect === ...) が 29個 並んでいて、1回の 描画で
+// すべて 評価されていた。中身は そのまま 移しただけ。
+//   p, atk  : プレイヤーと 技データ
+//   cx, cy  : 中心座標   dir: 向き 1 / -1   frame: 技の 経過フレーム
 // ======================================================================
-function drawAttackEffect(p) {
-  const atk = p.attackData;
-  if (!atk) return;
-  const frame = p.attackFrame;
-  const inActive = frame > (atk.startup||0) && frame <= (atk.startup||0) + (atk.active||0);
-  if (!inActive && atk.specialType !== 'jumpSlam') return;
-
-  // 負の半径エラー防止: ctx.arcをラップ
-  const _origArc = ctx.arc.bind(ctx);
-  ctx.arc = function(x, y, r, s, e, ccw) { _origArc(x, y, Math.max(0.1, r), s, e, ccw); };
-
-  const dir = p.facingLeft ? -1 : 1;
-  const cx = p.x;
-  const cy = p.y;
-
-  ctx.save();
-
-  if (atk.effect === 'slash') {
+const ATTACK_EFFECTS = {
+  'slash': (p, atk, cx, cy, dir, frame) => {
     // Sword arc
     const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     ctx.strokeStyle = atk.color;
@@ -17769,9 +17758,8 @@ function drawAttackEffect(p) {
     ctx.beginPath();
     ctx.arc(cx + 15 * dir, cy - 40, 45, startAngle, startAngle + sweep * dir);
     ctx.stroke();
-  }
-
-  if (atk.effect === 'bigslash') {
+  },
+  'bigslash': (p, atk, cx, cy, dir, frame) => {
     const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     const sx = cx + 10 * dir;
     // Main slash line
@@ -17807,9 +17795,8 @@ function drawAttackEffect(p) {
       ctx.globalAlpha = 0.3 * (1 - bt);
       ctx.beginPath(); ctx.arc(bx, by, 12 * (1 - bt), 0, Math.PI * 2); ctx.fill();
     }
-  }
-
-  if (atk.effect === 'punch') {
+  },
+  'punch': (p, atk, cx, cy, dir, frame) => {
     const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     const px = cx + (20 + 20 * t) * dir;
     // Impact circle
@@ -17830,9 +17817,8 @@ function drawAttackEffect(p) {
       ctx.lineTo(px + Math.cos(a) * sparkR, cy - 35 + Math.sin(a) * sparkR);
       ctx.stroke();
     }
-  }
-
-  if (atk.effect === 'shockwave') {
+  },
+  'shockwave': (p, atk, cx, cy, dir, frame) => {
     const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     const es = atk.effectScale || 1;
     const radius = 60 * es * t;
@@ -17872,9 +17858,8 @@ function drawAttackEffect(p) {
     ctx.beginPath();
     ctx.ellipse(cx, cy - 2, radius * 0.8, 6 * (1 - t), 0, 0, Math.PI * 2);
     ctx.fill();
-  }
-
-  if (atk.effect === 'slam') {
+  },
+  'slam': (p, atk, cx, cy, dir, frame) => {
     if (p.specialState === 'slamHit') {
       const t = Math.min(1, (frame - atk.startup) / (atk.slamActive || 1));
       // Expanding shockwave rings（適正サイズ）
@@ -17930,9 +17915,8 @@ function drawAttackEffect(p) {
         ctx.stroke();
       }
     }
-  }
-
-  if (atk.effect === 'kick') {
+  },
+  'kick': (p, atk, cx, cy, dir, frame) => {
     const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     const kickNum = Math.floor(t * 3);
     const kickT = (t * 3) % 1;
@@ -17952,9 +17936,8 @@ function drawAttackEffect(p) {
       ctx.lineTo(kx - 25 * dir, ky - 5 + i * 5);
       ctx.stroke();
     }
-  }
-
-  if (atk.effect === 'dash') {
+  },
+  'dash': (p, atk, cx, cy, dir, frame) => {
     if (p.specialState === 'dashing') {
       const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
       // Green energy trail
@@ -17981,9 +17964,8 @@ function drawAttackEffect(p) {
       ctx.globalAlpha = 0.5 * (1 - t);
       ctx.beginPath(); ctx.arc(cx + 20 * dir, cy - 35, 10 * (0.5 + t * 0.5), 0, Math.PI * 2); ctx.fill();
     }
-  }
-
-  if (atk.effect === 'uppercut') {
+  },
+  'uppercut': (p, atk, cx, cy, dir, frame) => {
     const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     const startY = cy - 20;
     // Rising arc trail
@@ -18014,9 +17996,8 @@ function drawAttackEffect(p) {
     ctx.beginPath();
     ctx.arc(cx + 10 * dir, cy - 55 - 25 * t, 7 * (1 - t * 0.3), 0, Math.PI * 2);
     ctx.fill();
-  }
-
-  if (atk.effect === 'rapid') {
+  },
+  'rapid': (p, atk, cx, cy, dir, frame) => {
     const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     const punchIdx = frame % 4;
     // Orange rapid punch impacts
@@ -18054,10 +18035,9 @@ function drawAttackEffect(p) {
     ctx.beginPath();
     ctx.arc(cx + 18 * dir, cy - 37, 22, 0, Math.PI * 2);
     ctx.stroke();
-  }
-
+  },
   // --- Aerial attack effects ---
-  if (atk.effect === 'airslash') {
+  'airslash': (p, atk, cx, cy, dir, frame) => {
     const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     ctx.strokeStyle = atk.color;
     ctx.lineWidth = 4;
@@ -18066,18 +18046,16 @@ function drawAttackEffect(p) {
     ctx.arc(cx + 10 * dir, cy - 30, 35, -Math.PI * 0.2 + t * Math.PI * 1.2, -Math.PI * 0.2 + t * Math.PI * 1.5);
     ctx.stroke();
     ctx.lineWidth = 10; ctx.globalAlpha = 0.2 * (1 - t); ctx.strokeStyle = '#FFF'; ctx.stroke();
-  }
-
-  if (atk.effect === 'airslam') {
+  },
+  'airslam': (p, atk, cx, cy, dir, frame) => {
     const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     ctx.fillStyle = atk.color; ctx.globalAlpha = 0.7 * (1 - t);
     ctx.beginPath();
     ctx.arc(cx, cy + 10, 25 * t, 0, Math.PI * 2); ctx.fill();
     ctx.strokeStyle = '#FFF'; ctx.lineWidth = 2; ctx.globalAlpha = 0.4 * (1 - t);
     ctx.beginPath(); ctx.arc(cx, cy + 10, 30 * t, 0, Math.PI * 2); ctx.stroke();
-  }
-
-  if (atk.effect === 'airkick') {
+  },
+  'airkick': (p, atk, cx, cy, dir, frame) => {
     const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     ctx.strokeStyle = atk.color; ctx.lineWidth = 3; ctx.globalAlpha = 0.8 * (1 - t);
     ctx.beginPath();
@@ -18085,9 +18063,8 @@ function drawAttackEffect(p) {
     ctx.stroke();
     ctx.fillStyle = atk.color; ctx.globalAlpha = 0.5 * (1 - t);
     ctx.beginPath(); ctx.arc(cx + 25 * dir * t, cy - 35, 8, 0, Math.PI * 2); ctx.fill();
-  }
-
-  if (atk.effect === 'airknee') {
+  },
+  'airknee': (p, atk, cx, cy, dir, frame) => {
     const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     ctx.fillStyle = atk.color; ctx.globalAlpha = 0.7 * (1 - t);
     const kx = cx + (15 + 15 * t) * dir;
@@ -18097,10 +18074,9 @@ function drawAttackEffect(p) {
       ctx.beginPath(); ctx.moveTo(kx - 10 * dir, cy - 30 + i * 6);
       ctx.lineTo(kx - 25 * dir, cy - 30 + i * 6); ctx.stroke();
     }
-  }
-
+  },
   // --- Down attack effects ---
-  if (atk.effect === 'sweep') {
+  'sweep': (p, atk, cx, cy, dir, frame) => {
     const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     ctx.strokeStyle = atk.color; ctx.lineWidth = 3; ctx.globalAlpha = 0.7 * (1 - t);
     ctx.beginPath();
@@ -18111,15 +18087,13 @@ function drawAttackEffect(p) {
     for (let i = 0; i < 3; i++) {
       ctx.beginPath(); ctx.arc(cx + (15 + i * 18) * dir * t, cy - 3, 4, 0, Math.PI * 2); ctx.fill();
     }
-  }
-
-  if (atk.effect === 'lowkick') {
+  },
+  'lowkick': (p, atk, cx, cy, dir, frame) => {
     const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     ctx.fillStyle = atk.color; ctx.globalAlpha = 0.7 * (1 - t);
     ctx.beginPath(); ctx.arc(cx + 25 * dir * t, cy - 8, 10 * (1 - t * 0.3), 0, Math.PI * 2); ctx.fill();
-  }
-
-  if (atk.effect === 'sliding') {
+  },
+  'sliding': (p, atk, cx, cy, dir, frame) => {
     const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     ctx.strokeStyle = atk.color; ctx.lineWidth = 2; ctx.globalAlpha = 0.5;
     for (let i = 0; i < 4; i++) {
@@ -18130,9 +18104,8 @@ function drawAttackEffect(p) {
     for (let i = 0; i < 3; i++) {
       ctx.beginPath(); ctx.arc(cx - (5 + i * 10) * dir, cy, 3, 0, Math.PI * 2); ctx.fill();
     }
-  }
-
-  if (atk.effect === 'crouchupper') {
+  },
+  'crouchupper': (p, atk, cx, cy, dir, frame) => {
     const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     ctx.strokeStyle = atk.color; ctx.lineWidth = 4; ctx.globalAlpha = 0.8 * (1 - t);
     ctx.beginPath();
@@ -18141,11 +18114,316 @@ function drawAttackEffect(p) {
     ctx.stroke();
     ctx.fillStyle = '#FF8800'; ctx.globalAlpha = 0.4 * (1 - t);
     ctx.beginPath(); ctx.arc(cx + 12 * dir, cy - 50 * t, 8, 0, Math.PI * 2); ctx.fill();
-  }
+  },
+  // Zen cmd1: 真空波 - big blue slash wave
+  'cmdZen1': (p, atk, cx, cy, dir, frame) => {
+    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
+    // Charging slash aura
+    ctx.strokeStyle = '#44AAFF';
+    ctx.lineWidth = 6 * (1 - t);
+    ctx.globalAlpha = 0.8 * (1 - t);
+    const startA = dir > 0 ? -Math.PI * 0.8 : Math.PI * 0.2;
+    ctx.beginPath();
+    ctx.arc(cx + 20 * dir, cy - 35, 55, startA, startA + Math.PI * t * dir);
+    ctx.stroke();
+    ctx.strokeStyle = '#FFF'; ctx.lineWidth = 12 * (1 - t); ctx.globalAlpha = 0.2 * (1 - t);
+    ctx.stroke();
+  },
+  // Zen cmd2: 神速斬り - teleport slash
+  'cmdZen2': (p, atk, cx, cy, dir, frame) => {
+    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
+    // Flash lines at teleport
+    ctx.strokeStyle = '#FFF';
+    ctx.lineWidth = 3;
+    ctx.globalAlpha = 0.7 * (1 - t);
+    for (let i = 0; i < 6; i++) {
+      const a = (i / 6) * Math.PI * 2 + t * 3;
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(a) * 15, cy - 35 + Math.sin(a) * 15);
+      ctx.lineTo(cx + Math.cos(a) * 50 * (0.5 + t), cy - 35 + Math.sin(a) * 50 * (0.5 + t));
+      ctx.stroke();
+    }
+    // Giant cross slash
+    ctx.strokeStyle = '#88DDFF'; ctx.lineWidth = 5 * (1 - t); ctx.globalAlpha = 0.9 * (1 - t);
+    ctx.beginPath(); ctx.moveTo(cx - 40 * dir, cy - 70); ctx.lineTo(cx + 60 * dir * t, cy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx - 40 * dir, cy); ctx.lineTo(cx + 60 * dir * t, cy - 70); ctx.stroke();
+  },
+  // Don cmd1: 大地砕き - massive ground shockwave
+  'cmdDon1': (p, atk, cx, cy, dir, frame) => {
+    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
+    // Multiple expanding ground waves
+    for (let w = 0; w < 3; w++) {
+      const wt = Math.max(0, t - w * 0.15);
+      if (wt <= 0) continue;
+      const r = 80 * wt;
+      ctx.strokeStyle = w === 0 ? '#FF2200' : w === 1 ? '#FF6600' : '#FF8844';
+      ctx.lineWidth = (6 - w * 1.5) * (1 - wt);
+      ctx.globalAlpha = 0.7 * (1 - wt);
+      ctx.beginPath();
+      ctx.moveTo(cx - r, cy - 5); ctx.quadraticCurveTo(cx, cy - 30 * (1 - wt), cx + r, cy - 5);
+      ctx.stroke();
+    }
+    // Ground fracture lines
+    ctx.strokeStyle = '#FF4400'; ctx.lineWidth = 3 * (1 - t); ctx.globalAlpha = 0.6 * (1 - t);
+    for (let i = 0; i < 10; i++) {
+      const fx = (i - 4.5) * 18 * t;
+      ctx.beginPath(); ctx.moveTo(cx + fx, cy - 3); ctx.lineTo(cx + fx * 1.2, cy + 10); ctx.stroke();
+    }
+    // Central explosion
+    if (t < 0.3) {
+      ctx.fillStyle = '#FFF'; ctx.globalAlpha = 0.8 * (1 - t / 0.3);
+      ctx.beginPath(); ctx.arc(cx, cy - 10, 30 * (1 - t / 0.3), 0, Math.PI * 2); ctx.fill();
+    }
+  },
+  // Don cmd2: 鬼突進 - charging rush
+  'cmdDon2': (p, atk, cx, cy, dir, frame) => {
+    if (p.specialState === 'charging') {
+      const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
+      // Red energy aura
+      ctx.fillStyle = '#FF2200'; ctx.globalAlpha = 0.3;
+      ctx.beginPath(); ctx.ellipse(cx + 15 * dir, cy - 35, 25, 40, 0, 0, Math.PI * 2); ctx.fill();
+      // Speed lines
+      ctx.strokeStyle = '#FF6644'; ctx.lineWidth = 3; ctx.globalAlpha = 0.6;
+      for (let i = 0; i < 7; i++) {
+        const ly = cy - 65 + i * 12;
+        ctx.beginPath(); ctx.moveTo(cx - 20 * dir, ly); ctx.lineTo(cx - (60 + i * 8) * dir, ly); ctx.stroke();
+      }
+      // Fire trail
+      ctx.fillStyle = '#FF8800'; ctx.globalAlpha = 0.4;
+      for (let i = 0; i < 4; i++) {
+        ctx.beginPath(); ctx.arc(cx - (20 + i * 15) * dir, cy - 30 + Math.sin(frame * 0.5 + i) * 8, 8 - i, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+  },
+  // Saisoku cmd1: 手裏剣嵐 - shuriken storm (aura only, projectiles handled in update)
+  'cmdSaisoku1': (p, atk, cx, cy, dir, frame) => {
+    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
+    // Spinning green aura
+    ctx.strokeStyle = '#44FFAA'; ctx.lineWidth = 2; ctx.globalAlpha = 0.5;
+    for (let i = 0; i < 4; i++) {
+      const a = frame * 0.15 + i * Math.PI / 2;
+      ctx.beginPath();
+      ctx.arc(cx + 10 * dir, cy - 35, 25, a, a + Math.PI * 0.4);
+      ctx.stroke();
+    }
+    // Wind effect
+    ctx.strokeStyle = '#88FFCC'; ctx.lineWidth = 1.5; ctx.globalAlpha = 0.3;
+    for (let i = 0; i < 5; i++) {
+      const wy = cy - 55 + i * 10;
+      ctx.beginPath(); ctx.moveTo(cx, wy); ctx.lineTo(cx + (30 + i * 5) * dir, wy + 2); ctx.stroke();
+    }
+  },
+  // Saisoku cmd2: 瞬身乱舞 - clone rush
+  'cmdSaisoku2': (p, atk, cx, cy, dir, frame) => {
+    if (p.specialState === 'cloneRush') {
+      const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
+      // 4 clone afterimages at different positions
+      const cloneOffsets = [[-30, -10], [20, -20], [-15, 10], [35, -5]];
+      const activeClone = Math.floor(t * 4) % 4;
+      for (let i = 0; i < 4; i++) {
+        const cAlpha = i === activeClone ? 0.5 : 0.15;
+        ctx.globalAlpha = cAlpha * (1 - t * 0.5);
+        ctx.fillStyle = '#22FFAA';
+        const ox = cloneOffsets[i][0] * dir;
+        const oy = cloneOffsets[i][1];
+        ctx.beginPath(); ctx.ellipse(cx + ox, cy + oy - 30, 12, 28, 0, 0, Math.PI * 2); ctx.fill();
+      }
+      // Slash marks per clone
+      ctx.strokeStyle = '#AAFFDD'; ctx.lineWidth = 3; ctx.globalAlpha = 0.6 * (1 - t);
+      const slashIdx = frame % 4;
+      const so = cloneOffsets[slashIdx];
+      ctx.beginPath();
+      ctx.moveTo(cx + so[0] * dir - 15 * dir, cy + so[1] - 45);
+      ctx.lineTo(cx + so[0] * dir + 25 * dir, cy + so[1] - 15);
+      ctx.stroke();
+    }
+  },
+  // Meteor cmd1: 百裂拳 (enhanced rapid punches)
+  'cmdMeteo1': (p, atk, cx, cy, dir, frame) => {
+    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
+    const punchIdx = frame % 6;
+    const offsets = [[18, -48], [24, -32], [14, -44], [26, -28], [20, -40], [22, -36]];
+    const o = offsets[punchIdx];
+    // Multiple simultaneous impacts
+    ctx.fillStyle = '#FFAA00'; ctx.globalAlpha = 0.8;
+    ctx.beginPath(); ctx.arc(cx + o[0] * dir, cy + o[1], 10, 0, Math.PI * 2); ctx.fill();
+    // Previous punch
+    const o2 = offsets[(punchIdx + 3) % 6];
+    ctx.fillStyle = '#FF6600'; ctx.globalAlpha = 0.3;
+    ctx.beginPath(); ctx.arc(cx + o2[0] * dir, cy + o2[1], 7, 0, Math.PI * 2); ctx.fill();
+    // Intense speed lines
+    ctx.strokeStyle = '#FFCC44'; ctx.lineWidth = 2; ctx.globalAlpha = 0.5;
+    for (let i = 0; i < 6; i++) {
+      const lx = cx + (o[0] + 8) * dir;
+      const ly = cy + o[1] - 8 + i * 3;
+      ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(lx + 22 * dir, ly); ctx.stroke();
+    }
+    // Fire aura
+    ctx.strokeStyle = '#FF4400'; ctx.lineWidth = 3; ctx.globalAlpha = 0.25 + Math.sin(frame * 0.3) * 0.1;
+    ctx.beginPath(); ctx.arc(cx + 18 * dir, cy - 37, 28, 0, Math.PI * 2); ctx.stroke();
+  },
+  // Meteor cmd2: 昇天拳MAX - super uppercut
+  'cmdMeteo2': (p, atk, cx, cy, dir, frame) => {
+    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
+    const startY = cy - 20;
+    // Giant rising arc
+    ctx.strokeStyle = '#FF8800'; ctx.lineWidth = 8 * (1 - t * 0.5); ctx.globalAlpha = 0.9 * (1 - t * 0.5);
+    ctx.beginPath();
+    ctx.moveTo(cx + 5 * dir, startY);
+    ctx.quadraticCurveTo(cx + 20 * dir, startY - 55 * t, cx + 12 * dir, startY - 80 * t);
+    ctx.stroke();
+    // White glow
+    ctx.strokeStyle = '#FFF'; ctx.lineWidth = 16 * (1 - t); ctx.globalAlpha = 0.2 * (1 - t);
+    ctx.stroke();
+    // Big fire
+    ctx.fillStyle = '#FF6600'; ctx.globalAlpha = 0.7 * (1 - t);
+    ctx.beginPath(); ctx.arc(cx + 12 * dir, cy - 60 - 30 * t, 18 * (1 - t * 0.3), 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#FFDD44'; ctx.globalAlpha = 0.5 * (1 - t);
+    ctx.beginPath(); ctx.arc(cx + 12 * dir, cy - 60 - 30 * t, 10 * (1 - t * 0.3), 0, Math.PI * 2); ctx.fill();
+    // Explosion ring at peak
+    if (t > 0.6) {
+      const rt = (t - 0.6) / 0.4;
+      ctx.strokeStyle = '#FFAA00'; ctx.lineWidth = 3 * (1 - rt); ctx.globalAlpha = 0.6 * (1 - rt);
+      ctx.beginPath(); ctx.arc(cx + 12 * dir, cy - 80, 30 * rt, 0, Math.PI * 2); ctx.stroke();
+    }
+  },
+  // Long command effects
+  'cmdLong1': (p, atk, cx, cy, dir, frame) => {
+    // Drill charge: spinning cyan drill effect
+    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
+    ctx.save();
+    ctx.translate(cx + 30 * dir * t, cy);
+    ctx.rotate(t * Math.PI * 8);
+    ctx.strokeStyle = '#44FFCC'; ctx.lineWidth = 4 * (1 - t * 0.3); ctx.globalAlpha = 0.8;
+    ctx.beginPath(); ctx.arc(0, 0, 15 + 5 * t, 0, Math.PI * 1.5); ctx.stroke();
+    ctx.strokeStyle = '#88AAFF'; ctx.lineWidth = 2; ctx.globalAlpha = 0.5;
+    ctx.beginPath(); ctx.arc(0, 0, 22 + 5 * t, 0, Math.PI); ctx.stroke();
+    ctx.restore();
+    // Trail sparks
+    for (let i = 0; i < 3; i++) {
+      const tx = cx - (20 + i * 15) * dir * t;
+      ctx.fillStyle = '#44FFCC'; ctx.globalAlpha = 0.3 * (1 - i * 0.25);
+      ctx.beginPath(); ctx.arc(tx, cy - 5 + Math.sin(frame * 0.5 + i) * 8, 4 - i, 0, Math.PI * 2); ctx.fill();
+    }
+  },
+  'cmdLong2': (p, atk, cx, cy, dir, frame) => {
+    // Extended spear: long cyan beam
+    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
+    const beamLen = 140 * Math.min(1, t * 2);
+    // Main beam
+    ctx.strokeStyle = '#A0B4FF'; ctx.lineWidth = 6 * (1 - t * 0.3); ctx.globalAlpha = 0.9;
+    ctx.beginPath(); ctx.moveTo(cx + 15 * dir, cy); ctx.lineTo(cx + (15 + beamLen) * dir, cy); ctx.stroke();
+    // Inner glow
+    ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 2; ctx.globalAlpha = 0.7 * (1 - t * 0.5);
+    ctx.beginPath(); ctx.moveTo(cx + 15 * dir, cy); ctx.lineTo(cx + (15 + beamLen) * dir, cy); ctx.stroke();
+    // Spear tip glow
+    ctx.fillStyle = '#44FFCC'; ctx.globalAlpha = 0.8 * (1 - t * 0.3);
+    ctx.beginPath(); ctx.arc(cx + (15 + beamLen) * dir, cy, 8 * (1 - t * 0.5), 0, Math.PI * 2); ctx.fill();
+    // Electric crackle
+    if (Math.random() > 0.4) {
+      ctx.strokeStyle = '#44FFCC'; ctx.lineWidth = 1; ctx.globalAlpha = 0.6;
+      const sx = cx + (15 + Math.random() * beamLen) * dir;
+      ctx.beginPath(); ctx.moveTo(sx, cy - 5); ctx.lineTo(sx + (Math.random() - 0.5) * 10, cy - 12 - Math.random() * 8); ctx.stroke();
+    }
+  },
+  'cmdJudge1': (p, atk, cx, cy, dir, frame) => {
+    // 拘束令状: 紫の鎖がターゲットに向かう
+    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
+    const range = 70 * Math.min(1, t * 2);
+    // 紫の波紋
+    ctx.strokeStyle = '#C0A0FF'; ctx.lineWidth = 3 * (1 - t * 0.5); ctx.globalAlpha = 0.7 * (1 - t);
+    ctx.beginPath(); ctx.arc(cx + range * dir * 0.5, cy - 35, 20 + t * 30, 0, Math.PI * 2); ctx.stroke();
+    // 内側の拘束サークル
+    ctx.strokeStyle = '#9966DD'; ctx.lineWidth = 2; ctx.globalAlpha = 0.5 * (1 - t);
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath(); ctx.arc(cx + range * dir * 0.5, cy - 35, 10 + t * 15, 0, Math.PI * 2); ctx.stroke();
+    ctx.setLineDash([]);
+    // 「拘束」の文字エフェクト
+    if (t < 0.5) {
+      ctx.fillStyle = '#C0A0FF'; ctx.globalAlpha = 0.6 * (1 - t * 2);
+      ctx.font = 'bold 14px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('BIND', cx + range * dir * 0.5, cy - 55);
+    }
+  },
+  'cmdJudge2': (p, atk, cx, cy, dir, frame) => {
+    // 死刑宣告: 全方向に黒い波動
+    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
+    const waveR = 20 + t * 80;
+    // 黒い波動リング（複数）
+    for (let r = 0; r < 3; r++) {
+      const rt = Math.max(0, t - r * 0.15);
+      if (rt <= 0) continue;
+      const rr = 20 + rt * 80;
+      ctx.strokeStyle = r === 0 ? '#2A2A3A' : r === 1 ? '#9966DD' : '#C0A0FF';
+      ctx.lineWidth = (4 - r) * (1 - t * 0.5);
+      ctx.globalAlpha = 0.6 * (1 - rt);
+      ctx.beginPath(); ctx.arc(cx, cy - 35, rr, 0, Math.PI * 2); ctx.stroke();
+    }
+    // 中央の暗黒オーラ
+    if (t < 0.5) {
+      const grad = ctx.createRadialGradient(cx, cy - 35, 0, cx, cy - 35, 30);
+      grad.addColorStop(0, 'rgba(42,42,58,0.6)');
+      grad.addColorStop(1, 'rgba(42,42,58,0)');
+      ctx.fillStyle = grad; ctx.globalAlpha = 1 - t * 2;
+      ctx.beginPath(); ctx.arc(cx, cy - 35, 30, 0, Math.PI * 2); ctx.fill();
+    }
+    // 放射状の暗い線
+    ctx.strokeStyle = '#2A2A3A'; ctx.lineWidth = 2; ctx.globalAlpha = 0.5 * (1 - t);
+    for (let i = 0; i < 8; i++) {
+      const a = (i / 8) * Math.PI * 2 + t * 2;
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(a) * 15, cy - 35 + Math.sin(a) * 15);
+      ctx.lineTo(cx + Math.cos(a) * waveR, cy - 35 + Math.sin(a) * waveR);
+      ctx.stroke();
+    }
+  },
+};
+
+
+// ======================================================================
+// 技の エフェクト描画
+// ======================================================================
+function drawAttackEffect(p) {
+  const atk = p.attackData;
+  if (!atk) return;
+  const frame = p.attackFrame;
+  const inActive = frame > (atk.startup||0) && frame <= (atk.startup||0) + (atk.active||0);
+  if (!inActive && atk.specialType !== 'jumpSlam') return;
+
+  // 負の半径エラー防止: ctx.arcをラップ
+  const _origArc = ctx.arc.bind(ctx);
+  ctx.arc = function(x, y, r, s, e, ccw) { _origArc(x, y, Math.max(0.1, r), s, e, ccw); };
+
+  const dir = p.facingLeft ? -1 : 1;
+  const cx = p.x;
+  const cy = p.y;
+
+  ctx.save();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   // === キャラ固有攻撃エフェクト（upslash/sideslash/meteor用） ===
   // 未対応のeffect名はキャラ固有スタイルで描画
   const charStyle = CHARACTER_ATTACK_STYLE[p.charIdx];
+  // 表から 1つだけ 呼ぶ（表は ATTACK_EFFECTS）
+  const fx = ATTACK_EFFECTS[atk.effect];
+  if (fx) fx(p, atk, cx, cy, dir, frame);
+
   if (charStyle && (atk.effect === 'upslash' || atk.effect === 'sideslash' || atk.effect === 'meteor' || atk.effect === 'none')) {
     const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
     const sc = charStyle.color;
@@ -18435,279 +18713,17 @@ function drawAttackEffect(p) {
 
   // === COMMAND ATTACK EFFECTS ===
 
-  // Zen cmd1: 真空波 - big blue slash wave
-  if (atk.effect === 'cmdZen1') {
-    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
-    // Charging slash aura
-    ctx.strokeStyle = '#44AAFF';
-    ctx.lineWidth = 6 * (1 - t);
-    ctx.globalAlpha = 0.8 * (1 - t);
-    const startA = dir > 0 ? -Math.PI * 0.8 : Math.PI * 0.2;
-    ctx.beginPath();
-    ctx.arc(cx + 20 * dir, cy - 35, 55, startA, startA + Math.PI * t * dir);
-    ctx.stroke();
-    ctx.strokeStyle = '#FFF'; ctx.lineWidth = 12 * (1 - t); ctx.globalAlpha = 0.2 * (1 - t);
-    ctx.stroke();
-  }
 
-  // Zen cmd2: 神速斬り - teleport slash
-  if (atk.effect === 'cmdZen2') {
-    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
-    // Flash lines at teleport
-    ctx.strokeStyle = '#FFF';
-    ctx.lineWidth = 3;
-    ctx.globalAlpha = 0.7 * (1 - t);
-    for (let i = 0; i < 6; i++) {
-      const a = (i / 6) * Math.PI * 2 + t * 3;
-      ctx.beginPath();
-      ctx.moveTo(cx + Math.cos(a) * 15, cy - 35 + Math.sin(a) * 15);
-      ctx.lineTo(cx + Math.cos(a) * 50 * (0.5 + t), cy - 35 + Math.sin(a) * 50 * (0.5 + t));
-      ctx.stroke();
-    }
-    // Giant cross slash
-    ctx.strokeStyle = '#88DDFF'; ctx.lineWidth = 5 * (1 - t); ctx.globalAlpha = 0.9 * (1 - t);
-    ctx.beginPath(); ctx.moveTo(cx - 40 * dir, cy - 70); ctx.lineTo(cx + 60 * dir * t, cy); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(cx - 40 * dir, cy); ctx.lineTo(cx + 60 * dir * t, cy - 70); ctx.stroke();
-  }
 
-  // Don cmd1: 大地砕き - massive ground shockwave
-  if (atk.effect === 'cmdDon1') {
-    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
-    // Multiple expanding ground waves
-    for (let w = 0; w < 3; w++) {
-      const wt = Math.max(0, t - w * 0.15);
-      if (wt <= 0) continue;
-      const r = 80 * wt;
-      ctx.strokeStyle = w === 0 ? '#FF2200' : w === 1 ? '#FF6600' : '#FF8844';
-      ctx.lineWidth = (6 - w * 1.5) * (1 - wt);
-      ctx.globalAlpha = 0.7 * (1 - wt);
-      ctx.beginPath();
-      ctx.moveTo(cx - r, cy - 5); ctx.quadraticCurveTo(cx, cy - 30 * (1 - wt), cx + r, cy - 5);
-      ctx.stroke();
-    }
-    // Ground fracture lines
-    ctx.strokeStyle = '#FF4400'; ctx.lineWidth = 3 * (1 - t); ctx.globalAlpha = 0.6 * (1 - t);
-    for (let i = 0; i < 10; i++) {
-      const fx = (i - 4.5) * 18 * t;
-      ctx.beginPath(); ctx.moveTo(cx + fx, cy - 3); ctx.lineTo(cx + fx * 1.2, cy + 10); ctx.stroke();
-    }
-    // Central explosion
-    if (t < 0.3) {
-      ctx.fillStyle = '#FFF'; ctx.globalAlpha = 0.8 * (1 - t / 0.3);
-      ctx.beginPath(); ctx.arc(cx, cy - 10, 30 * (1 - t / 0.3), 0, Math.PI * 2); ctx.fill();
-    }
-  }
 
-  // Don cmd2: 鬼突進 - charging rush
-  if (atk.effect === 'cmdDon2') {
-    if (p.specialState === 'charging') {
-      const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
-      // Red energy aura
-      ctx.fillStyle = '#FF2200'; ctx.globalAlpha = 0.3;
-      ctx.beginPath(); ctx.ellipse(cx + 15 * dir, cy - 35, 25, 40, 0, 0, Math.PI * 2); ctx.fill();
-      // Speed lines
-      ctx.strokeStyle = '#FF6644'; ctx.lineWidth = 3; ctx.globalAlpha = 0.6;
-      for (let i = 0; i < 7; i++) {
-        const ly = cy - 65 + i * 12;
-        ctx.beginPath(); ctx.moveTo(cx - 20 * dir, ly); ctx.lineTo(cx - (60 + i * 8) * dir, ly); ctx.stroke();
-      }
-      // Fire trail
-      ctx.fillStyle = '#FF8800'; ctx.globalAlpha = 0.4;
-      for (let i = 0; i < 4; i++) {
-        ctx.beginPath(); ctx.arc(cx - (20 + i * 15) * dir, cy - 30 + Math.sin(frame * 0.5 + i) * 8, 8 - i, 0, Math.PI * 2); ctx.fill();
-      }
-    }
-  }
 
-  // Saisoku cmd1: 手裏剣嵐 - shuriken storm (aura only, projectiles handled in update)
-  if (atk.effect === 'cmdSaisoku1') {
-    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
-    // Spinning green aura
-    ctx.strokeStyle = '#44FFAA'; ctx.lineWidth = 2; ctx.globalAlpha = 0.5;
-    for (let i = 0; i < 4; i++) {
-      const a = frame * 0.15 + i * Math.PI / 2;
-      ctx.beginPath();
-      ctx.arc(cx + 10 * dir, cy - 35, 25, a, a + Math.PI * 0.4);
-      ctx.stroke();
-    }
-    // Wind effect
-    ctx.strokeStyle = '#88FFCC'; ctx.lineWidth = 1.5; ctx.globalAlpha = 0.3;
-    for (let i = 0; i < 5; i++) {
-      const wy = cy - 55 + i * 10;
-      ctx.beginPath(); ctx.moveTo(cx, wy); ctx.lineTo(cx + (30 + i * 5) * dir, wy + 2); ctx.stroke();
-    }
-  }
 
-  // Saisoku cmd2: 瞬身乱舞 - clone rush
-  if (atk.effect === 'cmdSaisoku2') {
-    if (p.specialState === 'cloneRush') {
-      const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
-      // 4 clone afterimages at different positions
-      const cloneOffsets = [[-30, -10], [20, -20], [-15, 10], [35, -5]];
-      const activeClone = Math.floor(t * 4) % 4;
-      for (let i = 0; i < 4; i++) {
-        const cAlpha = i === activeClone ? 0.5 : 0.15;
-        ctx.globalAlpha = cAlpha * (1 - t * 0.5);
-        ctx.fillStyle = '#22FFAA';
-        const ox = cloneOffsets[i][0] * dir;
-        const oy = cloneOffsets[i][1];
-        ctx.beginPath(); ctx.ellipse(cx + ox, cy + oy - 30, 12, 28, 0, 0, Math.PI * 2); ctx.fill();
-      }
-      // Slash marks per clone
-      ctx.strokeStyle = '#AAFFDD'; ctx.lineWidth = 3; ctx.globalAlpha = 0.6 * (1 - t);
-      const slashIdx = frame % 4;
-      const so = cloneOffsets[slashIdx];
-      ctx.beginPath();
-      ctx.moveTo(cx + so[0] * dir - 15 * dir, cy + so[1] - 45);
-      ctx.lineTo(cx + so[0] * dir + 25 * dir, cy + so[1] - 15);
-      ctx.stroke();
-    }
-  }
 
-  // Meteor cmd1: 百裂拳 (enhanced rapid punches)
-  if (atk.effect === 'cmdMeteo1') {
-    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
-    const punchIdx = frame % 6;
-    const offsets = [[18, -48], [24, -32], [14, -44], [26, -28], [20, -40], [22, -36]];
-    const o = offsets[punchIdx];
-    // Multiple simultaneous impacts
-    ctx.fillStyle = '#FFAA00'; ctx.globalAlpha = 0.8;
-    ctx.beginPath(); ctx.arc(cx + o[0] * dir, cy + o[1], 10, 0, Math.PI * 2); ctx.fill();
-    // Previous punch
-    const o2 = offsets[(punchIdx + 3) % 6];
-    ctx.fillStyle = '#FF6600'; ctx.globalAlpha = 0.3;
-    ctx.beginPath(); ctx.arc(cx + o2[0] * dir, cy + o2[1], 7, 0, Math.PI * 2); ctx.fill();
-    // Intense speed lines
-    ctx.strokeStyle = '#FFCC44'; ctx.lineWidth = 2; ctx.globalAlpha = 0.5;
-    for (let i = 0; i < 6; i++) {
-      const lx = cx + (o[0] + 8) * dir;
-      const ly = cy + o[1] - 8 + i * 3;
-      ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(lx + 22 * dir, ly); ctx.stroke();
-    }
-    // Fire aura
-    ctx.strokeStyle = '#FF4400'; ctx.lineWidth = 3; ctx.globalAlpha = 0.25 + Math.sin(frame * 0.3) * 0.1;
-    ctx.beginPath(); ctx.arc(cx + 18 * dir, cy - 37, 28, 0, Math.PI * 2); ctx.stroke();
-  }
 
-  // Meteor cmd2: 昇天拳MAX - super uppercut
-  if (atk.effect === 'cmdMeteo2') {
-    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
-    const startY = cy - 20;
-    // Giant rising arc
-    ctx.strokeStyle = '#FF8800'; ctx.lineWidth = 8 * (1 - t * 0.5); ctx.globalAlpha = 0.9 * (1 - t * 0.5);
-    ctx.beginPath();
-    ctx.moveTo(cx + 5 * dir, startY);
-    ctx.quadraticCurveTo(cx + 20 * dir, startY - 55 * t, cx + 12 * dir, startY - 80 * t);
-    ctx.stroke();
-    // White glow
-    ctx.strokeStyle = '#FFF'; ctx.lineWidth = 16 * (1 - t); ctx.globalAlpha = 0.2 * (1 - t);
-    ctx.stroke();
-    // Big fire
-    ctx.fillStyle = '#FF6600'; ctx.globalAlpha = 0.7 * (1 - t);
-    ctx.beginPath(); ctx.arc(cx + 12 * dir, cy - 60 - 30 * t, 18 * (1 - t * 0.3), 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#FFDD44'; ctx.globalAlpha = 0.5 * (1 - t);
-    ctx.beginPath(); ctx.arc(cx + 12 * dir, cy - 60 - 30 * t, 10 * (1 - t * 0.3), 0, Math.PI * 2); ctx.fill();
-    // Explosion ring at peak
-    if (t > 0.6) {
-      const rt = (t - 0.6) / 0.4;
-      ctx.strokeStyle = '#FFAA00'; ctx.lineWidth = 3 * (1 - rt); ctx.globalAlpha = 0.6 * (1 - rt);
-      ctx.beginPath(); ctx.arc(cx + 12 * dir, cy - 80, 30 * rt, 0, Math.PI * 2); ctx.stroke();
-    }
-  }
 
-  // Long command effects
-  if (atk.effect === 'cmdLong1') {
-    // Drill charge: spinning cyan drill effect
-    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
-    ctx.save();
-    ctx.translate(cx + 30 * dir * t, cy);
-    ctx.rotate(t * Math.PI * 8);
-    ctx.strokeStyle = '#44FFCC'; ctx.lineWidth = 4 * (1 - t * 0.3); ctx.globalAlpha = 0.8;
-    ctx.beginPath(); ctx.arc(0, 0, 15 + 5 * t, 0, Math.PI * 1.5); ctx.stroke();
-    ctx.strokeStyle = '#88AAFF'; ctx.lineWidth = 2; ctx.globalAlpha = 0.5;
-    ctx.beginPath(); ctx.arc(0, 0, 22 + 5 * t, 0, Math.PI); ctx.stroke();
-    ctx.restore();
-    // Trail sparks
-    for (let i = 0; i < 3; i++) {
-      const tx = cx - (20 + i * 15) * dir * t;
-      ctx.fillStyle = '#44FFCC'; ctx.globalAlpha = 0.3 * (1 - i * 0.25);
-      ctx.beginPath(); ctx.arc(tx, cy - 5 + Math.sin(frame * 0.5 + i) * 8, 4 - i, 0, Math.PI * 2); ctx.fill();
-    }
-  }
 
-  if (atk.effect === 'cmdLong2') {
-    // Extended spear: long cyan beam
-    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
-    const beamLen = 140 * Math.min(1, t * 2);
-    // Main beam
-    ctx.strokeStyle = '#A0B4FF'; ctx.lineWidth = 6 * (1 - t * 0.3); ctx.globalAlpha = 0.9;
-    ctx.beginPath(); ctx.moveTo(cx + 15 * dir, cy); ctx.lineTo(cx + (15 + beamLen) * dir, cy); ctx.stroke();
-    // Inner glow
-    ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 2; ctx.globalAlpha = 0.7 * (1 - t * 0.5);
-    ctx.beginPath(); ctx.moveTo(cx + 15 * dir, cy); ctx.lineTo(cx + (15 + beamLen) * dir, cy); ctx.stroke();
-    // Spear tip glow
-    ctx.fillStyle = '#44FFCC'; ctx.globalAlpha = 0.8 * (1 - t * 0.3);
-    ctx.beginPath(); ctx.arc(cx + (15 + beamLen) * dir, cy, 8 * (1 - t * 0.5), 0, Math.PI * 2); ctx.fill();
-    // Electric crackle
-    if (Math.random() > 0.4) {
-      ctx.strokeStyle = '#44FFCC'; ctx.lineWidth = 1; ctx.globalAlpha = 0.6;
-      const sx = cx + (15 + Math.random() * beamLen) * dir;
-      ctx.beginPath(); ctx.moveTo(sx, cy - 5); ctx.lineTo(sx + (Math.random() - 0.5) * 10, cy - 12 - Math.random() * 8); ctx.stroke();
-    }
-  }
 
-  if (atk.effect === 'cmdJudge1') {
-    // 拘束令状: 紫の鎖がターゲットに向かう
-    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
-    const range = 70 * Math.min(1, t * 2);
-    // 紫の波紋
-    ctx.strokeStyle = '#C0A0FF'; ctx.lineWidth = 3 * (1 - t * 0.5); ctx.globalAlpha = 0.7 * (1 - t);
-    ctx.beginPath(); ctx.arc(cx + range * dir * 0.5, cy - 35, 20 + t * 30, 0, Math.PI * 2); ctx.stroke();
-    // 内側の拘束サークル
-    ctx.strokeStyle = '#9966DD'; ctx.lineWidth = 2; ctx.globalAlpha = 0.5 * (1 - t);
-    ctx.setLineDash([4, 4]);
-    ctx.beginPath(); ctx.arc(cx + range * dir * 0.5, cy - 35, 10 + t * 15, 0, Math.PI * 2); ctx.stroke();
-    ctx.setLineDash([]);
-    // 「拘束」の文字エフェクト
-    if (t < 0.5) {
-      ctx.fillStyle = '#C0A0FF'; ctx.globalAlpha = 0.6 * (1 - t * 2);
-      ctx.font = 'bold 14px sans-serif'; ctx.textAlign = 'center';
-      ctx.fillText('BIND', cx + range * dir * 0.5, cy - 55);
-    }
-  }
 
-  if (atk.effect === 'cmdJudge2') {
-    // 死刑宣告: 全方向に黒い波動
-    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
-    const waveR = 20 + t * 80;
-    // 黒い波動リング（複数）
-    for (let r = 0; r < 3; r++) {
-      const rt = Math.max(0, t - r * 0.15);
-      if (rt <= 0) continue;
-      const rr = 20 + rt * 80;
-      ctx.strokeStyle = r === 0 ? '#2A2A3A' : r === 1 ? '#9966DD' : '#C0A0FF';
-      ctx.lineWidth = (4 - r) * (1 - t * 0.5);
-      ctx.globalAlpha = 0.6 * (1 - rt);
-      ctx.beginPath(); ctx.arc(cx, cy - 35, rr, 0, Math.PI * 2); ctx.stroke();
-    }
-    // 中央の暗黒オーラ
-    if (t < 0.5) {
-      const grad = ctx.createRadialGradient(cx, cy - 35, 0, cx, cy - 35, 30);
-      grad.addColorStop(0, 'rgba(42,42,58,0.6)');
-      grad.addColorStop(1, 'rgba(42,42,58,0)');
-      ctx.fillStyle = grad; ctx.globalAlpha = 1 - t * 2;
-      ctx.beginPath(); ctx.arc(cx, cy - 35, 30, 0, Math.PI * 2); ctx.fill();
-    }
-    // 放射状の暗い線
-    ctx.strokeStyle = '#2A2A3A'; ctx.lineWidth = 2; ctx.globalAlpha = 0.5 * (1 - t);
-    for (let i = 0; i < 8; i++) {
-      const a = (i / 8) * Math.PI * 2 + t * 2;
-      ctx.beginPath();
-      ctx.moveTo(cx + Math.cos(a) * 15, cy - 35 + Math.sin(a) * 15);
-      ctx.lineTo(cx + Math.cos(a) * waveR, cy - 35 + Math.sin(a) * waveR);
-      ctx.stroke();
-    }
-  }
 
   ctx.restore();
   ctx.arc = _origArc; // arcラップを解除
