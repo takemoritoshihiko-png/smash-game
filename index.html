@@ -28,77 +28,77 @@
 //     ・キャラを 足すなら「キャラ別データ（31体ぶん）」の チェックリスト
 //     ・落とし穴の 一覧は README の「よくある 落とし穴」
 //
-//   110-303       書き換わる 値（グローバル状態）
-//   305-532       CANVAS / 画面サイズ
-//   534-1089      キャラ別データ（31体ぶん）
-//   1091-1132     音の ロック解除（最初の 操作で 呼ぶ）
-//   1134-1311     キャラ画像（遅延読み込み）
-//   1313-1348     タイトル画面の 粒子
-//   1350-3024     絵: メニュー用の 31体テーブル（CHAR_BODY_ART）
-//   3026-3054     絵: メニュー用の 呼び出し口（drawCharacterBody）
-//   3056-4745     攻撃中の ポーズ（キャラ 0〜8）
-//   4747-5592     キャラの 絵 ②バトル用
-//   5594-5641     描画ユーティリティ
-//   5643-5765     画面: タイトル
-//   5767-6015     画面: キャラ選択
-//   6017-6115     画面: 難易度選択（CPU戦）
-//   6117-6346     画面: ステージ選択
-//   6348-6712     バトルの 定数 と 状態
-//   6714-6756     ゲージ演出の 小道具（ポップアップ / 変身中の 判定 / MAX の 光り）
-//   6758-6773     カメラ / 画面揺れ
-//   6775-7207     効果音（Web Audio で 合成）
-//   7209-7523     観客の 音
-//   7525-7547     ヒット表示 / コミック文字
-//   7549-7596     掴み・投げ の 定数と キャラ別テーブル
-//   7598-8088     コマンド技（→→↓↓+Z など）
-//   8090-8614     技データ
-//   8616-8848     読み込み時に attackDefs を 一括で 書き換える（この 順番で 走る・並べ替え 禁止）
-//   8850-9197     プレイヤー生成 / 試合の 初期化
-//   9199-9216     ヒット処理（ダメージ・ノックバック）
-//   9218-9646     ヒットした ときの 演出（applyHit の 後半・ゲームの 数値は 変えない）
-//   9648-10571    ヒット処理（ダメージと ノックバックを 決めて 相手に 入れる）
-//   10573-10602   当たり判定
-//   10604-10645   飛び道具
-//   10647-10905   技の 発動（通常技・復帰技・ジャブ）
-//   10907-11125   掴み・投げ の 実行
-//   11127-11470   CPU の 思考
-//   11472-11644   画面演出の 配列を 1フレーム 進める
-//   11646-11880   キャラ固有の ゲージ更新（毎フレーム・プレイヤー1人分）
-//   11882-12233   攻撃中の 1フレーム 更新（プレイヤー1人分）
-//   12235-12376   D キー長押しの 処理（プレイヤー1人分）
-//   12378-12493   受け身（テクニング）の 処理（プレイヤー1人分）
-//   12495-12662   のけぞり（ヒットスタン）の 処理（プレイヤー1人分）
-//   12664-12764   着地の 処理（プレイヤー1人分）
-//   12766-14080   バトルの 毎フレーム更新（中核）
-//   14082-14579   物理（移動・重力・着地・撃墜判定）
-//   14581-14649   攻撃ボタンの 処理（P1ローカル と オンラインのゲスト で 共通）
-//   14651-14770   スマッシュ攻撃（方向2回 + X）
-//   14772-14867   崖つかまり
-//   14869-15297   D技 と 必殺技 の データ
-//   15299-15717   D技: キャラ別の 中身（D_SKILL_IMPL）
-//   15719-15866   D技: 発動 と 毎フレーム更新（triggerDSkill / updateDSkill）
-//   15868-15928   空中回避
-//   15930-16026   バトル描画の 下準備（カメラ・影・2.5D）
-//   16028-16250   バトル画面の うえに 重ねる もの（ボスラッシュHUD / GAME SET 演出）
-//   16252-16548   ステージの 床を 描く（2.5D の 台形）
-//   16550-16955   プレイヤー2人を 描く（本体・影・名前・ゲージ・状態異常の 重ね表示）
-//   16957-18111   バトル画面の 描画
-//   18113-18809   描画: 技エフェクトの 表（ATTACK_EFFECTS: effect名 → 描き方）
-//   18811-19215   描画: 技エフェクトの 呼び出し口（drawAttackEffect ほか）
-//   19217-19388   必殺技 / 即死技 の 全画面オーバーレイ
-//   19390-19520   画面: コンボ一覧 / 戦績
-//   19522-19731   キャラ別 ゲージの 描画（HUDの 下に 出る 細い バー）
-//   19733-19989   バトルの HUD
-//   19991-20873   オンライン対戦（PeerJS / ホストが 正）
-//   20875-21158   画面: VS イントロ
-//   21160-21195   画面の 切り替え（フェード）
-//   21197-21276   ポーズメニュー（バトル中に ESC）
-//   21278-21508   画面: キャラ詳細（Iキー）
-//   21510-21631   画面: 操作説明
-//   21633-21822   キー入力: キャラ選択画面
-//   21824-22040   キー入力: バトル中
-//   22042-22149   キー入力の 振り分け（画面ごと）
-//   22151-22356   メインループ（60FPS 固定タイムステップ）
+//   110-305       書き換わる 値（グローバル状態）
+//   307-534       CANVAS / 画面サイズ
+//   536-1091      キャラ別データ（31体ぶん）
+//   1093-1134     音の ロック解除（最初の 操作で 呼ぶ）
+//   1136-1313     キャラ画像（遅延読み込み）
+//   1315-1350     タイトル画面の 粒子
+//   1352-3026     絵: メニュー用の 31体テーブル（CHAR_BODY_ART）
+//   3028-3056     絵: メニュー用の 呼び出し口（drawCharacterBody）
+//   3058-4747     攻撃中の ポーズ（キャラ 0〜8）
+//   4749-5594     キャラの 絵 ②バトル用
+//   5596-5643     描画ユーティリティ
+//   5645-5767     画面: タイトル
+//   5769-6017     画面: キャラ選択
+//   6019-6117     画面: 難易度選択（CPU戦）
+//   6119-6348     画面: ステージ選択
+//   6350-6714     バトルの 定数 と 状態
+//   6716-6758     ゲージ演出の 小道具（ポップアップ / 変身中の 判定 / MAX の 光り）
+//   6760-6775     カメラ / 画面揺れ
+//   6777-7209     効果音（Web Audio で 合成）
+//   7211-7525     観客の 音
+//   7527-7549     ヒット表示 / コミック文字
+//   7551-7598     掴み・投げ の 定数と キャラ別テーブル
+//   7600-8090     コマンド技（→→↓↓+Z など）
+//   8092-8616     技データ
+//   8618-8850     読み込み時に attackDefs を 一括で 書き換える（この 順番で 走る・並べ替え 禁止）
+//   8852-9199     プレイヤー生成 / 試合の 初期化
+//   9201-9218     ヒット処理（ダメージ・ノックバック）
+//   9220-9648     ヒットした ときの 演出（applyHit の 後半・ゲームの 数値は 変えない）
+//   9650-10573    ヒット処理（ダメージと ノックバックを 決めて 相手に 入れる）
+//   10575-10604   当たり判定
+//   10606-10647   飛び道具
+//   10649-10907   技の 発動（通常技・復帰技・ジャブ）
+//   10909-11127   掴み・投げ の 実行
+//   11129-11472   CPU の 思考
+//   11474-11646   画面演出の 配列を 1フレーム 進める
+//   11648-11882   キャラ固有の ゲージ更新（毎フレーム・プレイヤー1人分）
+//   11884-12240   攻撃中の 1フレーム 更新（プレイヤー1人分）
+//   12242-12383   D キー長押しの 処理（プレイヤー1人分）
+//   12385-12500   受け身（テクニング）の 処理（プレイヤー1人分）
+//   12502-12669   のけぞり（ヒットスタン）の 処理（プレイヤー1人分）
+//   12671-12771   着地の 処理（プレイヤー1人分）
+//   12773-14087   バトルの 毎フレーム更新（中核）
+//   14089-14586   物理（移動・重力・着地・撃墜判定）
+//   14588-14656   攻撃ボタンの 処理（P1ローカル と オンラインのゲスト で 共通）
+//   14658-14777   スマッシュ攻撃（方向2回 + X）
+//   14779-14874   崖つかまり
+//   14876-15304   D技 と 必殺技 の データ
+//   15306-15724   D技: キャラ別の 中身（D_SKILL_IMPL）
+//   15726-15873   D技: 発動 と 毎フレーム更新（triggerDSkill / updateDSkill）
+//   15875-15935   空中回避
+//   15937-16033   バトル描画の 下準備（カメラ・影・2.5D）
+//   16035-16257   バトル画面の うえに 重ねる もの（ボスラッシュHUD / GAME SET 演出）
+//   16259-16555   ステージの 床を 描く（2.5D の 台形）
+//   16557-16962   プレイヤー2人を 描く（本体・影・名前・ゲージ・状態異常の 重ね表示）
+//   16964-18118   バトル画面の 描画
+//   18120-18816   描画: 技エフェクトの 表（ATTACK_EFFECTS: effect名 → 描き方）
+//   18818-19222   描画: 技エフェクトの 呼び出し口（drawAttackEffect ほか）
+//   19224-19395   必殺技 / 即死技 の 全画面オーバーレイ
+//   19397-19527   画面: コンボ一覧 / 戦績
+//   19529-19738   キャラ別 ゲージの 描画（HUDの 下に 出る 細い バー）
+//   19740-19996   バトルの HUD
+//   19998-20930   オンライン対戦（PeerJS / ホストが 正）
+//   20932-21215   画面: VS イントロ
+//   21217-21252   画面の 切り替え（フェード）
+//   21254-21333   ポーズメニュー（バトル中に ESC）
+//   21335-21565   画面: キャラ詳細（Iキー）
+//   21567-21688   画面: 操作説明
+//   21690-21879   キー入力: キャラ選択画面
+//   21881-22097   キー入力: バトル中
+//   22099-22206   キー入力の 振り分け（画面ごと）
+//   22208-22413   メインループ（60FPS 固定タイムステップ）
 //
 // ### 目次ここまで
 // ======================================================================
@@ -287,6 +287,8 @@ let ultimateVideoShowing = false;   // 動画が 画面に 出ている間は �
 let ultimateSteppedThisFrame = false;
 // オンラインの 後始末。自分で やめる ときは これだけ 呼ぶ（画面は 呼び出し側が 決める）
 let onlineTeardown = false;
+let onlinePingInterval = null;   // ロビー/キャラ選択中の 無通信で NAT に 接続を 殺されないための 生存確認
+let onlineJoinRetries = 0;       // 参加失敗（peer-unavailable）の 自動リトライ回数
 let onlineConnectTimeout = null;
 let guestSendCounter = 0;
 let lastGuestKeys = null;
@@ -11889,6 +11891,11 @@ function updateCharacterGauges(p) {
 function updateAttackFrames(p) {
   p.attackFrame++;
   const atk = p.attackData;
+  // オンラインのゲストでは attackType から attackData を 復元できない 技が ある
+  // （コマンド技・スマッシュ・ジャブ連打は 合成データで、attackDefs 表に 無い）。
+  // null の まま 進むと ここで 毎フレーム 例外 → updateBattle の 残りが 丸ごと 飛び、
+  // 画面カクつき・音と エフェクトの 欠落に なっていた
+  if (!atk) return;
   const totalFrames = atk.startup + atk.active + atk.recovery;
 
   // Special movement attacks
@@ -19997,6 +20004,7 @@ function generateRoomId() {
 function teardownOnlineSession() {
   onlineTeardown = true;   // peer.destroy() が 呼ぶ 'close' を 無視させる
   if (onlineConnectTimeout) { clearTimeout(onlineConnectTimeout); onlineConnectTimeout = null; }
+  if (onlinePingInterval) { clearInterval(onlinePingInterval); onlinePingInterval = null; }
   if (peer) { try { peer.destroy(); } catch (ex) {} peer = null; }
   peerConn = null;
   onlineMode = false;
@@ -20053,6 +20061,13 @@ function setupPeerConnection(conn) {
     if (onlineConnectTimeout) { clearTimeout(onlineConnectTimeout); onlineConnectTimeout = null; }
     onlineState = 'connected';
     onlineError = '';
+    // バトル中は 毎フレーム パケットが 流れるが、ロビーや キャラ選択中は 無通信に なる。
+    // NAT/ルーターに アイドル接続を 切られて「すぐ The opponent disconnected」に
+    // なっていたので、2秒ごとに 小さな ping を 流して 接続を 生かしておく
+    if (onlinePingInterval) clearInterval(onlinePingInterval);
+    onlinePingInterval = setInterval(() => {
+      try { if (peerConn && peerConn.open) peerConn.send({ type: 'ping' }); } catch (ex) {}
+    }, 2000);
     // Send our character selection
     const myCharIdx = isHost ? p1Select : p2Select;
     conn.send({ type: 'charSelect', charIdx: myCharIdx });
@@ -20067,6 +20082,7 @@ function setupPeerConnection(conn) {
   conn.on('data', (data) => {
     // 変な パケット（null や 文字列）で ハンドラごと 落ちないように 形だけ 先に 確認
     if (!data || typeof data.type !== 'string') return;
+    if (data.type === 'ping') return;   // 生存確認。中身は 無い
     if (data.type === 'charSelect') {
       // Received remote player's character selection
       if (isHost) { p2Select = safeCharIdx(data.charIdx, p2Select); }
@@ -20154,13 +20170,14 @@ function setupPeerConnection(conn) {
         players[0].vx += (data.p1vx - players[0].vx) * 0.4;
         players[0].vy += (data.p1vy - players[0].vy) * 0.4;
         players[0].facingLeft = data.p1f; players[0].grounded = data.p1g; players[0].animState = data.p1as;
-        // P2
+        // P2 = ゲスト機では 自分。ローカル予測を 信じ、40px 超の ズレだけ ゆっくり 寄せる
+        // （毎パケット 引き戻すと ラバーバンドで カタカタ 震える）
         const dx2 = (data.p2x + data.p2vx * onlineLagFrames) - players[1].x;
         const dy2 = (data.p2y + data.p2vy * onlineLagFrames) - players[1].y;
-        if (Math.abs(dx2) < 80) { players[1].x += dx2 * lp; players[1].y += dy2 * lp; }
-        else { players[1].x = data.p2x; players[1].y = data.p2y; }
-        players[1].vx += (data.p2vx - players[1].vx) * 0.4;
-        players[1].vy += (data.p2vy - players[1].vy) * 0.4;
+        const d2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
+        if (d2 > 160) { players[1].x = data.p2x; players[1].y = data.p2y;
+          players[1].vx = data.p2vx; players[1].vy = data.p2vy; }
+        else if (d2 > 40) { players[1].x += dx2 * 0.12; players[1].y += dy2 * 0.12; }
         players[1].facingLeft = data.p2f; players[1].grounded = data.p2g; players[1].animState = data.p2as;
       }
     }
@@ -20224,6 +20241,11 @@ function startHosting() {
   });
   peer.on('error', (err) => {
     console.error('[ONLINE] Peer error:', err.type, err);
+    // 'network' は 仲介サーバー(0.peerjs.com)との 切断で、対戦相手との P2P 接続とは 別物。
+    // 相手と つながって いるなら 試合は そのまま 続けられる（再接続は 'disconnected' 側が 試す）。
+    // ここで peer.destroy() すると 生きている 試合まで 道連れに なり、
+    // 相手側に 偽の「The opponent disconnected」が 出ていた
+    if (err.type === 'network' && peerConn && peerConn.open) return;
     onlineError = 'Connection error: ' + (err.type === 'unavailable-id' ? 'That ID is already taken' : err.type === 'network' ? 'Network error' : err.type === 'server-error' ? 'Server error' : err.message || err.type);
     onlineState = 'menu';
     if (peer) { try { peer.destroy(); } catch (ex) {} peer = null; }
@@ -20239,6 +20261,7 @@ function joinRoom(roomId) {
   if (!roomId || roomId.length < 4) { onlineError = 'Enter an ID of 4 or more characters'; return; }
   teardownOnlineSession();   // 前のセッションを 必ず 捨ててから 始める
   if (!peerLibReady()) return;
+  onlineJoinRetries = 0;
   onlineState = 'joining';
   onlineError = '';
   isHost = false;
@@ -20259,6 +20282,21 @@ function joinRoom(roomId) {
   });
   peer.on('error', (err) => {
     console.error('[ONLINE] Peer error:', err.type, err);
+    // 仲介サーバーとの 切断は P2P が 生きていれば 無視（ホスト側と 同じ 理由）
+    if (err.type === 'network' && peerConn && peerConn.open) return;
+    // 部屋が 見つからない 場合、ホストが 仲介サーバーに 再登録中の ことが ある。
+    // 1.5秒おきに 2回まで 自動で つなぎ直してから 諦める
+    if (err.type === 'peer-unavailable' && onlineState === 'joining' && onlineJoinRetries < 2) {
+      onlineJoinRetries++;
+      console.log('[ONLINE] Room not found, retrying... (' + onlineJoinRetries + '/2)');
+      setTimeout(() => {
+        if (onlineState === 'joining' && peer && !peer.destroyed) {
+          const c = peer.connect('smash-' + roomId, { reliable: true });
+          setupPeerConnection(c);
+        }
+      }, 1500);
+      return;
+    }
     if (onlineConnectTimeout) { clearTimeout(onlineConnectTimeout); onlineConnectTimeout = null; }
     onlineError = err.type === 'peer-unavailable' ? 'Opponent not found. Check the ID.' : err.type === 'network' ? 'Network error' : (err.message || err.type);
     onlineState = 'menu';
@@ -20364,6 +20402,15 @@ function serializePlayer(p) {
     chattaFly: p.chattaFly || 0, chattaFlyCd: p.chattaFlyCd || 0,
   };
   for (const f of CHAR_SYNC_FIELDS) out[f] = p[f] || 0;
+  // 攻撃データの 軽量版。コマンド技・スマッシュ・ジャブ連打は attackDefs 表に 無い
+  // 合成データなので、ゲストが attackType から 復元できない → 必要な 欄だけ 送る
+  if (p.attacking && p.attackData) {
+    const a = p.attackData;
+    out.ad = { startup: a.startup, active: a.active, recovery: a.recovery,
+      effect: a.effect, color: a.color, name: a.name,
+      hx: a.hx, hy: a.hy, hw: a.hw, hh: a.hh,
+      specialType: a.specialType, smashType: a.smashType, centerHit: a.centerHit };
+  }
   // 金金(22)の コインは 見た目に 出るので 位置だけ 送る
   if (p.charIdx === 22 && p.coins && p.coins.length > 0) {
     out.coins = p.coins.map(c => ({ x: Math.round(c.x), y: Math.round(c.y), life: c.life }));
@@ -20458,7 +20505,10 @@ function applyHostState(data) {
   const LERP_POS = 0.25;
   const LERP_VEL = 0.4;
   // ★ serializePlayer() と 1対1。足し忘れは 無音で 壊れる
-  const applyFields = (target, src) => {
+  // isSelf: ゲスト機では players[1] が「自分」。自分の 位置は ローカル予測が 一番 新しいので、
+  // ホストから 届く「少し 昔の 位置」へ 毎パケット 引き戻すと ラバーバンドで カタカタ 震える。
+  // 自分だけは 大きく ずれた とき 以外 ローカルの 位置・速度を 信じる
+  const applyFields = (target, src, isSelf) => {
     // 壊れた / 欠けた パケットで 座標が NaN に なると 二度と 戻らないので、
     // 数字で ない ものは 位置と 速度に 入れない
     if (!src || !Number.isFinite(src.x) || !Number.isFinite(src.y) ||
@@ -20468,10 +20518,13 @@ function applyHostState(data) {
     const lagY = src.y + src.vy * onlineLagFrames;
     const dx = lagX - target.x, dy = lagY - target.y;
     const dist = Math.sqrt(dx * dx + dy * dy);
-    const snapDist = 80;
+    const snapDist = isSelf ? 160 : 80;
     if (dist > snapDist || src.alive !== target.alive || src.respawnTimer !== target.respawnTimer) {
       // 大きなズレ or 状態変化: 即座にスナップ
       target.x = src.x; target.y = src.y;
+    } else if (isSelf) {
+      // 自分: 40px までの ズレは ローカルを 信じて 触らない。超えたら ゆっくり 寄せる
+      if (dist > 40) { target.x += dx * 0.12; target.y += dy * 0.12; }
     } else if (dist < 1.5) {
       // 微小なズレ: そのまま受け入れ（ジッター防止）
       target.x = src.x; target.y = src.y;
@@ -20480,9 +20533,11 @@ function applyHostState(data) {
       target.x += dx * LERP_POS;
       target.y += dy * LERP_POS;
     }
-    // 速度も補間（急な速度変化を緩和）
-    target.vx += (src.vx - target.vx) * LERP_VEL;
-    target.vy += (src.vy - target.vy) * LERP_VEL;
+    // 速度も補間（急な速度変化を緩和）。自分は のけぞり中以外 ローカルの 速度を 信じる
+    if (!isSelf || src.hitstun > 0 || dist > snapDist) {
+      target.vx += (src.vx - target.vx) * LERP_VEL;
+      target.vy += (src.vy - target.vy) * LERP_VEL;
+    }
     target.damage = src.damage; target.stocks = src.stocks; target.alive = src.alive;
     target.attacking = src.attacking; target.attackType = src.attackType; target.attackFrame = src.attackFrame;
     target.facingLeft = src.facingLeft; target.hitstun = src.hitstun; target.grounded = src.grounded;
@@ -20562,13 +20617,15 @@ function applyHostState(data) {
     // Restore attackData from attackType
     if (src.attacking && src.attackType) {
       const defs = (target.charIdx === 10 && target.dragonMode) ? dragonAttackDefs : attackDefs[target.charIdx];
-      target.attackData = defs ? (defs[src.attackType] || null) : null;
+      // 表に 無い 技（コマンド/スマッシュ/ジャブ連打）は 送られてきた 軽量版で 補う。
+      // どちらも 無ければ null（updateAttackFrames 側に ガードあり）
+      target.attackData = (defs && defs[src.attackType]) || src.ad || null;
     } else {
       target.attackData = null;
     }
   };
   applyFields(players[0], data.p1);
-  applyFields(players[1], data.p2);
+  applyFields(players[1], data.p2, true);   // applyHostState は ゲスト専用なので players[1] = 自分
 
   // Global state
   // 相手の 版ちがいや 途中で 切れた パケットで 項目が 欠ける ことが ある。
