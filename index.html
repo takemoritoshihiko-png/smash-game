@@ -28,72 +28,74 @@
 //     ・キャラを 足すなら「キャラ別データ（31体ぶん）」の チェックリスト
 //     ・落とし穴の 一覧は README の「よくある 落とし穴」
 //
-//   105-291       書き換わる 値（グローバル状態）
-//   293-522       CANVAS / 画面サイズ
-//   524-1079      キャラ別データ（31体ぶん）
-//   1081-1114     音の ロック解除（最初の 操作で 呼ぶ）
-//   1116-1293     キャラ画像（遅延読み込み）
-//   1295-1330     タイトル画面の 粒子
-//   1332-3006     絵: メニュー用の 31体テーブル（CHAR_BODY_ART）
-//   3008-3036     絵: メニュー用の 呼び出し口（drawCharacterBody）
-//   3038-4727     攻撃中の ポーズ（キャラ 0〜8）
-//   4729-5573     キャラの 絵 ②バトル用
-//   5575-5622     描画ユーティリティ
-//   5624-5746     画面: タイトル
-//   5748-5996     画面: キャラ選択
-//   5998-6096     画面: 難易度選択（CPU戦）
-//   6098-6327     画面: ステージ選択
-//   6329-6692     バトルの 定数 と 状態
-//   6694-6736     ゲージ演出の 小道具（ポップアップ / 変身中の 判定 / MAX の 光り）
-//   6738-6753     カメラ / 画面揺れ
-//   6755-7164     効果音（Web Audio で 合成）
-//   7166-7480     観客の 音
-//   7482-7504     ヒット表示 / コミック文字
-//   7506-7553     掴み・投げ の 定数と キャラ別テーブル
-//   7555-8043     コマンド技（→→↓↓+Z など）
-//   8045-8808     技データ
-//   8810-9156     プレイヤー生成 / 試合の 初期化
-//   9158-9175     ヒット処理（ダメージ・ノックバック）
-//   9177-9605     ヒットした ときの 演出（applyHit の 後半・ゲームの 数値は 変えない）
-//   9607-10530    ヒット処理（ダメージと ノックバックを 決めて 相手に 入れる）
-//   10532-10561   当たり判定
-//   10563-10604   飛び道具
-//   10606-10864   技の 発動（通常技・復帰技・ジャブ）
-//   10866-11088   掴み・投げ の 実行
-//   11090-11433   CPU の 思考
-//   11435-11594   画面演出の 配列を 1フレーム 進める
-//   11596-11830   キャラ固有の ゲージ更新（毎フレーム・プレイヤー1人分）
-//   11832-12175   攻撃中の 1フレーム 更新（プレイヤー1人分）
-//   12177-12318   D キー長押しの 処理（プレイヤー1人分）
-//   12320-12432   受け身（テクニング）の 処理（プレイヤー1人分）
-//   12434-12601   のけぞり（ヒットスタン）の 処理（プレイヤー1人分）
-//   12603-12703   着地の 処理（プレイヤー1人分）
-//   12705-13987   バトルの 毎フレーム更新（中核）
-//   13989-14484   物理（移動・重力・着地・撃墜判定）
-//   14486-14554   攻撃ボタンの 処理（P1ローカル と オンラインのゲスト で 共通）
-//   14556-14675   スマッシュ攻撃（方向2回 + X）
-//   14677-14772   崖つかまり
-//   14774-15211   D技 と 必殺技 の データ
-//   15213-15630   D技: キャラ別の 中身（D_SKILL_IMPL）
-//   15632-15783   D技: 発動 と 毎フレーム更新（triggerDSkill / updateDSkill）
-//   15785-15845   空中回避
-//   15847-15943   バトル描画の 下準備（カメラ・影・2.5D）
-//   15945-16171   バトル画面の うえに 重ねる もの（ボスラッシュHUD / GAME SET 演出）
-//   16173-18010   バトル画面の 描画
-//   18012-18667   描画: 技エフェクトの 表（ATTACK_EFFECTS: effect名 → 描き方）
-//   18669-19100   描画: 技エフェクトの 呼び出し口（drawAttackEffect ほか）
-//   19102-19273   必殺技 / 即死技 の 全画面オーバーレイ
-//   19275-19405   画面: コンボ一覧 / 戦績
-//   19407-19616   キャラ別 ゲージの 描画（HUDの 下に 出る 細い バー）
-//   19618-19885   バトルの HUD
-//   19887-20778   オンライン対戦（PeerJS / ホストが 正）
-//   20780-21063   画面: VS イントロ
-//   21065-21095   画面の 切り替え（フェード）
-//   21097-21176   ポーズメニュー（バトル中に ESC）
-//   21178-21408   画面: キャラ詳細（Iキー）
-//   21410-21532   画面: 操作説明
-//   21534-22013   キー入力の 振り分け（画面ごと）
-//   22015-22220   メインループ（60FPS 固定タイムステップ）
+//   107-293       書き換わる 値（グローバル状態）
+//   295-524       CANVAS / 画面サイズ
+//   526-1081      キャラ別データ（31体ぶん）
+//   1083-1116     音の ロック解除（最初の 操作で 呼ぶ）
+//   1118-1295     キャラ画像（遅延読み込み）
+//   1297-1332     タイトル画面の 粒子
+//   1334-3008     絵: メニュー用の 31体テーブル（CHAR_BODY_ART）
+//   3010-3038     絵: メニュー用の 呼び出し口（drawCharacterBody）
+//   3040-4729     攻撃中の ポーズ（キャラ 0〜8）
+//   4731-5575     キャラの 絵 ②バトル用
+//   5577-5624     描画ユーティリティ
+//   5626-5748     画面: タイトル
+//   5750-5998     画面: キャラ選択
+//   6000-6098     画面: 難易度選択（CPU戦）
+//   6100-6329     画面: ステージ選択
+//   6331-6694     バトルの 定数 と 状態
+//   6696-6738     ゲージ演出の 小道具（ポップアップ / 変身中の 判定 / MAX の 光り）
+//   6740-6755     カメラ / 画面揺れ
+//   6757-7166     効果音（Web Audio で 合成）
+//   7168-7482     観客の 音
+//   7484-7506     ヒット表示 / コミック文字
+//   7508-7555     掴み・投げ の 定数と キャラ別テーブル
+//   7557-8045     コマンド技（→→↓↓+Z など）
+//   8047-8810     技データ
+//   8812-9158     プレイヤー生成 / 試合の 初期化
+//   9160-9177     ヒット処理（ダメージ・ノックバック）
+//   9179-9607     ヒットした ときの 演出（applyHit の 後半・ゲームの 数値は 変えない）
+//   9609-10532    ヒット処理（ダメージと ノックバックを 決めて 相手に 入れる）
+//   10534-10563   当たり判定
+//   10565-10606   飛び道具
+//   10608-10866   技の 発動（通常技・復帰技・ジャブ）
+//   10868-11090   掴み・投げ の 実行
+//   11092-11435   CPU の 思考
+//   11437-11596   画面演出の 配列を 1フレーム 進める
+//   11598-11832   キャラ固有の ゲージ更新（毎フレーム・プレイヤー1人分）
+//   11834-12177   攻撃中の 1フレーム 更新（プレイヤー1人分）
+//   12179-12320   D キー長押しの 処理（プレイヤー1人分）
+//   12322-12434   受け身（テクニング）の 処理（プレイヤー1人分）
+//   12436-12603   のけぞり（ヒットスタン）の 処理（プレイヤー1人分）
+//   12605-12705   着地の 処理（プレイヤー1人分）
+//   12707-13989   バトルの 毎フレーム更新（中核）
+//   13991-14486   物理（移動・重力・着地・撃墜判定）
+//   14488-14556   攻撃ボタンの 処理（P1ローカル と オンラインのゲスト で 共通）
+//   14558-14677   スマッシュ攻撃（方向2回 + X）
+//   14679-14774   崖つかまり
+//   14776-15213   D技 と 必殺技 の データ
+//   15215-15632   D技: キャラ別の 中身（D_SKILL_IMPL）
+//   15634-15785   D技: 発動 と 毎フレーム更新（triggerDSkill / updateDSkill）
+//   15787-15847   空中回避
+//   15849-15945   バトル描画の 下準備（カメラ・影・2.5D）
+//   15947-16170   バトル画面の うえに 重ねる もの（ボスラッシュHUD / GAME SET 演出）
+//   16172-16468   ステージの 床を 描く（2.5D の 台形）
+//   16470-16875   プレイヤー2人を 描く（本体・影・名前・ゲージ・状態異常の 重ね表示）
+//   16877-18038   バトル画面の 描画
+//   18040-18695   描画: 技エフェクトの 表（ATTACK_EFFECTS: effect名 → 描き方）
+//   18697-19128   描画: 技エフェクトの 呼び出し口（drawAttackEffect ほか）
+//   19130-19301   必殺技 / 即死技 の 全画面オーバーレイ
+//   19303-19433   画面: コンボ一覧 / 戦績
+//   19435-19644   キャラ別 ゲージの 描画（HUDの 下に 出る 細い バー）
+//   19646-19913   バトルの HUD
+//   19915-20806   オンライン対戦（PeerJS / ホストが 正）
+//   20808-21091   画面: VS イントロ
+//   21093-21123   画面の 切り替え（フェード）
+//   21125-21204   ポーズメニュー（バトル中に ESC）
+//   21206-21436   画面: キャラ詳細（Iキー）
+//   21438-21560   画面: 操作説明
+//   21562-22041   キー入力の 振り分け（画面ごと）
+//   22043-22248   メインループ（60FPS 固定タイムステップ）
 //
 // ### 目次ここまで
 // ======================================================================
@@ -16166,6 +16168,708 @@ function drawGameSetOverlay() {
     }
   }
 }
+// ======================================================================
+// ステージの 床を 描く（2.5D の 台形）
+//
+// drawBattle から 切り出した もの。中身は そのまま。
+// 呼ばれる 時点で ctx には 画面揺れと カメラの 変形が かかっている。
+// ここでは save/restore を しない（する なら 必ず 対で）
+//   curStage : stages[selectedStage]。床幅は 中で STAGE_RIGHT/LEFT から 出す
+// ======================================================================
+function drawStageFloor(curStage) {
+// ===== ステージ足場 (2.5D台形) =====
+const stageW = STAGE_RIGHT - STAGE_LEFT;
+const stageH = 18;
+const stageY = STAGE_GROUND_Y;
+// 2.5D台形パラメータ（STAGE_LEFT/RIGHTが既に台形手前幅に拡張済み）
+const perspNear = 1.0;   // 手前の辺: そのまま（STAGE_LEFT/RIGHT = 台形手前幅）
+const perspFar = 0.625;  // 奥の辺: ×0.625 (元の0.75/1.2 = 奥幅は元幅の62.5%)
+const farYOffset = 35;   // 奥のY: 床より35px上
+const stageCx = STAGE_LEFT + stageW / 2;
+const nearHalfW = stageW * perspNear / 2;
+const farHalfW = stageW * perspFar / 2;
+const nearLeft = stageCx - nearHalfW;
+const nearRight = stageCx + nearHalfW;
+const farLeft = stageCx - farHalfW;
+const farRight = stageCx + farHalfW;
+
+if (curStage.id === 'mahoujin') {
+  // 魔法陣の間: メインプラットフォーム（2.5D台形）
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+  ctx.beginPath();
+  ctx.ellipse(stageCx, stageY + 28, nearHalfW * 0.75, 8, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // 上面（台形・奥暗め→手前明るめ）
+  const magicTopGrad = cachedLinGrad(0, stageY - farYOffset, 0, stageY, [0, '#0d0518', 1, '#2a1a3a']);
+  ctx.fillStyle = magicTopGrad;
+  ctx.beginPath();
+  ctx.moveTo(farLeft, stageY - farYOffset);
+  ctx.lineTo(farRight, stageY - farYOffset);
+  ctx.lineTo(nearRight, stageY);
+  ctx.lineTo(nearLeft, stageY);
+  ctx.closePath();
+  ctx.fill();
+  // 側面（厚み）
+  const magicSideH = 22;
+  ctx.fillStyle = '#0d0518';
+  ctx.beginPath();
+  ctx.moveTo(nearLeft, stageY);
+  ctx.lineTo(nearRight, stageY);
+  ctx.lineTo(nearRight + 3, stageY + magicSideH);
+  ctx.lineTo(nearLeft - 3, stageY + magicSideH);
+  ctx.closePath();
+  ctx.fill();
+  // 魔法陣ライン（手前エッジ）
+  ctx.shadowColor = '#AA77FF';
+  ctx.shadowBlur = 6;
+  ctx.strokeStyle = 'rgba(170, 120, 255, 0.5)';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(nearLeft, stageY); ctx.lineTo(nearRight, stageY); ctx.stroke();
+  // 奥エッジライン
+  ctx.strokeStyle = 'rgba(170, 120, 255, 0.25)';
+  ctx.beginPath(); ctx.moveTo(farLeft, stageY - farYOffset); ctx.lineTo(farRight, stageY - farYOffset); ctx.stroke();
+  ctx.shadowBlur = 0;
+  // 魔法の紋様ライン（台形に沿って）
+  ctx.strokeStyle = 'rgba(200, 170, 255, 0.15)';
+  ctx.lineWidth = 1;
+  for (let i = 1; i < 8; i++) {
+    const t = i / 8;
+    const lx1 = farLeft + (farRight - farLeft) * t;
+    const lx2 = nearLeft + (nearRight - nearLeft) * t;
+    ctx.beginPath(); ctx.moveTo(lx1, stageY - farYOffset); ctx.lineTo(lx2, stageY); ctx.stroke();
+  }
+  // 薄い光のエフェクト
+  const mainGlow = cachedLinGrad(0, stageY - farYOffset - 20, 0, stageY - farYOffset, [0, 'rgba(170, 120, 255, 0)', 1, 'rgba(170, 120, 255, 0.06)']);
+  ctx.fillStyle = mainGlow;
+  ctx.fillRect(farLeft, stageY - farYOffset - 20, farRight - farLeft, 20);
+
+  // 中段・上段プラットフォーム描画 (2.5D台形)
+  for (const plat of platforms) {
+    // 浮遊の揺れ
+    const floatOfs = Math.sin(battleTime * 0.02 + plat.x * 0.01) * 2;
+    const py = plat.y + floatOfs;
+    const pScale = getDepthScale(py);
+    const pCx = plat.x + plat.w / 2;
+    const pNearW = plat.w * 1.05;
+    const pFarW = plat.w * 0.85;
+    const pFarOfs = 8; // 奥のY距離
+    // 影
+    ctx.fillStyle = 'rgba(100, 60, 180, 0.15)';
+    ctx.beginPath();
+    ctx.ellipse(pCx, py + 15, pNearW * 0.35, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // 上面（台形: 奥暗め→手前明るめ）
+    const subTopGrad = cachedLinGrad(0, py - pFarOfs, 0, py, [0, '#1a0828', 1, '#3a2050']);
+    ctx.fillStyle = subTopGrad;
+    ctx.beginPath();
+    ctx.moveTo(pCx - pFarW / 2, py - pFarOfs);
+    ctx.lineTo(pCx + pFarW / 2, py - pFarOfs);
+    ctx.lineTo(pCx + pNearW / 2, py);
+    ctx.lineTo(pCx - pNearW / 2, py);
+    ctx.closePath();
+    ctx.fill();
+    // 側面（暗め）
+    ctx.fillStyle = '#0d0418';
+    ctx.beginPath();
+    ctx.moveTo(pCx - pNearW / 2, py);
+    ctx.lineTo(pCx + pNearW / 2, py);
+    ctx.lineTo(pCx + pNearW / 2 + 2, py + 8);
+    ctx.lineTo(pCx - pNearW / 2 - 2, py + 8);
+    ctx.closePath();
+    ctx.fill();
+    // 金色の縁ライン
+    ctx.shadowColor = '#DDAA44';
+    ctx.shadowBlur = 5;
+    ctx.strokeStyle = 'rgba(220, 170, 60, 0.6)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(plat.x, py); ctx.lineTo(plat.x + plat.w, py); ctx.stroke();
+    ctx.shadowBlur = 0;
+    // 薄い光のエフェクト（足場上）
+    const subGlow = cachedLinGrad(plat.x, py - 20, plat.x, py, [0, 'rgba(170, 120, 255, 0)', 1, 'rgba(170, 120, 255, 0.05)']);
+    ctx.fillStyle = subGlow;
+    ctx.fillRect(plat.x, py - 20, plat.w, 20);
+    // 端からのオーラ
+    for (let side = 0; side < 2; side++) {
+      const ex = side === 0 ? plat.x : plat.x + plat.w;
+      const auraAlpha = 0.15 + Math.sin(battleTime * 0.04 + side * 3 + plat.x * 0.02) * 0.08;
+      ctx.fillStyle = `rgba(170, 120, 255, ${auraAlpha})`;
+      ctx.beginPath();
+      ctx.arc(ex, py - 3, 6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+} else if (curStage.id === 'seijaku') {
+  // 夜のパリ: 石畳風プラットフォーム (2.5D台形)
+  // Platform shadow
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+  ctx.beginPath();
+  ctx.ellipse(stageCx, stageY + 28, nearHalfW * 0.75, 8, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // 上面（台形・奥暗め→手前明るめ）
+  const stoneTopGrad = cachedLinGrad(0, stageY - farYOffset, 0, stageY, [0, '#1a1a1a', 1, '#3a3a3a']);
+  ctx.fillStyle = stoneTopGrad;
+  ctx.beginPath();
+  ctx.moveTo(farLeft, stageY - farYOffset);
+  ctx.lineTo(farRight, stageY - farYOffset);
+  ctx.lineTo(nearRight, stageY);
+  ctx.lineTo(nearLeft, stageY);
+  ctx.closePath();
+  ctx.fill();
+  // 石畳の目地ライン（台形に沿って）
+  ctx.strokeStyle = 'rgba(80, 80, 80, 0.25)';
+  ctx.lineWidth = 1;
+  for (let i = 1; i < 10; i++) {
+    const t = i / 10;
+    const lx1 = farLeft + (farRight - farLeft) * t;
+    const lx2 = nearLeft + (nearRight - nearLeft) * t;
+    ctx.beginPath(); ctx.moveTo(lx1, stageY - farYOffset); ctx.lineTo(lx2, stageY); ctx.stroke();
+  }
+  // 側面（厚み）
+  const stoneSideH = 22;
+  const stoneSideGrad = cachedLinGrad(0, stageY, 0, stageY + stoneSideH, [0, '#2a2a2a', 1, '#1a1a1a']);
+  ctx.fillStyle = stoneSideGrad;
+  ctx.beginPath();
+  ctx.moveTo(nearLeft, stageY);
+  ctx.lineTo(nearRight, stageY);
+  ctx.lineTo(nearRight + 3, stageY + stoneSideH);
+  ctx.lineTo(nearLeft - 3, stageY + stoneSideH);
+  ctx.closePath();
+  ctx.fill();
+  // Edge accent (手前)
+  ctx.shadowColor = '#445566';
+  ctx.shadowBlur = 4;
+  ctx.strokeStyle = '#556677';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(nearLeft, stageY);
+  ctx.lineTo(nearRight, stageY);
+  ctx.stroke();
+  // 奥エッジ
+  ctx.strokeStyle = 'rgba(85, 102, 119, 0.3)';
+  ctx.beginPath();
+  ctx.moveTo(farLeft, stageY - farYOffset);
+  ctx.lineTo(farRight, stageY - farYOffset);
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+} else if (curStage.id === 'space') {
+  // 星降る宇宙: 宇宙クリスタルプラットフォーム (2.5D台形)
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+  ctx.beginPath();
+  ctx.ellipse(stageCx, stageY + 28, nearHalfW * 0.75, 8, 0, 0, Math.PI * 2);
+  ctx.fill();
+  const spaceTopGrad = cachedLinGrad(0, stageY - farYOffset, 0, stageY, [0, '#1a1040', 1, '#3a2870']);
+  ctx.fillStyle = spaceTopGrad;
+  ctx.beginPath();
+  ctx.moveTo(farLeft, stageY - farYOffset); ctx.lineTo(farRight, stageY - farYOffset);
+  ctx.lineTo(nearRight, stageY); ctx.lineTo(nearLeft, stageY); ctx.closePath(); ctx.fill();
+  const spaceSideH = 22;
+  ctx.fillStyle = '#0a0828';
+  ctx.beginPath();
+  ctx.moveTo(nearLeft, stageY); ctx.lineTo(nearRight, stageY);
+  ctx.lineTo(nearRight + 3, stageY + spaceSideH); ctx.lineTo(nearLeft - 3, stageY + spaceSideH); ctx.closePath(); ctx.fill();
+  ctx.shadowColor = '#8866FF'; ctx.shadowBlur = 6;
+  ctx.strokeStyle = 'rgba(136, 102, 255, 0.5)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(nearLeft, stageY); ctx.lineTo(nearRight, stageY); ctx.stroke();
+  ctx.strokeStyle = 'rgba(136, 102, 255, 0.25)';
+  ctx.beginPath(); ctx.moveTo(farLeft, stageY - farYOffset); ctx.lineTo(farRight, stageY - farYOffset); ctx.stroke();
+  ctx.shadowBlur = 0;
+  // 星パーティクル
+  ctx.strokeStyle = 'rgba(200, 170, 255, 0.15)'; ctx.lineWidth = 1;
+  for (let i = 1; i < 8; i++) {
+    const t = i / 8;
+    ctx.beginPath();
+    ctx.moveTo(farLeft + (farRight - farLeft) * t, stageY - farYOffset);
+    ctx.lineTo(nearLeft + (nearRight - nearLeft) * t, stageY); ctx.stroke();
+  }
+} else if (curStage.id === 'throne') {
+  // 魔王の玉座: ダークストーンプラットフォーム (2.5D台形)
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+  ctx.beginPath();
+  ctx.ellipse(stageCx, stageY + 28, nearHalfW * 0.75, 8, 0, 0, Math.PI * 2);
+  ctx.fill();
+  const throneTopGrad = cachedLinGrad(0, stageY - farYOffset, 0, stageY, [0, '#1a0808', 1, '#3a1515']);
+  ctx.fillStyle = throneTopGrad;
+  ctx.beginPath();
+  ctx.moveTo(farLeft, stageY - farYOffset); ctx.lineTo(farRight, stageY - farYOffset);
+  ctx.lineTo(nearRight, stageY); ctx.lineTo(nearLeft, stageY); ctx.closePath(); ctx.fill();
+  const throneSideH = 22;
+  const throneSideGrad = cachedLinGrad(0, stageY, 0, stageY + throneSideH, [0, '#2a0a0a', 1, '#150505']);
+  ctx.fillStyle = throneSideGrad;
+  ctx.beginPath();
+  ctx.moveTo(nearLeft, stageY); ctx.lineTo(nearRight, stageY);
+  ctx.lineTo(nearRight + 3, stageY + throneSideH); ctx.lineTo(nearLeft - 3, stageY + throneSideH); ctx.closePath(); ctx.fill();
+  ctx.shadowColor = '#FF4422'; ctx.shadowBlur = 6;
+  ctx.strokeStyle = 'rgba(255, 68, 34, 0.4)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(nearLeft, stageY); ctx.lineTo(nearRight, stageY); ctx.stroke();
+  ctx.strokeStyle = 'rgba(255, 68, 34, 0.2)';
+  ctx.beginPath(); ctx.moveTo(farLeft, stageY - farYOffset); ctx.lineTo(farRight, stageY - farYOffset); ctx.stroke();
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = 'rgba(180, 40, 20, 0.15)'; ctx.lineWidth = 1;
+  for (let i = 1; i < 10; i++) {
+    const t = i / 10;
+    ctx.beginPath();
+    ctx.moveTo(farLeft + (farRight - farLeft) * t, stageY - farYOffset);
+    ctx.lineTo(nearLeft + (nearRight - nearLeft) * t, stageY); ctx.stroke();
+  }
+} else {
+  // 桜ノ舞台: 和風プラットフォーム (2.5D台形)
+  // Platform shadow
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+  ctx.beginPath();
+  ctx.ellipse(stageCx, stageY + 30, nearHalfW * 0.8, 10, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // 上面（台形・グラデーション: 奥暗め→手前明るめ）
+  const platTopGrad = cachedLinGrad(0, stageY - farYOffset, 0, stageY, [0, '#5A3A1B', 1, '#A0784A']);
+  ctx.fillStyle = platTopGrad;
+  ctx.beginPath();
+  ctx.moveTo(farLeft, stageY - farYOffset);
+  ctx.lineTo(farRight, stageY - farYOffset);
+  ctx.lineTo(nearRight, stageY);
+  ctx.lineTo(nearLeft, stageY);
+  ctx.closePath();
+  ctx.fill();
+  // 畳 grid lines (台形に沿って)
+  ctx.strokeStyle = 'rgba(60, 40, 20, 0.3)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 10; i++) {
+    const t = i / 10;
+    const lx1 = farLeft + (farRight - farLeft) * t;
+    const lx2 = nearLeft + (nearRight - nearLeft) * t;
+    ctx.beginPath(); ctx.moveTo(lx1, stageY - farYOffset); ctx.lineTo(lx2, stageY); ctx.stroke();
+  }
+  // 側面（厚み・暗め）
+  const sideH = 22;
+  const sideGrad = cachedLinGrad(0, stageY, 0, stageY + sideH, [0, '#7A4A1E', 1, '#4A2A0E']);
+  ctx.fillStyle = sideGrad;
+  ctx.beginPath();
+  ctx.moveTo(nearLeft, stageY);
+  ctx.lineTo(nearRight, stageY);
+  ctx.lineTo(nearRight + 3, stageY + sideH);
+  ctx.lineTo(nearLeft - 3, stageY + sideH);
+  ctx.closePath();
+  ctx.fill();
+  // Edge accent
+  ctx.shadowColor = '#CC8844';
+  ctx.shadowBlur = 6;
+  ctx.strokeStyle = '#CC9955';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(nearLeft, stageY);
+  ctx.lineTo(nearRight, stageY);
+  ctx.stroke();
+  // 奥のエッジライン
+  ctx.strokeStyle = 'rgba(160, 120, 74, 0.4)';
+  ctx.beginPath();
+  ctx.moveTo(farLeft, stageY - farYOffset);
+  ctx.lineTo(farRight, stageY - farYOffset);
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+}
+}
+// ======================================================================
+// プレイヤー2人を 描く（本体・影・名前・ゲージ・状態異常の 重ね表示）
+//
+// drawBattle から 切り出した もの。中身は そのまま。
+// 呼ばれる 時点で ctx には 画面揺れと カメラの 変形が かかっている。
+// 中で save/restore を 17回 対で 使っている（崩すと 以後の 描画が ずれる）。
+// 描画の 都合で p.x / p.y を 一時的に 書き換え、最後に 戻している
+// ======================================================================
+function drawPlayers() {
+// Players
+for (const p of players) {
+  if (!p.alive) continue;
+  // 描画補間: renderX/renderYを使用（物理位置を一時退避）
+  const _physX = p.x, _physY = p.y;
+  if (p.renderX !== undefined) { p.x = p.renderX; p.y = p.renderY; }
+  // 強化モード中: グロー + サイズ×1.1
+  const _pm = getActivePowerMode(p);
+  ctx.save(); // プレイヤー描画の外側save（shadowBlur/transform含む）
+  if (_pm) {
+    const gc = POWER_GLOW[p.charIdx] || '#FFD700';
+    ctx.shadowColor = gc; ctx.shadowBlur = 20;
+    ctx.translate(p.x, p.y - 55);
+    ctx.scale(1.1, 1.1);
+    ctx.translate(-p.x, -(p.y - 55));
+  }
+
+  // Catbus(11): 瞬間消滅中は半透明
+  if (p.charIdx === 11 && p.catbusVanishTimer > 0) {
+    ctx.globalAlpha = 0.15;
+  }
+  // マイクロ(20): 分離時は小さく描画
+  if (p.charIdx === 20 && p.microSplit) {
+    ctx.translate(p.x, p.y - 55);
+    ctx.scale(0.7, 0.7);
+    ctx.translate(-p.x, -(p.y - 55));
+  }
+  // 怖(24): 近くの相手が震える
+  if (p._kowaiShake && p.hitstun <= 0) {
+    ctx.translate((Math.random()-0.5)*2, (Math.random()-0.5)*1);
+    p._kowaiShake = false;
+  }
+  // 空中回避エフェクト: 残像 + 半透明
+  if (p.airDodging || p.airDodgeTimer > 0) {
+    // 残像エフェクト（移動方向の逆に2つ）
+    const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+    if (speed > 2) {
+      ctx.globalAlpha = 0.2;
+      drawBattleCharacter(p.x - p.vx * 2, p.y - p.vy * 2 - 55, 1.0, p.charIdx, battleTime, p.facingLeft, p);
+      ctx.globalAlpha = 0.08;
+      drawBattleCharacter(p.x - p.vx * 4, p.y - p.vy * 4 - 55, 1.0, p.charIdx, battleTime, p.facingLeft, p);
+    }
+    // 本体半透明
+    ctx.globalAlpha = 0.35;
+  } else if (p.invincibleTimer > 0) {
+    // 崖無敵: 残り5Fから速い点滅
+    const blinkRate = (p.ledgeGrab && p.ledgeInvincible > 0 && p.ledgeInvincible <= 5) ? 2 : 4;
+    if (Math.floor(p.invincibleTimer / blinkRate) % 2 === 0) ctx.globalAlpha = 0.4;
+  }
+
+  // Hitstun flash + knockback afterimage
+  if (p.hitstun > 0) {
+    if (p.hitstun % 3 === 0) ctx.globalAlpha = 0.6;
+    // Draw fading afterimage during strong knockback
+    const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+    if (speed > 6) {
+      ctx.globalAlpha = 0.15;
+      drawBattleCharacter(p.x - p.vx * 1.5, p.y - p.vy * 1.5 - 55, 1.0, p.charIdx, battleTime, p.facingLeft, p);
+      if (speed > 10) {
+        ctx.globalAlpha = 0.07;
+        drawBattleCharacter(p.x - p.vx * 3, p.y - p.vy * 3 - 55, 1.0, p.charIdx, battleTime, p.facingLeft, p);
+      }
+      ctx.globalAlpha = p.hitstun % 3 === 0 ? 0.6 : 1;
+    }
+  }
+
+  // アイドルモーション: 待機中にわずかに上下に揺れる（描画のみ）
+  const isIdle = p.grounded && !p.attacking && Math.abs(p.vx) < 0.5 && p.hitstun <= 0 && !p.grabbing && !p.grabbed && !p.guarding && p.guardBreakStun <= 0;
+  const idleOfs = isIdle ? Math.sin(battleTime * (Math.PI * 2 / 180)) * 0.3 : 0;
+  const drawY = p.y - 55 + idleOfs;
+  // ヒットストップ中の 震え（見た目だけ ずらす。当たり判定は そのまま）
+  const vibX = p.hitVib > 0 ? Math.sin(p.hitVib * 2.4) * p.hitVibAmp : 0;
+  const vibY = p.hitVib > 0 ? Math.cos(p.hitVib * 3.1) * p.hitVibAmp * 0.35 : 0;
+
+  // 着地スクワッシュ（landSquash: 縦圧縮→元に戻す）
+  if (p.landSquash > 0) {
+    const squashT = p.landSquash / 12; // 0→1
+    const scaleY = 1 - squashT * (p.fastFalling ? 0.3 : 0.15);
+    const scaleX = 1 + squashT * (p.fastFalling ? 0.15 : 0.08);
+    ctx.translate(p.x, p.y);
+    ctx.scale(scaleX, scaleY);
+    ctx.translate(-p.x, -p.y);
+  }
+  // ステージ端のオフセット表示（端を向いている時のみ）
+  const edgeL = p.x - STAGE_LEFT, edgeR = STAGE_RIGHT - p.x;
+  if (p.grounded && p.hitstun <= 0) {
+    if (edgeL < 30 && p.facingLeft) ctx.translate(-4, 0);
+    else if (edgeR < 30 && !p.facingLeft) ctx.translate(4, 0);
+  }
+
+  // === 攻撃時モーションブラー（残像） ===
+  if (p.attacking && p.attackFrame > 0 && (Math.abs(p.vx) > 1 || Math.abs(p.vy) > 1)) {
+    ctx.save();
+    ctx.globalAlpha = 0.2;
+    drawBattleCharacter(p.x - p.vx * 2, drawY - p.vy * 2, 1.0, p.charIdx, battleTime, p.facingLeft, p);
+    ctx.globalAlpha = 0.08;
+    drawBattleCharacter(p.x - p.vx * 4, drawY - p.vy * 4, 1.0, p.charIdx, battleTime, p.facingLeft, p);
+    ctx.restore();
+  }
+
+  // 2.5D遠近感スケール
+  const depthS = getDepthScale(p.y);
+
+  // ⑤ コマンド技スケールエフェクト & ドラゴンモード拡大
+  const dragonScale = (p.charIdx === 10 && p.dragonMode) ? 1.3 : 1.0;
+  if (cmdScaleEffect.playerId === p.id && cmdScaleEffect.life > 0) {
+    const scaleT = cmdScaleEffect.life / 12;
+    const s = (1 + scaleT * 0.3) * dragonScale * depthS;
+    ctx.save();
+    ctx.translate(p.x, drawY);
+    ctx.scale(s, s);
+    ctx.translate(-p.x, -drawY);
+    drawBattleCharacter(p.x + vibX, drawY + vibY, 1.0, p.charIdx, battleTime, p.facingLeft, p);
+    ctx.restore();
+  } else if (dragonScale !== 1.0 || depthS !== 1.0) {
+    const s = dragonScale * depthS;
+    ctx.save();
+    ctx.translate(p.x, drawY);
+    ctx.scale(s, s);
+    ctx.translate(-p.x, -drawY);
+    drawBattleCharacter(p.x + vibX, drawY + vibY, 1.0, p.charIdx, battleTime, p.facingLeft, p);
+    ctx.restore();
+  } else {
+    drawBattleCharacter(p.x + vibX, drawY + vibY, 1.0, p.charIdx, battleTime, p.facingLeft, p);
+  }
+
+  // ライティング・ダメージフラッシュはdrawBattleCharacter内のdamageTintで処理
+
+  // Draw attack effects
+  if (p.attacking && p.attackData) {
+    drawAttackEffect(p);
+  }
+
+  // Guard effect
+  if (p.guarding) {
+    drawGuardEffect(p);
+  }
+
+  // Charge glow effect (溜め中の光る演出)
+  if (p.charging) {
+    ctx.save();
+    const chargeRatio = Math.min(p.chargeTime / p.chargeMaxTime, 1);
+    const pulse = Math.sin(battleTime * 0.15) * 0.3;
+    const chColor = characters[p.charIdx].accent;
+    // Glowing aura
+    ctx.globalAlpha = 0.2 + chargeRatio * 0.4 + pulse * 0.1;
+    const gr = ctx.createRadialGradient(p.x, p.y - 40, 5, p.x, p.y - 40, 30 + chargeRatio * 20);
+    gr.addColorStop(0, chColor);
+    gr.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = gr;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y - 40, 30 + chargeRatio * 20, 0, Math.PI * 2);
+    ctx.fill();
+    // Charge particles
+    if (p.chargeTime % 4 === 0) {
+      const a = Math.random() * Math.PI * 2;
+      sparks.push({
+        x: p.x + Math.cos(a) * 20, y: p.y - 40 + Math.sin(a) * 20,
+        vx: -Math.cos(a) * 2, vy: -Math.sin(a) * 2 - 1,
+        life: 10, maxLife: 15, color: chColor, size: 2 + chargeRatio * 2, gravity: -0.05,
+      });
+    }
+    // Max charge flash
+    if (chargeRatio >= 1 && battleFrame % 10 < 5) {
+      ctx.globalAlpha = 0.3;
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath();
+      ctx.arc(p.x, p.y - 40, 35, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  // セン: 満腹パワーバフ中のスチームエフェクト
+  if (p.charIdx === 18 && p.senBuffTimer > 0) {
+    ctx.save();
+    const pulse = Math.sin(battleTime * 0.08) * 0.1;
+    ctx.globalAlpha = 0.2 + pulse;
+    const sg = ctx.createRadialGradient(p.x, p.y - 40, 5, p.x, p.y - 40, 35);
+    sg.addColorStop(0, '#FF8844');
+    sg.addColorStop(0.5, '#FF884466');
+    sg.addColorStop(1, 'rgba(255,136,68,0)');
+    ctx.fillStyle = sg;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y - 40, 35, 0, Math.PI * 2);
+    ctx.fill();
+    // Steam particles
+    if (battleFrame % 8 === 0) {
+      sparks.push({ x: p.x + (Math.random()-0.5)*20, y: p.y - 30, vx: (Math.random()-0.5)*1.5, vy: -1.5-Math.random()*1.5,
+        life: 12, maxLife: 15, color: '#FFDDAA', size: 2+Math.random()*2, gravity: -0.03, drag: 0.98 });
+    }
+    // Buff timer indicator (flashing when low)
+    const buffRatio = p.senBuffTimer / 600;
+    if (buffRatio < 0.3 && battleFrame % 10 < 5) {
+      ctx.globalAlpha = 0.5;
+      ctx.strokeStyle = '#FF8844';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y - 100, 8, -Math.PI/2, -Math.PI/2 + Math.PI * 2 * buffRatio / 0.3);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+  // ドスボス: ランダム必殺技「?」表示
+  if (p.charIdx === 19 && p.attacking && p.attackData && p.attackData.dosbossRandom && p.attackFrame <= p.attackData.startup) {
+    ctx.save();
+    ctx.font = 'bold 28px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#CC66FF';
+    ctx.globalAlpha = 0.7 + Math.sin(battleTime * 0.2) * 0.3;
+    ctx.fillText('?', p.x, p.y - 90);
+    ctx.globalAlpha = 1;
+    ctx.restore();
+  }
+  // ドスボス: 重力デバフ表示
+  if (p.gravityDebuffTimer > 0) {
+    ctx.save();
+    const gdt = p.gravityDebuffTimer / 180;
+    ctx.globalAlpha = 0.3 * gdt;
+    ctx.strokeStyle = '#9944CC';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(p.x, p.y - 40, 20 + Math.sin(battleTime * 0.1) * 5, 0, Math.PI * 2); ctx.stroke();
+    ctx.globalAlpha = 1;
+    ctx.restore();
+  }
+
+  // Dragon mode aura (天才 ドラゴンモード中の炎オーラ)
+  if (p.charIdx === 10 && p.dragonMode) {
+    ctx.save();
+    const pulse = Math.sin(battleTime * 0.1) * 0.15;
+    ctx.globalAlpha = 0.25 + pulse;
+    const fg = ctx.createRadialGradient(p.x, p.y - 40, 5, p.x, p.y - 40, 40);
+    fg.addColorStop(0, '#FF6600');
+    fg.addColorStop(0.5, '#FF440066');
+    fg.addColorStop(1, 'rgba(255,68,0,0)');
+    ctx.fillStyle = fg;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y - 40, 40, 0, Math.PI * 2);
+    ctx.fill();
+    // Dragon timer indicator
+    const timerRatio = p.dragonTimer / 900;
+    if (timerRatio < 0.3) {
+      // Flashing warning when time is running out
+      if (battleFrame % 10 < 5) {
+        ctx.globalAlpha = 0.5;
+        ctx.strokeStyle = '#FF0000';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y - 100, 8, -Math.PI/2, -Math.PI/2 + Math.PI * 2 * timerRatio / 0.3);
+        ctx.stroke();
+      }
+    }
+    // Fire particles
+    if (battleFrame % 6 === 0) {
+      sparks.push({ x: p.x + (Math.random()-0.5)*20, y: p.y - 20, vx: (Math.random()-0.5)*2, vy: -1-Math.random()*2,
+        life: 10, maxLife: 15, color: '#FF6600', size: 2+Math.random()*2, type: 'fireball', gravity: -0.05, drag: 0.98 });
+    }
+    ctx.restore();
+  }
+
+  // Dragon transform charging indicator
+  if (p.charIdx === 10 && p.dragonTransformTimer > 0 && !p.dragonMode) {
+    ctx.save();
+    const tRatio = p.dragonTransformTimer / 60;
+    ctx.globalAlpha = 0.4 + tRatio * 0.4;
+    ctx.strokeStyle = '#FF4400';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y - 80, 12, -Math.PI/2, -Math.PI/2 + Math.PI * 2 * tRatio);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // Guard break stun effect
+  if (p.guardBreakStun > 0) {
+    ctx.save();
+    ctx.globalAlpha = 0.5 + Math.sin(battleTime * 0.03) * 0.3;
+    ctx.strokeStyle = '#FF6600';
+    ctx.lineWidth = 2;
+    // Dizzy stars
+    for (let i = 0; i < 3; i++) {
+      const angle = battleTime * 0.02 + i * Math.PI * 2 / 3;
+      const sx = p.x + Math.cos(angle) * 18;
+      const sy = p.y - 80 + Math.sin(angle) * 6;
+      ctx.fillStyle = '#FFDD00';
+      drawStar(sx, sy, 5, 5, ctx);
+    }
+    ctx.restore();
+  }
+
+  // Ink blind effect
+  if (p.inkBlindTimer > 0) {
+    ctx.save();
+    const fade = Math.min(1, p.inkBlindTimer / 30);
+    ctx.globalAlpha = 0.6 * fade;
+    ctx.fillStyle = '#1A0030';
+    ctx.beginPath(); ctx.ellipse(p.x, p.y - 45, 28, 35, 0, 0, Math.PI * 2); ctx.fill();
+    // ink drip
+    ctx.fillStyle = '#2A0040';
+    ctx.globalAlpha = 0.5 * fade;
+    for (let j = 0; j < 3; j++) {
+      const dx = (j - 1) * 12;
+      const drip = Math.min(20, (120 - p.inkBlindTimer) * 0.5);
+      ctx.beginPath(); ctx.ellipse(p.x + dx, p.y - 30 + drip + j * 4, 4, 6 + drip * 0.3, 0, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  // Grab effect
+  if (p.grabbing) {
+    drawGrabEffect(p);
+  }
+
+  // Shadow dash / slide / charge after-image
+  if (p.specialState === 'dashing' || p.specialState === 'sliding' || p.specialState === 'charging') {
+    ctx.globalAlpha = 0.25;
+    drawBattleCharacter(p.x - p.vx * 2, p.y - 55, 1.0, p.charIdx, battleTime, p.facingLeft, p);
+    ctx.globalAlpha = 0.12;
+    drawBattleCharacter(p.x - p.vx * 4, p.y - 55, 1.0, p.charIdx, battleTime, p.facingLeft, p);
+  }
+
+  // Teleport slash flash
+  if (p.specialState === 'teleSlashing') {
+    ctx.globalAlpha = 0.4;
+    ctx.fillStyle = '#FFFFFF';
+    ctx.beginPath(); ctx.ellipse(p.x, p.y - 35, 30, 45, 0, 0, Math.PI * 2); ctx.fill();
+  }
+
+  ctx.restore();
+
+  // うる男(5): 怒りゲージ表示
+  if (p.charIdx === 5 && !p.rageActive && p.rageGauge > 0) {
+    ctx.save();
+    ctx.globalAlpha = 0.7;
+    const rw = 30, rh = 3;
+    ctx.fillStyle = '#440000';
+    ctx.fillRect(p.x - rw/2, p.y - 98, rw, rh);
+    ctx.fillStyle = '#FF4444';
+    ctx.fillRect(p.x - rw/2, p.y - 98, rw * (p.rageGauge / 100), rh);
+    ctx.restore();
+  }
+  // うる男(5): 怒り発動中エフェクト
+  if (p.charIdx === 5 && p.rageActive) {
+    ctx.save();
+    ctx.globalAlpha = 0.3;
+    const rg = ctx.createRadialGradient(p.x, p.y - 35, 5, p.x, p.y - 35, 35);
+    rg.addColorStop(0, '#FF4444');
+    rg.addColorStop(1, 'rgba(255,68,68,0)');
+    ctx.fillStyle = rg;
+    ctx.beginPath(); ctx.arc(p.x, p.y - 35, 35, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+  // マイクロ(20): 分離状態インジケーター
+  if (p.charIdx === 20 && p.microSplit) {
+    ctx.save();
+    ctx.font = 'bold 9px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillStyle = '#44DDFF'; ctx.globalAlpha = 0.8;
+    ctx.fillText('Split', p.x, p.y - 92);
+    ctx.restore();
+  }
+  // ヤッホ(25): パッシブ表示
+  if (p.charIdx === 25 && p.yahoPassiveDisplay) {
+    ctx.save();
+    ctx.font = 'bold 8px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillStyle = '#FFDD00'; ctx.globalAlpha = 0.6;
+    ctx.fillText('★' + p.yahoPassiveDisplay, p.x, p.y - 92);
+    ctx.restore();
+  }
+  // サトル(23): カウンター準備完了表示
+  if (p.charIdx === 23 && p.satoruCounterBonus > 0) {
+    ctx.save();
+    ctx.globalAlpha = 0.4;
+    ctx.strokeStyle = '#66CCFF';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(p.x, p.y - 35, 25, 0, Math.PI * 2); ctx.stroke();
+    ctx.restore();
+  }
+
+  // Player indicator
+  const arrowY = p.y - 105;
+  ctx.fillStyle = p.id === 0 ? '#44AAFF' : '#FF4444';
+  ctx.font = 'bold 14px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(p.id === 0 ? '1P' : (bossRushMode ? 'BOSS' : (gameMode === 'cpu' ? 'CPU' : '2P')), p.x, arrowY - 8);
+  ctx.beginPath();
+  ctx.moveTo(p.x, arrowY + 2);
+  ctx.lineTo(p.x - 6, arrowY - 4);
+  ctx.lineTo(p.x + 6, arrowY - 4);
+  ctx.closePath(); ctx.fill();
+  // 描画補間: 物理位置を復元
+  p.x = _physX; p.y = _physY;
+}
+}
+
+
 
 
 // 台形ステージ描画ヘルパー
@@ -16242,294 +16946,8 @@ function drawBattle(dt) {
   ctx.scale(cam.zoom, cam.zoom);
   ctx.translate(-cam.x, -cam.y);
 
-  // ===== ステージ足場 (2.5D台形) =====
-  const stageW = STAGE_RIGHT - STAGE_LEFT;
-  const stageH = 18;
-  const stageY = STAGE_GROUND_Y;
-  // 2.5D台形パラメータ（STAGE_LEFT/RIGHTが既に台形手前幅に拡張済み）
-  const perspNear = 1.0;   // 手前の辺: そのまま（STAGE_LEFT/RIGHT = 台形手前幅）
-  const perspFar = 0.625;  // 奥の辺: ×0.625 (元の0.75/1.2 = 奥幅は元幅の62.5%)
-  const farYOffset = 35;   // 奥のY: 床より35px上
-  const stageCx = STAGE_LEFT + stageW / 2;
-  const nearHalfW = stageW * perspNear / 2;
-  const farHalfW = stageW * perspFar / 2;
-  const nearLeft = stageCx - nearHalfW;
-  const nearRight = stageCx + nearHalfW;
-  const farLeft = stageCx - farHalfW;
-  const farRight = stageCx + farHalfW;
-
-  if (curStage.id === 'mahoujin') {
-    // 魔法陣の間: メインプラットフォーム（2.5D台形）
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-    ctx.beginPath();
-    ctx.ellipse(stageCx, stageY + 28, nearHalfW * 0.75, 8, 0, 0, Math.PI * 2);
-    ctx.fill();
-    // 上面（台形・奥暗め→手前明るめ）
-    const magicTopGrad = cachedLinGrad(0, stageY - farYOffset, 0, stageY, [0, '#0d0518', 1, '#2a1a3a']);
-    ctx.fillStyle = magicTopGrad;
-    ctx.beginPath();
-    ctx.moveTo(farLeft, stageY - farYOffset);
-    ctx.lineTo(farRight, stageY - farYOffset);
-    ctx.lineTo(nearRight, stageY);
-    ctx.lineTo(nearLeft, stageY);
-    ctx.closePath();
-    ctx.fill();
-    // 側面（厚み）
-    const magicSideH = 22;
-    ctx.fillStyle = '#0d0518';
-    ctx.beginPath();
-    ctx.moveTo(nearLeft, stageY);
-    ctx.lineTo(nearRight, stageY);
-    ctx.lineTo(nearRight + 3, stageY + magicSideH);
-    ctx.lineTo(nearLeft - 3, stageY + magicSideH);
-    ctx.closePath();
-    ctx.fill();
-    // 魔法陣ライン（手前エッジ）
-    ctx.shadowColor = '#AA77FF';
-    ctx.shadowBlur = 6;
-    ctx.strokeStyle = 'rgba(170, 120, 255, 0.5)';
-    ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(nearLeft, stageY); ctx.lineTo(nearRight, stageY); ctx.stroke();
-    // 奥エッジライン
-    ctx.strokeStyle = 'rgba(170, 120, 255, 0.25)';
-    ctx.beginPath(); ctx.moveTo(farLeft, stageY - farYOffset); ctx.lineTo(farRight, stageY - farYOffset); ctx.stroke();
-    ctx.shadowBlur = 0;
-    // 魔法の紋様ライン（台形に沿って）
-    ctx.strokeStyle = 'rgba(200, 170, 255, 0.15)';
-    ctx.lineWidth = 1;
-    for (let i = 1; i < 8; i++) {
-      const t = i / 8;
-      const lx1 = farLeft + (farRight - farLeft) * t;
-      const lx2 = nearLeft + (nearRight - nearLeft) * t;
-      ctx.beginPath(); ctx.moveTo(lx1, stageY - farYOffset); ctx.lineTo(lx2, stageY); ctx.stroke();
-    }
-    // 薄い光のエフェクト
-    const mainGlow = cachedLinGrad(0, stageY - farYOffset - 20, 0, stageY - farYOffset, [0, 'rgba(170, 120, 255, 0)', 1, 'rgba(170, 120, 255, 0.06)']);
-    ctx.fillStyle = mainGlow;
-    ctx.fillRect(farLeft, stageY - farYOffset - 20, farRight - farLeft, 20);
-
-    // 中段・上段プラットフォーム描画 (2.5D台形)
-    for (const plat of platforms) {
-      // 浮遊の揺れ
-      const floatOfs = Math.sin(battleTime * 0.02 + plat.x * 0.01) * 2;
-      const py = plat.y + floatOfs;
-      const pScale = getDepthScale(py);
-      const pCx = plat.x + plat.w / 2;
-      const pNearW = plat.w * 1.05;
-      const pFarW = plat.w * 0.85;
-      const pFarOfs = 8; // 奥のY距離
-      // 影
-      ctx.fillStyle = 'rgba(100, 60, 180, 0.15)';
-      ctx.beginPath();
-      ctx.ellipse(pCx, py + 15, pNearW * 0.35, 4, 0, 0, Math.PI * 2);
-      ctx.fill();
-      // 上面（台形: 奥暗め→手前明るめ）
-      const subTopGrad = cachedLinGrad(0, py - pFarOfs, 0, py, [0, '#1a0828', 1, '#3a2050']);
-      ctx.fillStyle = subTopGrad;
-      ctx.beginPath();
-      ctx.moveTo(pCx - pFarW / 2, py - pFarOfs);
-      ctx.lineTo(pCx + pFarW / 2, py - pFarOfs);
-      ctx.lineTo(pCx + pNearW / 2, py);
-      ctx.lineTo(pCx - pNearW / 2, py);
-      ctx.closePath();
-      ctx.fill();
-      // 側面（暗め）
-      ctx.fillStyle = '#0d0418';
-      ctx.beginPath();
-      ctx.moveTo(pCx - pNearW / 2, py);
-      ctx.lineTo(pCx + pNearW / 2, py);
-      ctx.lineTo(pCx + pNearW / 2 + 2, py + 8);
-      ctx.lineTo(pCx - pNearW / 2 - 2, py + 8);
-      ctx.closePath();
-      ctx.fill();
-      // 金色の縁ライン
-      ctx.shadowColor = '#DDAA44';
-      ctx.shadowBlur = 5;
-      ctx.strokeStyle = 'rgba(220, 170, 60, 0.6)';
-      ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(plat.x, py); ctx.lineTo(plat.x + plat.w, py); ctx.stroke();
-      ctx.shadowBlur = 0;
-      // 薄い光のエフェクト（足場上）
-      const subGlow = cachedLinGrad(plat.x, py - 20, plat.x, py, [0, 'rgba(170, 120, 255, 0)', 1, 'rgba(170, 120, 255, 0.05)']);
-      ctx.fillStyle = subGlow;
-      ctx.fillRect(plat.x, py - 20, plat.w, 20);
-      // 端からのオーラ
-      for (let side = 0; side < 2; side++) {
-        const ex = side === 0 ? plat.x : plat.x + plat.w;
-        const auraAlpha = 0.15 + Math.sin(battleTime * 0.04 + side * 3 + plat.x * 0.02) * 0.08;
-        ctx.fillStyle = `rgba(170, 120, 255, ${auraAlpha})`;
-        ctx.beginPath();
-        ctx.arc(ex, py - 3, 6, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-  } else if (curStage.id === 'seijaku') {
-    // 夜のパリ: 石畳風プラットフォーム (2.5D台形)
-    // Platform shadow
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-    ctx.beginPath();
-    ctx.ellipse(stageCx, stageY + 28, nearHalfW * 0.75, 8, 0, 0, Math.PI * 2);
-    ctx.fill();
-    // 上面（台形・奥暗め→手前明るめ）
-    const stoneTopGrad = cachedLinGrad(0, stageY - farYOffset, 0, stageY, [0, '#1a1a1a', 1, '#3a3a3a']);
-    ctx.fillStyle = stoneTopGrad;
-    ctx.beginPath();
-    ctx.moveTo(farLeft, stageY - farYOffset);
-    ctx.lineTo(farRight, stageY - farYOffset);
-    ctx.lineTo(nearRight, stageY);
-    ctx.lineTo(nearLeft, stageY);
-    ctx.closePath();
-    ctx.fill();
-    // 石畳の目地ライン（台形に沿って）
-    ctx.strokeStyle = 'rgba(80, 80, 80, 0.25)';
-    ctx.lineWidth = 1;
-    for (let i = 1; i < 10; i++) {
-      const t = i / 10;
-      const lx1 = farLeft + (farRight - farLeft) * t;
-      const lx2 = nearLeft + (nearRight - nearLeft) * t;
-      ctx.beginPath(); ctx.moveTo(lx1, stageY - farYOffset); ctx.lineTo(lx2, stageY); ctx.stroke();
-    }
-    // 側面（厚み）
-    const stoneSideH = 22;
-    const stoneSideGrad = cachedLinGrad(0, stageY, 0, stageY + stoneSideH, [0, '#2a2a2a', 1, '#1a1a1a']);
-    ctx.fillStyle = stoneSideGrad;
-    ctx.beginPath();
-    ctx.moveTo(nearLeft, stageY);
-    ctx.lineTo(nearRight, stageY);
-    ctx.lineTo(nearRight + 3, stageY + stoneSideH);
-    ctx.lineTo(nearLeft - 3, stageY + stoneSideH);
-    ctx.closePath();
-    ctx.fill();
-    // Edge accent (手前)
-    ctx.shadowColor = '#445566';
-    ctx.shadowBlur = 4;
-    ctx.strokeStyle = '#556677';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(nearLeft, stageY);
-    ctx.lineTo(nearRight, stageY);
-    ctx.stroke();
-    // 奥エッジ
-    ctx.strokeStyle = 'rgba(85, 102, 119, 0.3)';
-    ctx.beginPath();
-    ctx.moveTo(farLeft, stageY - farYOffset);
-    ctx.lineTo(farRight, stageY - farYOffset);
-    ctx.stroke();
-    ctx.shadowBlur = 0;
-  } else if (curStage.id === 'space') {
-    // 星降る宇宙: 宇宙クリスタルプラットフォーム (2.5D台形)
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-    ctx.beginPath();
-    ctx.ellipse(stageCx, stageY + 28, nearHalfW * 0.75, 8, 0, 0, Math.PI * 2);
-    ctx.fill();
-    const spaceTopGrad = cachedLinGrad(0, stageY - farYOffset, 0, stageY, [0, '#1a1040', 1, '#3a2870']);
-    ctx.fillStyle = spaceTopGrad;
-    ctx.beginPath();
-    ctx.moveTo(farLeft, stageY - farYOffset); ctx.lineTo(farRight, stageY - farYOffset);
-    ctx.lineTo(nearRight, stageY); ctx.lineTo(nearLeft, stageY); ctx.closePath(); ctx.fill();
-    const spaceSideH = 22;
-    ctx.fillStyle = '#0a0828';
-    ctx.beginPath();
-    ctx.moveTo(nearLeft, stageY); ctx.lineTo(nearRight, stageY);
-    ctx.lineTo(nearRight + 3, stageY + spaceSideH); ctx.lineTo(nearLeft - 3, stageY + spaceSideH); ctx.closePath(); ctx.fill();
-    ctx.shadowColor = '#8866FF'; ctx.shadowBlur = 6;
-    ctx.strokeStyle = 'rgba(136, 102, 255, 0.5)'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(nearLeft, stageY); ctx.lineTo(nearRight, stageY); ctx.stroke();
-    ctx.strokeStyle = 'rgba(136, 102, 255, 0.25)';
-    ctx.beginPath(); ctx.moveTo(farLeft, stageY - farYOffset); ctx.lineTo(farRight, stageY - farYOffset); ctx.stroke();
-    ctx.shadowBlur = 0;
-    // 星パーティクル
-    ctx.strokeStyle = 'rgba(200, 170, 255, 0.15)'; ctx.lineWidth = 1;
-    for (let i = 1; i < 8; i++) {
-      const t = i / 8;
-      ctx.beginPath();
-      ctx.moveTo(farLeft + (farRight - farLeft) * t, stageY - farYOffset);
-      ctx.lineTo(nearLeft + (nearRight - nearLeft) * t, stageY); ctx.stroke();
-    }
-  } else if (curStage.id === 'throne') {
-    // 魔王の玉座: ダークストーンプラットフォーム (2.5D台形)
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
-    ctx.beginPath();
-    ctx.ellipse(stageCx, stageY + 28, nearHalfW * 0.75, 8, 0, 0, Math.PI * 2);
-    ctx.fill();
-    const throneTopGrad = cachedLinGrad(0, stageY - farYOffset, 0, stageY, [0, '#1a0808', 1, '#3a1515']);
-    ctx.fillStyle = throneTopGrad;
-    ctx.beginPath();
-    ctx.moveTo(farLeft, stageY - farYOffset); ctx.lineTo(farRight, stageY - farYOffset);
-    ctx.lineTo(nearRight, stageY); ctx.lineTo(nearLeft, stageY); ctx.closePath(); ctx.fill();
-    const throneSideH = 22;
-    const throneSideGrad = cachedLinGrad(0, stageY, 0, stageY + throneSideH, [0, '#2a0a0a', 1, '#150505']);
-    ctx.fillStyle = throneSideGrad;
-    ctx.beginPath();
-    ctx.moveTo(nearLeft, stageY); ctx.lineTo(nearRight, stageY);
-    ctx.lineTo(nearRight + 3, stageY + throneSideH); ctx.lineTo(nearLeft - 3, stageY + throneSideH); ctx.closePath(); ctx.fill();
-    ctx.shadowColor = '#FF4422'; ctx.shadowBlur = 6;
-    ctx.strokeStyle = 'rgba(255, 68, 34, 0.4)'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(nearLeft, stageY); ctx.lineTo(nearRight, stageY); ctx.stroke();
-    ctx.strokeStyle = 'rgba(255, 68, 34, 0.2)';
-    ctx.beginPath(); ctx.moveTo(farLeft, stageY - farYOffset); ctx.lineTo(farRight, stageY - farYOffset); ctx.stroke();
-    ctx.shadowBlur = 0;
-    ctx.strokeStyle = 'rgba(180, 40, 20, 0.15)'; ctx.lineWidth = 1;
-    for (let i = 1; i < 10; i++) {
-      const t = i / 10;
-      ctx.beginPath();
-      ctx.moveTo(farLeft + (farRight - farLeft) * t, stageY - farYOffset);
-      ctx.lineTo(nearLeft + (nearRight - nearLeft) * t, stageY); ctx.stroke();
-    }
-  } else {
-    // 桜ノ舞台: 和風プラットフォーム (2.5D台形)
-    // Platform shadow
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
-    ctx.beginPath();
-    ctx.ellipse(stageCx, stageY + 30, nearHalfW * 0.8, 10, 0, 0, Math.PI * 2);
-    ctx.fill();
-    // 上面（台形・グラデーション: 奥暗め→手前明るめ）
-    const platTopGrad = cachedLinGrad(0, stageY - farYOffset, 0, stageY, [0, '#5A3A1B', 1, '#A0784A']);
-    ctx.fillStyle = platTopGrad;
-    ctx.beginPath();
-    ctx.moveTo(farLeft, stageY - farYOffset);
-    ctx.lineTo(farRight, stageY - farYOffset);
-    ctx.lineTo(nearRight, stageY);
-    ctx.lineTo(nearLeft, stageY);
-    ctx.closePath();
-    ctx.fill();
-    // 畳 grid lines (台形に沿って)
-    ctx.strokeStyle = 'rgba(60, 40, 20, 0.3)';
-    ctx.lineWidth = 1;
-    for (let i = 0; i <= 10; i++) {
-      const t = i / 10;
-      const lx1 = farLeft + (farRight - farLeft) * t;
-      const lx2 = nearLeft + (nearRight - nearLeft) * t;
-      ctx.beginPath(); ctx.moveTo(lx1, stageY - farYOffset); ctx.lineTo(lx2, stageY); ctx.stroke();
-    }
-    // 側面（厚み・暗め）
-    const sideH = 22;
-    const sideGrad = cachedLinGrad(0, stageY, 0, stageY + sideH, [0, '#7A4A1E', 1, '#4A2A0E']);
-    ctx.fillStyle = sideGrad;
-    ctx.beginPath();
-    ctx.moveTo(nearLeft, stageY);
-    ctx.lineTo(nearRight, stageY);
-    ctx.lineTo(nearRight + 3, stageY + sideH);
-    ctx.lineTo(nearLeft - 3, stageY + sideH);
-    ctx.closePath();
-    ctx.fill();
-    // Edge accent
-    ctx.shadowColor = '#CC8844';
-    ctx.shadowBlur = 6;
-    ctx.strokeStyle = '#CC9955';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(nearLeft, stageY);
-    ctx.lineTo(nearRight, stageY);
-    ctx.stroke();
-    // 奥のエッジライン
-    ctx.strokeStyle = 'rgba(160, 120, 74, 0.4)';
-    ctx.beginPath();
-    ctx.moveTo(farLeft, stageY - farYOffset);
-    ctx.lineTo(farRight, stageY - farYOffset);
-    ctx.stroke();
-    ctx.shadowBlur = 0;
-  }
+  // 床（2.5Dの 台形）は drawStageFloor() に まとめてある
+  drawStageFloor(curStage);
 
   // === 全ステージ共通プラットフォーム描画 ===
   if (curStage.id !== 'mahoujin') { // mahoujinは専用描画あり
@@ -17052,398 +17470,8 @@ function drawBattle(dt) {
     p.x = _sx; p.y = _sy;
   }
 
-  // Players
-  for (const p of players) {
-    if (!p.alive) continue;
-    // 描画補間: renderX/renderYを使用（物理位置を一時退避）
-    const _physX = p.x, _physY = p.y;
-    if (p.renderX !== undefined) { p.x = p.renderX; p.y = p.renderY; }
-    // 強化モード中: グロー + サイズ×1.1
-    const _pm = getActivePowerMode(p);
-    ctx.save(); // プレイヤー描画の外側save（shadowBlur/transform含む）
-    if (_pm) {
-      const gc = POWER_GLOW[p.charIdx] || '#FFD700';
-      ctx.shadowColor = gc; ctx.shadowBlur = 20;
-      ctx.translate(p.x, p.y - 55);
-      ctx.scale(1.1, 1.1);
-      ctx.translate(-p.x, -(p.y - 55));
-    }
-
-    // Catbus(11): 瞬間消滅中は半透明
-    if (p.charIdx === 11 && p.catbusVanishTimer > 0) {
-      ctx.globalAlpha = 0.15;
-    }
-    // マイクロ(20): 分離時は小さく描画
-    if (p.charIdx === 20 && p.microSplit) {
-      ctx.translate(p.x, p.y - 55);
-      ctx.scale(0.7, 0.7);
-      ctx.translate(-p.x, -(p.y - 55));
-    }
-    // 怖(24): 近くの相手が震える
-    if (p._kowaiShake && p.hitstun <= 0) {
-      ctx.translate((Math.random()-0.5)*2, (Math.random()-0.5)*1);
-      p._kowaiShake = false;
-    }
-    // 空中回避エフェクト: 残像 + 半透明
-    if (p.airDodging || p.airDodgeTimer > 0) {
-      // 残像エフェクト（移動方向の逆に2つ）
-      const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
-      if (speed > 2) {
-        ctx.globalAlpha = 0.2;
-        drawBattleCharacter(p.x - p.vx * 2, p.y - p.vy * 2 - 55, 1.0, p.charIdx, battleTime, p.facingLeft, p);
-        ctx.globalAlpha = 0.08;
-        drawBattleCharacter(p.x - p.vx * 4, p.y - p.vy * 4 - 55, 1.0, p.charIdx, battleTime, p.facingLeft, p);
-      }
-      // 本体半透明
-      ctx.globalAlpha = 0.35;
-    } else if (p.invincibleTimer > 0) {
-      // 崖無敵: 残り5Fから速い点滅
-      const blinkRate = (p.ledgeGrab && p.ledgeInvincible > 0 && p.ledgeInvincible <= 5) ? 2 : 4;
-      if (Math.floor(p.invincibleTimer / blinkRate) % 2 === 0) ctx.globalAlpha = 0.4;
-    }
-
-    // Hitstun flash + knockback afterimage
-    if (p.hitstun > 0) {
-      if (p.hitstun % 3 === 0) ctx.globalAlpha = 0.6;
-      // Draw fading afterimage during strong knockback
-      const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
-      if (speed > 6) {
-        ctx.globalAlpha = 0.15;
-        drawBattleCharacter(p.x - p.vx * 1.5, p.y - p.vy * 1.5 - 55, 1.0, p.charIdx, battleTime, p.facingLeft, p);
-        if (speed > 10) {
-          ctx.globalAlpha = 0.07;
-          drawBattleCharacter(p.x - p.vx * 3, p.y - p.vy * 3 - 55, 1.0, p.charIdx, battleTime, p.facingLeft, p);
-        }
-        ctx.globalAlpha = p.hitstun % 3 === 0 ? 0.6 : 1;
-      }
-    }
-
-    // アイドルモーション: 待機中にわずかに上下に揺れる（描画のみ）
-    const isIdle = p.grounded && !p.attacking && Math.abs(p.vx) < 0.5 && p.hitstun <= 0 && !p.grabbing && !p.grabbed && !p.guarding && p.guardBreakStun <= 0;
-    const idleOfs = isIdle ? Math.sin(battleTime * (Math.PI * 2 / 180)) * 0.3 : 0;
-    const drawY = p.y - 55 + idleOfs;
-    // ヒットストップ中の 震え（見た目だけ ずらす。当たり判定は そのまま）
-    const vibX = p.hitVib > 0 ? Math.sin(p.hitVib * 2.4) * p.hitVibAmp : 0;
-    const vibY = p.hitVib > 0 ? Math.cos(p.hitVib * 3.1) * p.hitVibAmp * 0.35 : 0;
-
-    // 着地スクワッシュ（landSquash: 縦圧縮→元に戻す）
-    if (p.landSquash > 0) {
-      const squashT = p.landSquash / 12; // 0→1
-      const scaleY = 1 - squashT * (p.fastFalling ? 0.3 : 0.15);
-      const scaleX = 1 + squashT * (p.fastFalling ? 0.15 : 0.08);
-      ctx.translate(p.x, p.y);
-      ctx.scale(scaleX, scaleY);
-      ctx.translate(-p.x, -p.y);
-    }
-    // ステージ端のオフセット表示（端を向いている時のみ）
-    const edgeL = p.x - STAGE_LEFT, edgeR = STAGE_RIGHT - p.x;
-    if (p.grounded && p.hitstun <= 0) {
-      if (edgeL < 30 && p.facingLeft) ctx.translate(-4, 0);
-      else if (edgeR < 30 && !p.facingLeft) ctx.translate(4, 0);
-    }
-
-    // === 攻撃時モーションブラー（残像） ===
-    if (p.attacking && p.attackFrame > 0 && (Math.abs(p.vx) > 1 || Math.abs(p.vy) > 1)) {
-      ctx.save();
-      ctx.globalAlpha = 0.2;
-      drawBattleCharacter(p.x - p.vx * 2, drawY - p.vy * 2, 1.0, p.charIdx, battleTime, p.facingLeft, p);
-      ctx.globalAlpha = 0.08;
-      drawBattleCharacter(p.x - p.vx * 4, drawY - p.vy * 4, 1.0, p.charIdx, battleTime, p.facingLeft, p);
-      ctx.restore();
-    }
-
-    // 2.5D遠近感スケール
-    const depthS = getDepthScale(p.y);
-
-    // ⑤ コマンド技スケールエフェクト & ドラゴンモード拡大
-    const dragonScale = (p.charIdx === 10 && p.dragonMode) ? 1.3 : 1.0;
-    if (cmdScaleEffect.playerId === p.id && cmdScaleEffect.life > 0) {
-      const scaleT = cmdScaleEffect.life / 12;
-      const s = (1 + scaleT * 0.3) * dragonScale * depthS;
-      ctx.save();
-      ctx.translate(p.x, drawY);
-      ctx.scale(s, s);
-      ctx.translate(-p.x, -drawY);
-      drawBattleCharacter(p.x + vibX, drawY + vibY, 1.0, p.charIdx, battleTime, p.facingLeft, p);
-      ctx.restore();
-    } else if (dragonScale !== 1.0 || depthS !== 1.0) {
-      const s = dragonScale * depthS;
-      ctx.save();
-      ctx.translate(p.x, drawY);
-      ctx.scale(s, s);
-      ctx.translate(-p.x, -drawY);
-      drawBattleCharacter(p.x + vibX, drawY + vibY, 1.0, p.charIdx, battleTime, p.facingLeft, p);
-      ctx.restore();
-    } else {
-      drawBattleCharacter(p.x + vibX, drawY + vibY, 1.0, p.charIdx, battleTime, p.facingLeft, p);
-    }
-
-    // ライティング・ダメージフラッシュはdrawBattleCharacter内のdamageTintで処理
-
-    // Draw attack effects
-    if (p.attacking && p.attackData) {
-      drawAttackEffect(p);
-    }
-
-    // Guard effect
-    if (p.guarding) {
-      drawGuardEffect(p);
-    }
-
-    // Charge glow effect (溜め中の光る演出)
-    if (p.charging) {
-      ctx.save();
-      const chargeRatio = Math.min(p.chargeTime / p.chargeMaxTime, 1);
-      const pulse = Math.sin(battleTime * 0.15) * 0.3;
-      const chColor = characters[p.charIdx].accent;
-      // Glowing aura
-      ctx.globalAlpha = 0.2 + chargeRatio * 0.4 + pulse * 0.1;
-      const gr = ctx.createRadialGradient(p.x, p.y - 40, 5, p.x, p.y - 40, 30 + chargeRatio * 20);
-      gr.addColorStop(0, chColor);
-      gr.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle = gr;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y - 40, 30 + chargeRatio * 20, 0, Math.PI * 2);
-      ctx.fill();
-      // Charge particles
-      if (p.chargeTime % 4 === 0) {
-        const a = Math.random() * Math.PI * 2;
-        sparks.push({
-          x: p.x + Math.cos(a) * 20, y: p.y - 40 + Math.sin(a) * 20,
-          vx: -Math.cos(a) * 2, vy: -Math.sin(a) * 2 - 1,
-          life: 10, maxLife: 15, color: chColor, size: 2 + chargeRatio * 2, gravity: -0.05,
-        });
-      }
-      // Max charge flash
-      if (chargeRatio >= 1 && battleFrame % 10 < 5) {
-        ctx.globalAlpha = 0.3;
-        ctx.fillStyle = '#FFFFFF';
-        ctx.beginPath();
-        ctx.arc(p.x, p.y - 40, 35, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.restore();
-    }
-
-    // セン: 満腹パワーバフ中のスチームエフェクト
-    if (p.charIdx === 18 && p.senBuffTimer > 0) {
-      ctx.save();
-      const pulse = Math.sin(battleTime * 0.08) * 0.1;
-      ctx.globalAlpha = 0.2 + pulse;
-      const sg = ctx.createRadialGradient(p.x, p.y - 40, 5, p.x, p.y - 40, 35);
-      sg.addColorStop(0, '#FF8844');
-      sg.addColorStop(0.5, '#FF884466');
-      sg.addColorStop(1, 'rgba(255,136,68,0)');
-      ctx.fillStyle = sg;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y - 40, 35, 0, Math.PI * 2);
-      ctx.fill();
-      // Steam particles
-      if (battleFrame % 8 === 0) {
-        sparks.push({ x: p.x + (Math.random()-0.5)*20, y: p.y - 30, vx: (Math.random()-0.5)*1.5, vy: -1.5-Math.random()*1.5,
-          life: 12, maxLife: 15, color: '#FFDDAA', size: 2+Math.random()*2, gravity: -0.03, drag: 0.98 });
-      }
-      // Buff timer indicator (flashing when low)
-      const buffRatio = p.senBuffTimer / 600;
-      if (buffRatio < 0.3 && battleFrame % 10 < 5) {
-        ctx.globalAlpha = 0.5;
-        ctx.strokeStyle = '#FF8844';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y - 100, 8, -Math.PI/2, -Math.PI/2 + Math.PI * 2 * buffRatio / 0.3);
-        ctx.stroke();
-      }
-      ctx.restore();
-    }
-    // ドスボス: ランダム必殺技「?」表示
-    if (p.charIdx === 19 && p.attacking && p.attackData && p.attackData.dosbossRandom && p.attackFrame <= p.attackData.startup) {
-      ctx.save();
-      ctx.font = 'bold 28px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillStyle = '#CC66FF';
-      ctx.globalAlpha = 0.7 + Math.sin(battleTime * 0.2) * 0.3;
-      ctx.fillText('?', p.x, p.y - 90);
-      ctx.globalAlpha = 1;
-      ctx.restore();
-    }
-    // ドスボス: 重力デバフ表示
-    if (p.gravityDebuffTimer > 0) {
-      ctx.save();
-      const gdt = p.gravityDebuffTimer / 180;
-      ctx.globalAlpha = 0.3 * gdt;
-      ctx.strokeStyle = '#9944CC';
-      ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.arc(p.x, p.y - 40, 20 + Math.sin(battleTime * 0.1) * 5, 0, Math.PI * 2); ctx.stroke();
-      ctx.globalAlpha = 1;
-      ctx.restore();
-    }
-
-    // Dragon mode aura (天才 ドラゴンモード中の炎オーラ)
-    if (p.charIdx === 10 && p.dragonMode) {
-      ctx.save();
-      const pulse = Math.sin(battleTime * 0.1) * 0.15;
-      ctx.globalAlpha = 0.25 + pulse;
-      const fg = ctx.createRadialGradient(p.x, p.y - 40, 5, p.x, p.y - 40, 40);
-      fg.addColorStop(0, '#FF6600');
-      fg.addColorStop(0.5, '#FF440066');
-      fg.addColorStop(1, 'rgba(255,68,0,0)');
-      ctx.fillStyle = fg;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y - 40, 40, 0, Math.PI * 2);
-      ctx.fill();
-      // Dragon timer indicator
-      const timerRatio = p.dragonTimer / 900;
-      if (timerRatio < 0.3) {
-        // Flashing warning when time is running out
-        if (battleFrame % 10 < 5) {
-          ctx.globalAlpha = 0.5;
-          ctx.strokeStyle = '#FF0000';
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y - 100, 8, -Math.PI/2, -Math.PI/2 + Math.PI * 2 * timerRatio / 0.3);
-          ctx.stroke();
-        }
-      }
-      // Fire particles
-      if (battleFrame % 6 === 0) {
-        sparks.push({ x: p.x + (Math.random()-0.5)*20, y: p.y - 20, vx: (Math.random()-0.5)*2, vy: -1-Math.random()*2,
-          life: 10, maxLife: 15, color: '#FF6600', size: 2+Math.random()*2, type: 'fireball', gravity: -0.05, drag: 0.98 });
-      }
-      ctx.restore();
-    }
-
-    // Dragon transform charging indicator
-    if (p.charIdx === 10 && p.dragonTransformTimer > 0 && !p.dragonMode) {
-      ctx.save();
-      const tRatio = p.dragonTransformTimer / 60;
-      ctx.globalAlpha = 0.4 + tRatio * 0.4;
-      ctx.strokeStyle = '#FF4400';
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y - 80, 12, -Math.PI/2, -Math.PI/2 + Math.PI * 2 * tRatio);
-      ctx.stroke();
-      ctx.restore();
-    }
-
-    // Guard break stun effect
-    if (p.guardBreakStun > 0) {
-      ctx.save();
-      ctx.globalAlpha = 0.5 + Math.sin(battleTime * 0.03) * 0.3;
-      ctx.strokeStyle = '#FF6600';
-      ctx.lineWidth = 2;
-      // Dizzy stars
-      for (let i = 0; i < 3; i++) {
-        const angle = battleTime * 0.02 + i * Math.PI * 2 / 3;
-        const sx = p.x + Math.cos(angle) * 18;
-        const sy = p.y - 80 + Math.sin(angle) * 6;
-        ctx.fillStyle = '#FFDD00';
-        drawStar(sx, sy, 5, 5, ctx);
-      }
-      ctx.restore();
-    }
-
-    // Ink blind effect
-    if (p.inkBlindTimer > 0) {
-      ctx.save();
-      const fade = Math.min(1, p.inkBlindTimer / 30);
-      ctx.globalAlpha = 0.6 * fade;
-      ctx.fillStyle = '#1A0030';
-      ctx.beginPath(); ctx.ellipse(p.x, p.y - 45, 28, 35, 0, 0, Math.PI * 2); ctx.fill();
-      // ink drip
-      ctx.fillStyle = '#2A0040';
-      ctx.globalAlpha = 0.5 * fade;
-      for (let j = 0; j < 3; j++) {
-        const dx = (j - 1) * 12;
-        const drip = Math.min(20, (120 - p.inkBlindTimer) * 0.5);
-        ctx.beginPath(); ctx.ellipse(p.x + dx, p.y - 30 + drip + j * 4, 4, 6 + drip * 0.3, 0, 0, Math.PI * 2); ctx.fill();
-      }
-      ctx.restore();
-    }
-
-    // Grab effect
-    if (p.grabbing) {
-      drawGrabEffect(p);
-    }
-
-    // Shadow dash / slide / charge after-image
-    if (p.specialState === 'dashing' || p.specialState === 'sliding' || p.specialState === 'charging') {
-      ctx.globalAlpha = 0.25;
-      drawBattleCharacter(p.x - p.vx * 2, p.y - 55, 1.0, p.charIdx, battleTime, p.facingLeft, p);
-      ctx.globalAlpha = 0.12;
-      drawBattleCharacter(p.x - p.vx * 4, p.y - 55, 1.0, p.charIdx, battleTime, p.facingLeft, p);
-    }
-
-    // Teleport slash flash
-    if (p.specialState === 'teleSlashing') {
-      ctx.globalAlpha = 0.4;
-      ctx.fillStyle = '#FFFFFF';
-      ctx.beginPath(); ctx.ellipse(p.x, p.y - 35, 30, 45, 0, 0, Math.PI * 2); ctx.fill();
-    }
-
-    ctx.restore();
-
-    // うる男(5): 怒りゲージ表示
-    if (p.charIdx === 5 && !p.rageActive && p.rageGauge > 0) {
-      ctx.save();
-      ctx.globalAlpha = 0.7;
-      const rw = 30, rh = 3;
-      ctx.fillStyle = '#440000';
-      ctx.fillRect(p.x - rw/2, p.y - 98, rw, rh);
-      ctx.fillStyle = '#FF4444';
-      ctx.fillRect(p.x - rw/2, p.y - 98, rw * (p.rageGauge / 100), rh);
-      ctx.restore();
-    }
-    // うる男(5): 怒り発動中エフェクト
-    if (p.charIdx === 5 && p.rageActive) {
-      ctx.save();
-      ctx.globalAlpha = 0.3;
-      const rg = ctx.createRadialGradient(p.x, p.y - 35, 5, p.x, p.y - 35, 35);
-      rg.addColorStop(0, '#FF4444');
-      rg.addColorStop(1, 'rgba(255,68,68,0)');
-      ctx.fillStyle = rg;
-      ctx.beginPath(); ctx.arc(p.x, p.y - 35, 35, 0, Math.PI * 2); ctx.fill();
-      ctx.restore();
-    }
-    // マイクロ(20): 分離状態インジケーター
-    if (p.charIdx === 20 && p.microSplit) {
-      ctx.save();
-      ctx.font = 'bold 9px sans-serif'; ctx.textAlign = 'center';
-      ctx.fillStyle = '#44DDFF'; ctx.globalAlpha = 0.8;
-      ctx.fillText('Split', p.x, p.y - 92);
-      ctx.restore();
-    }
-    // ヤッホ(25): パッシブ表示
-    if (p.charIdx === 25 && p.yahoPassiveDisplay) {
-      ctx.save();
-      ctx.font = 'bold 8px sans-serif'; ctx.textAlign = 'center';
-      ctx.fillStyle = '#FFDD00'; ctx.globalAlpha = 0.6;
-      ctx.fillText('★' + p.yahoPassiveDisplay, p.x, p.y - 92);
-      ctx.restore();
-    }
-    // サトル(23): カウンター準備完了表示
-    if (p.charIdx === 23 && p.satoruCounterBonus > 0) {
-      ctx.save();
-      ctx.globalAlpha = 0.4;
-      ctx.strokeStyle = '#66CCFF';
-      ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.arc(p.x, p.y - 35, 25, 0, Math.PI * 2); ctx.stroke();
-      ctx.restore();
-    }
-
-    // Player indicator
-    const arrowY = p.y - 105;
-    ctx.fillStyle = p.id === 0 ? '#44AAFF' : '#FF4444';
-    ctx.font = 'bold 14px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(p.id === 0 ? '1P' : (bossRushMode ? 'BOSS' : (gameMode === 'cpu' ? 'CPU' : '2P')), p.x, arrowY - 8);
-    ctx.beginPath();
-    ctx.moveTo(p.x, arrowY + 2);
-    ctx.lineTo(p.x - 6, arrowY - 4);
-    ctx.lineTo(p.x + 6, arrowY - 4);
-    ctx.closePath(); ctx.fill();
-    // 描画補間: 物理位置を復元
-    p.x = _physX; p.y = _physY;
-  }
+  // プレイヤー2人の 描画は drawPlayers() に まとめてある
+  drawPlayers();
 
   // 金金(22): コイン描画
   for (const p of players) {
