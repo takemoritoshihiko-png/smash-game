@@ -28,70 +28,72 @@
 //     ・キャラを 足すなら「キャラ別データ（31体ぶん）」の チェックリスト
 //     ・落とし穴の 一覧は README の「よくある 落とし穴」
 //
-//   103-289       書き換わる 値（グローバル状態）
-//   291-520       CANVAS / 画面サイズ
-//   522-1077      キャラ別データ（31体ぶん）
-//   1079-1112     音の ロック解除（最初の 操作で 呼ぶ）
-//   1114-1291     キャラ画像（遅延読み込み）
-//   1293-1328     タイトル画面の 粒子
-//   1330-3004     絵: メニュー用の 31体テーブル（CHAR_BODY_ART）
-//   3006-3034     絵: メニュー用の 呼び出し口（drawCharacterBody）
-//   3036-4725     攻撃中の ポーズ（キャラ 0〜8）
-//   4727-5571     キャラの 絵 ②バトル用
-//   5573-5620     描画ユーティリティ
-//   5622-5744     画面: タイトル
-//   5746-5994     画面: キャラ選択
-//   5996-6094     画面: 難易度選択（CPU戦）
-//   6096-6325     画面: ステージ選択
-//   6327-6690     バトルの 定数 と 状態
-//   6692-6734     ゲージ演出の 小道具（ポップアップ / 変身中の 判定 / MAX の 光り）
-//   6736-6751     カメラ / 画面揺れ
-//   6753-7162     効果音（Web Audio で 合成）
-//   7164-7478     観客の 音
-//   7480-7502     ヒット表示 / コミック文字
-//   7504-7551     掴み・投げ の 定数と キャラ別テーブル
-//   7553-8041     コマンド技（→→↓↓+Z など）
-//   8043-8806     技データ
-//   8808-9154     プレイヤー生成 / 試合の 初期化
-//   9156-10494    ヒット処理（ダメージ・ノックバック）
-//   10496-10525   当たり判定
-//   10527-10568   飛び道具
-//   10570-10828   技の 発動（通常技・復帰技・ジャブ）
-//   10830-11052   掴み・投げ の 実行
-//   11054-11397   CPU の 思考
-//   11399-11558   画面演出の 配列を 1フレーム 進める
-//   11560-11794   キャラ固有の ゲージ更新（毎フレーム・プレイヤー1人分）
-//   11796-12139   攻撃中の 1フレーム 更新（プレイヤー1人分）
-//   12141-12282   D キー長押しの 処理（プレイヤー1人分）
-//   12284-12396   受け身（テクニング）の 処理（プレイヤー1人分）
-//   12398-12565   のけぞり（ヒットスタン）の 処理（プレイヤー1人分）
-//   12567-12667   着地の 処理（プレイヤー1人分）
-//   12669-13935   バトルの 毎フレーム更新（中核）
-//   13937-14432   物理（移動・重力・着地・撃墜判定）
-//   14434-14502   攻撃ボタンの 処理（P1ローカル と オンラインのゲスト で 共通）
-//   14504-14623   スマッシュ攻撃（方向2回 + X）
-//   14625-14720   崖つかまり
-//   14722-15159   D技 と 必殺技 の データ
-//   15161-15578   D技: キャラ別の 中身（D_SKILL_IMPL）
-//   15580-15731   D技: 発動 と 毎フレーム更新（triggerDSkill / updateDSkill）
-//   15733-15793   空中回避
-//   15795-15891   バトル描画の 下準備（カメラ・影・2.5D）
-//   15893-16119   バトル画面の うえに 重ねる もの（ボスラッシュHUD / GAME SET 演出）
-//   16121-17944   バトル画面の 描画
-//   17946-18601   描画: 技エフェクトの 表（ATTACK_EFFECTS: effect名 → 描き方）
-//   18603-19034   描画: 技エフェクトの 呼び出し口（drawAttackEffect ほか）
-//   19036-19207   必殺技 / 即死技 の 全画面オーバーレイ
-//   19209-19339   画面: コンボ一覧 / 戦績
-//   19341-19550   キャラ別 ゲージの 描画（HUDの 下に 出る 細い バー）
-//   19552-19819   バトルの HUD
-//   19821-20712   オンライン対戦（PeerJS / ホストが 正）
-//   20714-20997   画面: VS イントロ
-//   20999-21029   画面の 切り替え（フェード）
-//   21031-21110   ポーズメニュー（バトル中に ESC）
-//   21112-21342   画面: キャラ詳細（Iキー）
-//   21344-21466   画面: 操作説明
-//   21468-21947   キー入力の 振り分け（画面ごと）
-//   21949-22154   メインループ（60FPS 固定タイムステップ）
+//   105-291       書き換わる 値（グローバル状態）
+//   293-522       CANVAS / 画面サイズ
+//   524-1079      キャラ別データ（31体ぶん）
+//   1081-1114     音の ロック解除（最初の 操作で 呼ぶ）
+//   1116-1293     キャラ画像（遅延読み込み）
+//   1295-1330     タイトル画面の 粒子
+//   1332-3006     絵: メニュー用の 31体テーブル（CHAR_BODY_ART）
+//   3008-3036     絵: メニュー用の 呼び出し口（drawCharacterBody）
+//   3038-4727     攻撃中の ポーズ（キャラ 0〜8）
+//   4729-5573     キャラの 絵 ②バトル用
+//   5575-5622     描画ユーティリティ
+//   5624-5746     画面: タイトル
+//   5748-5996     画面: キャラ選択
+//   5998-6096     画面: 難易度選択（CPU戦）
+//   6098-6327     画面: ステージ選択
+//   6329-6692     バトルの 定数 と 状態
+//   6694-6736     ゲージ演出の 小道具（ポップアップ / 変身中の 判定 / MAX の 光り）
+//   6738-6753     カメラ / 画面揺れ
+//   6755-7164     効果音（Web Audio で 合成）
+//   7166-7480     観客の 音
+//   7482-7504     ヒット表示 / コミック文字
+//   7506-7553     掴み・投げ の 定数と キャラ別テーブル
+//   7555-8043     コマンド技（→→↓↓+Z など）
+//   8045-8808     技データ
+//   8810-9156     プレイヤー生成 / 試合の 初期化
+//   9158-9175     ヒット処理（ダメージ・ノックバック）
+//   9177-9605     ヒットした ときの 演出（applyHit の 後半・ゲームの 数値は 変えない）
+//   9607-10530    ヒット処理（ダメージと ノックバックを 決めて 相手に 入れる）
+//   10532-10561   当たり判定
+//   10563-10604   飛び道具
+//   10606-10864   技の 発動（通常技・復帰技・ジャブ）
+//   10866-11088   掴み・投げ の 実行
+//   11090-11433   CPU の 思考
+//   11435-11594   画面演出の 配列を 1フレーム 進める
+//   11596-11830   キャラ固有の ゲージ更新（毎フレーム・プレイヤー1人分）
+//   11832-12175   攻撃中の 1フレーム 更新（プレイヤー1人分）
+//   12177-12318   D キー長押しの 処理（プレイヤー1人分）
+//   12320-12432   受け身（テクニング）の 処理（プレイヤー1人分）
+//   12434-12601   のけぞり（ヒットスタン）の 処理（プレイヤー1人分）
+//   12603-12703   着地の 処理（プレイヤー1人分）
+//   12705-13987   バトルの 毎フレーム更新（中核）
+//   13989-14484   物理（移動・重力・着地・撃墜判定）
+//   14486-14554   攻撃ボタンの 処理（P1ローカル と オンラインのゲスト で 共通）
+//   14556-14675   スマッシュ攻撃（方向2回 + X）
+//   14677-14772   崖つかまり
+//   14774-15211   D技 と 必殺技 の データ
+//   15213-15630   D技: キャラ別の 中身（D_SKILL_IMPL）
+//   15632-15783   D技: 発動 と 毎フレーム更新（triggerDSkill / updateDSkill）
+//   15785-15845   空中回避
+//   15847-15943   バトル描画の 下準備（カメラ・影・2.5D）
+//   15945-16171   バトル画面の うえに 重ねる もの（ボスラッシュHUD / GAME SET 演出）
+//   16173-18010   バトル画面の 描画
+//   18012-18667   描画: 技エフェクトの 表（ATTACK_EFFECTS: effect名 → 描き方）
+//   18669-19100   描画: 技エフェクトの 呼び出し口（drawAttackEffect ほか）
+//   19102-19273   必殺技 / 即死技 の 全画面オーバーレイ
+//   19275-19405   画面: コンボ一覧 / 戦績
+//   19407-19616   キャラ別 ゲージの 描画（HUDの 下に 出る 細い バー）
+//   19618-19885   バトルの HUD
+//   19887-20778   オンライン対戦（PeerJS / ホストが 正）
+//   20780-21063   画面: VS イントロ
+//   21065-21095   画面の 切り替え（フェード）
+//   21097-21176   ポーズメニュー（バトル中に ESC）
+//   21178-21408   画面: キャラ詳細（Iキー）
+//   21410-21532   画面: 操作説明
+//   21534-22013   キー入力の 振り分け（画面ごと）
+//   22015-22220   メインループ（60FPS 固定タイムステップ）
 //
 // ### 目次ここまで
 // ======================================================================
@@ -9171,7 +9173,458 @@ function calcKnockback(damage, kbBase, kbScale) {
   // 100%以上: 倍率1.0（そのまま、バースト圏内）
   return kb;
 }
+// ======================================================================
+// ヒットした ときの 演出（applyHit の 後半・ゲームの 数値は 変えない）
+//
+// 火花・ヒットストップ・画面揺れ・効果音・コミック文字など。
+// ダメージや ノックバックの 計算は すでに 終わっていて、ここでは 触らない。
+// 数値を いじりたい ときは applyHit 本体の 方を 見る
+// ======================================================================
+function spawnHitEffects(attacker, target, damage, finalDamage, kb, hitType, isStrong, isSpecial, isSmash) {
+  // --- Hit effects vary by attack type ---
+  const charColor = characters[attacker.charIdx] ? characters[attacker.charIdx].accent : '#FFFFFF';
+  const charMainColor = characters[attacker.charIdx] ? characters[attacker.charIdx].color : '#FFFFFF';
+  // isStrong/isSpecial/isSmash は関数先頭で宣言済み
+  if (isStrong || isSpecial || isSmash) {
+    // Strong/Special/Smash: エフェクトサイズ1.5倍 + 表示時間1.5倍
+    const effectSize = (isSmash ? Math.min(120, 52 + kb * 4.5) : Math.min(90, 37 + kb * 3.75));
+    hitEffects.push({
+      x: target.x, y: target.y - 40,
+      life: isSmash ? 33 : 27, maxLife: isSmash ? 33 : 27,
+      color: isSpecial ? charColor : (isSmash ? '#FFAA00' : '#FF8800'),
+      size: effectSize
+    });
+    // Shockwave ring 1.5倍
+    hitEffects.push({
+      x: target.x, y: target.y - 35,
+      life: isSmash ? 24 : 18, maxLife: isSmash ? 24 : 18,
+      color: '#FFFFFF', size: isSmash ? 165 : 120,
+      type: 'ring',
+    });
+    // Screen shake: smash > special > strong
+    const shakeI = isSmash ? 7 + kb * 0.4 : (isSpecial ? 5 + kb * 0.3 : 3 + kb * 0.2);
+    const shakeD = isSmash ? 14 : (isSpecial ? 12 : 8);
+    triggerScreenShake(shakeI, shakeD);
+    // Hit flash for all strong hits
+    hitFlash.alpha = Math.max(hitFlash.alpha, isSmash ? 0.35 : (hitType === 'cmd' ? 0.25 : 0.15));
+    hitFlash.color = isSmash ? '#FFFFFF' : charColor;
+    // 技の種類を そのまま 渡す → 技ごとに 違う音が 鳴る
+    playHitSound(hitType, kb, attacker.charIdx);
+  } else {
+    // Normal hit: yellow spark flash + light shake
+    hitEffects.push({
+      x: target.x, y: target.y - 40,
+      life: 12, maxLife: 12,
+      color: '#FFDD44',
+      size: Math.min(35, 12 + kb * 1.5)
+    });
+    // Light screen shake even for normal hits
+    if (kb > 2) triggerScreenShake(2 + kb * 0.15, 4);
+    // Subtle hit flash
+    if (kb > 3) { hitFlash.alpha = Math.max(hitFlash.alpha, 0.08); hitFlash.color = '#FFDD44'; }
+    playHitSound(hitType, kb, attacker.charIdx);
+  }
 
+  // ① 攻撃ヒット時パーティクル（通常:10粒黄色、強:20粒オレンジ、必殺:30+粒キャラカラー）
+  const hx = (target.x + attacker.x) / 2;
+  const hy = target.y - 40;
+
+  if (isSpecial && attacker.charIdx !== undefined) {
+    // 必殺技: キャラ固有カラーで30粒以上
+    const charColors = {
+      0: ['#88CCFF', '#AADDFF', '#4488CC'],  // Zen: blue
+      1: ['#FF4422', '#FF8844', '#FFBB66'],  // Don: red/orange
+      2: ['#44FFAA', '#88FFcc', '#22DD88'],  // Saisoku: green
+      3: ['#FFD700', '#FFAA33', '#FFEE88'],  // Meteor: gold
+      4: ['#44FFCC', '#88AAFF', '#66DDFF'],  // Long: cyan
+      9: ['#C0A0FF', '#9966DD', '#3A2050'],  // Judgeman: purple
+      10: ['#FF6600', '#FF8833', '#CC4400'], // Tensai: fire
+      11: ['#FFBB44', '#DD8822', '#FFE8AA'], // Catbus: orange
+      12: ['#A0B858', '#6B7B3A', '#FF8833'], // Tank: olive/orange
+      13: ['#FF6644', '#CC3333', '#FFFFFF'], // Namioji: red/white
+      14: ['#CC44FF', '#8B00CC', '#FF44AA'], // Tokko: purple/pink
+      15: ['#FFD700', '#FF4444', '#4488FF'], // Sam: gold/red/blue
+      16: ['#FFD700', '#DAA520', '#FFFFFF'], // King: gold/white
+      17: ['#88FFFF', '#44DDEE', '#FFFFFF'], // Onpa: cyan/white
+      18: ['#335577', '#FF8844', '#FFFFFF'], // Sen: navy/orange
+      19: ['#9944CC', '#CC66FF', '#FF6600'], // Dosboss: purple/orange
+      20: ['#3388FF', '#66BBFF', '#FF4400'], // Micro: blue/fire
+      21: ['#7733CC', '#AA66FF', '#440066'], // MrTwo: purple/dark
+      22: ['#FFD700', '#DAA520', '#8B6914'], // KingKing: gold
+      23: ['#2266AA', '#44AAFF', '#88DDFF'], // Satoru: water blue
+      24: ['#440022', '#CC0044', '#220011'], // Kowai: dark red
+      25: ['#FF8800', '#FFCC44', '#88DDFF'], // Yaho: orange/yellow
+      26: ['#44CCEE', '#88EEFF', '#AAEEFF'], // Poyo: cyan
+      27: ['#6622AA', '#9944DD', '#CC88FF'], // Pull: purple
+      28: ['#228822', '#44CC44', '#88CC00'], // Mussy: green/insect
+    };
+    const colors = charColors[attacker.charIdx] || ['#FFFFFF'];
+    const specialCount = 30 + Math.floor(kb * 1.5);
+    const specialTypes = ['slash', 'explosion', 'afterimage', 'aura', 'slash'];
+    const sType = specialTypes[attacker.charIdx] || 'slash';
+
+    for (let i = 0; i < specialCount; i++) {
+      const a = (Math.random() - 0.5) * Math.PI * 2;
+      const speed = 2 + Math.random() * 7 + kb * 0.2;
+      sparks.push({
+        x: hx + (Math.random() - 0.5) * 20, y: hy + (Math.random() - 0.5) * 20,
+        vx: Math.cos(a) * speed * (i % 3 === 0 ? 1.3 : 1),
+        vy: Math.sin(a) * speed - 1,
+        life: 15 + Math.floor(Math.random() * 15),
+        maxLife: 30,
+        color: colors[i % colors.length],
+        size: 1.5 + Math.random() * 3.5,
+        type: sType,
+        gravity: 0.08 + Math.random() * 0.1,
+      });
+    }
+  } else if (isStrong) {
+    // 強攻撃: オレンジ大きめ20粒
+    for (let i = 0; i < 20; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const speed = 3 + Math.random() * 6 + kb * 0.3;
+      sparks.push({
+        x: hx + (Math.random() - 0.5) * 15, y: hy + (Math.random() - 0.5) * 15,
+        vx: Math.cos(a) * speed,
+        vy: Math.sin(a) * speed - 1,
+        life: 15 + Math.floor(Math.random() * 12),
+        maxLife: 27,
+        color: i % 3 === 0 ? '#FFFFFF' : i % 3 === 1 ? '#FF8844' : '#FFAA22',
+        size: 2.5 + Math.random() * 3,
+        type: 'explosion',
+        gravity: 0.12 + Math.random() * 0.08,
+      });
+    }
+  } else {
+    // 通常攻撃: 黄色10粒
+    for (let i = 0; i < 10; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const speed = 2 + Math.random() * 4 + kb * 0.2;
+      sparks.push({
+        x: hx + (Math.random() - 0.5) * 10, y: hy + (Math.random() - 0.5) * 10,
+        vx: Math.cos(a) * speed,
+        vy: Math.sin(a) * speed - 0.5,
+        life: 12 + Math.floor(Math.random() * 8),
+        maxLife: 20,
+        color: i % 3 === 0 ? '#FFFFFF' : '#FFDD44',
+        size: 1.5 + Math.random() * 2,
+        gravity: 0.12 + Math.random() * 0.08,
+      });
+    }
+  }
+
+  // 吹っ飛び方向への追加スパーク
+  const sparkCount = Math.min(isSpecial ? 20 : isStrong ? 16 : 10, (isStrong ? 6 : 4) + Math.floor(kb * 0.8));
+  const sparkColor = isSpecial ? charColor : isStrong ? '#FF8844' : '#FFDD44';
+  for (let i = 0; i < sparkCount; i++) {
+    const angle = Math.atan2(target.vy, target.vx) + (Math.random() - 0.5) * 1.2;
+    const speed = 2 + Math.random() * 4 + kb * 0.3;
+    sparks.push({
+      x: target.x + (Math.random() - 0.5) * 10,
+      y: target.y - 35 + (Math.random() - 0.5) * 10,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      life: 15 + Math.floor(Math.random() * 10),
+      maxLife: 25,
+      color: i % 3 === 0 ? '#FFFFFF' : sparkColor,
+      size: (isStrong ? 2 : 1.5) + Math.random() * (isStrong ? 3 : 2.5),
+      gravity: 0.1 + Math.random() * 0.1,
+    });
+  }
+
+  // --- キャラ固有ヒットエフェクト（小さめ・0.2〜0.3秒） ---
+  const efx = hx, efy = hy;
+  const ci = attacker.charIdx;
+  if (ci === 0) {
+    // ゼン: 細い青白い斬撃線
+    hitEffects.push({ x: efx, y: efy, life: 14, maxLife: 14, color: '#AADDFF', size: 18, type: 'charSlash' });
+  } else if (ci === 1) {
+    // ドン: 小さな赤い火花
+    for (let i = 0; i < 3; i++) sparks.push({ x: efx + (Math.random()-0.5)*12, y: efy + (Math.random()-0.5)*12, vx: (Math.random()-0.5)*4, vy: -1-Math.random()*2, life: 12, maxLife: 12, color: '#FF4422', size: 2+Math.random(), gravity: 0.1, drag: 0.96 });
+  } else if (ci === 2) {
+    // サイソク: 薄い緑の残像1枚
+    hitEffects.push({ x: efx, y: efy, life: 12, maxLife: 12, color: 'rgba(68,255,136,0.3)', size: 15, type: 'charGhost' });
+  } else if (ci === 3) {
+    // メテオ: 小さなオレンジ粒子3〜4個
+    for (let i = 0; i < 3+Math.floor(Math.random()*2); i++) sparks.push({ x: efx+(Math.random()-0.5)*10, y: efy+(Math.random()-0.5)*10, vx: (Math.random()-0.5)*3, vy: -1-Math.random()*2, life: 14, maxLife: 14, color: '#FFAA33', size: 1.5+Math.random(), gravity: 0.08, drag: 0.97 });
+  } else if (ci === 4) {
+    // ロング: 小さな水色スパーク
+    hitEffects.push({ x: efx, y: efy, life: 10, maxLife: 10, color: '#66DDFF', size: 12, type: 'charSpark' });
+  } else if (ci === 5) {
+    // うる男: 薄い紫の円
+    hitEffects.push({ x: efx, y: efy, life: 15, maxLife: 15, color: '#AA88CC', size: 16, type: 'ring' });
+  } else if (ci === 6) {
+    // 熊太郎: 小さな茶色い土煙
+    for (let i = 0; i < 3; i++) sparks.push({ x: efx+(Math.random()-0.5)*10, y: efy+5, vx: (Math.random()-0.5)*2, vy: -0.5-Math.random(), life: 14, maxLife: 14, color: '#AA8855', size: 2+Math.random()*2, gravity: 0.03, drag: 0.95 });
+  } else if (ci === 7) {
+    // バレット: 細い黄色ライン
+    hitEffects.push({ x: efx, y: efy, life: 12, maxLife: 12, color: '#FFEE44', size: 16, type: 'charSlash' });
+  } else if (ci === 8) {
+    // シャうでん: 小さな水色リング
+    hitEffects.push({ x: efx, y: efy, life: 14, maxLife: 14, color: '#66EEFF', size: 14, type: 'ring' });
+  } else if (ci === 9) {
+    // ジャッジマン: 薄い金色の光
+    hitEffects.push({ x: efx, y: efy, life: 15, maxLife: 15, color: '#FFD700', size: 12, type: 'charGlow' });
+  } else if (ci === 10) {
+    // 天才: 小さな黒紫の粒子
+    for (let i = 0; i < 3; i++) sparks.push({ x: efx+(Math.random()-0.5)*10, y: efy+(Math.random()-0.5)*10, vx: (Math.random()-0.5)*3, vy: -1-Math.random(), life: 14, maxLife: 14, color: '#6622AA', size: 1.5+Math.random(), gravity: 0.06, drag: 0.97 });
+  } else if (ci === 11) {
+    // Catbus: 薄い黄色ライン
+    hitEffects.push({ x: efx, y: efy, life: 12, maxLife: 12, color: '#FFCC44', size: 14, type: 'charSlash' });
+  } else if (ci === 12) {
+    // タンク: 小さな灰色の煙
+    for (let i = 0; i < 3; i++) sparks.push({ x: efx+(Math.random()-0.5)*10, y: efy, vx: (Math.random()-0.5)*2, vy: -0.5-Math.random()*1.5, life: 16, maxLife: 16, color: '#999999', size: 2.5+Math.random()*2, gravity: -0.02, drag: 0.95 });
+  } else if (ci === 13) {
+    // 波おじ: 小さな赤い円
+    hitEffects.push({ x: efx, y: efy, life: 12, maxLife: 12, color: '#FF4444', size: 12, type: 'ring' });
+  } else if (ci === 14) {
+    // とっこ: 細い緑ライン
+    hitEffects.push({ x: efx, y: efy, life: 10, maxLife: 10, color: '#44FF88', size: 16, type: 'charSlash' });
+  } else if (ci === 15) {
+    // サム: 小さなカラフル粒子2〜3個
+    const samColors = ['#FFD700','#FF4444','#4488FF'];
+    for (let i = 0; i < 2+Math.floor(Math.random()*2); i++) sparks.push({ x: efx+(Math.random()-0.5)*10, y: efy+(Math.random()-0.5)*10, vx: (Math.random()-0.5)*3, vy: -1-Math.random()*2, life: 14, maxLife: 14, color: samColors[i%3], size: 1.5+Math.random(), gravity: 0.08, drag: 0.97 });
+  } else if (ci === 16) {
+    // キング: 薄い金色リング
+    hitEffects.push({ x: efx, y: efy, life: 14, maxLife: 14, color: '#FFD700', size: 14, type: 'ring' });
+  } else if (ci === 17) {
+    // おんぱ: 小さな水色波紋
+    hitEffects.push({ x: efx, y: efy, life: 16, maxLife: 16, color: '#88FFFF', size: 18, type: 'ring' });
+  } else if (ci === 18) {
+    // セン: 小さな白い粒子（湯気）
+    for (let i = 0; i < 3; i++) sparks.push({ x: efx+(Math.random()-0.5)*8, y: efy, vx: (Math.random()-0.5)*1.5, vy: -1-Math.random()*1.5, life: 16, maxLife: 16, color: '#FFFFFF', size: 2+Math.random()*1.5, gravity: -0.03, drag: 0.96 });
+  } else if (ci === 19) {
+    // ドスボス: 小さな紫の火花
+    for (let i = 0; i < 3; i++) sparks.push({ x: efx+(Math.random()-0.5)*12, y: efy+(Math.random()-0.5)*8, vx: (Math.random()-0.5)*4, vy: -1-Math.random()*2, life: 12, maxLife: 12, color: '#CC66FF', size: 2+Math.random(), gravity: 0.1, drag: 0.96 });
+  } else if (ci === 20) {
+    // マイクロ: 青白い小さなスパーク + 星
+    hitEffects.push({ x: efx, y: efy, life: 12, maxLife: 12, color: '#66BBFF', size: 14, type: 'charSpark' });
+    sparks.push({ x: efx, y: efy, vx:(Math.random()-0.5)*3, vy:-2-Math.random(), life:10, maxLife:10, color:'#FFD700', size:2, gravity:0.06, drag:0.97 });
+  } else if (ci === 21) {
+    // ミスターツー: 紫の念波パーティクル
+    hitEffects.push({ x: efx, y: efy, life: 14, maxLife: 14, color: '#AA66FF', size: 16, type: 'charGlow' });
+    for (let i = 0; i < 2; i++) sparks.push({ x: efx+(Math.random()-0.5)*10, y: efy+(Math.random()-0.5)*10, vx:(Math.random()-0.5)*3, vy:-1.5-Math.random()*1.5, life:12, maxLife:12, color:i%2?'#AA66FF':'#7733CC', size:2+Math.random(), gravity:-0.02, drag:0.97 });
+  } else if (ci === 22) {
+    // 金金: 金貨が2〜3枚飛び散る
+    for (let i = 0; i < 2+Math.floor(Math.random()*2); i++) sparks.push({ x: efx+(Math.random()-0.5)*12, y: efy+(Math.random()-0.5)*8, vx:(Math.random()-0.5)*5, vy:-2-Math.random()*3, life:14, maxLife:14, color:i%2?'#FFD700':'#DAA520', size:2.5+Math.random(), gravity:0.15, drag:0.96 });
+  } else if (ci === 23) {
+    // サトル: 水しぶきパーティクル
+    hitEffects.push({ x: efx, y: efy, life: 12, maxLife: 12, color: '#44AAFF', size: 16, type: 'ring' });
+    for (let i = 0; i < 3; i++) sparks.push({ x: efx+(Math.random()-0.5)*10, y: efy+(Math.random()-0.5)*8, vx:(Math.random()-0.5)*4, vy:-2-Math.random()*2, life:12, maxLife:12, color:i%2?'#44AAFF':'#88DDFF', size:2+Math.random(), gravity:0.12, drag:0.96 });
+  } else if (ci === 24) {
+    // 怖: 赤い引っ掻きライン + 黒い霧
+    hitEffects.push({ x: efx, y: efy, life: 14, maxLife: 14, color: '#CC0044', size: 18, type: 'charSlash' });
+    sparks.push({ x: efx, y: efy, vx:(Math.random()-0.5)*2, vy:-1-Math.random(), life:16, maxLife:16, color:'#220011', size:3+Math.random()*2, gravity:-0.02, drag:0.95 });
+  } else if (ci === 25) {
+    // ヤッホ: 水色しぶき + 黄色い星
+    hitEffects.push({ x: efx, y: efy, life: 10, maxLife: 10, color: '#88DDFF', size: 14, type: 'ring' });
+    for (let i = 0; i < 2; i++) sparks.push({ x: efx+(Math.random()-0.5)*10, y: efy+(Math.random()-0.5)*8, vx:(Math.random()-0.5)*4, vy:-2-Math.random()*2, life:10, maxLife:10, color:i%2?'#FFCC44':'#88DDFF', size:2+Math.random(), gravity:0.1, drag:0.96 });
+  } else if (ci === 26) {
+    // ぽよ: 水色のぷにぷにエフェクト
+    hitEffects.push({ x: efx, y: efy, life: 10, maxLife: 10, color: '#88EEFF', size: 14, type: 'charGlow' });
+    sparks.push({ x: efx, y: efy, vx:(Math.random()-0.5)*3, vy:-1.5-Math.random(), life:10, maxLife:10, color:'#44CCEE', size:2.5+Math.random(), gravity:0.08, drag:0.96 });
+  } else if (ci === 27) {
+    // プル: 紫の引力波紋（内向き）
+    hitEffects.push({ x: efx, y: efy, life: 14, maxLife: 14, color: '#9944DD', size: 20, type: 'ring' });
+    for (let i = 0; i < 2; i++) sparks.push({ x: efx+(Math.random()-0.5)*15, y: efy+(Math.random()-0.5)*10, vx:(Math.random()-0.5)*2, vy:(Math.random()-0.5)*2, life:12, maxLife:12, color:i%2?'#6622AA':'#CC88FF', size:2+Math.random(), gravity:-0.03, drag:0.97 });
+  } else if (ci === 28) {
+    // ムッシー: 緑の斬撃ライン
+    hitEffects.push({ x: efx, y: efy, life: 12, maxLife: 12, color: '#44CC44', size: 18, type: 'charSlash' });
+    sparks.push({ x: efx, y: efy, vx:(Math.random()-0.5)*3, vy:-2-Math.random(), life:10, maxLife:10, color:'#88CC00', size:2+Math.random(), gravity:0.08, drag:0.96 });
+  }
+
+  // Floating damage number (larger for strong/special)
+  const numScale = isSpecial ? Math.min(2.5, 1.2 + kb * 0.08) : isStrong ? Math.min(2.2, 1.0 + kb * 0.07) : Math.min(1.8, 0.8 + kb * 0.06);
+  damageNumbers.push({
+    x: target.x + (Math.random() - 0.5) * 20,
+    y: target.y - 50,
+    vy: -1.8 - Math.random() * 0.5,
+    value: Math.floor(damage),
+    life: isSpecial ? 55 : isStrong ? 48 : 40,
+    maxLife: isSpecial ? 55 : isStrong ? 48 : 40,
+    color: isSpecial ? charColor : kb > 10 ? '#FF4444' : kb > 5 ? '#FFAA44' : '#FFFFFF',
+    scale: numScale,
+    bold: isStrong || isSpecial,
+  });
+
+  // ② 吹っ飛び軌跡（ダメージ率が高いほど長い）
+  if (kb > 3) {
+    const dmgFactor = Math.min(target.damage / 150, 1); // ダメージ率で軌跡長変化
+    const trailLife = Math.floor(15 + kb * 0.8 + dmgFactor * 20);
+    const maxPoints = Math.floor(15 + dmgFactor * 20); // 高ダメージ=長い軌跡
+    trails.push({
+      x: target.x, y: target.y - 35,
+      vx: target.vx, vy: target.vy,
+      life: trailLife,
+      maxLife: trailLife,
+      color: isSpecial ? charColor : characters[attacker.charIdx].accent,
+      targetId: target.id,
+      maxPoints: maxPoints,
+      width: 2 + dmgFactor * 3, // 太さもダメージで変化(60%)
+    });
+  }
+
+  // ===== All-Star Brawl 2 エフェクト =====
+
+  // ① ヒットストップ（スマブラと同じ式）
+  //    フレーム数 = ダメージ × 0.65 + 6（上限30F）。桜井さん いわく
+  //    「両者が 一瞬 止まることで、当たった衝撃の 強さを 強調する」。
+  //    以前は 2〜4F 固定で スマブラの 1/5しか 止まっておらず、軽く 感じていた。
+  {
+    const hl = Math.max(2, Math.min(30,
+      Math.floor((finalDamage * 0.65 + 6) * (isSmash ? 1.15 : 1) * HITSTOP_SCALE)));
+    if (hl > hitStopFrames) hitStopFrames = hl;
+    // 止まっている間 キャラを 震わせる（見た目だけ。当たり判定は 動かさない）
+    attacker.hitVib = hl; attacker.hitVibAmp = Math.min(5, 1.2 + finalDamage * 0.10);
+    target.hitVib = hl;   target.hitVibAmp = Math.min(8, 2.0 + finalDamage * 0.18);
+  }
+
+  // ② 強攻撃・スマッシュヒット時: 相手を白フラッシュ + 一瞬拡大
+  if (isStrong || isSpecial || isSmash) {
+    target.damageTint = Math.max(target.damageTint, isSmash ? 8 : 6); // 白フラッシュ延長
+    // 低音ベース追加（50-80Hz、0.15秒）
+    try {
+      const ac = getAudioCtx(); const now = ac.currentTime;
+      const bo = ac.createOscillator(); const bg = ac.createGain();
+      bo.type = 'sine'; bo.frequency.setValueAtTime(isSmash ? 50 : 65, now);
+      bo.frequency.exponentialRampToValueAtTime(30, now + 0.15);
+      bg.gain.setValueAtTime(isSmash ? 0.2 : 0.12, now);
+      bg.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+      bo.connect(bg); bg.connect(ac.destination);
+      bo.start(now); bo.stop(now + 0.15);
+    } catch(e) {}
+  }
+
+  // ③ スマッシュヒット時: 放射状8方向火花
+  if (isSmash) {
+    for (let si2 = 0; si2 < 8; si2++) {
+      const sa2 = (si2 / 8) * Math.PI * 2;
+      for (let sj = 0; sj < 2 + Math.floor(Math.random() * 2); sj++) {
+        const spd = 3 + Math.random() * 5;
+        sparks.push({ x: hx, y: hy, vx: Math.cos(sa2)*spd + (Math.random()-0.5)*2, vy: Math.sin(sa2)*spd + (Math.random()-0.5)*2,
+          life: 12+Math.random()*8, maxLife: 20, color: sj%2===0?'#FFFFFF':'#FFAA44', size: 2+Math.random()*2, gravity: 0.1, drag: 0.96 });
+      }
+    }
+  }
+  // ④ 強攻撃ヒット時: 4方向火花
+  else if (isStrong || isSpecial) {
+    for (let si3 = 0; si3 < 4; si3++) {
+      const sa3 = (si3 / 4) * Math.PI * 2 + Math.random() * 0.5;
+      for (let sj2 = 0; sj2 < 2; sj2++) {
+        const spd2 = 2 + Math.random() * 4;
+        sparks.push({ x: hx, y: hy, vx: Math.cos(sa3)*spd2, vy: Math.sin(sa3)*spd2 - 1,
+          life: 10+Math.random()*6, maxLife: 16, color: sj2%2===0?'#FFFFFF':charColor, size: 1.5+Math.random()*2, gravity: 0.1, drag: 0.96 });
+      }
+    }
+  }
+
+  // ① コミック風テキスト
+  if (kb > 2) {
+    const word = isSpecial ? 'SMASH!' : isStrong ? COMIC_WORDS[Math.floor(Math.random() * COMIC_WORDS.length)] : (kb > 6 ? 'POW!' : 'BAM!');
+    const ci = Math.floor(Math.random() * COMIC_COLORS.length);
+    comicTexts.push({
+      text: word, x: hx + (Math.random() - 0.5) * 40, y: hy - 20 + (Math.random() - 0.5) * 30,
+      life: 35, maxLife: 35,
+      color: COMIC_COLORS[ci], bgColor: COMIC_COLORS[(ci + 4) % COMIC_COLORS.length],
+      size: isSpecial ? 24 : isStrong ? 20 : 14,
+      rotation: (Math.random() - 0.5) * 0.4,
+    });
+  }
+
+  // ① カラフルな星・ハート・稲妻パーティクル
+  if (kb > 3) {
+    const decorCount = isSpecial ? 8 : isStrong ? 5 : 3;
+    for (let i = 0; i < decorCount; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const spd = 3 + Math.random() * 5;
+      sparks.push({
+        x: hx, y: hy, vx: Math.cos(a) * spd, vy: Math.sin(a) * spd - 2,
+        life: 25 + Math.floor(Math.random() * 15), maxLife: 40,
+        color: ['#FF4444','#FFDD00','#44AAFF','#FF66AA','#44FF88'][i % 5],
+        size: 5 + Math.random() * 4,
+        type: ['star','heart','bolt'][i % 3],
+        gravity: 0.1, drag: 0.97,
+        spin: (Math.random() - 0.5) * 0.3, angle: Math.random() * Math.PI * 2,
+      });
+    }
+  }
+
+  // ③ スピードライン（吹っ飛び時 - 画面を走る）
+  if (kb > 5) {
+    const lineCount = Math.min(18, 6 + Math.floor(kb * 0.8));
+    for (let i = 0; i < lineCount; i++) {
+      speedLines.push({
+        x: target.x, y: target.y - 35,
+        angle: Math.atan2(target.vy, target.vx) + (Math.random() - 0.5) * 0.8,
+        length: 80 + Math.random() * 200 + kb * 5,
+        life: 15 + Math.floor(Math.random() * 10),
+        maxLife: 25,
+        color: i % 3 === 0 ? '#FFFFFF' : i % 3 === 1 ? charColor : COMIC_COLORS[i % COMIC_COLORS.length],
+        width: 1.5 + Math.random() * 3,
+      });
+    }
+    // Full-screen radial speed lines for strong knockback
+    if (kb > 10) {
+      for (let i = 0; i < 12; i++) {
+        const a = (i / 12) * Math.PI * 2 + Math.random() * 0.3;
+        speedLines.push({
+          x: 480, y: 320,
+          angle: a,
+          length: 300 + Math.random() * 200,
+          life: 10 + Math.floor(Math.random() * 8),
+          maxLife: 18,
+          color: i % 2 === 0 ? 'rgba(255,255,255,0.5)' : charColor,
+          width: 1 + Math.random() * 1.5,
+        });
+      }
+    }
+  }
+
+  // ② 必殺技ヒット時の画面フラッシュ
+  if (isSpecial) {
+    hitFlash.alpha = Math.max(hitFlash.alpha, 0.2);
+    hitFlash.color = charColor;
+  }
+
+  // ③ 炎の軌跡（200%超え）
+  if (target.damage > 200 && kb > 4) {
+    for (let i = 0; i < 6; i++) {
+      fireTrails.push({
+        x: target.x + (Math.random() - 0.5) * 15,
+        y: target.y - 35 + (Math.random() - 0.5) * 15,
+        vx: target.vx * 0.3 + (Math.random() - 0.5) * 2,
+        vy: target.vy * 0.3 - Math.random() * 2,
+        life: 20 + Math.floor(Math.random() * 15),
+        maxLife: 35,
+        size: 4 + Math.random() * 6,
+      });
+    }
+  }
+}
+
+
+// ======================================================================
+// ヒット処理（ダメージと ノックバックを 決めて 相手に 入れる）
+//
+// この ファイルで いちばん 複雑な 関数。流れは 上から 順に:
+//
+//   1. 入力の 掃除        NaN を 既定値に 直す
+//   2. 当たらない 条件    無敵・空中回避なら ここで return
+//   3. ガード判定         ガード中なら 耐久を 削って return（割れたら 別処理）
+//   4. 補正を かけ算       自己バフ → 固有パッシブ（攻/防）→ 固有ゲージ加算
+//                         → 固有ダメージ倍率 → コンボ補正 → 連発ハメ防止 → ラグ
+//   5. finalDamage 確定   ここまでの 倍率を 全部 かけた 値
+//   6. ノックバック        角度・メテオ判定・体重・DI の 初期値
+//   7. 相手に 反映        damage / vx / vy / hitstun / コンボ数 / 掴み解除
+//   8. 演出               spawnHitEffects()（数値は もう 変えない）
+//
+// 注意:
+//   ・4 の 途中で finalDamage を 17か所 書き換えている。順番に 意味が ある ので
+//     並べ替えない こと（倍率の かかる 順が 変わる）
+//   ・return するのは 2 と 3 だけ。4 以降は 必ず 最後まで 通る
+//   ・飛び道具の ときは attacker が 本人（owner）。身代わりを 渡すと
+//     ゲージが 入らない（過去に それで 飛び道具の ゲージが 一生 溜まらなかった）
+// ======================================================================
 function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   // NaN safety: 全パラメータの保護（最初に実行）
   if (isNaN(damage) || damage === undefined || damage === null) damage = 5;
@@ -10071,425 +10524,8 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
     if (grabber) releaseGrab(grabber);
   }
 
-  // --- Hit effects vary by attack type ---
-  const charColor = characters[attacker.charIdx] ? characters[attacker.charIdx].accent : '#FFFFFF';
-  const charMainColor = characters[attacker.charIdx] ? characters[attacker.charIdx].color : '#FFFFFF';
-  // isStrong/isSpecial/isSmash は関数先頭で宣言済み
-  if (isStrong || isSpecial || isSmash) {
-    // Strong/Special/Smash: エフェクトサイズ1.5倍 + 表示時間1.5倍
-    const effectSize = (isSmash ? Math.min(120, 52 + kb * 4.5) : Math.min(90, 37 + kb * 3.75));
-    hitEffects.push({
-      x: target.x, y: target.y - 40,
-      life: isSmash ? 33 : 27, maxLife: isSmash ? 33 : 27,
-      color: isSpecial ? charColor : (isSmash ? '#FFAA00' : '#FF8800'),
-      size: effectSize
-    });
-    // Shockwave ring 1.5倍
-    hitEffects.push({
-      x: target.x, y: target.y - 35,
-      life: isSmash ? 24 : 18, maxLife: isSmash ? 24 : 18,
-      color: '#FFFFFF', size: isSmash ? 165 : 120,
-      type: 'ring',
-    });
-    // Screen shake: smash > special > strong
-    const shakeI = isSmash ? 7 + kb * 0.4 : (isSpecial ? 5 + kb * 0.3 : 3 + kb * 0.2);
-    const shakeD = isSmash ? 14 : (isSpecial ? 12 : 8);
-    triggerScreenShake(shakeI, shakeD);
-    // Hit flash for all strong hits
-    hitFlash.alpha = Math.max(hitFlash.alpha, isSmash ? 0.35 : (hitType === 'cmd' ? 0.25 : 0.15));
-    hitFlash.color = isSmash ? '#FFFFFF' : charColor;
-    // 技の種類を そのまま 渡す → 技ごとに 違う音が 鳴る
-    playHitSound(hitType, kb, attacker.charIdx);
-  } else {
-    // Normal hit: yellow spark flash + light shake
-    hitEffects.push({
-      x: target.x, y: target.y - 40,
-      life: 12, maxLife: 12,
-      color: '#FFDD44',
-      size: Math.min(35, 12 + kb * 1.5)
-    });
-    // Light screen shake even for normal hits
-    if (kb > 2) triggerScreenShake(2 + kb * 0.15, 4);
-    // Subtle hit flash
-    if (kb > 3) { hitFlash.alpha = Math.max(hitFlash.alpha, 0.08); hitFlash.color = '#FFDD44'; }
-    playHitSound(hitType, kb, attacker.charIdx);
-  }
-
-  // ① 攻撃ヒット時パーティクル（通常:10粒黄色、強:20粒オレンジ、必殺:30+粒キャラカラー）
-  const hx = (target.x + attacker.x) / 2;
-  const hy = target.y - 40;
-
-  if (isSpecial && attacker.charIdx !== undefined) {
-    // 必殺技: キャラ固有カラーで30粒以上
-    const charColors = {
-      0: ['#88CCFF', '#AADDFF', '#4488CC'],  // Zen: blue
-      1: ['#FF4422', '#FF8844', '#FFBB66'],  // Don: red/orange
-      2: ['#44FFAA', '#88FFcc', '#22DD88'],  // Saisoku: green
-      3: ['#FFD700', '#FFAA33', '#FFEE88'],  // Meteor: gold
-      4: ['#44FFCC', '#88AAFF', '#66DDFF'],  // Long: cyan
-      9: ['#C0A0FF', '#9966DD', '#3A2050'],  // Judgeman: purple
-      10: ['#FF6600', '#FF8833', '#CC4400'], // Tensai: fire
-      11: ['#FFBB44', '#DD8822', '#FFE8AA'], // Catbus: orange
-      12: ['#A0B858', '#6B7B3A', '#FF8833'], // Tank: olive/orange
-      13: ['#FF6644', '#CC3333', '#FFFFFF'], // Namioji: red/white
-      14: ['#CC44FF', '#8B00CC', '#FF44AA'], // Tokko: purple/pink
-      15: ['#FFD700', '#FF4444', '#4488FF'], // Sam: gold/red/blue
-      16: ['#FFD700', '#DAA520', '#FFFFFF'], // King: gold/white
-      17: ['#88FFFF', '#44DDEE', '#FFFFFF'], // Onpa: cyan/white
-      18: ['#335577', '#FF8844', '#FFFFFF'], // Sen: navy/orange
-      19: ['#9944CC', '#CC66FF', '#FF6600'], // Dosboss: purple/orange
-      20: ['#3388FF', '#66BBFF', '#FF4400'], // Micro: blue/fire
-      21: ['#7733CC', '#AA66FF', '#440066'], // MrTwo: purple/dark
-      22: ['#FFD700', '#DAA520', '#8B6914'], // KingKing: gold
-      23: ['#2266AA', '#44AAFF', '#88DDFF'], // Satoru: water blue
-      24: ['#440022', '#CC0044', '#220011'], // Kowai: dark red
-      25: ['#FF8800', '#FFCC44', '#88DDFF'], // Yaho: orange/yellow
-      26: ['#44CCEE', '#88EEFF', '#AAEEFF'], // Poyo: cyan
-      27: ['#6622AA', '#9944DD', '#CC88FF'], // Pull: purple
-      28: ['#228822', '#44CC44', '#88CC00'], // Mussy: green/insect
-    };
-    const colors = charColors[attacker.charIdx] || ['#FFFFFF'];
-    const specialCount = 30 + Math.floor(kb * 1.5);
-    const specialTypes = ['slash', 'explosion', 'afterimage', 'aura', 'slash'];
-    const sType = specialTypes[attacker.charIdx] || 'slash';
-
-    for (let i = 0; i < specialCount; i++) {
-      const a = (Math.random() - 0.5) * Math.PI * 2;
-      const speed = 2 + Math.random() * 7 + kb * 0.2;
-      sparks.push({
-        x: hx + (Math.random() - 0.5) * 20, y: hy + (Math.random() - 0.5) * 20,
-        vx: Math.cos(a) * speed * (i % 3 === 0 ? 1.3 : 1),
-        vy: Math.sin(a) * speed - 1,
-        life: 15 + Math.floor(Math.random() * 15),
-        maxLife: 30,
-        color: colors[i % colors.length],
-        size: 1.5 + Math.random() * 3.5,
-        type: sType,
-        gravity: 0.08 + Math.random() * 0.1,
-      });
-    }
-  } else if (isStrong) {
-    // 強攻撃: オレンジ大きめ20粒
-    for (let i = 0; i < 20; i++) {
-      const a = Math.random() * Math.PI * 2;
-      const speed = 3 + Math.random() * 6 + kb * 0.3;
-      sparks.push({
-        x: hx + (Math.random() - 0.5) * 15, y: hy + (Math.random() - 0.5) * 15,
-        vx: Math.cos(a) * speed,
-        vy: Math.sin(a) * speed - 1,
-        life: 15 + Math.floor(Math.random() * 12),
-        maxLife: 27,
-        color: i % 3 === 0 ? '#FFFFFF' : i % 3 === 1 ? '#FF8844' : '#FFAA22',
-        size: 2.5 + Math.random() * 3,
-        type: 'explosion',
-        gravity: 0.12 + Math.random() * 0.08,
-      });
-    }
-  } else {
-    // 通常攻撃: 黄色10粒
-    for (let i = 0; i < 10; i++) {
-      const a = Math.random() * Math.PI * 2;
-      const speed = 2 + Math.random() * 4 + kb * 0.2;
-      sparks.push({
-        x: hx + (Math.random() - 0.5) * 10, y: hy + (Math.random() - 0.5) * 10,
-        vx: Math.cos(a) * speed,
-        vy: Math.sin(a) * speed - 0.5,
-        life: 12 + Math.floor(Math.random() * 8),
-        maxLife: 20,
-        color: i % 3 === 0 ? '#FFFFFF' : '#FFDD44',
-        size: 1.5 + Math.random() * 2,
-        gravity: 0.12 + Math.random() * 0.08,
-      });
-    }
-  }
-
-  // 吹っ飛び方向への追加スパーク
-  const sparkCount = Math.min(isSpecial ? 20 : isStrong ? 16 : 10, (isStrong ? 6 : 4) + Math.floor(kb * 0.8));
-  const sparkColor = isSpecial ? charColor : isStrong ? '#FF8844' : '#FFDD44';
-  for (let i = 0; i < sparkCount; i++) {
-    const angle = Math.atan2(target.vy, target.vx) + (Math.random() - 0.5) * 1.2;
-    const speed = 2 + Math.random() * 4 + kb * 0.3;
-    sparks.push({
-      x: target.x + (Math.random() - 0.5) * 10,
-      y: target.y - 35 + (Math.random() - 0.5) * 10,
-      vx: Math.cos(angle) * speed,
-      vy: Math.sin(angle) * speed,
-      life: 15 + Math.floor(Math.random() * 10),
-      maxLife: 25,
-      color: i % 3 === 0 ? '#FFFFFF' : sparkColor,
-      size: (isStrong ? 2 : 1.5) + Math.random() * (isStrong ? 3 : 2.5),
-      gravity: 0.1 + Math.random() * 0.1,
-    });
-  }
-
-  // --- キャラ固有ヒットエフェクト（小さめ・0.2〜0.3秒） ---
-  const efx = hx, efy = hy;
-  const ci = attacker.charIdx;
-  if (ci === 0) {
-    // ゼン: 細い青白い斬撃線
-    hitEffects.push({ x: efx, y: efy, life: 14, maxLife: 14, color: '#AADDFF', size: 18, type: 'charSlash' });
-  } else if (ci === 1) {
-    // ドン: 小さな赤い火花
-    for (let i = 0; i < 3; i++) sparks.push({ x: efx + (Math.random()-0.5)*12, y: efy + (Math.random()-0.5)*12, vx: (Math.random()-0.5)*4, vy: -1-Math.random()*2, life: 12, maxLife: 12, color: '#FF4422', size: 2+Math.random(), gravity: 0.1, drag: 0.96 });
-  } else if (ci === 2) {
-    // サイソク: 薄い緑の残像1枚
-    hitEffects.push({ x: efx, y: efy, life: 12, maxLife: 12, color: 'rgba(68,255,136,0.3)', size: 15, type: 'charGhost' });
-  } else if (ci === 3) {
-    // メテオ: 小さなオレンジ粒子3〜4個
-    for (let i = 0; i < 3+Math.floor(Math.random()*2); i++) sparks.push({ x: efx+(Math.random()-0.5)*10, y: efy+(Math.random()-0.5)*10, vx: (Math.random()-0.5)*3, vy: -1-Math.random()*2, life: 14, maxLife: 14, color: '#FFAA33', size: 1.5+Math.random(), gravity: 0.08, drag: 0.97 });
-  } else if (ci === 4) {
-    // ロング: 小さな水色スパーク
-    hitEffects.push({ x: efx, y: efy, life: 10, maxLife: 10, color: '#66DDFF', size: 12, type: 'charSpark' });
-  } else if (ci === 5) {
-    // うる男: 薄い紫の円
-    hitEffects.push({ x: efx, y: efy, life: 15, maxLife: 15, color: '#AA88CC', size: 16, type: 'ring' });
-  } else if (ci === 6) {
-    // 熊太郎: 小さな茶色い土煙
-    for (let i = 0; i < 3; i++) sparks.push({ x: efx+(Math.random()-0.5)*10, y: efy+5, vx: (Math.random()-0.5)*2, vy: -0.5-Math.random(), life: 14, maxLife: 14, color: '#AA8855', size: 2+Math.random()*2, gravity: 0.03, drag: 0.95 });
-  } else if (ci === 7) {
-    // バレット: 細い黄色ライン
-    hitEffects.push({ x: efx, y: efy, life: 12, maxLife: 12, color: '#FFEE44', size: 16, type: 'charSlash' });
-  } else if (ci === 8) {
-    // シャうでん: 小さな水色リング
-    hitEffects.push({ x: efx, y: efy, life: 14, maxLife: 14, color: '#66EEFF', size: 14, type: 'ring' });
-  } else if (ci === 9) {
-    // ジャッジマン: 薄い金色の光
-    hitEffects.push({ x: efx, y: efy, life: 15, maxLife: 15, color: '#FFD700', size: 12, type: 'charGlow' });
-  } else if (ci === 10) {
-    // 天才: 小さな黒紫の粒子
-    for (let i = 0; i < 3; i++) sparks.push({ x: efx+(Math.random()-0.5)*10, y: efy+(Math.random()-0.5)*10, vx: (Math.random()-0.5)*3, vy: -1-Math.random(), life: 14, maxLife: 14, color: '#6622AA', size: 1.5+Math.random(), gravity: 0.06, drag: 0.97 });
-  } else if (ci === 11) {
-    // Catbus: 薄い黄色ライン
-    hitEffects.push({ x: efx, y: efy, life: 12, maxLife: 12, color: '#FFCC44', size: 14, type: 'charSlash' });
-  } else if (ci === 12) {
-    // タンク: 小さな灰色の煙
-    for (let i = 0; i < 3; i++) sparks.push({ x: efx+(Math.random()-0.5)*10, y: efy, vx: (Math.random()-0.5)*2, vy: -0.5-Math.random()*1.5, life: 16, maxLife: 16, color: '#999999', size: 2.5+Math.random()*2, gravity: -0.02, drag: 0.95 });
-  } else if (ci === 13) {
-    // 波おじ: 小さな赤い円
-    hitEffects.push({ x: efx, y: efy, life: 12, maxLife: 12, color: '#FF4444', size: 12, type: 'ring' });
-  } else if (ci === 14) {
-    // とっこ: 細い緑ライン
-    hitEffects.push({ x: efx, y: efy, life: 10, maxLife: 10, color: '#44FF88', size: 16, type: 'charSlash' });
-  } else if (ci === 15) {
-    // サム: 小さなカラフル粒子2〜3個
-    const samColors = ['#FFD700','#FF4444','#4488FF'];
-    for (let i = 0; i < 2+Math.floor(Math.random()*2); i++) sparks.push({ x: efx+(Math.random()-0.5)*10, y: efy+(Math.random()-0.5)*10, vx: (Math.random()-0.5)*3, vy: -1-Math.random()*2, life: 14, maxLife: 14, color: samColors[i%3], size: 1.5+Math.random(), gravity: 0.08, drag: 0.97 });
-  } else if (ci === 16) {
-    // キング: 薄い金色リング
-    hitEffects.push({ x: efx, y: efy, life: 14, maxLife: 14, color: '#FFD700', size: 14, type: 'ring' });
-  } else if (ci === 17) {
-    // おんぱ: 小さな水色波紋
-    hitEffects.push({ x: efx, y: efy, life: 16, maxLife: 16, color: '#88FFFF', size: 18, type: 'ring' });
-  } else if (ci === 18) {
-    // セン: 小さな白い粒子（湯気）
-    for (let i = 0; i < 3; i++) sparks.push({ x: efx+(Math.random()-0.5)*8, y: efy, vx: (Math.random()-0.5)*1.5, vy: -1-Math.random()*1.5, life: 16, maxLife: 16, color: '#FFFFFF', size: 2+Math.random()*1.5, gravity: -0.03, drag: 0.96 });
-  } else if (ci === 19) {
-    // ドスボス: 小さな紫の火花
-    for (let i = 0; i < 3; i++) sparks.push({ x: efx+(Math.random()-0.5)*12, y: efy+(Math.random()-0.5)*8, vx: (Math.random()-0.5)*4, vy: -1-Math.random()*2, life: 12, maxLife: 12, color: '#CC66FF', size: 2+Math.random(), gravity: 0.1, drag: 0.96 });
-  } else if (ci === 20) {
-    // マイクロ: 青白い小さなスパーク + 星
-    hitEffects.push({ x: efx, y: efy, life: 12, maxLife: 12, color: '#66BBFF', size: 14, type: 'charSpark' });
-    sparks.push({ x: efx, y: efy, vx:(Math.random()-0.5)*3, vy:-2-Math.random(), life:10, maxLife:10, color:'#FFD700', size:2, gravity:0.06, drag:0.97 });
-  } else if (ci === 21) {
-    // ミスターツー: 紫の念波パーティクル
-    hitEffects.push({ x: efx, y: efy, life: 14, maxLife: 14, color: '#AA66FF', size: 16, type: 'charGlow' });
-    for (let i = 0; i < 2; i++) sparks.push({ x: efx+(Math.random()-0.5)*10, y: efy+(Math.random()-0.5)*10, vx:(Math.random()-0.5)*3, vy:-1.5-Math.random()*1.5, life:12, maxLife:12, color:i%2?'#AA66FF':'#7733CC', size:2+Math.random(), gravity:-0.02, drag:0.97 });
-  } else if (ci === 22) {
-    // 金金: 金貨が2〜3枚飛び散る
-    for (let i = 0; i < 2+Math.floor(Math.random()*2); i++) sparks.push({ x: efx+(Math.random()-0.5)*12, y: efy+(Math.random()-0.5)*8, vx:(Math.random()-0.5)*5, vy:-2-Math.random()*3, life:14, maxLife:14, color:i%2?'#FFD700':'#DAA520', size:2.5+Math.random(), gravity:0.15, drag:0.96 });
-  } else if (ci === 23) {
-    // サトル: 水しぶきパーティクル
-    hitEffects.push({ x: efx, y: efy, life: 12, maxLife: 12, color: '#44AAFF', size: 16, type: 'ring' });
-    for (let i = 0; i < 3; i++) sparks.push({ x: efx+(Math.random()-0.5)*10, y: efy+(Math.random()-0.5)*8, vx:(Math.random()-0.5)*4, vy:-2-Math.random()*2, life:12, maxLife:12, color:i%2?'#44AAFF':'#88DDFF', size:2+Math.random(), gravity:0.12, drag:0.96 });
-  } else if (ci === 24) {
-    // 怖: 赤い引っ掻きライン + 黒い霧
-    hitEffects.push({ x: efx, y: efy, life: 14, maxLife: 14, color: '#CC0044', size: 18, type: 'charSlash' });
-    sparks.push({ x: efx, y: efy, vx:(Math.random()-0.5)*2, vy:-1-Math.random(), life:16, maxLife:16, color:'#220011', size:3+Math.random()*2, gravity:-0.02, drag:0.95 });
-  } else if (ci === 25) {
-    // ヤッホ: 水色しぶき + 黄色い星
-    hitEffects.push({ x: efx, y: efy, life: 10, maxLife: 10, color: '#88DDFF', size: 14, type: 'ring' });
-    for (let i = 0; i < 2; i++) sparks.push({ x: efx+(Math.random()-0.5)*10, y: efy+(Math.random()-0.5)*8, vx:(Math.random()-0.5)*4, vy:-2-Math.random()*2, life:10, maxLife:10, color:i%2?'#FFCC44':'#88DDFF', size:2+Math.random(), gravity:0.1, drag:0.96 });
-  } else if (ci === 26) {
-    // ぽよ: 水色のぷにぷにエフェクト
-    hitEffects.push({ x: efx, y: efy, life: 10, maxLife: 10, color: '#88EEFF', size: 14, type: 'charGlow' });
-    sparks.push({ x: efx, y: efy, vx:(Math.random()-0.5)*3, vy:-1.5-Math.random(), life:10, maxLife:10, color:'#44CCEE', size:2.5+Math.random(), gravity:0.08, drag:0.96 });
-  } else if (ci === 27) {
-    // プル: 紫の引力波紋（内向き）
-    hitEffects.push({ x: efx, y: efy, life: 14, maxLife: 14, color: '#9944DD', size: 20, type: 'ring' });
-    for (let i = 0; i < 2; i++) sparks.push({ x: efx+(Math.random()-0.5)*15, y: efy+(Math.random()-0.5)*10, vx:(Math.random()-0.5)*2, vy:(Math.random()-0.5)*2, life:12, maxLife:12, color:i%2?'#6622AA':'#CC88FF', size:2+Math.random(), gravity:-0.03, drag:0.97 });
-  } else if (ci === 28) {
-    // ムッシー: 緑の斬撃ライン
-    hitEffects.push({ x: efx, y: efy, life: 12, maxLife: 12, color: '#44CC44', size: 18, type: 'charSlash' });
-    sparks.push({ x: efx, y: efy, vx:(Math.random()-0.5)*3, vy:-2-Math.random(), life:10, maxLife:10, color:'#88CC00', size:2+Math.random(), gravity:0.08, drag:0.96 });
-  }
-
-  // Floating damage number (larger for strong/special)
-  const numScale = isSpecial ? Math.min(2.5, 1.2 + kb * 0.08) : isStrong ? Math.min(2.2, 1.0 + kb * 0.07) : Math.min(1.8, 0.8 + kb * 0.06);
-  damageNumbers.push({
-    x: target.x + (Math.random() - 0.5) * 20,
-    y: target.y - 50,
-    vy: -1.8 - Math.random() * 0.5,
-    value: Math.floor(damage),
-    life: isSpecial ? 55 : isStrong ? 48 : 40,
-    maxLife: isSpecial ? 55 : isStrong ? 48 : 40,
-    color: isSpecial ? charColor : kb > 10 ? '#FF4444' : kb > 5 ? '#FFAA44' : '#FFFFFF',
-    scale: numScale,
-    bold: isStrong || isSpecial,
-  });
-
-  // ② 吹っ飛び軌跡（ダメージ率が高いほど長い）
-  if (kb > 3) {
-    const dmgFactor = Math.min(target.damage / 150, 1); // ダメージ率で軌跡長変化
-    const trailLife = Math.floor(15 + kb * 0.8 + dmgFactor * 20);
-    const maxPoints = Math.floor(15 + dmgFactor * 20); // 高ダメージ=長い軌跡
-    trails.push({
-      x: target.x, y: target.y - 35,
-      vx: target.vx, vy: target.vy,
-      life: trailLife,
-      maxLife: trailLife,
-      color: isSpecial ? charColor : characters[attacker.charIdx].accent,
-      targetId: target.id,
-      maxPoints: maxPoints,
-      width: 2 + dmgFactor * 3, // 太さもダメージで変化(60%)
-    });
-  }
-
-  // ===== All-Star Brawl 2 エフェクト =====
-
-  // ① ヒットストップ（スマブラと同じ式）
-  //    フレーム数 = ダメージ × 0.65 + 6（上限30F）。桜井さん いわく
-  //    「両者が 一瞬 止まることで、当たった衝撃の 強さを 強調する」。
-  //    以前は 2〜4F 固定で スマブラの 1/5しか 止まっておらず、軽く 感じていた。
-  {
-    const hl = Math.max(2, Math.min(30,
-      Math.floor((finalDamage * 0.65 + 6) * (isSmash ? 1.15 : 1) * HITSTOP_SCALE)));
-    if (hl > hitStopFrames) hitStopFrames = hl;
-    // 止まっている間 キャラを 震わせる（見た目だけ。当たり判定は 動かさない）
-    attacker.hitVib = hl; attacker.hitVibAmp = Math.min(5, 1.2 + finalDamage * 0.10);
-    target.hitVib = hl;   target.hitVibAmp = Math.min(8, 2.0 + finalDamage * 0.18);
-  }
-
-  // ② 強攻撃・スマッシュヒット時: 相手を白フラッシュ + 一瞬拡大
-  if (isStrong || isSpecial || isSmash) {
-    target.damageTint = Math.max(target.damageTint, isSmash ? 8 : 6); // 白フラッシュ延長
-    // 低音ベース追加（50-80Hz、0.15秒）
-    try {
-      const ac = getAudioCtx(); const now = ac.currentTime;
-      const bo = ac.createOscillator(); const bg = ac.createGain();
-      bo.type = 'sine'; bo.frequency.setValueAtTime(isSmash ? 50 : 65, now);
-      bo.frequency.exponentialRampToValueAtTime(30, now + 0.15);
-      bg.gain.setValueAtTime(isSmash ? 0.2 : 0.12, now);
-      bg.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
-      bo.connect(bg); bg.connect(ac.destination);
-      bo.start(now); bo.stop(now + 0.15);
-    } catch(e) {}
-  }
-
-  // ③ スマッシュヒット時: 放射状8方向火花
-  if (isSmash) {
-    for (let si2 = 0; si2 < 8; si2++) {
-      const sa2 = (si2 / 8) * Math.PI * 2;
-      for (let sj = 0; sj < 2 + Math.floor(Math.random() * 2); sj++) {
-        const spd = 3 + Math.random() * 5;
-        sparks.push({ x: hx, y: hy, vx: Math.cos(sa2)*spd + (Math.random()-0.5)*2, vy: Math.sin(sa2)*spd + (Math.random()-0.5)*2,
-          life: 12+Math.random()*8, maxLife: 20, color: sj%2===0?'#FFFFFF':'#FFAA44', size: 2+Math.random()*2, gravity: 0.1, drag: 0.96 });
-      }
-    }
-  }
-  // ④ 強攻撃ヒット時: 4方向火花
-  else if (isStrong || isSpecial) {
-    for (let si3 = 0; si3 < 4; si3++) {
-      const sa3 = (si3 / 4) * Math.PI * 2 + Math.random() * 0.5;
-      for (let sj2 = 0; sj2 < 2; sj2++) {
-        const spd2 = 2 + Math.random() * 4;
-        sparks.push({ x: hx, y: hy, vx: Math.cos(sa3)*spd2, vy: Math.sin(sa3)*spd2 - 1,
-          life: 10+Math.random()*6, maxLife: 16, color: sj2%2===0?'#FFFFFF':charColor, size: 1.5+Math.random()*2, gravity: 0.1, drag: 0.96 });
-      }
-    }
-  }
-
-  // ① コミック風テキスト
-  if (kb > 2) {
-    const word = isSpecial ? 'SMASH!' : isStrong ? COMIC_WORDS[Math.floor(Math.random() * COMIC_WORDS.length)] : (kb > 6 ? 'POW!' : 'BAM!');
-    const ci = Math.floor(Math.random() * COMIC_COLORS.length);
-    comicTexts.push({
-      text: word, x: hx + (Math.random() - 0.5) * 40, y: hy - 20 + (Math.random() - 0.5) * 30,
-      life: 35, maxLife: 35,
-      color: COMIC_COLORS[ci], bgColor: COMIC_COLORS[(ci + 4) % COMIC_COLORS.length],
-      size: isSpecial ? 24 : isStrong ? 20 : 14,
-      rotation: (Math.random() - 0.5) * 0.4,
-    });
-  }
-
-  // ① カラフルな星・ハート・稲妻パーティクル
-  if (kb > 3) {
-    const decorCount = isSpecial ? 8 : isStrong ? 5 : 3;
-    for (let i = 0; i < decorCount; i++) {
-      const a = Math.random() * Math.PI * 2;
-      const spd = 3 + Math.random() * 5;
-      sparks.push({
-        x: hx, y: hy, vx: Math.cos(a) * spd, vy: Math.sin(a) * spd - 2,
-        life: 25 + Math.floor(Math.random() * 15), maxLife: 40,
-        color: ['#FF4444','#FFDD00','#44AAFF','#FF66AA','#44FF88'][i % 5],
-        size: 5 + Math.random() * 4,
-        type: ['star','heart','bolt'][i % 3],
-        gravity: 0.1, drag: 0.97,
-        spin: (Math.random() - 0.5) * 0.3, angle: Math.random() * Math.PI * 2,
-      });
-    }
-  }
-
-  // ③ スピードライン（吹っ飛び時 - 画面を走る）
-  if (kb > 5) {
-    const lineCount = Math.min(18, 6 + Math.floor(kb * 0.8));
-    for (let i = 0; i < lineCount; i++) {
-      speedLines.push({
-        x: target.x, y: target.y - 35,
-        angle: Math.atan2(target.vy, target.vx) + (Math.random() - 0.5) * 0.8,
-        length: 80 + Math.random() * 200 + kb * 5,
-        life: 15 + Math.floor(Math.random() * 10),
-        maxLife: 25,
-        color: i % 3 === 0 ? '#FFFFFF' : i % 3 === 1 ? charColor : COMIC_COLORS[i % COMIC_COLORS.length],
-        width: 1.5 + Math.random() * 3,
-      });
-    }
-    // Full-screen radial speed lines for strong knockback
-    if (kb > 10) {
-      for (let i = 0; i < 12; i++) {
-        const a = (i / 12) * Math.PI * 2 + Math.random() * 0.3;
-        speedLines.push({
-          x: 480, y: 320,
-          angle: a,
-          length: 300 + Math.random() * 200,
-          life: 10 + Math.floor(Math.random() * 8),
-          maxLife: 18,
-          color: i % 2 === 0 ? 'rgba(255,255,255,0.5)' : charColor,
-          width: 1 + Math.random() * 1.5,
-        });
-      }
-    }
-  }
-
-  // ② 必殺技ヒット時の画面フラッシュ
-  if (isSpecial) {
-    hitFlash.alpha = Math.max(hitFlash.alpha, 0.2);
-    hitFlash.color = charColor;
-  }
-
-  // ③ 炎の軌跡（200%超え）
-  if (target.damage > 200 && kb > 4) {
-    for (let i = 0; i < 6; i++) {
-      fireTrails.push({
-        x: target.x + (Math.random() - 0.5) * 15,
-        y: target.y - 35 + (Math.random() - 0.5) * 15,
-        vx: target.vx * 0.3 + (Math.random() - 0.5) * 2,
-        vy: target.vy * 0.3 - Math.random() * 2,
-        life: 20 + Math.floor(Math.random() * 15),
-        maxLife: 35,
-        size: 4 + Math.random() * 6,
-      });
-    }
-  }
+  // 演出は spawnHitEffects() に まとめてある（数値計算は ここまでで 終わり）
+  spawnHitEffects(attacker, target, damage, finalDamage, kb, hitType, isStrong, isSpecial, isSmash);
 }
 
 // ======================================================================
@@ -12669,6 +12705,22 @@ function updateLanding(p, wasGroundedBefore) {
 // バトルの 毎フレーム更新（中核）
 // 「Nフレームに1回」の 判定は battleFrame を 使うこと。battleTime は ミリ秒
 // ======================================================================
+// この 関数の 流れ（上から 順）
+//   1. 時間       コンボ時間 / ヒットストップ / 試合時間 / 時間切れ判定
+//   2. 場         動く足場 → updateEffectArrays() → 分身・爪・ミサイル → 飛び道具
+//   3. 各プレイヤー（for (const p of players) が この 関数の 大半）
+//   4. 押し合い   resolvePlayerCollisions()
+//
+// 3 の 中の 順番（並べ替えると 1フレーム ずれて 効かなく なる ものが ある）:
+//   タイマー減算 → updateDSkill → updateDKeyActions → 掴み/投げ → 崖つかまり
+//   → updateCharacterGauges → キャラ固有パッシブ → 状態異常
+//   → updateTeching(p)  … true なら continue（この人は ここで 終わり）
+//   → updateHitstun(p)  … true なら continue
+//   → p.attacking なら updateAttackFrames(p) して continue
+//   → ガード → 空中回避 → 入力(CPU / P1 / ゲスト) → ジャンプ → 重力
+//   → updateLanding(p, wasGroundedBefore)
+//
+// 「Nフレームに1回」の 判定は battleFrame を 使う こと。battleTime は ミリ秒
 function updateBattle(dt) {
   battleTime += dt;
   battleFrame++;
@@ -16120,6 +16172,20 @@ function drawGameSetOverlay() {
 // ======================================================================
 // バトル画面の 描画
 // ======================================================================
+// この 関数の 流れ（上から 順）
+//   1. 背景            ステージごとの 絵
+//   2. ctx.save() ×2   画面揺れ → カメラ（この 2つは 必ず 対で 戻す）
+//   3. 足場・2.5D の 台形
+//   4. 飛び道具・エフェクト各種
+//   5. プレイヤー2人（drawBattleCharacter）と その 上の 表示
+//   6. カメラと 揺れを 戻す
+//   7. HUD → ボスラッシュHUD → GAME SET 演出
+//
+// 注意:
+//   ・2 の save を 戻さずに return すると 以後の 描画が 全部 ずれる。
+//     途中で 抜けるのは drawBossRushHUD() が true を 返した ときだけ
+//   ・カメラと 画面揺れは ここ（描画と 同じ 回数）で 進める。
+//     物理の 固定ステップとは 別で、必殺技の 動画中は 止まる
 function drawBattle(dt) {
   // Update camera
   updateCamera();
