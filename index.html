@@ -28,74 +28,76 @@
 //     ・キャラを 足すなら「キャラ別データ（31体ぶん）」の チェックリスト
 //     ・落とし穴の 一覧は README の「よくある 落とし穴」
 //
-//   107-293       書き換わる 値（グローバル状態）
-//   295-524       CANVAS / 画面サイズ
-//   526-1081      キャラ別データ（31体ぶん）
-//   1083-1116     音の ロック解除（最初の 操作で 呼ぶ）
-//   1118-1295     キャラ画像（遅延読み込み）
-//   1297-1332     タイトル画面の 粒子
-//   1334-3008     絵: メニュー用の 31体テーブル（CHAR_BODY_ART）
-//   3010-3038     絵: メニュー用の 呼び出し口（drawCharacterBody）
-//   3040-4729     攻撃中の ポーズ（キャラ 0〜8）
-//   4731-5575     キャラの 絵 ②バトル用
-//   5577-5624     描画ユーティリティ
-//   5626-5748     画面: タイトル
-//   5750-5998     画面: キャラ選択
-//   6000-6098     画面: 難易度選択（CPU戦）
-//   6100-6329     画面: ステージ選択
-//   6331-6694     バトルの 定数 と 状態
-//   6696-6738     ゲージ演出の 小道具（ポップアップ / 変身中の 判定 / MAX の 光り）
-//   6740-6755     カメラ / 画面揺れ
-//   6757-7166     効果音（Web Audio で 合成）
-//   7168-7482     観客の 音
-//   7484-7506     ヒット表示 / コミック文字
-//   7508-7555     掴み・投げ の 定数と キャラ別テーブル
-//   7557-8045     コマンド技（→→↓↓+Z など）
-//   8047-8810     技データ
-//   8812-9158     プレイヤー生成 / 試合の 初期化
-//   9160-9177     ヒット処理（ダメージ・ノックバック）
-//   9179-9607     ヒットした ときの 演出（applyHit の 後半・ゲームの 数値は 変えない）
-//   9609-10532    ヒット処理（ダメージと ノックバックを 決めて 相手に 入れる）
-//   10534-10563   当たり判定
-//   10565-10606   飛び道具
-//   10608-10866   技の 発動（通常技・復帰技・ジャブ）
-//   10868-11090   掴み・投げ の 実行
-//   11092-11435   CPU の 思考
-//   11437-11596   画面演出の 配列を 1フレーム 進める
-//   11598-11832   キャラ固有の ゲージ更新（毎フレーム・プレイヤー1人分）
-//   11834-12177   攻撃中の 1フレーム 更新（プレイヤー1人分）
-//   12179-12320   D キー長押しの 処理（プレイヤー1人分）
-//   12322-12434   受け身（テクニング）の 処理（プレイヤー1人分）
-//   12436-12603   のけぞり（ヒットスタン）の 処理（プレイヤー1人分）
-//   12605-12705   着地の 処理（プレイヤー1人分）
-//   12707-13989   バトルの 毎フレーム更新（中核）
-//   13991-14486   物理（移動・重力・着地・撃墜判定）
-//   14488-14556   攻撃ボタンの 処理（P1ローカル と オンラインのゲスト で 共通）
-//   14558-14677   スマッシュ攻撃（方向2回 + X）
-//   14679-14774   崖つかまり
-//   14776-15213   D技 と 必殺技 の データ
-//   15215-15632   D技: キャラ別の 中身（D_SKILL_IMPL）
-//   15634-15785   D技: 発動 と 毎フレーム更新（triggerDSkill / updateDSkill）
-//   15787-15847   空中回避
-//   15849-15945   バトル描画の 下準備（カメラ・影・2.5D）
-//   15947-16170   バトル画面の うえに 重ねる もの（ボスラッシュHUD / GAME SET 演出）
-//   16172-16468   ステージの 床を 描く（2.5D の 台形）
-//   16470-16875   プレイヤー2人を 描く（本体・影・名前・ゲージ・状態異常の 重ね表示）
-//   16877-18038   バトル画面の 描画
-//   18040-18695   描画: 技エフェクトの 表（ATTACK_EFFECTS: effect名 → 描き方）
-//   18697-19128   描画: 技エフェクトの 呼び出し口（drawAttackEffect ほか）
-//   19130-19301   必殺技 / 即死技 の 全画面オーバーレイ
-//   19303-19433   画面: コンボ一覧 / 戦績
-//   19435-19644   キャラ別 ゲージの 描画（HUDの 下に 出る 細い バー）
-//   19646-19913   バトルの HUD
-//   19915-20806   オンライン対戦（PeerJS / ホストが 正）
-//   20808-21091   画面: VS イントロ
-//   21093-21123   画面の 切り替え（フェード）
-//   21125-21204   ポーズメニュー（バトル中に ESC）
-//   21206-21436   画面: キャラ詳細（Iキー）
-//   21438-21560   画面: 操作説明
-//   21562-22041   キー入力の 振り分け（画面ごと）
-//   22043-22248   メインループ（60FPS 固定タイムステップ）
+//   109-295       書き換わる 値（グローバル状態）
+//   297-526       CANVAS / 画面サイズ
+//   528-1083      キャラ別データ（31体ぶん）
+//   1085-1118     音の ロック解除（最初の 操作で 呼ぶ）
+//   1120-1297     キャラ画像（遅延読み込み）
+//   1299-1334     タイトル画面の 粒子
+//   1336-3010     絵: メニュー用の 31体テーブル（CHAR_BODY_ART）
+//   3012-3040     絵: メニュー用の 呼び出し口（drawCharacterBody）
+//   3042-4731     攻撃中の ポーズ（キャラ 0〜8）
+//   4733-5577     キャラの 絵 ②バトル用
+//   5579-5626     描画ユーティリティ
+//   5628-5750     画面: タイトル
+//   5752-6000     画面: キャラ選択
+//   6002-6100     画面: 難易度選択（CPU戦）
+//   6102-6331     画面: ステージ選択
+//   6333-6696     バトルの 定数 と 状態
+//   6698-6740     ゲージ演出の 小道具（ポップアップ / 変身中の 判定 / MAX の 光り）
+//   6742-6757     カメラ / 画面揺れ
+//   6759-7168     効果音（Web Audio で 合成）
+//   7170-7484     観客の 音
+//   7486-7508     ヒット表示 / コミック文字
+//   7510-7557     掴み・投げ の 定数と キャラ別テーブル
+//   7559-8047     コマンド技（→→↓↓+Z など）
+//   8049-8812     技データ
+//   8814-9160     プレイヤー生成 / 試合の 初期化
+//   9162-9179     ヒット処理（ダメージ・ノックバック）
+//   9181-9609     ヒットした ときの 演出（applyHit の 後半・ゲームの 数値は 変えない）
+//   9611-10534    ヒット処理（ダメージと ノックバックを 決めて 相手に 入れる）
+//   10536-10565   当たり判定
+//   10567-10608   飛び道具
+//   10610-10868   技の 発動（通常技・復帰技・ジャブ）
+//   10870-11092   掴み・投げ の 実行
+//   11094-11437   CPU の 思考
+//   11439-11598   画面演出の 配列を 1フレーム 進める
+//   11600-11834   キャラ固有の ゲージ更新（毎フレーム・プレイヤー1人分）
+//   11836-12179   攻撃中の 1フレーム 更新（プレイヤー1人分）
+//   12181-12322   D キー長押しの 処理（プレイヤー1人分）
+//   12324-12436   受け身（テクニング）の 処理（プレイヤー1人分）
+//   12438-12605   のけぞり（ヒットスタン）の 処理（プレイヤー1人分）
+//   12607-12707   着地の 処理（プレイヤー1人分）
+//   12709-13991   バトルの 毎フレーム更新（中核）
+//   13993-14488   物理（移動・重力・着地・撃墜判定）
+//   14490-14558   攻撃ボタンの 処理（P1ローカル と オンラインのゲスト で 共通）
+//   14560-14679   スマッシュ攻撃（方向2回 + X）
+//   14681-14776   崖つかまり
+//   14778-15215   D技 と 必殺技 の データ
+//   15217-15634   D技: キャラ別の 中身（D_SKILL_IMPL）
+//   15636-15787   D技: 発動 と 毎フレーム更新（triggerDSkill / updateDSkill）
+//   15789-15849   空中回避
+//   15851-15947   バトル描画の 下準備（カメラ・影・2.5D）
+//   15949-16172   バトル画面の うえに 重ねる もの（ボスラッシュHUD / GAME SET 演出）
+//   16174-16470   ステージの 床を 描く（2.5D の 台形）
+//   16472-16877   プレイヤー2人を 描く（本体・影・名前・ゲージ・状態異常の 重ね表示）
+//   16879-18040   バトル画面の 描画
+//   18042-18697   描画: 技エフェクトの 表（ATTACK_EFFECTS: effect名 → 描き方）
+//   18699-19130   描画: 技エフェクトの 呼び出し口（drawAttackEffect ほか）
+//   19132-19303   必殺技 / 即死技 の 全画面オーバーレイ
+//   19305-19435   画面: コンボ一覧 / 戦績
+//   19437-19646   キャラ別 ゲージの 描画（HUDの 下に 出る 細い バー）
+//   19648-19915   バトルの HUD
+//   19917-20808   オンライン対戦（PeerJS / ホストが 正）
+//   20810-21093   画面: VS イントロ
+//   21095-21125   画面の 切り替え（フェード）
+//   21127-21206   ポーズメニュー（バトル中に ESC）
+//   21208-21438   画面: キャラ詳細（Iキー）
+//   21440-21561   画面: 操作説明
+//   21563-21739   キー入力: キャラ選択画面
+//   21741-21957   キー入力: バトル中
+//   21959-22064   キー入力の 振り分け（画面ごと）
+//   22066-22271   メインループ（60FPS 固定タイムステップ）
 //
 // ### 目次ここまで
 // ======================================================================
@@ -21557,6 +21559,401 @@ function drawHowToPlayContent(ox, oy, w, h, alpha) {
 
   ctx.restore();
 }
+// ======================================================================
+// キー入力: キャラ選択画面
+//
+// handleKeyDown から 切り出した もの。中身は そのまま。
+// モード選択 → カーソル移動（P1は 矢印 / CPU・2Pは A D W S）→ 確定 → I で 詳細
+// ======================================================================
+function handleSelectKey(e) {
+  // Mode selection phase
+  if (!modeSelected) {
+    // オンライン対戦中はCPUモード選択不可→自動的にVS固定
+    if (onlineMode) {
+      gameMode = 'vs';
+      modeSelected = true;
+      return;
+    }
+    // オフライン: cpu / bossrush / training のみ、オンライン: vs のみ
+    const availModes = onlineMode ? ['vs'] : ['cpu', 'bossrush', 'training'];
+    const curIdx = availModes.indexOf(gameMode);
+    if (e.key === 'ArrowLeft') {
+      gameMode = availModes[(curIdx - 1 + availModes.length) % availModes.length];
+    }
+    if (e.key === 'ArrowRight') {
+      gameMode = availModes[(curIdx + 1) % availModes.length];
+    }
+    if (e.key === 'Enter') {
+      if (gameMode === 'training') {
+        // Training mode: CPU doesn't move
+        trainingMode = true;
+        gameMode = 'cpu';
+        cpuDifficulty = 0; // CPUが動かない
+        modeSelected = true;
+        p1Confirmed = false; p2Confirmed = false;
+        return;
+      }
+      if (gameMode === 'bossrush') {
+        // Boss Rush: proceed to character select (P1 only)
+        bossRushMode = true;
+        modeSelected = true;
+        p1Confirmed = false;
+        p2Confirmed = false;
+        return;
+      }
+      modeSelected = true;
+      p1Confirmed = false;
+      p2Confirmed = false;
+      if (gameMode === 'cpu') {
+        if (p2Select === p1Select) p2Select = (p1Select + 1) % characters.length;
+      }
+    }
+    if (e.key === 'Escape') { bossRushMode = false; startTransition('title'); }
+    return;
+  }
+
+  // Character select phase
+  if (gameMode === 'bossrush') {
+    // Boss Rush: P1 selects, bosses are random
+    if (!p1Confirmed) {
+      const n = characters.length + 1;
+      if (e.key === 'ArrowLeft') p1Select = (p1Select + n - 1) % n;
+      if (e.key === 'ArrowRight') p1Select = (p1Select + 1) % n;
+      if (e.key === 'ArrowUp') p1Select = selectVMove(p1Select, n, -1);
+      if (e.key === 'ArrowDown') p1Select = selectVMove(p1Select, n, 1);
+      if (e.key === 'Enter') {
+        if (p1Select >= characters.length) p1Select = Math.floor(Math.random() * characters.length);
+        bossRushPlayerChar = p1Select;
+        // Pick 3 unique random bosses
+        const pool = [];
+        for (let i = 0; i < characters.length; i++) { if (i !== p1Select) pool.push(i); }
+        for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+        bossRushBosses = pool.slice(0, 3);
+        bossRushCurrent = 0;
+        bossRushPhase = 'intro';
+        bossRushTimer = 0;
+        p2Select = bossRushBosses[0];
+        cpuDifficulty = 3;
+        p1Confirmed = true; p2Confirmed = true;
+      }
+    } else if (e.key === 'Enter' && p1Confirmed) {
+      startTransition('stageselect'); return;
+    }
+  } else if (gameMode === 'cpu') {
+    // CPU mode: P1 selects, A/D changes CPU char
+    if (!p1Confirmed) {
+      const n = characters.length + 1; // +1 for random
+      if (e.key === 'ArrowLeft') p1Select = (p1Select + n - 1) % n;
+      if (e.key === 'ArrowRight') p1Select = (p1Select + 1) % n;
+      if (e.key === 'ArrowUp') p1Select = selectVMove(p1Select, n, -1);
+      if (e.key === 'ArrowDown') p1Select = selectVMove(p1Select, n, 1);
+      if (e.key === 'a' || e.key === 'A') p2Select = (p2Select + n - 1) % n;
+      if (e.key === 'd' || e.key === 'D') p2Select = (p2Select + 1) % n;
+      if (e.key === 'w' || e.key === 'W') p2Select = selectVMove(p2Select, n, -1);
+      if (e.key === 's' || e.key === 'S') p2Select = selectVMove(p2Select, n, 1);
+      if (e.key === 'Enter') {
+        if (p1Select >= characters.length) p1Select = Math.floor(Math.random() * characters.length);
+        if (p2Select >= characters.length) p2Select = Math.floor(Math.random() * characters.length);
+        p1Confirmed = true; p2Confirmed = true;
+      }
+    } else if (e.key === 'Enter' && p1Confirmed) {
+      startTransition('difficulty'); return;
+    }
+  } else if (onlineMode) {
+    // Online VS mode: arrows select local char, Enter confirms & sends
+    const n = characters.length + 1; // +1 for random
+    if (isHost) {
+      // Host controls P1
+      if (!p1Confirmed) {
+        if (e.key === 'ArrowLeft') { p1Select = (p1Select + n - 1) % n; if (peerConn) peerConn.send({ type: 'charSelect', charIdx: p1Select }); }
+        if (e.key === 'ArrowRight') { p1Select = (p1Select + 1) % n; if (peerConn) peerConn.send({ type: 'charSelect', charIdx: p1Select }); }
+        if (e.key === 'ArrowUp') { p1Select = selectVMove(p1Select, n, -1); if (peerConn) peerConn.send({ type: 'charSelect', charIdx: p1Select }); }
+        if (e.key === 'ArrowDown') { p1Select = selectVMove(p1Select, n, 1); if (peerConn) peerConn.send({ type: 'charSelect', charIdx: p1Select }); }
+        if (e.key === 'Enter') {
+          if (p1Select >= characters.length) p1Select = Math.floor(Math.random() * characters.length);
+          p1Confirmed = true; if (peerConn) peerConn.send({ type: 'charConfirm', charIdx: p1Select });
+        }
+      }
+      if (p1Confirmed && p2Confirmed && e.key === 'Enter') {
+        startTransition('stageselect'); return;
+      }
+    } else {
+      // Guest controls P2
+      if (!p2Confirmed) {
+        if (e.key === 'ArrowLeft') { p2Select = (p2Select + n - 1) % n; if (peerConn) peerConn.send({ type: 'charSelect', charIdx: p2Select }); }
+        if (e.key === 'ArrowRight') { p2Select = (p2Select + 1) % n; if (peerConn) peerConn.send({ type: 'charSelect', charIdx: p2Select }); }
+        if (e.key === 'ArrowUp') { p2Select = selectVMove(p2Select, n, -1); if (peerConn) peerConn.send({ type: 'charSelect', charIdx: p2Select }); }
+        if (e.key === 'ArrowDown') { p2Select = selectVMove(p2Select, n, 1); if (peerConn) peerConn.send({ type: 'charSelect', charIdx: p2Select }); }
+        if (e.key === 'Enter') {
+          if (p2Select >= characters.length) p2Select = Math.floor(Math.random() * characters.length);
+          p2Confirmed = true; if (peerConn) peerConn.send({ type: 'charConfirm', charIdx: p2Select });
+        }
+      }
+      // Guest can also see both confirmed and wait for host to start
+    }
+  } else {
+    // Local VS mode: original 2P controls
+    const n = characters.length + 1; // +1 for random
+    if (!p1Confirmed) {
+      if (e.key === 'ArrowLeft') p1Select = (p1Select + n - 1) % n;
+      if (e.key === 'ArrowRight') p1Select = (p1Select + 1) % n;
+      if (e.key === 'ArrowUp') p1Select = selectVMove(p1Select, n, -1);
+      if (e.key === 'ArrowDown') p1Select = selectVMove(p1Select, n, 1);
+      if (e.key === 'Enter') {
+        if (p1Select >= characters.length) p1Select = Math.floor(Math.random() * characters.length);
+        p1Confirmed = true;
+      }
+    } else if (e.key === 'Enter' && p1Confirmed && p2Confirmed) {
+      startTransition('stageselect'); return;
+    }
+    if (!p2Confirmed) {
+      if (e.key === 'a' || e.key === 'A') p2Select = (p2Select + n - 1) % n;
+      if (e.key === 'd' || e.key === 'D') p2Select = (p2Select + 1) % n;
+      if (e.key === 'w' || e.key === 'W') p2Select = selectVMove(p2Select, n, -1);
+      if (e.key === 's' || e.key === 'S') p2Select = selectVMove(p2Select, n, 1);
+      if (e.key === ' ') {
+        if (p2Select >= characters.length) p2Select = Math.floor(Math.random() * characters.length);
+        p2Confirmed = true; e.preventDefault();
+      }
+    }
+  }
+
+  // I key: open character detail page（オンラインのゲストは 自分のカーソルは p2Select）
+  {
+    const isGuest = onlineMode && !isHost;
+    const mySel = isGuest ? p2Select : p1Select;
+    const myConfirmed = isGuest ? p2Confirmed : p1Confirmed;
+    if ((e.key === 'i' || e.key === 'I') && !myConfirmed && modeSelected && mySel < characters.length) {
+      charDetailIdx = mySel;
+      charDetailTab = 0;
+      startTransition('chardetail');
+      return;
+    }
+  }
+
+  if (e.key === 'Escape') {
+    if (p1Confirmed || p2Confirmed) { p1Confirmed = false; p2Confirmed = false; }
+    else if (!onlineMode) { modeSelected = false; bossRushMode = false; }
+  }
+}
+
+// ======================================================================
+// キー入力: バトル中
+//
+// handleKeyDown から 切り出した もの。中身は そのまま。
+// 決着後の Enter/ESC → ポーズ → 崖つかまり → P1 の 技（press* を 呼ぶ）→ ガード。
+// ゲスト(P2)の 入力は ここを 通らない（gameLoop の リモート入力が pressZ 等を 呼ぶ）
+// ======================================================================
+function handleBattleKey(e) {
+  // Boss Rush clear screen
+  if (bossRushMode && bossRushPhase === 'clear' && bossRushTimer > 120 && e.key === 'Enter') {
+    bossRushMode = false;
+    stopBGM();
+    startTransition('title');
+    return;
+  }
+  if (gameOver && gameSetTimer > 180 && e.key === 'Enter') {
+    if (bossRushMode) {
+      if (winner === 0) {
+        // Player won - advance to next boss or clear
+        bossRushCurrent++;
+        if (bossRushCurrent >= 3) {
+          // All bosses defeated - clear!
+          bossRushPhase = 'clear';
+          bossRushTimer = 0;
+          const remainStocks = players[0].stocks;
+          bossRushTitle = remainStocks >= 3 ? 'Flawless Champ' : (remainStocks >= 2 ? 'Iron Wall Champ' : 'Deathline Champ');
+          try { localStorage.setItem('smash_bossrush_title', bossRushTitle); } catch(e) {}
+          // アンロックチェック
+          checkBossRushUnlocks(3, bossRushTitle);
+        } else {
+          // Next boss
+          bossRushPhase = 'intro';
+          bossRushTimer = 0;
+          p2Select = bossRushBosses[bossRushCurrent];
+          const prevStocks = players[0].stocks;
+          const prevDamage = players[0].damage;
+          initBattle();
+          players[0].stocks = prevStocks;
+          players[0].damage = prevDamage;
+        }
+      } else {
+        // Player lost - restart boss rush
+        bossRushMode = false;
+        stopBGM();
+        startTransition('select');
+      }
+      return;
+    }
+    // リマッチ
+    if (onlineMode) {
+      if (isHost) {
+        if (peerConn && peerConn.open) peerConn.send({ type: 'rematch' });
+        closePause(); initBattle();
+      } else if (peerConn && peerConn.open) {
+        peerConn.send({ type: 'rematchReq' });   // ホストが 受けて 両方 やり直す
+      }
+      return;
+    }
+    initBattle(); return;
+  }
+  if (gameOver && gameSetTimer > 180 && e.key === 'Escape') {
+    if (onlineMode) {
+      if (isHost) {
+        if (peerConn && peerConn.open) peerConn.send({ type: 'quitToSelect' });
+        closePause(); stopBGM(); startTransition('select');
+      } else if (peerConn && peerConn.open) {
+        peerConn.send({ type: 'quitReq' });
+      }
+      return;
+    }
+    stopBGM();
+    bossRushMode = false;
+    startTransition('select'); return;
+  }
+
+  // --- ポーズメニュー ---
+  if (pauseOpen) {
+    const items = pauseMenuItems();
+    if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') { pauseSel = (pauseSel + items.length - 1) % items.length; playMenuSE(false); }
+    if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') { pauseSel = (pauseSel + 1) % items.length; playMenuSE(false); }
+    if (e.key === 'Enter' || e.key === ' ' || e.key === 'z' || e.key === 'Z') { e.preventDefault(); playMenuSE(true); runPauseItem(items[pauseSel]); }
+    if (e.key === 'Escape') closePause();
+    return;
+  }
+  if (e.key === 'Escape' && battleStarted && !gameOver && !ultimateActive && !ultimateVideoShowing) {
+    pauseOpen = true; pauseSel = 0; pauseAnim = 0; clearHeldKeys();
+    return;
+  }
+
+  if (!battleStarted || gameOver) return;
+
+  // Online: ゲストの 入力は keys{} に 入って sendGuestInput() で ホストへ 送られる。
+  // ここで ローカルの ゲーム状態を 触ると 相手キャラを 勝手に 動かしてしまうので 何もしない
+  if (onlineMode && !isHost) return;
+
+  const p1 = players[0], p2 = players[1];
+
+  // 崖つかまり中の入力処理（P1）
+  if (p1 && p1.ledgeGrab) {
+    if (e.key === 'ArrowUp') {
+      if (keys['z'] || keys['Z'] || keys['x'] || keys['X']) releaseLedge(p1, 'attack');
+      else if (keys['Shift']) releaseLedge(p1, 'dodge');
+      else releaseLedge(p1, 'normal');
+    }
+    if (e.key === 'ArrowDown') releaseLedge(p1, 'drop');
+    return;
+  }
+  // 崖つかまり中の入力処理（P2ローカル）
+  if (p2 && p2.ledgeGrab && !(gameMode === 'cpu' || bossRushMode) && !onlineMode) {
+    if (e.key === 'w' || e.key === 'W') {
+      if (keys['j'] || keys['J'] || keys['i'] || keys['I']) releaseLedge(p2, 'attack');
+      else if (keys['k'] || keys['K']) releaseLedge(p2, 'dodge');
+      else releaseLedge(p2, 'normal');
+    }
+    if (e.key === 's' || e.key === 'S') releaseLedge(p2, 'drop');
+    return;
+  }
+
+  // P1 の 入力。中身は pressZ/pressX/pressA/pressC に まとめてある
+  // （ゲストの 入力も 同じ関数を 通る。片方だけ 直すと ずれる）
+  const d1 = { left: !!keys['ArrowLeft'], right: !!keys['ArrowRight'], up: !!keys['ArrowUp'], down: !!keys['ArrowDown'] };
+  if (e.key === 'ArrowDown') pressDirection(p1, 0, 'down', e.repeat);
+  if (e.key === 'ArrowUp') pressDirection(p1, 0, 'up', e.repeat);
+  if (e.key === 'ArrowLeft') pressDirection(p1, 0, 'left', e.repeat);
+  if (e.key === 'ArrowRight') pressDirection(p1, 0, 'right', e.repeat);
+  if (e.key === 'z' || e.key === 'Z') pressZ(p1, d1);
+  if (e.key === 'x' || e.key === 'X') pressX(p1, d1);
+  if (e.key === 'a' || e.key === 'A') pressA(p1);
+  if (e.key === 'c' || e.key === 'C') pressC(p1);
+  // P1 Guard (ground) / Air Dodge (air) - Shift key
+  if (e.key === 'Shift') {
+    if (p1.grounded) {
+      if (!p1.attacking && !p1.guarding && p1.guardDurability > 0 && p1.guardBreakStun <= 0 && p1.invincibleTimer <= 0) {
+        p1.guarding = true;
+        p1.justGuardTimer = typeof JUST_GUARD_WINDOW !== 'undefined' ? JUST_GUARD_WINDOW : 6;
+      }
+    } else {
+      if (canAirDodge(p1)) {
+        triggerAirDodge(p1, keys);
+      }
+    }
+  }
+
+  // F key: トレーニングモードでフレームデータ表示切替
+  if ((e.key === 'f' || e.key === 'F') && trainingMode && !(gameMode === 'vs')) {
+    showFrameData = !showFrameData;
+  }
+
+  // P2 attacks: U I O (only in local VS mode, skip for online)
+  if (gameMode === 'vs' && !onlineMode) {
+    // P2 direction input for commands
+    if (e.key === 's' || e.key === 'S') addCmdInput(1, 'D');
+    if (e.key === 'w' || e.key === 'W') addCmdInput(1, 'U');
+    if (e.key === 'a' || e.key === 'A') addCmdInput(1, 'L');
+    if (e.key === 'd' || e.key === 'D') addCmdInput(1, 'R');
+
+    if (e.key === 'u' || e.key === 'U') {
+      if (p2.grabbing) {
+        const target = players.find(pp => pp.id === p2.grabTarget);
+        if (target) { target.damage = Math.min(999, target.damage + 2); hitEffects.push({x:target.x,y:target.y-40,life:6,maxLife:6,color:'#FFF',size:10}); }
+      } else {
+        const cmd = checkCommandInput(p2);
+        if (cmd && cmd.chargeCmd) {
+          if (!p2.charging && !p2.attacking) {
+            p2.charging = true; p2.chargeTime = 0; p2.chargeCmd = cmd;
+          }
+        } else if (cmd && executeCommand(p2, cmd)) {
+          // Command executed
+        } else if (!p2.grounded && (keys['s'] || keys['S'])) {
+          startAttack(p2, 'downair');
+        } else if (!p2.grounded) {
+          startAttack(p2, 'aerial');
+        } else if (p2.grounded && Math.abs(p2.vx) > 3 && (keys['a'] || keys['A'] || keys['d'] || keys['D'])) {
+          startAttack(p2, 'dash');
+        } else if (keys['w'] || keys['W']) {
+          startAttack(p2, 'up');
+        } else if (keys['a'] || keys['A'] || keys['d'] || keys['D']) {
+          startAttack(p2, 'side');
+        } else if (keys['s'] || keys['S']) {
+          startAttack(p2, 'down');
+        } else {
+          startAttack(p2, 'normal');
+        }
+      }
+    }
+    if (e.key === 'i' || e.key === 'I') {
+      if (!tryCancelAttack(p2, 'strong')) {
+        startAttack(p2, 'strong');
+      }
+    }
+    // P2 Throw (F key) / 投げ抜け
+    if (e.key === 'f' || e.key === 'F') {
+      if (p2.grabbed && p2.throwTechWindow > 0) {
+        const grabber = players.find(pp => pp.id === p2.grabbedBy);
+        if (grabber) throwTech(grabber, p2);
+      } else if (!p2.grabbing && p2.grounded && !p2.attacking && p2.hitstun <= 0 && !p2.grabbed) {
+        tryGrab(p2);
+      }
+    }
+    if (e.key === 'o' || e.key === 'O') {
+      if (canComboFinisher(p2.id)) {
+        executeComboFinisher(p2);
+      } else if (!(p2.charIdx === 10 && !p2.dragonMode && p2.damage >= 80 && p2.dragonCooldown <= 0 && p2.grounded)) {
+        if (!tryCancelAttack(p2, 'special')) {
+          startAttack(p2, 'special');
+        }
+      }
+    }
+    // P2 Air Dodge (E)
+    if (e.key === 'e' || e.key === 'E') {
+      if (canAirDodge(p2)) {
+        triggerAirDodge(p2, keys);
+      }
+    }
+  }
+}
+
 
 // ======================================================================
 // キー入力の 振り分け（画面ごと）
@@ -21626,175 +22023,7 @@ function handleKeyDown(e) {
     e.preventDefault();
     return;
   } else if (scene === 'select') {
-    // Mode selection phase
-    if (!modeSelected) {
-      // オンライン対戦中はCPUモード選択不可→自動的にVS固定
-      if (onlineMode) {
-        gameMode = 'vs';
-        modeSelected = true;
-        return;
-      }
-      // オフライン: cpu / bossrush / training のみ、オンライン: vs のみ
-      const availModes = onlineMode ? ['vs'] : ['cpu', 'bossrush', 'training'];
-      const curIdx = availModes.indexOf(gameMode);
-      if (e.key === 'ArrowLeft') {
-        gameMode = availModes[(curIdx - 1 + availModes.length) % availModes.length];
-      }
-      if (e.key === 'ArrowRight') {
-        gameMode = availModes[(curIdx + 1) % availModes.length];
-      }
-      if (e.key === 'Enter') {
-        if (gameMode === 'training') {
-          // Training mode: CPU doesn't move
-          trainingMode = true;
-          gameMode = 'cpu';
-          cpuDifficulty = 0; // CPUが動かない
-          modeSelected = true;
-          p1Confirmed = false; p2Confirmed = false;
-          return;
-        }
-        if (gameMode === 'bossrush') {
-          // Boss Rush: proceed to character select (P1 only)
-          bossRushMode = true;
-          modeSelected = true;
-          p1Confirmed = false;
-          p2Confirmed = false;
-          return;
-        }
-        modeSelected = true;
-        p1Confirmed = false;
-        p2Confirmed = false;
-        if (gameMode === 'cpu') {
-          if (p2Select === p1Select) p2Select = (p1Select + 1) % characters.length;
-        }
-      }
-      if (e.key === 'Escape') { bossRushMode = false; startTransition('title'); }
-      return;
-    }
-
-    // Character select phase
-    if (gameMode === 'bossrush') {
-      // Boss Rush: P1 selects, bosses are random
-      if (!p1Confirmed) {
-        const n = characters.length + 1;
-        if (e.key === 'ArrowLeft') p1Select = (p1Select + n - 1) % n;
-        if (e.key === 'ArrowRight') p1Select = (p1Select + 1) % n;
-        if (e.key === 'ArrowUp') p1Select = selectVMove(p1Select, n, -1);
-        if (e.key === 'ArrowDown') p1Select = selectVMove(p1Select, n, 1);
-        if (e.key === 'Enter') {
-          if (p1Select >= characters.length) p1Select = Math.floor(Math.random() * characters.length);
-          bossRushPlayerChar = p1Select;
-          // Pick 3 unique random bosses
-          const pool = [];
-          for (let i = 0; i < characters.length; i++) { if (i !== p1Select) pool.push(i); }
-          for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
-          bossRushBosses = pool.slice(0, 3);
-          bossRushCurrent = 0;
-          bossRushPhase = 'intro';
-          bossRushTimer = 0;
-          p2Select = bossRushBosses[0];
-          cpuDifficulty = 3;
-          p1Confirmed = true; p2Confirmed = true;
-        }
-      } else if (e.key === 'Enter' && p1Confirmed) {
-        startTransition('stageselect'); return;
-      }
-    } else if (gameMode === 'cpu') {
-      // CPU mode: P1 selects, A/D changes CPU char
-      if (!p1Confirmed) {
-        const n = characters.length + 1; // +1 for random
-        if (e.key === 'ArrowLeft') p1Select = (p1Select + n - 1) % n;
-        if (e.key === 'ArrowRight') p1Select = (p1Select + 1) % n;
-        if (e.key === 'ArrowUp') p1Select = selectVMove(p1Select, n, -1);
-        if (e.key === 'ArrowDown') p1Select = selectVMove(p1Select, n, 1);
-        if (e.key === 'a' || e.key === 'A') p2Select = (p2Select + n - 1) % n;
-        if (e.key === 'd' || e.key === 'D') p2Select = (p2Select + 1) % n;
-        if (e.key === 'w' || e.key === 'W') p2Select = selectVMove(p2Select, n, -1);
-        if (e.key === 's' || e.key === 'S') p2Select = selectVMove(p2Select, n, 1);
-        if (e.key === 'Enter') {
-          if (p1Select >= characters.length) p1Select = Math.floor(Math.random() * characters.length);
-          if (p2Select >= characters.length) p2Select = Math.floor(Math.random() * characters.length);
-          p1Confirmed = true; p2Confirmed = true;
-        }
-      } else if (e.key === 'Enter' && p1Confirmed) {
-        startTransition('difficulty'); return;
-      }
-    } else if (onlineMode) {
-      // Online VS mode: arrows select local char, Enter confirms & sends
-      const n = characters.length + 1; // +1 for random
-      if (isHost) {
-        // Host controls P1
-        if (!p1Confirmed) {
-          if (e.key === 'ArrowLeft') { p1Select = (p1Select + n - 1) % n; if (peerConn) peerConn.send({ type: 'charSelect', charIdx: p1Select }); }
-          if (e.key === 'ArrowRight') { p1Select = (p1Select + 1) % n; if (peerConn) peerConn.send({ type: 'charSelect', charIdx: p1Select }); }
-          if (e.key === 'ArrowUp') { p1Select = selectVMove(p1Select, n, -1); if (peerConn) peerConn.send({ type: 'charSelect', charIdx: p1Select }); }
-          if (e.key === 'ArrowDown') { p1Select = selectVMove(p1Select, n, 1); if (peerConn) peerConn.send({ type: 'charSelect', charIdx: p1Select }); }
-          if (e.key === 'Enter') {
-            if (p1Select >= characters.length) p1Select = Math.floor(Math.random() * characters.length);
-            p1Confirmed = true; if (peerConn) peerConn.send({ type: 'charConfirm', charIdx: p1Select });
-          }
-        }
-        if (p1Confirmed && p2Confirmed && e.key === 'Enter') {
-          startTransition('stageselect'); return;
-        }
-      } else {
-        // Guest controls P2
-        if (!p2Confirmed) {
-          if (e.key === 'ArrowLeft') { p2Select = (p2Select + n - 1) % n; if (peerConn) peerConn.send({ type: 'charSelect', charIdx: p2Select }); }
-          if (e.key === 'ArrowRight') { p2Select = (p2Select + 1) % n; if (peerConn) peerConn.send({ type: 'charSelect', charIdx: p2Select }); }
-          if (e.key === 'ArrowUp') { p2Select = selectVMove(p2Select, n, -1); if (peerConn) peerConn.send({ type: 'charSelect', charIdx: p2Select }); }
-          if (e.key === 'ArrowDown') { p2Select = selectVMove(p2Select, n, 1); if (peerConn) peerConn.send({ type: 'charSelect', charIdx: p2Select }); }
-          if (e.key === 'Enter') {
-            if (p2Select >= characters.length) p2Select = Math.floor(Math.random() * characters.length);
-            p2Confirmed = true; if (peerConn) peerConn.send({ type: 'charConfirm', charIdx: p2Select });
-          }
-        }
-        // Guest can also see both confirmed and wait for host to start
-      }
-    } else {
-      // Local VS mode: original 2P controls
-      const n = characters.length + 1; // +1 for random
-      if (!p1Confirmed) {
-        if (e.key === 'ArrowLeft') p1Select = (p1Select + n - 1) % n;
-        if (e.key === 'ArrowRight') p1Select = (p1Select + 1) % n;
-        if (e.key === 'ArrowUp') p1Select = selectVMove(p1Select, n, -1);
-        if (e.key === 'ArrowDown') p1Select = selectVMove(p1Select, n, 1);
-        if (e.key === 'Enter') {
-          if (p1Select >= characters.length) p1Select = Math.floor(Math.random() * characters.length);
-          p1Confirmed = true;
-        }
-      } else if (e.key === 'Enter' && p1Confirmed && p2Confirmed) {
-        startTransition('stageselect'); return;
-      }
-      if (!p2Confirmed) {
-        if (e.key === 'a' || e.key === 'A') p2Select = (p2Select + n - 1) % n;
-        if (e.key === 'd' || e.key === 'D') p2Select = (p2Select + 1) % n;
-        if (e.key === 'w' || e.key === 'W') p2Select = selectVMove(p2Select, n, -1);
-        if (e.key === 's' || e.key === 'S') p2Select = selectVMove(p2Select, n, 1);
-        if (e.key === ' ') {
-          if (p2Select >= characters.length) p2Select = Math.floor(Math.random() * characters.length);
-          p2Confirmed = true; e.preventDefault();
-        }
-      }
-    }
-
-    // I key: open character detail page（オンラインのゲストは 自分のカーソルは p2Select）
-    {
-      const isGuest = onlineMode && !isHost;
-      const mySel = isGuest ? p2Select : p1Select;
-      const myConfirmed = isGuest ? p2Confirmed : p1Confirmed;
-      if ((e.key === 'i' || e.key === 'I') && !myConfirmed && modeSelected && mySel < characters.length) {
-        charDetailIdx = mySel;
-        charDetailTab = 0;
-        startTransition('chardetail');
-        return;
-      }
-    }
-
-    if (e.key === 'Escape') {
-      if (p1Confirmed || p2Confirmed) { p1Confirmed = false; p2Confirmed = false; }
-      else if (!onlineMode) { modeSelected = false; bossRushMode = false; }
-    }
+    handleSelectKey(e);
   } else if (scene === 'difficulty') {
     if (e.key === 'ArrowLeft') difficultySelected = Math.max(0, difficultySelected - 1);
     if (e.key === 'ArrowRight') difficultySelected = Math.min(3, difficultySelected + 1);
@@ -21823,213 +22052,7 @@ function handleKeyDown(e) {
       startTransition('battle');
     }
   } else if (scene === 'battle') {
-    // Boss Rush clear screen
-    if (bossRushMode && bossRushPhase === 'clear' && bossRushTimer > 120 && e.key === 'Enter') {
-      bossRushMode = false;
-      stopBGM();
-      startTransition('title');
-      return;
-    }
-    if (gameOver && gameSetTimer > 180 && e.key === 'Enter') {
-      if (bossRushMode) {
-        if (winner === 0) {
-          // Player won - advance to next boss or clear
-          bossRushCurrent++;
-          if (bossRushCurrent >= 3) {
-            // All bosses defeated - clear!
-            bossRushPhase = 'clear';
-            bossRushTimer = 0;
-            const remainStocks = players[0].stocks;
-            bossRushTitle = remainStocks >= 3 ? 'Flawless Champ' : (remainStocks >= 2 ? 'Iron Wall Champ' : 'Deathline Champ');
-            try { localStorage.setItem('smash_bossrush_title', bossRushTitle); } catch(e) {}
-            // アンロックチェック
-            checkBossRushUnlocks(3, bossRushTitle);
-          } else {
-            // Next boss
-            bossRushPhase = 'intro';
-            bossRushTimer = 0;
-            p2Select = bossRushBosses[bossRushCurrent];
-            const prevStocks = players[0].stocks;
-            const prevDamage = players[0].damage;
-            initBattle();
-            players[0].stocks = prevStocks;
-            players[0].damage = prevDamage;
-          }
-        } else {
-          // Player lost - restart boss rush
-          bossRushMode = false;
-          stopBGM();
-          startTransition('select');
-        }
-        return;
-      }
-      // リマッチ
-      if (onlineMode) {
-        if (isHost) {
-          if (peerConn && peerConn.open) peerConn.send({ type: 'rematch' });
-          closePause(); initBattle();
-        } else if (peerConn && peerConn.open) {
-          peerConn.send({ type: 'rematchReq' });   // ホストが 受けて 両方 やり直す
-        }
-        return;
-      }
-      initBattle(); return;
-    }
-    if (gameOver && gameSetTimer > 180 && e.key === 'Escape') {
-      if (onlineMode) {
-        if (isHost) {
-          if (peerConn && peerConn.open) peerConn.send({ type: 'quitToSelect' });
-          closePause(); stopBGM(); startTransition('select');
-        } else if (peerConn && peerConn.open) {
-          peerConn.send({ type: 'quitReq' });
-        }
-        return;
-      }
-      stopBGM();
-      bossRushMode = false;
-      startTransition('select'); return;
-    }
-
-    // --- ポーズメニュー ---
-    if (pauseOpen) {
-      const items = pauseMenuItems();
-      if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') { pauseSel = (pauseSel + items.length - 1) % items.length; playMenuSE(false); }
-      if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') { pauseSel = (pauseSel + 1) % items.length; playMenuSE(false); }
-      if (e.key === 'Enter' || e.key === ' ' || e.key === 'z' || e.key === 'Z') { e.preventDefault(); playMenuSE(true); runPauseItem(items[pauseSel]); }
-      if (e.key === 'Escape') closePause();
-      return;
-    }
-    if (e.key === 'Escape' && battleStarted && !gameOver && !ultimateActive && !ultimateVideoShowing) {
-      pauseOpen = true; pauseSel = 0; pauseAnim = 0; clearHeldKeys();
-      return;
-    }
-
-    if (!battleStarted || gameOver) return;
-
-    // Online: ゲストの 入力は keys{} に 入って sendGuestInput() で ホストへ 送られる。
-    // ここで ローカルの ゲーム状態を 触ると 相手キャラを 勝手に 動かしてしまうので 何もしない
-    if (onlineMode && !isHost) return;
-
-    const p1 = players[0], p2 = players[1];
-
-    // 崖つかまり中の入力処理（P1）
-    if (p1 && p1.ledgeGrab) {
-      if (e.key === 'ArrowUp') {
-        if (keys['z'] || keys['Z'] || keys['x'] || keys['X']) releaseLedge(p1, 'attack');
-        else if (keys['Shift']) releaseLedge(p1, 'dodge');
-        else releaseLedge(p1, 'normal');
-      }
-      if (e.key === 'ArrowDown') releaseLedge(p1, 'drop');
-      return;
-    }
-    // 崖つかまり中の入力処理（P2ローカル）
-    if (p2 && p2.ledgeGrab && !(gameMode === 'cpu' || bossRushMode) && !onlineMode) {
-      if (e.key === 'w' || e.key === 'W') {
-        if (keys['j'] || keys['J'] || keys['i'] || keys['I']) releaseLedge(p2, 'attack');
-        else if (keys['k'] || keys['K']) releaseLedge(p2, 'dodge');
-        else releaseLedge(p2, 'normal');
-      }
-      if (e.key === 's' || e.key === 'S') releaseLedge(p2, 'drop');
-      return;
-    }
-
-    // P1 の 入力。中身は pressZ/pressX/pressA/pressC に まとめてある
-    // （ゲストの 入力も 同じ関数を 通る。片方だけ 直すと ずれる）
-    const d1 = { left: !!keys['ArrowLeft'], right: !!keys['ArrowRight'], up: !!keys['ArrowUp'], down: !!keys['ArrowDown'] };
-    if (e.key === 'ArrowDown') pressDirection(p1, 0, 'down', e.repeat);
-    if (e.key === 'ArrowUp') pressDirection(p1, 0, 'up', e.repeat);
-    if (e.key === 'ArrowLeft') pressDirection(p1, 0, 'left', e.repeat);
-    if (e.key === 'ArrowRight') pressDirection(p1, 0, 'right', e.repeat);
-    if (e.key === 'z' || e.key === 'Z') pressZ(p1, d1);
-    if (e.key === 'x' || e.key === 'X') pressX(p1, d1);
-    if (e.key === 'a' || e.key === 'A') pressA(p1);
-    if (e.key === 'c' || e.key === 'C') pressC(p1);
-    // P1 Guard (ground) / Air Dodge (air) - Shift key
-    if (e.key === 'Shift') {
-      if (p1.grounded) {
-        if (!p1.attacking && !p1.guarding && p1.guardDurability > 0 && p1.guardBreakStun <= 0 && p1.invincibleTimer <= 0) {
-          p1.guarding = true;
-          p1.justGuardTimer = typeof JUST_GUARD_WINDOW !== 'undefined' ? JUST_GUARD_WINDOW : 6;
-        }
-      } else {
-        if (canAirDodge(p1)) {
-          triggerAirDodge(p1, keys);
-        }
-      }
-    }
-
-    // F key: トレーニングモードでフレームデータ表示切替
-    if ((e.key === 'f' || e.key === 'F') && trainingMode && !(gameMode === 'vs')) {
-      showFrameData = !showFrameData;
-    }
-
-    // P2 attacks: U I O (only in local VS mode, skip for online)
-    if (gameMode === 'vs' && !onlineMode) {
-      // P2 direction input for commands
-      if (e.key === 's' || e.key === 'S') addCmdInput(1, 'D');
-      if (e.key === 'w' || e.key === 'W') addCmdInput(1, 'U');
-      if (e.key === 'a' || e.key === 'A') addCmdInput(1, 'L');
-      if (e.key === 'd' || e.key === 'D') addCmdInput(1, 'R');
-
-      if (e.key === 'u' || e.key === 'U') {
-        if (p2.grabbing) {
-          const target = players.find(pp => pp.id === p2.grabTarget);
-          if (target) { target.damage = Math.min(999, target.damage + 2); hitEffects.push({x:target.x,y:target.y-40,life:6,maxLife:6,color:'#FFF',size:10}); }
-        } else {
-          const cmd = checkCommandInput(p2);
-          if (cmd && cmd.chargeCmd) {
-            if (!p2.charging && !p2.attacking) {
-              p2.charging = true; p2.chargeTime = 0; p2.chargeCmd = cmd;
-            }
-          } else if (cmd && executeCommand(p2, cmd)) {
-            // Command executed
-          } else if (!p2.grounded && (keys['s'] || keys['S'])) {
-            startAttack(p2, 'downair');
-          } else if (!p2.grounded) {
-            startAttack(p2, 'aerial');
-          } else if (p2.grounded && Math.abs(p2.vx) > 3 && (keys['a'] || keys['A'] || keys['d'] || keys['D'])) {
-            startAttack(p2, 'dash');
-          } else if (keys['w'] || keys['W']) {
-            startAttack(p2, 'up');
-          } else if (keys['a'] || keys['A'] || keys['d'] || keys['D']) {
-            startAttack(p2, 'side');
-          } else if (keys['s'] || keys['S']) {
-            startAttack(p2, 'down');
-          } else {
-            startAttack(p2, 'normal');
-          }
-        }
-      }
-      if (e.key === 'i' || e.key === 'I') {
-        if (!tryCancelAttack(p2, 'strong')) {
-          startAttack(p2, 'strong');
-        }
-      }
-      // P2 Throw (F key) / 投げ抜け
-      if (e.key === 'f' || e.key === 'F') {
-        if (p2.grabbed && p2.throwTechWindow > 0) {
-          const grabber = players.find(pp => pp.id === p2.grabbedBy);
-          if (grabber) throwTech(grabber, p2);
-        } else if (!p2.grabbing && p2.grounded && !p2.attacking && p2.hitstun <= 0 && !p2.grabbed) {
-          tryGrab(p2);
-        }
-      }
-      if (e.key === 'o' || e.key === 'O') {
-        if (canComboFinisher(p2.id)) {
-          executeComboFinisher(p2);
-        } else if (!(p2.charIdx === 10 && !p2.dragonMode && p2.damage >= 80 && p2.dragonCooldown <= 0 && p2.grounded)) {
-          if (!tryCancelAttack(p2, 'special')) {
-            startAttack(p2, 'special');
-          }
-        }
-      }
-      // P2 Air Dodge (E)
-      if (e.key === 'e' || e.key === 'E') {
-        if (canAirDodge(p2)) {
-          triggerAirDodge(p2, keys);
-        }
-      }
-    }
+    handleBattleKey(e);
   }
 }
 
