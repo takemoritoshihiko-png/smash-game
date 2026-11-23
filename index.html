@@ -21,57 +21,58 @@
 //   変更したら  node tools/smoketest.mjs  を 必ず 走らせること。
 //   目次が ずれたら  node tools/toc.mjs  で 作り直す。
 //
-//   272   CANVAS / 画面サイズ
-//   1055  音の ロック解除（最初の 操作で 呼ぶ）
-//   1090  キャラ画像（遅延読み込み）
-//   1270  タイトル画面の 粒子
-//   1309  キャラの 絵 ①メニュー用（選択画面・詳細画面）
-//   2969  キャラの 絵 ②バトル用
-//   5490  描画ユーティリティ
-//   5539  画面: タイトル
-//   5663  画面: キャラ選択
-//   5913  画面: 難易度選択（CPU戦）
-//   6013  画面: ステージ選択
-//   6244  バトルの 定数 と 状態
-//   6613  復帰技 / パワーモードの 表示
-//   6655  カメラ / 画面揺れ
-//   6672  効果音（Web Audio で 合成）
-//   7083  観客の 音
-//   7399  ヒット表示 / コミック文字
-//   7423  掴み・投げ の 定数と キャラ別テーブル
-//   7472  コマンド技（→→↓↓+Z など）
-//   7963  技データ
-//   8728  プレイヤー生成 / 試合の 初期化
-//   9076  ヒット処理（ダメージ・ノックバック）
-//   10417 当たり判定
-//   10449 飛び道具
-//   10492 技の 発動（通常技・復帰技・ジャブ）
-//   10751 掴み・投げ の 実行
-//   10975 CPU の 思考
-//   11321 バトルの 毎フレーム更新（中核）
-//   13771 物理（移動・重力・着地・撃墜判定）
-//   14338 スマッシュ攻撃（方向2回 + X）
-//   14454 崖つかまり
-//   14551 D技 と 必殺技 の データ
-//   15409 D技の 中身（キャラ別）
-//   15562 空中回避
-//   15624 バトル描画の 下準備（カメラ・影・2.5D）
-//   15722 バトル画面の うえに 重ねる もの（ボスラッシュHUD / GAME SET 演出）
-//   15950 バトル画面の 描画
-//   17775 技エフェクトの 描画（effect 名 → 描き方）
-//   18432 技の エフェクト描画
-//   18866 必殺技 / 即死技 の 全画面オーバーレイ
-//   19039 画面: コンボ一覧 / 戦績
-//   19171 キャラ別 ゲージの 描画（HUDの 下に 出る 細い バー）
-//   19382 バトルの HUD
-//   19651 オンライン対戦（PeerJS / ホストが 正）
-//   20595 画面: VS イントロ
-//   20880 画面の 切り替え（フェード）
-//   20915 ポーズメニュー（バトル中に ESC）
-//   20996 画面: キャラ詳細（Iキー）
-//   21227 画面: 操作説明
-//   21351 キー入力の 振り分け（画面ごと）
-//   21832 メインループ（60FPS 固定タイムステップ）
+//   273   CANVAS / 画面サイズ
+//   1056  音の ロック解除（最初の 操作で 呼ぶ）
+//   1091  キャラ画像（遅延読み込み）
+//   1271  タイトル画面の 粒子
+//   1308  キャラの 絵 ①メニュー用（選択画面・詳細画面・タイトル）
+//   2985  キャラの 絵 ①メニュー用（選択画面・詳細画面）
+//   3014  キャラの 絵 ②バトル用
+//   5535  描画ユーティリティ
+//   5584  画面: タイトル
+//   5708  画面: キャラ選択
+//   5958  画面: 難易度選択（CPU戦）
+//   6058  画面: ステージ選択
+//   6289  バトルの 定数 と 状態
+//   6658  復帰技 / パワーモードの 表示
+//   6700  カメラ / 画面揺れ
+//   6717  効果音（Web Audio で 合成）
+//   7128  観客の 音
+//   7444  ヒット表示 / コミック文字
+//   7468  掴み・投げ の 定数と キャラ別テーブル
+//   7517  コマンド技（→→↓↓+Z など）
+//   8008  技データ
+//   8773  プレイヤー生成 / 試合の 初期化
+//   9121  ヒット処理（ダメージ・ノックバック）
+//   10462 当たり判定
+//   10494 飛び道具
+//   10537 技の 発動（通常技・復帰技・ジャブ）
+//   10796 掴み・投げ の 実行
+//   11020 CPU の 思考
+//   11366 バトルの 毎フレーム更新（中核）
+//   13816 物理（移動・重力・着地・撃墜判定）
+//   14383 スマッシュ攻撃（方向2回 + X）
+//   14499 崖つかまり
+//   14596 D技 と 必殺技 の データ
+//   15454 D技の 中身（キャラ別）
+//   15607 空中回避
+//   15669 バトル描画の 下準備（カメラ・影・2.5D）
+//   15767 バトル画面の うえに 重ねる もの（ボスラッシュHUD / GAME SET 演出）
+//   15995 バトル画面の 描画
+//   17820 技エフェクトの 描画（effect 名 → 描き方）
+//   18477 技の エフェクト描画
+//   18911 必殺技 / 即死技 の 全画面オーバーレイ
+//   19084 画面: コンボ一覧 / 戦績
+//   19216 キャラ別 ゲージの 描画（HUDの 下に 出る 細い バー）
+//   19427 バトルの HUD
+//   19696 オンライン対戦（PeerJS / ホストが 正）
+//   20640 画面: VS イントロ
+//   20925 画面の 切り替え（フェード）
+//   20960 ポーズメニュー（バトル中に ESC）
+//   21041 画面: キャラ詳細（Iキー）
+//   21272 画面: 操作説明
+//   21396 キー入力の 振り分け（画面ごと）
+//   21877 メインループ（60FPS 固定タイムステップ）
 //
 // ### 目次ここまで
 // ======================================================================
@@ -1303,58 +1304,48 @@ function drawParticles() {
   }
   ctx.globalAlpha = 1;
 }
-
-// --- Draw character body ---
 // ======================================================================
-// キャラの 絵 ①メニュー用（選択画面・詳細画面）
-// 31キャラ分の if (charIndex === N) が 並ぶ。バトル用は 次の区画
+// キャラの 絵 ①メニュー用（選択画面・詳細画面・タイトル）
+//
+// 31体ぶんの if (charIndex === N) を 表に した もの。中身は そのまま。
+// 呼ばれる 時点で ctx は すでに 中心へ 移動・左右反転 済み。
+//   s : 拡大率   time : 経過ミリ秒   ci : キャラ番号
+//   c : bodyColors   ch : characters[ci]
 // ======================================================================
-function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
-  const ch = characters[charIndex];
-  const c = ch.bodyColors;
-  const s = scale;
-  const bounce = Math.sin(time * 0.03 + charIndex) * 3 * s;
-  const cy = y + bounce;
-
-  ctx.save();
-  ctx.translate(x, cy);
-  if (facingLeft) ctx.scale(-1, 1);
-
-  // Shadow
-  ctx.fillStyle = 'rgba(0,0,0,0.3)';
-  ctx.beginPath();
-  ctx.ellipse(0, 60 * s, 25 * s, 8 * s, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  if (charIndex === 0) {
+const CHAR_BODY_ART = {
+  0: (s, time, ci, c, ch) => {
     // Zen - image
     if (zenImg.complete && zenImg.naturalWidth > 0) {
       const imgW = 70 * s;
       const imgH = 90 * s;
       ctx.drawImage(zenImg, -imgW / 2, -35 * s, imgW, imgH);
     }
-  } else if (charIndex === 1) {
+  },
+  1: (s, time, ci, c, ch) => {
     // Don - image
     if (donImg.complete && donImg.naturalWidth > 0) {
       const imgW = 75 * s;
       const imgH = 90 * s;
       ctx.drawImage(donImg, -imgW / 2, -35 * s, imgW, imgH);
     }
-  } else if (charIndex === 2) {
+  },
+  2: (s, time, ci, c, ch) => {
     // Saisoku - image
     if (saisokuImg.complete && saisokuImg.naturalWidth > 0) {
       const imgW = 75 * s;
       const imgH = 90 * s;
       ctx.drawImage(saisokuImg, -imgW / 2, -35 * s, imgW, imgH);
     }
-  } else if (charIndex === 3) {
+  },
+  3: (s, time, ci, c, ch) => {
     // Meteor - image
     if (meteoImg.complete && meteoImg.naturalWidth > 0) {
       const imgW = 75 * s;
       const imgH = 90 * s;
       ctx.drawImage(meteoImg, -imgW / 2, -35 * s, imgW, imgH);
     }
-  } else if (charIndex === 4) {
+  },
+  4: (s, time, ci, c, ch) => {
     // Long - image or Canvas fallback
     if (longImg.complete && longImg.naturalWidth > 0) {
       const imgW = 75 * s;
@@ -1398,7 +1389,8 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.fillStyle = '#33DDAA';
       ctx.fillRect(-2 * s, -8 * s, 4 * s, 4 * s);
     }
-  } else if (charIndex === 5) {
+  },
+  5: (s, time, ci, c, ch) => {
     // うる男 - 狼系獣人 (landscape image: center-crop to portrait)
     if (uruoImg.complete && uruoImg.naturalWidth > 0) {
       const imgW = 75 * s;
@@ -1506,7 +1498,8 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.lineWidth = 1;
       ctx.lineCap = 'butt';
     }
-  } else if (charIndex === 6) {
+  },
+  6: (s, time, ci, c, ch) => {
     // 熊太郎 - 黒いクマ
     if (kumataroImg.complete && kumataroImg.naturalWidth > 0) {
       const imgW = 78 * s;
@@ -1571,7 +1564,8 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.stroke();
       ctx.lineWidth = 1;
     }
-  } else if (charIndex === 7) {
+  },
+  7: (s, time, ci, c, ch) => {
     // バレット - 機械系女性・遠距離型
     if (bulletImg.complete && bulletImg.naturalWidth > 0) {
       const imgW = 70 * s;
@@ -1636,7 +1630,8 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.lineWidth = 1;
       ctx.lineCap = 'butt';
     }
-  } else if (charIndex === 8) {
+  },
+  8: (s, time, ci, c, ch) => {
     // シャうでん - タコ系海の生き物
     if (shaudenImg.complete && shaudenImg.naturalWidth > 0) {
       const imgW = 75 * s;
@@ -1690,7 +1685,8 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.fillStyle = '#AA2060';
       ctx.beginPath(); ctx.ellipse(0, 2 * s, 3 * s, 2 * s, 0, 0, Math.PI * 2); ctx.fill();
     }
-  } else if (charIndex === 9) {
+  },
+  9: (s, time, ci, c, ch) => {
     // ジャッジマン - 審判・裁判官系
     if (judgemanImg.complete && judgemanImg.naturalWidth > 0) {
       const imgW = 75 * s;
@@ -1795,542 +1791,8 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.stroke();
       ctx.lineWidth = 1;
     }
-  } else if (charIndex === 11) {
-    // Catbus - 猫バス系
-    if (catbusImg.complete && catbusImg.naturalWidth > 0) {
-      const imgW = 80 * s;
-      const imgH = 90 * s;
-      ctx.drawImage(catbusImg, -imgW / 2, -35 * s, imgW, imgH);
-    } else {
-      // Canvas描画：猫バス風デザイン
-      // 脚（4本＝短い）
-      ctx.fillStyle = '#BB7711';
-      ctx.fillRect(-14 * s, 25 * s, 6 * s, 18 * s);
-      ctx.fillRect(-4 * s, 25 * s, 6 * s, 18 * s);
-      ctx.fillRect(4 * s, 28 * s, 6 * s, 15 * s);
-      ctx.fillRect(12 * s, 28 * s, 6 * s, 15 * s);
-      // 体（横長の楕円＝バス体型）
-      ctx.fillStyle = '#DD8822';
-      ctx.beginPath(); ctx.ellipse(0, 5 * s, 22 * s, 18 * s, 0, 0, Math.PI * 2); ctx.fill();
-      // お腹（薄い色）
-      ctx.fillStyle = '#FFE8AA';
-      ctx.beginPath(); ctx.ellipse(0, 10 * s, 16 * s, 12 * s, 0, 0, Math.PI * 2); ctx.fill();
-      // 縞模様
-      ctx.fillStyle = '#CC7711';
-      for (let i = -2; i <= 2; i++) {
-        ctx.fillRect((i * 8 - 1) * s, -8 * s, 3 * s, 20 * s);
-      }
-      // 窓（バスの窓を模した模様）
-      ctx.fillStyle = '#AADDFF';
-      ctx.globalAlpha = 0.6;
-      ctx.fillRect(-12 * s, -2 * s, 6 * s, 5 * s);
-      ctx.fillRect(-4 * s, -2 * s, 6 * s, 5 * s);
-      ctx.fillRect(4 * s, -2 * s, 6 * s, 5 * s);
-      ctx.globalAlpha = 1;
-      // 頭（丸い猫顔）
-      ctx.fillStyle = '#DD8822';
-      ctx.beginPath(); ctx.arc(0, -22 * s, 14 * s, 0, Math.PI * 2); ctx.fill();
-      // 耳（三角）
-      ctx.fillStyle = '#CC7711';
-      ctx.beginPath();
-      ctx.moveTo(-10 * s, -33 * s); ctx.lineTo(-7 * s, -44 * s); ctx.lineTo(-3 * s, -32 * s);
-      ctx.closePath(); ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(3 * s, -32 * s); ctx.lineTo(7 * s, -44 * s); ctx.lineTo(10 * s, -33 * s);
-      ctx.closePath(); ctx.fill();
-      // 耳の中
-      ctx.fillStyle = '#FFAA88';
-      ctx.beginPath();
-      ctx.moveTo(-9 * s, -34 * s); ctx.lineTo(-7 * s, -41 * s); ctx.lineTo(-4 * s, -33 * s);
-      ctx.closePath(); ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(4 * s, -33 * s); ctx.lineTo(7 * s, -41 * s); ctx.lineTo(9 * s, -34 * s);
-      ctx.closePath(); ctx.fill();
-      // 目（大きくてまん丸）
-      ctx.fillStyle = '#FFF';
-      ctx.beginPath(); ctx.arc(-5 * s, -24 * s, 5 * s, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(5 * s, -24 * s, 5 * s, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#222';
-      ctx.beginPath(); ctx.arc(-4 * s, -23 * s, 2.5 * s, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(6 * s, -23 * s, 2.5 * s, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#FFF';
-      ctx.beginPath(); ctx.arc(-3.5 * s, -24.5 * s, 1 * s, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(6.5 * s, -24.5 * s, 1 * s, 0, Math.PI * 2); ctx.fill();
-      // 鼻
-      ctx.fillStyle = '#FF8866';
-      ctx.beginPath(); ctx.ellipse(0, -18 * s, 2.5 * s, 2 * s, 0, 0, Math.PI * 2); ctx.fill();
-      // 口（にっこり）
-      ctx.strokeStyle = '#885511';
-      ctx.lineWidth = 1.5 * s;
-      ctx.beginPath(); ctx.arc(-3 * s, -16 * s, 3 * s, 0.1, Math.PI - 0.1); ctx.stroke();
-      ctx.beginPath(); ctx.arc(3 * s, -16 * s, 3 * s, 0.1, Math.PI - 0.1); ctx.stroke();
-      ctx.lineWidth = 1;
-      // ひげ
-      ctx.strokeStyle = '#885511';
-      ctx.lineWidth = 1 * s;
-      ctx.beginPath(); ctx.moveTo(-14 * s, -20 * s); ctx.lineTo(-6 * s, -18 * s); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(-14 * s, -16 * s); ctx.lineTo(-6 * s, -16 * s); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(6 * s, -18 * s); ctx.lineTo(14 * s, -20 * s); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(6 * s, -16 * s); ctx.lineTo(14 * s, -16 * s); ctx.stroke();
-      ctx.lineWidth = 1;
-      // 尻尾
-      ctx.strokeStyle = '#CC7711';
-      ctx.lineWidth = 4 * s;
-      ctx.lineCap = 'round';
-      const tailWave = Math.sin(time * 0.06) * 5 * s;
-      ctx.beginPath();
-      ctx.moveTo(-16 * s, 15 * s);
-      ctx.quadraticCurveTo(-28 * s + tailWave, 5 * s, -22 * s + tailWave, -8 * s);
-      ctx.stroke();
-      ctx.lineWidth = 1; ctx.lineCap = 'butt';
-    }
-  } else if (charIndex === 12) {
-    // タンク - 戦車モチーフ重装甲キャラ
-    if (tankImg.complete && tankImg.naturalWidth > 0) {
-      const imgW = 168 * s;
-      const imgH = 112 * s;
-      ctx.drawImage(tankImg, -imgW / 2 - 5 * s, -55 * s, imgW, imgH);
-    } else {
-      // Canvas fallback
-      ctx.fillStyle = '#6B7B3A';
-      ctx.fillRect(-18 * s, -15 * s, 36 * s, 44 * s);
-      ctx.fillStyle = '#7A8A4A';
-      ctx.beginPath(); ctx.arc(0, -24 * s, 14 * s, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#4A5A2A';
-      ctx.fillRect(14 * s, -28 * s, 24 * s, 6 * s);
-      ctx.fillStyle = '#3A3A2A';
-      ctx.fillRect(-16 * s, 28 * s, 12 * s, 16 * s);
-      ctx.fillRect(4 * s, 28 * s, 12 * s, 16 * s);
-      ctx.fillStyle = '#CCFF44';
-      ctx.fillRect(-8 * s, -28 * s, 16 * s, 5 * s);
-    }
-  } else if (charIndex === 13) {
-    // 波おじ - ボクサーおじさん
-    if (namiojiImg.complete && namiojiImg.naturalWidth > 0) {
-      const imgW = 75 * s;
-      const imgH = 90 * s;
-      ctx.drawImage(namiojiImg, -imgW / 2, -35 * s, imgW, imgH);
-    } else {
-      // Canvas fallback: simple boxer
-      ctx.fillStyle = '#FFCBA4';
-      ctx.beginPath(); ctx.arc(0, -28 * s, 12 * s, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(-12 * s, -15 * s, 24 * s, 30 * s);
-      ctx.fillStyle = '#222';
-      ctx.fillRect(-10 * s, 15 * s, 20 * s, 20 * s);
-      ctx.fillStyle = '#CC3333';
-      ctx.beginPath(); ctx.arc(-16 * s, 0, 7 * s, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(16 * s, 0, 7 * s, 0, Math.PI * 2); ctx.fill();
-    }
-  } else if (charIndex === 14) {
-    // とっこ - 凶獣
-    if (tokkoImg.complete && tokkoImg.naturalWidth > 0) {
-      const imgW = 75 * s;
-      const imgH = 90 * s;
-      ctx.drawImage(tokkoImg, -imgW / 2, -35 * s, imgW, imgH);
-    } else {
-      // Canvas fallback: beast silhouette
-      // Legs
-      ctx.fillStyle = '#440066';
-      ctx.fillRect(-10 * s, 25 * s, 7 * s, 20 * s);
-      ctx.fillRect(3 * s, 25 * s, 7 * s, 20 * s);
-      // Body (slim, agile)
-      ctx.fillStyle = '#8B00CC';
-      ctx.fillRect(-12 * s, -15 * s, 24 * s, 40 * s);
-      // Chest slash mark
-      ctx.strokeStyle = '#CC44FF';
-      ctx.lineWidth = 2 * s;
-      ctx.beginPath(); ctx.moveTo(-6 * s, -8 * s); ctx.lineTo(6 * s, 5 * s); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(6 * s, -8 * s); ctx.lineTo(-6 * s, 5 * s); ctx.stroke();
-      ctx.lineWidth = 1;
-      // Arms (claws)
-      ctx.fillStyle = '#6A00AA';
-      ctx.fillRect(-18 * s, -10 * s, 7 * s, 22 * s);
-      ctx.fillRect(11 * s, -10 * s, 7 * s, 22 * s);
-      // Claws
-      ctx.fillStyle = '#FFF';
-      for (let i = 0; i < 3; i++) {
-        ctx.fillRect((12 + i * 2) * s, 12 * s, 1.5 * s, 5 * s);
-        ctx.fillRect((-18 + i * 2) * s, 12 * s, 1.5 * s, 5 * s);
-      }
-      // Head
-      ctx.fillStyle = '#9B10DD';
-      ctx.beginPath(); ctx.arc(0, -25 * s, 12 * s, 0, Math.PI * 2); ctx.fill();
-      // Eyes (fierce, glowing)
-      ctx.fillStyle = '#FF3366';
-      ctx.beginPath(); ctx.ellipse(-5 * s, -27 * s, 3 * s, 2 * s, -0.2, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.ellipse(5 * s, -27 * s, 3 * s, 2 * s, 0.2, 0, Math.PI * 2); ctx.fill();
-      // Pupils
-      ctx.fillStyle = '#FFF';
-      ctx.beginPath(); ctx.arc(-4.5 * s, -27 * s, 1 * s, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(5.5 * s, -27 * s, 1 * s, 0, Math.PI * 2); ctx.fill();
-      // Ears (pointed)
-      ctx.fillStyle = '#7A00BB';
-      ctx.beginPath();
-      ctx.moveTo(-9 * s, -34 * s); ctx.lineTo(-5 * s, -48 * s); ctx.lineTo(-1 * s, -33 * s);
-      ctx.closePath(); ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(1 * s, -33 * s); ctx.lineTo(5 * s, -48 * s); ctx.lineTo(9 * s, -34 * s);
-      ctx.closePath(); ctx.fill();
-      // Mouth (fangs)
-      ctx.fillStyle = '#222';
-      ctx.beginPath(); ctx.ellipse(0, -19 * s, 5 * s, 3 * s, 0, 0, Math.PI); ctx.fill();
-      ctx.fillStyle = '#FFF';
-      ctx.beginPath();
-      ctx.moveTo(-3 * s, -19 * s); ctx.lineTo(-2 * s, -15 * s); ctx.lineTo(-1 * s, -19 * s);
-      ctx.closePath(); ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(1 * s, -19 * s); ctx.lineTo(2 * s, -15 * s); ctx.lineTo(3 * s, -19 * s);
-      ctx.closePath(); ctx.fill();
-    }
-  } else if (charIndex === 15) {
-    // サム - 鶏ピエロ
-    if (samImg.complete && samImg.naturalWidth > 0) {
-      const imgW = 75 * s;
-      const imgH = 90 * s;
-      ctx.drawImage(samImg, -imgW / 2, -35 * s, imgW, imgH);
-    } else {
-      // Canvas fallback: chicken-clown
-      // Chicken feet (orange)
-      ctx.fillStyle = '#FF8800';
-      ctx.fillRect(-10 * s, 30 * s, 5 * s, 15 * s);
-      ctx.fillRect(5 * s, 30 * s, 5 * s, 15 * s);
-      // Toes
-      for (let i = 0; i < 3; i++) {
-        ctx.fillRect((-12 + i * 3) * s, 43 * s, 3 * s, 4 * s);
-        ctx.fillRect((3 + i * 3) * s, 43 * s, 3 * s, 4 * s);
-      }
-      // Body (colorful clown suit)
-      ctx.fillStyle = '#FFD700';
-      ctx.fillRect(-14 * s, -10 * s, 28 * s, 40 * s);
-      // Clown suit stripes
-      ctx.fillStyle = '#FF4444';
-      ctx.fillRect(-14 * s, -2 * s, 28 * s, 8 * s);
-      ctx.fillStyle = '#4488FF';
-      ctx.fillRect(-14 * s, 14 * s, 28 * s, 8 * s);
-      // Ruffled collar
-      ctx.fillStyle = '#FFFFFF';
-      for (let i = 0; i < 5; i++) {
-        ctx.beginPath();
-        ctx.arc((-8 + i * 4) * s, -10 * s, 4 * s, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      // Wings (white-yellow feathers)
-      ctx.fillStyle = '#FFFFCC';
-      ctx.beginPath();
-      ctx.ellipse(-18 * s, 5 * s, 8 * s, 14 * s, 0.3, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.ellipse(18 * s, 5 * s, 8 * s, 14 * s, -0.3, 0, Math.PI * 2);
-      ctx.fill();
-      // Wing tips
-      ctx.fillStyle = '#FFD700';
-      ctx.beginPath();
-      ctx.ellipse(-22 * s, 10 * s, 4 * s, 8 * s, 0.4, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.ellipse(22 * s, 10 * s, 4 * s, 8 * s, -0.4, 0, Math.PI * 2);
-      ctx.fill();
-      // Head (white clown face)
-      ctx.fillStyle = '#FFFFFF';
-      ctx.beginPath(); ctx.arc(0, -22 * s, 14 * s, 0, Math.PI * 2); ctx.fill();
-      // Comb/Crest (red chicken comb)
-      ctx.fillStyle = '#FF2222';
-      ctx.beginPath();
-      ctx.moveTo(-5 * s, -35 * s);
-      ctx.lineTo(-2 * s, -48 * s);
-      ctx.lineTo(2 * s, -42 * s);
-      ctx.lineTo(5 * s, -50 * s);
-      ctx.lineTo(8 * s, -40 * s);
-      ctx.lineTo(10 * s, -35 * s);
-      ctx.closePath(); ctx.fill();
-      // Clown face paint - eye marks
-      ctx.fillStyle = '#4488FF';
-      ctx.beginPath();
-      ctx.moveTo(-9 * s, -28 * s); ctx.lineTo(-4 * s, -30 * s); ctx.lineTo(-4 * s, -24 * s);
-      ctx.closePath(); ctx.fill();
-      ctx.fillStyle = '#FF4444';
-      ctx.beginPath();
-      ctx.moveTo(4 * s, -30 * s); ctx.lineTo(9 * s, -28 * s); ctx.lineTo(4 * s, -24 * s);
-      ctx.closePath(); ctx.fill();
-      // Eyes
-      ctx.fillStyle = '#111';
-      ctx.beginPath(); ctx.arc(-5 * s, -25 * s, 2.5 * s, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(5 * s, -25 * s, 2.5 * s, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#FFF';
-      ctx.beginPath(); ctx.arc(-4.5 * s, -26 * s, 1 * s, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(5.5 * s, -26 * s, 1 * s, 0, Math.PI * 2); ctx.fill();
-      // Red clown nose
-      ctx.fillStyle = '#FF0000';
-      ctx.beginPath(); ctx.arc(0, -18 * s, 4 * s, 0, Math.PI * 2); ctx.fill();
-      // Highlight on nose
-      ctx.fillStyle = '#FF8888';
-      ctx.beginPath(); ctx.arc(-1 * s, -19 * s, 1.5 * s, 0, Math.PI * 2); ctx.fill();
-      // Beak (yellow, small)
-      ctx.fillStyle = '#FFAA00';
-      ctx.beginPath();
-      ctx.moveTo(-3 * s, -15 * s); ctx.lineTo(0, -10 * s); ctx.lineTo(3 * s, -15 * s);
-      ctx.closePath(); ctx.fill();
-      // Smile
-      ctx.strokeStyle = '#FF4444';
-      ctx.lineWidth = 2 * s;
-      ctx.beginPath();
-      ctx.arc(0, -14 * s, 6 * s, 0.2, Math.PI - 0.2);
-      ctx.stroke();
-      ctx.lineWidth = 1;
-    }
-  } else if (charIndex === 16) {
-    // キング - 帝王
-    if (kingImg.complete && kingImg.naturalWidth > 0) {
-      const imgW = 75 * s;
-      const imgH = 90 * s;
-      ctx.drawImage(kingImg, -imgW / 2, -35 * s, imgW, imgH);
-    } else {
-      // Canvas fallback: royal figure
-      // Legs
-      ctx.fillStyle = '#333';
-      ctx.fillRect(-9 * s, 25 * s, 7 * s, 20 * s);
-      ctx.fillRect(2 * s, 25 * s, 7 * s, 20 * s);
-      // Body (royal robe)
-      ctx.fillStyle = '#8B0000';
-      ctx.fillRect(-14 * s, -12 * s, 28 * s, 38 * s);
-      // Gold trim
-      ctx.fillStyle = '#DAA520';
-      ctx.fillRect(-14 * s, -12 * s, 28 * s, 4 * s);
-      ctx.fillRect(-14 * s, 22 * s, 28 * s, 4 * s);
-      // Belt
-      ctx.fillStyle = '#FFD700';
-      ctx.fillRect(-12 * s, 8 * s, 24 * s, 5 * s);
-      // Emblem
-      ctx.fillStyle = '#FFD700';
-      ctx.beginPath(); ctx.arc(0, 0, 5 * s, 0, Math.PI * 2); ctx.fill();
-      // Arms
-      ctx.fillStyle = '#8B0000';
-      ctx.fillRect(-18 * s, -8 * s, 6 * s, 24 * s);
-      ctx.fillRect(12 * s, -8 * s, 6 * s, 24 * s);
-      // Gloves
-      ctx.fillStyle = '#FFD700';
-      ctx.beginPath(); ctx.arc(-15 * s, 16 * s, 4 * s, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(15 * s, 16 * s, 4 * s, 0, Math.PI * 2); ctx.fill();
-      // Head
-      ctx.fillStyle = '#FFDAB9';
-      ctx.beginPath(); ctx.arc(0, -22 * s, 12 * s, 0, Math.PI * 2); ctx.fill();
-      // Crown
-      ctx.fillStyle = '#FFD700';
-      ctx.beginPath();
-      ctx.moveTo(-10 * s, -30 * s);
-      ctx.lineTo(-8 * s, -42 * s);
-      ctx.lineTo(-4 * s, -34 * s);
-      ctx.lineTo(0, -44 * s);
-      ctx.lineTo(4 * s, -34 * s);
-      ctx.lineTo(8 * s, -42 * s);
-      ctx.lineTo(10 * s, -30 * s);
-      ctx.closePath(); ctx.fill();
-      // Crown jewels
-      ctx.fillStyle = '#FF0000';
-      ctx.beginPath(); ctx.arc(0, -38 * s, 2 * s, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#0044FF';
-      ctx.beginPath(); ctx.arc(-6 * s, -36 * s, 1.5 * s, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(6 * s, -36 * s, 1.5 * s, 0, Math.PI * 2); ctx.fill();
-      // Eyes (sharp, confident)
-      ctx.fillStyle = '#DAA520';
-      ctx.beginPath(); ctx.ellipse(-5 * s, -24 * s, 3 * s, 2 * s, -0.1, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.ellipse(5 * s, -24 * s, 3 * s, 2 * s, 0.1, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#222';
-      ctx.beginPath(); ctx.arc(-5 * s, -24 * s, 1.5 * s, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(5 * s, -24 * s, 1.5 * s, 0, Math.PI * 2); ctx.fill();
-      // Mouth (slight smirk)
-      ctx.strokeStyle = '#8B4513';
-      ctx.lineWidth = 1.5 * s;
-      ctx.beginPath(); ctx.arc(2 * s, -16 * s, 4 * s, 0.1, Math.PI - 0.3); ctx.stroke();
-      ctx.lineWidth = 1;
-    }
-  } else if (charIndex === 17) {
-    // おんぱ - 音波キャラ
-    if (onpaImg.complete && onpaImg.naturalWidth > 0) {
-      const imgW = 75 * s;
-      const imgH = 90 * s;
-      ctx.drawImage(onpaImg, -imgW / 2, -35 * s, imgW, imgH);
-    } else {
-      // Canvas fallback: sound wave character
-      // Legs
-      ctx.fillStyle = '#226688';
-      ctx.fillRect(-8 * s, 25 * s, 6 * s, 20 * s);
-      ctx.fillRect(2 * s, 25 * s, 6 * s, 20 * s);
-      // Body (sleek, aerodynamic)
-      ctx.fillStyle = '#44DDEE';
-      ctx.beginPath(); ctx.ellipse(0, 5 * s, 14 * s, 22 * s, 0, 0, Math.PI * 2); ctx.fill();
-      // Sound wave lines on body
-      ctx.strokeStyle = '#88FFFF';
-      ctx.lineWidth = 1.5 * s;
-      ctx.globalAlpha = 0.6;
-      for (let i = 0; i < 3; i++) {
-        ctx.beginPath();
-        ctx.arc(0, (i * 8 - 8) * s, (8 + i * 3) * s, -0.5, 0.5);
-        ctx.stroke();
-      }
-      ctx.globalAlpha = 1;
-      ctx.lineWidth = 1;
-      // Arms (thin, speaker-like)
-      ctx.fillStyle = '#33BBCC';
-      ctx.fillRect(-18 * s, -5 * s, 6 * s, 18 * s);
-      ctx.fillRect(12 * s, -5 * s, 6 * s, 18 * s);
-      // Speaker cones on hands
-      ctx.fillStyle = '#88FFFF';
-      ctx.beginPath(); ctx.arc(-15 * s, 14 * s, 5 * s, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(15 * s, 14 * s, 5 * s, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#226688';
-      ctx.beginPath(); ctx.arc(-15 * s, 14 * s, 2.5 * s, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(15 * s, 14 * s, 2.5 * s, 0, Math.PI * 2); ctx.fill();
-      // Head (round, headphone-like)
-      ctx.fillStyle = '#55EEFF';
-      ctx.beginPath(); ctx.arc(0, -22 * s, 13 * s, 0, Math.PI * 2); ctx.fill();
-      // Headphones
-      ctx.fillStyle = '#226688';
-      ctx.beginPath(); ctx.ellipse(-13 * s, -22 * s, 4 * s, 7 * s, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.ellipse(13 * s, -22 * s, 4 * s, 7 * s, 0, 0, Math.PI * 2); ctx.fill();
-      // Headband
-      ctx.strokeStyle = '#226688';
-      ctx.lineWidth = 3 * s;
-      ctx.beginPath(); ctx.arc(0, -25 * s, 14 * s, Math.PI + 0.3, -0.3); ctx.stroke();
-      ctx.lineWidth = 1;
-      // Eyes (visor-style)
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(-8 * s, -26 * s, 16 * s, 5 * s);
-      ctx.fillStyle = '#00FFFF';
-      ctx.fillRect(-6 * s, -25 * s, 5 * s, 3 * s);
-      ctx.fillRect(1 * s, -25 * s, 5 * s, 3 * s);
-      // Mouth (speaker grill)
-      ctx.fillStyle = '#226688';
-      ctx.fillRect(-4 * s, -16 * s, 8 * s, 4 * s);
-      ctx.strokeStyle = '#88FFFF';
-      ctx.lineWidth = 0.8 * s;
-      for (let i = 0; i < 3; i++) {
-        ctx.beginPath();
-        ctx.moveTo((-3 + i * 3) * s, -16 * s);
-        ctx.lineTo((-3 + i * 3) * s, -12 * s);
-        ctx.stroke();
-      }
-      ctx.lineWidth = 1;
-    }
-  } else if (charIndex === 18) {
-    // セン - サラリーマン戦士
-    if (senImg.complete && senImg.naturalWidth > 0) {
-      const imgW = 85 * s;
-      const imgH = 85 * s;
-      ctx.drawImage(senImg, -imgW / 2, -35 * s, imgW, imgH);
-    } else {
-      // Canvas fallback: salaryman
-      // Legs (dark pants)
-      ctx.fillStyle = '#1A2A3A';
-      ctx.fillRect(-9 * s, 25 * s, 7 * s, 20 * s);
-      ctx.fillRect(2 * s, 25 * s, 7 * s, 20 * s);
-      // Shoes
-      ctx.fillStyle = '#222';
-      ctx.fillRect(-10 * s, 43 * s, 9 * s, 4 * s);
-      ctx.fillRect(1 * s, 43 * s, 9 * s, 4 * s);
-      // Body (suit jacket)
-      ctx.fillStyle = '#335577';
-      ctx.fillRect(-13 * s, -16 * s, 26 * s, 42 * s);
-      // Tie
-      ctx.fillStyle = '#FF8844';
-      ctx.beginPath();
-      ctx.moveTo(-2 * s, -12 * s); ctx.lineTo(0, 10 * s); ctx.lineTo(2 * s, -12 * s);
-      ctx.closePath(); ctx.fill();
-      // Shirt collar
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(-6 * s, -14 * s, 12 * s, 5 * s);
-      // Arms
-      ctx.fillStyle = '#335577';
-      ctx.fillRect(-17 * s, -12 * s, 6 * s, 24 * s);
-      ctx.fillRect(11 * s, -12 * s, 6 * s, 24 * s);
-      // Hands
-      ctx.fillStyle = '#FFDBB8';
-      ctx.beginPath(); ctx.arc(-14 * s, 14 * s, 3.5 * s, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(14 * s, 14 * s, 3.5 * s, 0, Math.PI * 2); ctx.fill();
-      // Head
-      ctx.fillStyle = '#FFDBB8';
-      ctx.beginPath(); ctx.arc(0, -26 * s, 12 * s, 0, Math.PI * 2); ctx.fill();
-      // Hair (short, neat)
-      ctx.fillStyle = '#1A1A2A';
-      ctx.beginPath(); ctx.arc(0, -30 * s, 12 * s, Math.PI, 0); ctx.fill();
-      // Eyes
-      ctx.fillStyle = '#111';
-      ctx.beginPath(); ctx.ellipse(-4 * s, -26 * s, 2 * s, 2.5 * s, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.ellipse(4 * s, -26 * s, 2 * s, 2.5 * s, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#FFF';
-      ctx.beginPath(); ctx.arc(-3.5 * s, -27 * s, 0.8 * s, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(4.5 * s, -27 * s, 0.8 * s, 0, Math.PI * 2); ctx.fill();
-      // Mouth
-      ctx.strokeStyle = '#AA6644';
-      ctx.lineWidth = 1.2 * s;
-      ctx.beginPath(); ctx.arc(0, -20 * s, 3 * s, 0.2, Math.PI - 0.2); ctx.stroke();
-      ctx.lineWidth = 1;
-      // Glasses
-      ctx.strokeStyle = '#444';
-      ctx.lineWidth = 1.2 * s;
-      ctx.beginPath(); ctx.rect(-7 * s, -28 * s, 6 * s, 5 * s); ctx.stroke();
-      ctx.beginPath(); ctx.rect(1 * s, -28 * s, 6 * s, 5 * s); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(-1 * s, -26 * s); ctx.lineTo(1 * s, -26 * s); ctx.stroke();
-      ctx.lineWidth = 1;
-      // Briefcase (right hand)
-      ctx.fillStyle = '#8B4513';
-      ctx.fillRect(10 * s, 10 * s, 10 * s, 8 * s);
-      ctx.fillStyle = '#DAA520';
-      ctx.fillRect(13 * s, 9 * s, 4 * s, 2 * s);
-    }
-  } else if (charIndex === 19) {
-    // ドスボス - 鋼鉄将軍
-    if (dosbossImg.complete && dosbossImg.naturalWidth > 0) {
-      const imgW = 75 * s;
-      const imgH = 100 * s;
-      const nw = dosbossImg.naturalWidth;
-      const nh = dosbossImg.naturalHeight;
-      const cropH = nh * 0.85;
-      const cropY = nh * 0.05;
-      ctx.drawImage(dosbossImg, 0, cropY, nw, cropH, -imgW / 2, -45 * s, imgW, imgH);
-    } else {
-      // Canvas fallback: tank boss
-      // Wheels
-      ctx.fillStyle = '#333';
-      ctx.beginPath(); ctx.arc(-12 * s, 35 * s, 10 * s, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(10 * s, 38 * s, 7 * s, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#9944CC';
-      ctx.beginPath(); ctx.arc(-12 * s, 35 * s, 5 * s, 0, Math.PI * 2); ctx.fill();
-      // Body (boxy tank)
-      ctx.fillStyle = '#AAAAAA';
-      ctx.fillRect(-14 * s, -15 * s, 28 * s, 40 * s);
-      // Purple armor plates
-      ctx.fillStyle = '#9944CC';
-      ctx.fillRect(-16 * s, -5 * s, 8 * s, 15 * s);
-      ctx.fillRect(8 * s, -5 * s, 8 * s, 15 * s);
-      ctx.fillRect(-12 * s, 15 * s, 24 * s, 10 * s);
-      // Head
-      ctx.fillStyle = '#AAAAAA';
-      ctx.fillRect(-10 * s, -28 * s, 20 * s, 16 * s);
-      // Cap
-      ctx.fillStyle = '#222';
-      ctx.fillRect(-12 * s, -34 * s, 24 * s, 8 * s);
-      ctx.fillRect(-8 * s, -36 * s, 16 * s, 4 * s);
-      // Eye
-      ctx.fillStyle = '#FFF';
-      ctx.beginPath(); ctx.ellipse(4 * s, -22 * s, 3 * s, 2.5 * s, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#111';
-      ctx.beginPath(); ctx.arc(4 * s, -22 * s, 1.5 * s, 0, Math.PI * 2); ctx.fill();
-      // Cannon (right side)
-      ctx.fillStyle = '#555';
-      ctx.fillRect(10 * s, -24 * s, 10 * s, 6 * s);
-      // Cross emblems
-      ctx.fillStyle = '#FF3333';
-      ctx.fillRect(-3 * s, -8 * s, 6 * s, 2 * s);
-      ctx.fillRect(-1 * s, -10 * s, 2 * s, 6 * s);
-      // Tree on back
-      ctx.fillStyle = '#44AA22';
-      ctx.beginPath(); ctx.moveTo(-14 * s, -5 * s); ctx.lineTo(-18 * s, 5 * s); ctx.lineTo(-10 * s, 5 * s); ctx.closePath(); ctx.fill();
-      ctx.fillStyle = '#33881A';
-      ctx.fillRect(-15 * s, 5 * s, 2 * s, 8 * s);
-    }
-  } else if (charIndex === 10) {
+  },
+  10: (s, time, ci, c, ch) => {
     // 天才 - 変形型ドラゴン
     const isDragon = typeof players !== 'undefined' && players.some(p => p.charIdx === 10 && p.dragonMode);
     const tImg = isDragon ? tensaiDragonImg : tensaiHumanImg;
@@ -2436,7 +1898,552 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
         ctx.beginPath(); ctx.arc(4 * s, -25 * s, 1.2 * s, 0, Math.PI * 2); ctx.fill();
       }
     }
-  } else if (charIndex === 20) {
+  },
+  11: (s, time, ci, c, ch) => {
+    // Catbus - 猫バス系
+    if (catbusImg.complete && catbusImg.naturalWidth > 0) {
+      const imgW = 80 * s;
+      const imgH = 90 * s;
+      ctx.drawImage(catbusImg, -imgW / 2, -35 * s, imgW, imgH);
+    } else {
+      // Canvas描画：猫バス風デザイン
+      // 脚（4本＝短い）
+      ctx.fillStyle = '#BB7711';
+      ctx.fillRect(-14 * s, 25 * s, 6 * s, 18 * s);
+      ctx.fillRect(-4 * s, 25 * s, 6 * s, 18 * s);
+      ctx.fillRect(4 * s, 28 * s, 6 * s, 15 * s);
+      ctx.fillRect(12 * s, 28 * s, 6 * s, 15 * s);
+      // 体（横長の楕円＝バス体型）
+      ctx.fillStyle = '#DD8822';
+      ctx.beginPath(); ctx.ellipse(0, 5 * s, 22 * s, 18 * s, 0, 0, Math.PI * 2); ctx.fill();
+      // お腹（薄い色）
+      ctx.fillStyle = '#FFE8AA';
+      ctx.beginPath(); ctx.ellipse(0, 10 * s, 16 * s, 12 * s, 0, 0, Math.PI * 2); ctx.fill();
+      // 縞模様
+      ctx.fillStyle = '#CC7711';
+      for (let i = -2; i <= 2; i++) {
+        ctx.fillRect((i * 8 - 1) * s, -8 * s, 3 * s, 20 * s);
+      }
+      // 窓（バスの窓を模した模様）
+      ctx.fillStyle = '#AADDFF';
+      ctx.globalAlpha = 0.6;
+      ctx.fillRect(-12 * s, -2 * s, 6 * s, 5 * s);
+      ctx.fillRect(-4 * s, -2 * s, 6 * s, 5 * s);
+      ctx.fillRect(4 * s, -2 * s, 6 * s, 5 * s);
+      ctx.globalAlpha = 1;
+      // 頭（丸い猫顔）
+      ctx.fillStyle = '#DD8822';
+      ctx.beginPath(); ctx.arc(0, -22 * s, 14 * s, 0, Math.PI * 2); ctx.fill();
+      // 耳（三角）
+      ctx.fillStyle = '#CC7711';
+      ctx.beginPath();
+      ctx.moveTo(-10 * s, -33 * s); ctx.lineTo(-7 * s, -44 * s); ctx.lineTo(-3 * s, -32 * s);
+      ctx.closePath(); ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(3 * s, -32 * s); ctx.lineTo(7 * s, -44 * s); ctx.lineTo(10 * s, -33 * s);
+      ctx.closePath(); ctx.fill();
+      // 耳の中
+      ctx.fillStyle = '#FFAA88';
+      ctx.beginPath();
+      ctx.moveTo(-9 * s, -34 * s); ctx.lineTo(-7 * s, -41 * s); ctx.lineTo(-4 * s, -33 * s);
+      ctx.closePath(); ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(4 * s, -33 * s); ctx.lineTo(7 * s, -41 * s); ctx.lineTo(9 * s, -34 * s);
+      ctx.closePath(); ctx.fill();
+      // 目（大きくてまん丸）
+      ctx.fillStyle = '#FFF';
+      ctx.beginPath(); ctx.arc(-5 * s, -24 * s, 5 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(5 * s, -24 * s, 5 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#222';
+      ctx.beginPath(); ctx.arc(-4 * s, -23 * s, 2.5 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(6 * s, -23 * s, 2.5 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#FFF';
+      ctx.beginPath(); ctx.arc(-3.5 * s, -24.5 * s, 1 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(6.5 * s, -24.5 * s, 1 * s, 0, Math.PI * 2); ctx.fill();
+      // 鼻
+      ctx.fillStyle = '#FF8866';
+      ctx.beginPath(); ctx.ellipse(0, -18 * s, 2.5 * s, 2 * s, 0, 0, Math.PI * 2); ctx.fill();
+      // 口（にっこり）
+      ctx.strokeStyle = '#885511';
+      ctx.lineWidth = 1.5 * s;
+      ctx.beginPath(); ctx.arc(-3 * s, -16 * s, 3 * s, 0.1, Math.PI - 0.1); ctx.stroke();
+      ctx.beginPath(); ctx.arc(3 * s, -16 * s, 3 * s, 0.1, Math.PI - 0.1); ctx.stroke();
+      ctx.lineWidth = 1;
+      // ひげ
+      ctx.strokeStyle = '#885511';
+      ctx.lineWidth = 1 * s;
+      ctx.beginPath(); ctx.moveTo(-14 * s, -20 * s); ctx.lineTo(-6 * s, -18 * s); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-14 * s, -16 * s); ctx.lineTo(-6 * s, -16 * s); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(6 * s, -18 * s); ctx.lineTo(14 * s, -20 * s); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(6 * s, -16 * s); ctx.lineTo(14 * s, -16 * s); ctx.stroke();
+      ctx.lineWidth = 1;
+      // 尻尾
+      ctx.strokeStyle = '#CC7711';
+      ctx.lineWidth = 4 * s;
+      ctx.lineCap = 'round';
+      const tailWave = Math.sin(time * 0.06) * 5 * s;
+      ctx.beginPath();
+      ctx.moveTo(-16 * s, 15 * s);
+      ctx.quadraticCurveTo(-28 * s + tailWave, 5 * s, -22 * s + tailWave, -8 * s);
+      ctx.stroke();
+      ctx.lineWidth = 1; ctx.lineCap = 'butt';
+    }
+  },
+  12: (s, time, ci, c, ch) => {
+    // タンク - 戦車モチーフ重装甲キャラ
+    if (tankImg.complete && tankImg.naturalWidth > 0) {
+      const imgW = 168 * s;
+      const imgH = 112 * s;
+      ctx.drawImage(tankImg, -imgW / 2 - 5 * s, -55 * s, imgW, imgH);
+    } else {
+      // Canvas fallback
+      ctx.fillStyle = '#6B7B3A';
+      ctx.fillRect(-18 * s, -15 * s, 36 * s, 44 * s);
+      ctx.fillStyle = '#7A8A4A';
+      ctx.beginPath(); ctx.arc(0, -24 * s, 14 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#4A5A2A';
+      ctx.fillRect(14 * s, -28 * s, 24 * s, 6 * s);
+      ctx.fillStyle = '#3A3A2A';
+      ctx.fillRect(-16 * s, 28 * s, 12 * s, 16 * s);
+      ctx.fillRect(4 * s, 28 * s, 12 * s, 16 * s);
+      ctx.fillStyle = '#CCFF44';
+      ctx.fillRect(-8 * s, -28 * s, 16 * s, 5 * s);
+    }
+  },
+  13: (s, time, ci, c, ch) => {
+    // 波おじ - ボクサーおじさん
+    if (namiojiImg.complete && namiojiImg.naturalWidth > 0) {
+      const imgW = 75 * s;
+      const imgH = 90 * s;
+      ctx.drawImage(namiojiImg, -imgW / 2, -35 * s, imgW, imgH);
+    } else {
+      // Canvas fallback: simple boxer
+      ctx.fillStyle = '#FFCBA4';
+      ctx.beginPath(); ctx.arc(0, -28 * s, 12 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(-12 * s, -15 * s, 24 * s, 30 * s);
+      ctx.fillStyle = '#222';
+      ctx.fillRect(-10 * s, 15 * s, 20 * s, 20 * s);
+      ctx.fillStyle = '#CC3333';
+      ctx.beginPath(); ctx.arc(-16 * s, 0, 7 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(16 * s, 0, 7 * s, 0, Math.PI * 2); ctx.fill();
+    }
+  },
+  14: (s, time, ci, c, ch) => {
+    // とっこ - 凶獣
+    if (tokkoImg.complete && tokkoImg.naturalWidth > 0) {
+      const imgW = 75 * s;
+      const imgH = 90 * s;
+      ctx.drawImage(tokkoImg, -imgW / 2, -35 * s, imgW, imgH);
+    } else {
+      // Canvas fallback: beast silhouette
+      // Legs
+      ctx.fillStyle = '#440066';
+      ctx.fillRect(-10 * s, 25 * s, 7 * s, 20 * s);
+      ctx.fillRect(3 * s, 25 * s, 7 * s, 20 * s);
+      // Body (slim, agile)
+      ctx.fillStyle = '#8B00CC';
+      ctx.fillRect(-12 * s, -15 * s, 24 * s, 40 * s);
+      // Chest slash mark
+      ctx.strokeStyle = '#CC44FF';
+      ctx.lineWidth = 2 * s;
+      ctx.beginPath(); ctx.moveTo(-6 * s, -8 * s); ctx.lineTo(6 * s, 5 * s); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(6 * s, -8 * s); ctx.lineTo(-6 * s, 5 * s); ctx.stroke();
+      ctx.lineWidth = 1;
+      // Arms (claws)
+      ctx.fillStyle = '#6A00AA';
+      ctx.fillRect(-18 * s, -10 * s, 7 * s, 22 * s);
+      ctx.fillRect(11 * s, -10 * s, 7 * s, 22 * s);
+      // Claws
+      ctx.fillStyle = '#FFF';
+      for (let i = 0; i < 3; i++) {
+        ctx.fillRect((12 + i * 2) * s, 12 * s, 1.5 * s, 5 * s);
+        ctx.fillRect((-18 + i * 2) * s, 12 * s, 1.5 * s, 5 * s);
+      }
+      // Head
+      ctx.fillStyle = '#9B10DD';
+      ctx.beginPath(); ctx.arc(0, -25 * s, 12 * s, 0, Math.PI * 2); ctx.fill();
+      // Eyes (fierce, glowing)
+      ctx.fillStyle = '#FF3366';
+      ctx.beginPath(); ctx.ellipse(-5 * s, -27 * s, 3 * s, 2 * s, -0.2, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(5 * s, -27 * s, 3 * s, 2 * s, 0.2, 0, Math.PI * 2); ctx.fill();
+      // Pupils
+      ctx.fillStyle = '#FFF';
+      ctx.beginPath(); ctx.arc(-4.5 * s, -27 * s, 1 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(5.5 * s, -27 * s, 1 * s, 0, Math.PI * 2); ctx.fill();
+      // Ears (pointed)
+      ctx.fillStyle = '#7A00BB';
+      ctx.beginPath();
+      ctx.moveTo(-9 * s, -34 * s); ctx.lineTo(-5 * s, -48 * s); ctx.lineTo(-1 * s, -33 * s);
+      ctx.closePath(); ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(1 * s, -33 * s); ctx.lineTo(5 * s, -48 * s); ctx.lineTo(9 * s, -34 * s);
+      ctx.closePath(); ctx.fill();
+      // Mouth (fangs)
+      ctx.fillStyle = '#222';
+      ctx.beginPath(); ctx.ellipse(0, -19 * s, 5 * s, 3 * s, 0, 0, Math.PI); ctx.fill();
+      ctx.fillStyle = '#FFF';
+      ctx.beginPath();
+      ctx.moveTo(-3 * s, -19 * s); ctx.lineTo(-2 * s, -15 * s); ctx.lineTo(-1 * s, -19 * s);
+      ctx.closePath(); ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(1 * s, -19 * s); ctx.lineTo(2 * s, -15 * s); ctx.lineTo(3 * s, -19 * s);
+      ctx.closePath(); ctx.fill();
+    }
+  },
+  15: (s, time, ci, c, ch) => {
+    // サム - 鶏ピエロ
+    if (samImg.complete && samImg.naturalWidth > 0) {
+      const imgW = 75 * s;
+      const imgH = 90 * s;
+      ctx.drawImage(samImg, -imgW / 2, -35 * s, imgW, imgH);
+    } else {
+      // Canvas fallback: chicken-clown
+      // Chicken feet (orange)
+      ctx.fillStyle = '#FF8800';
+      ctx.fillRect(-10 * s, 30 * s, 5 * s, 15 * s);
+      ctx.fillRect(5 * s, 30 * s, 5 * s, 15 * s);
+      // Toes
+      for (let i = 0; i < 3; i++) {
+        ctx.fillRect((-12 + i * 3) * s, 43 * s, 3 * s, 4 * s);
+        ctx.fillRect((3 + i * 3) * s, 43 * s, 3 * s, 4 * s);
+      }
+      // Body (colorful clown suit)
+      ctx.fillStyle = '#FFD700';
+      ctx.fillRect(-14 * s, -10 * s, 28 * s, 40 * s);
+      // Clown suit stripes
+      ctx.fillStyle = '#FF4444';
+      ctx.fillRect(-14 * s, -2 * s, 28 * s, 8 * s);
+      ctx.fillStyle = '#4488FF';
+      ctx.fillRect(-14 * s, 14 * s, 28 * s, 8 * s);
+      // Ruffled collar
+      ctx.fillStyle = '#FFFFFF';
+      for (let i = 0; i < 5; i++) {
+        ctx.beginPath();
+        ctx.arc((-8 + i * 4) * s, -10 * s, 4 * s, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      // Wings (white-yellow feathers)
+      ctx.fillStyle = '#FFFFCC';
+      ctx.beginPath();
+      ctx.ellipse(-18 * s, 5 * s, 8 * s, 14 * s, 0.3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(18 * s, 5 * s, 8 * s, 14 * s, -0.3, 0, Math.PI * 2);
+      ctx.fill();
+      // Wing tips
+      ctx.fillStyle = '#FFD700';
+      ctx.beginPath();
+      ctx.ellipse(-22 * s, 10 * s, 4 * s, 8 * s, 0.4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(22 * s, 10 * s, 4 * s, 8 * s, -0.4, 0, Math.PI * 2);
+      ctx.fill();
+      // Head (white clown face)
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath(); ctx.arc(0, -22 * s, 14 * s, 0, Math.PI * 2); ctx.fill();
+      // Comb/Crest (red chicken comb)
+      ctx.fillStyle = '#FF2222';
+      ctx.beginPath();
+      ctx.moveTo(-5 * s, -35 * s);
+      ctx.lineTo(-2 * s, -48 * s);
+      ctx.lineTo(2 * s, -42 * s);
+      ctx.lineTo(5 * s, -50 * s);
+      ctx.lineTo(8 * s, -40 * s);
+      ctx.lineTo(10 * s, -35 * s);
+      ctx.closePath(); ctx.fill();
+      // Clown face paint - eye marks
+      ctx.fillStyle = '#4488FF';
+      ctx.beginPath();
+      ctx.moveTo(-9 * s, -28 * s); ctx.lineTo(-4 * s, -30 * s); ctx.lineTo(-4 * s, -24 * s);
+      ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#FF4444';
+      ctx.beginPath();
+      ctx.moveTo(4 * s, -30 * s); ctx.lineTo(9 * s, -28 * s); ctx.lineTo(4 * s, -24 * s);
+      ctx.closePath(); ctx.fill();
+      // Eyes
+      ctx.fillStyle = '#111';
+      ctx.beginPath(); ctx.arc(-5 * s, -25 * s, 2.5 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(5 * s, -25 * s, 2.5 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#FFF';
+      ctx.beginPath(); ctx.arc(-4.5 * s, -26 * s, 1 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(5.5 * s, -26 * s, 1 * s, 0, Math.PI * 2); ctx.fill();
+      // Red clown nose
+      ctx.fillStyle = '#FF0000';
+      ctx.beginPath(); ctx.arc(0, -18 * s, 4 * s, 0, Math.PI * 2); ctx.fill();
+      // Highlight on nose
+      ctx.fillStyle = '#FF8888';
+      ctx.beginPath(); ctx.arc(-1 * s, -19 * s, 1.5 * s, 0, Math.PI * 2); ctx.fill();
+      // Beak (yellow, small)
+      ctx.fillStyle = '#FFAA00';
+      ctx.beginPath();
+      ctx.moveTo(-3 * s, -15 * s); ctx.lineTo(0, -10 * s); ctx.lineTo(3 * s, -15 * s);
+      ctx.closePath(); ctx.fill();
+      // Smile
+      ctx.strokeStyle = '#FF4444';
+      ctx.lineWidth = 2 * s;
+      ctx.beginPath();
+      ctx.arc(0, -14 * s, 6 * s, 0.2, Math.PI - 0.2);
+      ctx.stroke();
+      ctx.lineWidth = 1;
+    }
+  },
+  16: (s, time, ci, c, ch) => {
+    // キング - 帝王
+    if (kingImg.complete && kingImg.naturalWidth > 0) {
+      const imgW = 75 * s;
+      const imgH = 90 * s;
+      ctx.drawImage(kingImg, -imgW / 2, -35 * s, imgW, imgH);
+    } else {
+      // Canvas fallback: royal figure
+      // Legs
+      ctx.fillStyle = '#333';
+      ctx.fillRect(-9 * s, 25 * s, 7 * s, 20 * s);
+      ctx.fillRect(2 * s, 25 * s, 7 * s, 20 * s);
+      // Body (royal robe)
+      ctx.fillStyle = '#8B0000';
+      ctx.fillRect(-14 * s, -12 * s, 28 * s, 38 * s);
+      // Gold trim
+      ctx.fillStyle = '#DAA520';
+      ctx.fillRect(-14 * s, -12 * s, 28 * s, 4 * s);
+      ctx.fillRect(-14 * s, 22 * s, 28 * s, 4 * s);
+      // Belt
+      ctx.fillStyle = '#FFD700';
+      ctx.fillRect(-12 * s, 8 * s, 24 * s, 5 * s);
+      // Emblem
+      ctx.fillStyle = '#FFD700';
+      ctx.beginPath(); ctx.arc(0, 0, 5 * s, 0, Math.PI * 2); ctx.fill();
+      // Arms
+      ctx.fillStyle = '#8B0000';
+      ctx.fillRect(-18 * s, -8 * s, 6 * s, 24 * s);
+      ctx.fillRect(12 * s, -8 * s, 6 * s, 24 * s);
+      // Gloves
+      ctx.fillStyle = '#FFD700';
+      ctx.beginPath(); ctx.arc(-15 * s, 16 * s, 4 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(15 * s, 16 * s, 4 * s, 0, Math.PI * 2); ctx.fill();
+      // Head
+      ctx.fillStyle = '#FFDAB9';
+      ctx.beginPath(); ctx.arc(0, -22 * s, 12 * s, 0, Math.PI * 2); ctx.fill();
+      // Crown
+      ctx.fillStyle = '#FFD700';
+      ctx.beginPath();
+      ctx.moveTo(-10 * s, -30 * s);
+      ctx.lineTo(-8 * s, -42 * s);
+      ctx.lineTo(-4 * s, -34 * s);
+      ctx.lineTo(0, -44 * s);
+      ctx.lineTo(4 * s, -34 * s);
+      ctx.lineTo(8 * s, -42 * s);
+      ctx.lineTo(10 * s, -30 * s);
+      ctx.closePath(); ctx.fill();
+      // Crown jewels
+      ctx.fillStyle = '#FF0000';
+      ctx.beginPath(); ctx.arc(0, -38 * s, 2 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#0044FF';
+      ctx.beginPath(); ctx.arc(-6 * s, -36 * s, 1.5 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(6 * s, -36 * s, 1.5 * s, 0, Math.PI * 2); ctx.fill();
+      // Eyes (sharp, confident)
+      ctx.fillStyle = '#DAA520';
+      ctx.beginPath(); ctx.ellipse(-5 * s, -24 * s, 3 * s, 2 * s, -0.1, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(5 * s, -24 * s, 3 * s, 2 * s, 0.1, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#222';
+      ctx.beginPath(); ctx.arc(-5 * s, -24 * s, 1.5 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(5 * s, -24 * s, 1.5 * s, 0, Math.PI * 2); ctx.fill();
+      // Mouth (slight smirk)
+      ctx.strokeStyle = '#8B4513';
+      ctx.lineWidth = 1.5 * s;
+      ctx.beginPath(); ctx.arc(2 * s, -16 * s, 4 * s, 0.1, Math.PI - 0.3); ctx.stroke();
+      ctx.lineWidth = 1;
+    }
+  },
+  17: (s, time, ci, c, ch) => {
+    // おんぱ - 音波キャラ
+    if (onpaImg.complete && onpaImg.naturalWidth > 0) {
+      const imgW = 75 * s;
+      const imgH = 90 * s;
+      ctx.drawImage(onpaImg, -imgW / 2, -35 * s, imgW, imgH);
+    } else {
+      // Canvas fallback: sound wave character
+      // Legs
+      ctx.fillStyle = '#226688';
+      ctx.fillRect(-8 * s, 25 * s, 6 * s, 20 * s);
+      ctx.fillRect(2 * s, 25 * s, 6 * s, 20 * s);
+      // Body (sleek, aerodynamic)
+      ctx.fillStyle = '#44DDEE';
+      ctx.beginPath(); ctx.ellipse(0, 5 * s, 14 * s, 22 * s, 0, 0, Math.PI * 2); ctx.fill();
+      // Sound wave lines on body
+      ctx.strokeStyle = '#88FFFF';
+      ctx.lineWidth = 1.5 * s;
+      ctx.globalAlpha = 0.6;
+      for (let i = 0; i < 3; i++) {
+        ctx.beginPath();
+        ctx.arc(0, (i * 8 - 8) * s, (8 + i * 3) * s, -0.5, 0.5);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+      ctx.lineWidth = 1;
+      // Arms (thin, speaker-like)
+      ctx.fillStyle = '#33BBCC';
+      ctx.fillRect(-18 * s, -5 * s, 6 * s, 18 * s);
+      ctx.fillRect(12 * s, -5 * s, 6 * s, 18 * s);
+      // Speaker cones on hands
+      ctx.fillStyle = '#88FFFF';
+      ctx.beginPath(); ctx.arc(-15 * s, 14 * s, 5 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(15 * s, 14 * s, 5 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#226688';
+      ctx.beginPath(); ctx.arc(-15 * s, 14 * s, 2.5 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(15 * s, 14 * s, 2.5 * s, 0, Math.PI * 2); ctx.fill();
+      // Head (round, headphone-like)
+      ctx.fillStyle = '#55EEFF';
+      ctx.beginPath(); ctx.arc(0, -22 * s, 13 * s, 0, Math.PI * 2); ctx.fill();
+      // Headphones
+      ctx.fillStyle = '#226688';
+      ctx.beginPath(); ctx.ellipse(-13 * s, -22 * s, 4 * s, 7 * s, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(13 * s, -22 * s, 4 * s, 7 * s, 0, 0, Math.PI * 2); ctx.fill();
+      // Headband
+      ctx.strokeStyle = '#226688';
+      ctx.lineWidth = 3 * s;
+      ctx.beginPath(); ctx.arc(0, -25 * s, 14 * s, Math.PI + 0.3, -0.3); ctx.stroke();
+      ctx.lineWidth = 1;
+      // Eyes (visor-style)
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(-8 * s, -26 * s, 16 * s, 5 * s);
+      ctx.fillStyle = '#00FFFF';
+      ctx.fillRect(-6 * s, -25 * s, 5 * s, 3 * s);
+      ctx.fillRect(1 * s, -25 * s, 5 * s, 3 * s);
+      // Mouth (speaker grill)
+      ctx.fillStyle = '#226688';
+      ctx.fillRect(-4 * s, -16 * s, 8 * s, 4 * s);
+      ctx.strokeStyle = '#88FFFF';
+      ctx.lineWidth = 0.8 * s;
+      for (let i = 0; i < 3; i++) {
+        ctx.beginPath();
+        ctx.moveTo((-3 + i * 3) * s, -16 * s);
+        ctx.lineTo((-3 + i * 3) * s, -12 * s);
+        ctx.stroke();
+      }
+      ctx.lineWidth = 1;
+    }
+  },
+  18: (s, time, ci, c, ch) => {
+    // セン - サラリーマン戦士
+    if (senImg.complete && senImg.naturalWidth > 0) {
+      const imgW = 85 * s;
+      const imgH = 85 * s;
+      ctx.drawImage(senImg, -imgW / 2, -35 * s, imgW, imgH);
+    } else {
+      // Canvas fallback: salaryman
+      // Legs (dark pants)
+      ctx.fillStyle = '#1A2A3A';
+      ctx.fillRect(-9 * s, 25 * s, 7 * s, 20 * s);
+      ctx.fillRect(2 * s, 25 * s, 7 * s, 20 * s);
+      // Shoes
+      ctx.fillStyle = '#222';
+      ctx.fillRect(-10 * s, 43 * s, 9 * s, 4 * s);
+      ctx.fillRect(1 * s, 43 * s, 9 * s, 4 * s);
+      // Body (suit jacket)
+      ctx.fillStyle = '#335577';
+      ctx.fillRect(-13 * s, -16 * s, 26 * s, 42 * s);
+      // Tie
+      ctx.fillStyle = '#FF8844';
+      ctx.beginPath();
+      ctx.moveTo(-2 * s, -12 * s); ctx.lineTo(0, 10 * s); ctx.lineTo(2 * s, -12 * s);
+      ctx.closePath(); ctx.fill();
+      // Shirt collar
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(-6 * s, -14 * s, 12 * s, 5 * s);
+      // Arms
+      ctx.fillStyle = '#335577';
+      ctx.fillRect(-17 * s, -12 * s, 6 * s, 24 * s);
+      ctx.fillRect(11 * s, -12 * s, 6 * s, 24 * s);
+      // Hands
+      ctx.fillStyle = '#FFDBB8';
+      ctx.beginPath(); ctx.arc(-14 * s, 14 * s, 3.5 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(14 * s, 14 * s, 3.5 * s, 0, Math.PI * 2); ctx.fill();
+      // Head
+      ctx.fillStyle = '#FFDBB8';
+      ctx.beginPath(); ctx.arc(0, -26 * s, 12 * s, 0, Math.PI * 2); ctx.fill();
+      // Hair (short, neat)
+      ctx.fillStyle = '#1A1A2A';
+      ctx.beginPath(); ctx.arc(0, -30 * s, 12 * s, Math.PI, 0); ctx.fill();
+      // Eyes
+      ctx.fillStyle = '#111';
+      ctx.beginPath(); ctx.ellipse(-4 * s, -26 * s, 2 * s, 2.5 * s, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(4 * s, -26 * s, 2 * s, 2.5 * s, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#FFF';
+      ctx.beginPath(); ctx.arc(-3.5 * s, -27 * s, 0.8 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(4.5 * s, -27 * s, 0.8 * s, 0, Math.PI * 2); ctx.fill();
+      // Mouth
+      ctx.strokeStyle = '#AA6644';
+      ctx.lineWidth = 1.2 * s;
+      ctx.beginPath(); ctx.arc(0, -20 * s, 3 * s, 0.2, Math.PI - 0.2); ctx.stroke();
+      ctx.lineWidth = 1;
+      // Glasses
+      ctx.strokeStyle = '#444';
+      ctx.lineWidth = 1.2 * s;
+      ctx.beginPath(); ctx.rect(-7 * s, -28 * s, 6 * s, 5 * s); ctx.stroke();
+      ctx.beginPath(); ctx.rect(1 * s, -28 * s, 6 * s, 5 * s); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-1 * s, -26 * s); ctx.lineTo(1 * s, -26 * s); ctx.stroke();
+      ctx.lineWidth = 1;
+      // Briefcase (right hand)
+      ctx.fillStyle = '#8B4513';
+      ctx.fillRect(10 * s, 10 * s, 10 * s, 8 * s);
+      ctx.fillStyle = '#DAA520';
+      ctx.fillRect(13 * s, 9 * s, 4 * s, 2 * s);
+    }
+  },
+  19: (s, time, ci, c, ch) => {
+    // ドスボス - 鋼鉄将軍
+    if (dosbossImg.complete && dosbossImg.naturalWidth > 0) {
+      const imgW = 75 * s;
+      const imgH = 100 * s;
+      const nw = dosbossImg.naturalWidth;
+      const nh = dosbossImg.naturalHeight;
+      const cropH = nh * 0.85;
+      const cropY = nh * 0.05;
+      ctx.drawImage(dosbossImg, 0, cropY, nw, cropH, -imgW / 2, -45 * s, imgW, imgH);
+    } else {
+      // Canvas fallback: tank boss
+      // Wheels
+      ctx.fillStyle = '#333';
+      ctx.beginPath(); ctx.arc(-12 * s, 35 * s, 10 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(10 * s, 38 * s, 7 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#9944CC';
+      ctx.beginPath(); ctx.arc(-12 * s, 35 * s, 5 * s, 0, Math.PI * 2); ctx.fill();
+      // Body (boxy tank)
+      ctx.fillStyle = '#AAAAAA';
+      ctx.fillRect(-14 * s, -15 * s, 28 * s, 40 * s);
+      // Purple armor plates
+      ctx.fillStyle = '#9944CC';
+      ctx.fillRect(-16 * s, -5 * s, 8 * s, 15 * s);
+      ctx.fillRect(8 * s, -5 * s, 8 * s, 15 * s);
+      ctx.fillRect(-12 * s, 15 * s, 24 * s, 10 * s);
+      // Head
+      ctx.fillStyle = '#AAAAAA';
+      ctx.fillRect(-10 * s, -28 * s, 20 * s, 16 * s);
+      // Cap
+      ctx.fillStyle = '#222';
+      ctx.fillRect(-12 * s, -34 * s, 24 * s, 8 * s);
+      ctx.fillRect(-8 * s, -36 * s, 16 * s, 4 * s);
+      // Eye
+      ctx.fillStyle = '#FFF';
+      ctx.beginPath(); ctx.ellipse(4 * s, -22 * s, 3 * s, 2.5 * s, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#111';
+      ctx.beginPath(); ctx.arc(4 * s, -22 * s, 1.5 * s, 0, Math.PI * 2); ctx.fill();
+      // Cannon (right side)
+      ctx.fillStyle = '#555';
+      ctx.fillRect(10 * s, -24 * s, 10 * s, 6 * s);
+      // Cross emblems
+      ctx.fillStyle = '#FF3333';
+      ctx.fillRect(-3 * s, -8 * s, 6 * s, 2 * s);
+      ctx.fillRect(-1 * s, -10 * s, 2 * s, 6 * s);
+      // Tree on back
+      ctx.fillStyle = '#44AA22';
+      ctx.beginPath(); ctx.moveTo(-14 * s, -5 * s); ctx.lineTo(-18 * s, 5 * s); ctx.lineTo(-10 * s, 5 * s); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#33881A';
+      ctx.fillRect(-15 * s, 5 * s, 2 * s, 8 * s);
+    }
+  },
+  20: (s, time, ci, c, ch) => {
     // マイクロ - 小さな万能ファイター (1536x1024 横長画像、キャラ中央)
     if (microImg.complete && microImg.naturalWidth > 0) {
       const nw = microImg.naturalWidth;
@@ -2498,7 +2505,8 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.fillStyle = '#FFBB88';
       ctx.beginPath(); ctx.arc(0, -18 * s, 3 * s, 0, Math.PI * 2); ctx.fill();
     }
-  } else if (charIndex === 21) {
+  },
+  21: (s, time, ci, c, ch) => {
     // ミスターツー - 超能力型 (1536x1024 横長画像)
     if (mrtwoImg.complete && mrtwoImg.naturalWidth > 0) {
       const nw = mrtwoImg.naturalWidth;
@@ -2561,7 +2569,8 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.beginPath(); ctx.arc(-4 * s, -24 * s, 1 * s, 0, Math.PI * 2); ctx.fill();
       ctx.beginPath(); ctx.arc(4 * s, -24 * s, 1 * s, 0, Math.PI * 2); ctx.fill();
     }
-  } else if (charIndex === 22) {
+  },
+  22: (s, time, ci, c, ch) => {
     // 金金 - 黄金の覇者 (1024x1024 RGBA 透過済み)
     if (kingkingImg.complete && kingkingImg.naturalWidth > 0) {
       const imgW = 80 * s;
@@ -2621,7 +2630,8 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.textAlign = 'center';
       ctx.fillText('$', 14 * s, 18 * s);
     }
-  } else if (charIndex === 23) {
+  },
+  23: (s, time, ci, c, ch) => {
     // サトル - 海流を操る拳士（魚人空手風）
     if (satoruImg.complete && satoruImg.naturalWidth > 0) {
       const imgW = 80 * s;
@@ -2672,7 +2682,8 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.beginPath(); ctx.moveTo(-3 * s, -15 * s); ctx.lineTo(3 * s, -15 * s); ctx.stroke();
       ctx.lineWidth = 1;
     }
-  } else if (charIndex === 24) {
+  },
+  24: (s, time, ci, c, ch) => {
     // 怖 - 恐怖を喰らう亡霊 (1024x559 横長RGBA)
     if (kowaiImg.complete && kowaiImg.naturalWidth > 0) {
       const nw = kowaiImg.naturalWidth;
@@ -2731,7 +2742,8 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.stroke();
       ctx.lineWidth = 1;
     }
-  } else if (charIndex === 25) {
+  },
+  25: (s, time, ci, c, ch) => {
     // ヤッホ - 最強のふざけ屋 (1024x559 横長RGBA)
     if (yahoImg.complete && yahoImg.naturalWidth > 0) {
       const nw = yahoImg.naturalWidth;
@@ -2785,7 +2797,8 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.arc(0, -16 * s, 6 * s, 0.1, Math.PI - 0.1);
       ctx.stroke(); ctx.lineWidth = 1;
     }
-  } else if (charIndex === 26) {
+  },
+  26: (s, time, ci, c, ch) => {
     // ぽよ - みんなの友達スライム (1024x559 横長RGBA)
     if (poyoImg.complete && poyoImg.naturalWidth > 0) {
       const nw = poyoImg.naturalWidth;
@@ -2833,7 +2846,8 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.beginPath(); ctx.ellipse(-10 * s, 5 * s, 4 * s, 3 * s, 0, 0, Math.PI * 2); ctx.fill();
       ctx.beginPath(); ctx.ellipse(10 * s, 5 * s, 4 * s, 3 * s, 0, 0, Math.PI * 2); ctx.fill();
     }
-  } else if (charIndex === 27) {
+  },
+  27: (s, time, ci, c, ch) => {
     // プル - 引力を操る者 (2816x1536 RGBA, 背景透過済み)
     if (pullImg.complete && pullImg.naturalWidth > 0) {
       const nw = pullImg.naturalWidth, nh = pullImg.naturalHeight;
@@ -2873,7 +2887,8 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.beginPath(); ctx.moveTo(0, -3*s); ctx.lineTo(0, 7*s); ctx.stroke();
       ctx.lineWidth = 1;
     }
-  } else if (charIndex === 28) {
+  },
+  28: (s, time, ci, c, ch) => {
     // ムッシー - 百虫の覇者 (1024x559 横長RGBA)
     if (mussyImg.complete && mussyImg.naturalWidth > 0) {
       const nw = mussyImg.naturalWidth, nh = mussyImg.naturalHeight;
@@ -2919,7 +2934,8 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.beginPath(); ctx.moveTo(-3*s, -14*s); ctx.lineTo(-6*s, -10*s); ctx.lineTo(-1*s, -12*s); ctx.closePath(); ctx.fill();
       ctx.beginPath(); ctx.moveTo(3*s, -14*s); ctx.lineTo(6*s, -10*s); ctx.lineTo(1*s, -12*s); ctx.closePath(); ctx.fill();
     }
-  } else if (charIndex === 29) {
+  },
+  29: (s, time, ci, c, ch) => {
     // Bot - 変身中は ロボットの 立ち絵、普段は 棒人間の 立ち絵
     const useRobot29 = false;   // ここ（キャラ選択・プレビュー）は 普段の姿で 表示する
     const img29 = useRobot29 ? botRobotImg : botImg;
@@ -2946,7 +2962,8 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.beginPath(); ctx.arc(-3.2 * s, -34 * s, 2 * s, 0, Math.PI * 2); ctx.fill();
       ctx.beginPath(); ctx.arc(3.2 * s, -34 * s, 2 * s, 0, Math.PI * 2); ctx.fill();
     }
-  } else if (charIndex === 30) {
+  },
+  30: (s, time, ci, c, ch) => {
     // Chatta
     if (chattaImg.complete && chattaImg.naturalWidth > 0) {
       const w30 = 76 * s, h30 = w30 * (chattaImg.naturalHeight / chattaImg.naturalWidth);
@@ -2959,7 +2976,35 @@ function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
       ctx.beginPath(); ctx.arc(-4 * s, -28 * s, 2.5 * s, 0, Math.PI * 2); ctx.fill();
       ctx.beginPath(); ctx.arc(4 * s, -28 * s, 2.5 * s, 0, Math.PI * 2); ctx.fill();
     }
-  }
+  },
+};
+
+
+// --- Draw character body ---
+// ======================================================================
+// キャラの 絵 ①メニュー用（選択画面・詳細画面）
+// 31キャラ分の if (charIndex === N) が 並ぶ。バトル用は 次の区画
+// ======================================================================
+function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
+  const ch = characters[charIndex];
+  const c = ch.bodyColors;
+  const s = scale;
+  const bounce = Math.sin(time * 0.03 + charIndex) * 3 * s;
+  const cy = y + bounce;
+
+  ctx.save();
+  ctx.translate(x, cy);
+  if (facingLeft) ctx.scale(-1, 1);
+
+  // Shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.beginPath();
+  ctx.ellipse(0, 60 * s, 25 * s, 8 * s, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 31体ぶんの 絵は CHAR_BODY_ART（表）に ある
+  const art = CHAR_BODY_ART[charIndex];
+  if (art) art(s, time, charIndex, c, ch);
 
   ctx.restore();
 }
