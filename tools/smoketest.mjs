@@ -959,6 +959,8 @@ try {
       //     ここに 書き間違いが あっても 普通の テストでは 見つからない。
       //     実際 CHAR_BODY_ART[8] が 存在しない 変数を 参照していた
       var fbBad = [];
+      var missingImgVars = [];
+      var IMG_NAMES = ['botImg', 'botRobotImg', 'bulletImg', 'catbusImg', 'chattaImg', 'donImg', 'dosbossImg', 'judgemanImg', 'kingImg', 'kingkingImg', 'kowaiImg', 'kumataroImg', 'longImg', 'meteoImg', 'microImg', 'mrtwoImg', 'mussyImg', 'namiojiImg', 'onpaImg', 'poyoImg', 'pullImg', 'saisokuImg', 'samImg', 'satoruImg', 'senImg', 'shaudenImg', 'tankImg', 'tensaiDragonImg', 'tensaiHumanImg', 'tokkoImg', 'uruoImg', 'yahoImg', 'zenImg'];
       try {
         // 画像を 「未読み込み」に 見せかける
         var patched = [];
@@ -976,14 +978,19 @@ try {
           var set = SPRITE_SETS[fi];
           if (set) for (var ki = 0; ki < SPRITE_KEYS.length; ki++) fakeBroken(set[SPRITE_KEYS[ki]]);
         }
-        // 1枚絵の キャラ画像も 潰す
-        ['zenImg','donImg','saisokuImg','meteoImg','longImg','uruoImg','kumatarouImg','bulletImg',
-         'shaudenImg','judgemanImg','tensaiImg','tensaiDragonImg','catbusImg','tankImg','namiojiImg',
-         'tokkoImg','samImg','kingImg','onpaImg','senImg','dosbossImg','microImg','mrtwoImg',
-         'kinkinImg','satoruImg','kowaiImg','yahoImg','poyoImg','pullImg','mussyImg','botImg',
-         'botRobotImg','chattaImg'].forEach(function (nm) {
-          try { fakeBroken(eval(nm)); } catch (e) {}
+        // 1枚絵の キャラ画像も 潰す。
+        // 名前を 手で 並べると 綴り違いに 気づけない（kumataroImg を kumatarouImg と
+        // 書いて 3キャラ分の 検査が 黙って 素通りしていた）ので、
+        // 「Image を 持つ グローバル」を 自動で 集める
+        var imgVars = Object.getOwnPropertyNames(window).filter(function (k) {
+          try { return /Img$/.test(k) && window[k] instanceof HTMLImageElement; } catch (e) { return false; }
         });
+        // window に 出ない 宣言（script スコープの const）は eval で 拾う
+        IMG_NAMES.forEach(function (nm) {
+          try { var v = eval(nm); if (v instanceof HTMLImageElement && imgVars.indexOf(nm) < 0) imgVars.push(nm); }
+          catch (e) { missingImgVars.push(nm); }
+        });
+        imgVars.forEach(function (nm) { try { fakeBroken(eval(nm)); } catch (e) {} });
 
         for (var fc = 0; fc < characters.length; fc++) {
           ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,960,640);
@@ -1012,6 +1019,7 @@ try {
           }
         }
       } catch (e) { fbBad.push('threw: ' + e.message); }
+      if (missingImgVars.length) fbBad.push('存在しない 画像変数名: ' + missingImgVars.join(','));
       check('vector fallback art draws for every character', fbBad.length === 0,
             fbBad.slice(0,4).join(' | ') || '31 chars, sprites forced missing');
 
@@ -1052,6 +1060,52 @@ try {
       onlineMode = false; isHost = false;
       check('every synced field is applied on the guest', syncBad.length === 0,
             syncBad.join(' | ').slice(0, 160) || 'serializePlayer and applyFields agree');
+
+      // --- 起き上がり攻撃が 両プレイヤーで 効くか ---
+      //     切り出しの ときに 内側ループの continue を return に 変えて しまい、
+      //     P1 の ダウン攻撃が 一切 当たらなく なっていた（例外は 出ない）
+      var daBad = [];
+      try {
+        [0, 1].forEach(function (who) {
+          var dr = battle(0, 0, 250);
+          var me = players[who], foe = players[1 - who];
+          foe.x = me.x + 30; foe.y = me.y; foe.invincibleTimer = 0; foe.damage = 0; foe.hitstun = 0;
+          me.techState = 'downattack'; me.techTimer = 11; me.grounded = true;
+          var fx0 = hitEffects.length;
+          run(4);
+          if (!(foe.damage > 0)) daBad.push('P' + who + ' の ダウン攻撃が 当たらない');
+          if (!(hitEffects.length > fx0)) daBad.push('P' + who + ' の ダウン攻撃に 演出が 出ない');
+        });
+      } catch (e) { daBad.push('threw: ' + e.message); }
+      check('down attack works for both players', daBad.length === 0,
+            daBad.join(' | ') || 'damage and effect on both sides');
+
+      // --- 読み込み時に 乱数を 使っていないか ---
+      //     const の 初期値で Math.random() を 呼ぶと、その セッション中 ずっと
+      //     同じ 値に 固定される（ヤッホの 復帰高さが そうなっていた）
+      var randBad = [];
+      try {
+        var heights = {};
+        for (var rc = 0; rc < characters.length; rc++) {
+          var rm = RECOVERY_MOVES[rc];
+          if (!rm) continue;
+          if (rm.heightRand) {
+            // 出す たびに 変わる べき
+            var seen = {};
+            for (var tr = 0; tr < 12; tr++) {
+              var rr = battle(rc, 0, 250), rp = rr[0];
+              rr[1].x = 3000; rr[1].alive = false;
+              rp.y = -200; rp.grounded = false; rp.jumps = 0; rp.vx = 0; rp.vy = 0;
+              rp.recoveryUsed = false; rp.attacking = false; rp.hitstun = 0;
+              executeRecovery(rp);
+              seen[Math.round(Math.abs(rp.vy) * 10)] = 1;
+            }
+            if (Object.keys(seen).length < 2) randBad.push(rc + ': heightRand なのに 毎回 同じ 高さ');
+          }
+        }
+      } catch (e) { randBad.push('threw: ' + e.message); }
+      check('random recovery height varies per use', randBad.length === 0,
+            randBad.join(' | ') || 'rolled at use time, not at load time');
 
       // --- ポーズメニュー ---
       var pauseBad = [];
