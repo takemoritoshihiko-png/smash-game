@@ -28,77 +28,77 @@
 //     ・キャラを 足すなら「キャラ別データ（31体ぶん）」の チェックリスト
 //     ・落とし穴の 一覧は README の「よくある 落とし穴」
 //
-//   110-305       書き換わる 値（グローバル状態）
-//   307-534       CANVAS / 画面サイズ
-//   536-1091      キャラ別データ（31体ぶん）
-//   1093-1134     音の ロック解除（最初の 操作で 呼ぶ）
-//   1136-1313     キャラ画像（遅延読み込み）
-//   1315-1350     タイトル画面の 粒子
-//   1352-3026     絵: メニュー用の 31体テーブル（CHAR_BODY_ART）
-//   3028-3056     絵: メニュー用の 呼び出し口（drawCharacterBody）
-//   3058-4747     攻撃中の ポーズ（キャラ 0〜8）
-//   4749-5594     キャラの 絵 ②バトル用
-//   5596-5643     描画ユーティリティ
-//   5645-5767     画面: タイトル
-//   5769-6017     画面: キャラ選択
-//   6019-6117     画面: 難易度選択（CPU戦）
-//   6119-6348     画面: ステージ選択
-//   6350-6714     バトルの 定数 と 状態
-//   6716-6758     ゲージ演出の 小道具（ポップアップ / 変身中の 判定 / MAX の 光り）
-//   6760-6775     カメラ / 画面揺れ
-//   6777-7209     効果音（Web Audio で 合成）
-//   7211-7525     観客の 音
-//   7527-7549     ヒット表示 / コミック文字
-//   7551-7598     掴み・投げ の 定数と キャラ別テーブル
-//   7600-8090     コマンド技（→→↓↓+Z など）
-//   8092-8616     技データ
-//   8618-8850     読み込み時に attackDefs を 一括で 書き換える（この 順番で 走る・並べ替え 禁止）
-//   8852-9199     プレイヤー生成 / 試合の 初期化
-//   9201-9218     ヒット処理（ダメージ・ノックバック）
-//   9220-9648     ヒットした ときの 演出（applyHit の 後半・ゲームの 数値は 変えない）
-//   9650-10573    ヒット処理（ダメージと ノックバックを 決めて 相手に 入れる）
-//   10575-10604   当たり判定
-//   10606-10647   飛び道具
-//   10649-10907   技の 発動（通常技・復帰技・ジャブ）
-//   10909-11127   掴み・投げ の 実行
-//   11129-11472   CPU の 思考
-//   11474-11646   画面演出の 配列を 1フレーム 進める
-//   11648-11882   キャラ固有の ゲージ更新（毎フレーム・プレイヤー1人分）
-//   11884-12240   攻撃中の 1フレーム 更新（プレイヤー1人分）
-//   12242-12383   D キー長押しの 処理（プレイヤー1人分）
-//   12385-12500   受け身（テクニング）の 処理（プレイヤー1人分）
-//   12502-12669   のけぞり（ヒットスタン）の 処理（プレイヤー1人分）
-//   12671-12771   着地の 処理（プレイヤー1人分）
-//   12773-14087   バトルの 毎フレーム更新（中核）
-//   14089-14586   物理（移動・重力・着地・撃墜判定）
-//   14588-14656   攻撃ボタンの 処理（P1ローカル と オンラインのゲスト で 共通）
-//   14658-14777   スマッシュ攻撃（方向2回 + X）
-//   14779-14874   崖つかまり
-//   14876-15304   D技 と 必殺技 の データ
-//   15306-15724   D技: キャラ別の 中身（D_SKILL_IMPL）
-//   15726-15873   D技: 発動 と 毎フレーム更新（triggerDSkill / updateDSkill）
-//   15875-15935   空中回避
-//   15937-16033   バトル描画の 下準備（カメラ・影・2.5D）
-//   16035-16257   バトル画面の うえに 重ねる もの（ボスラッシュHUD / GAME SET 演出）
-//   16259-16555   ステージの 床を 描く（2.5D の 台形）
-//   16557-16962   プレイヤー2人を 描く（本体・影・名前・ゲージ・状態異常の 重ね表示）
-//   16964-18118   バトル画面の 描画
-//   18120-18816   描画: 技エフェクトの 表（ATTACK_EFFECTS: effect名 → 描き方）
-//   18818-19222   描画: 技エフェクトの 呼び出し口（drawAttackEffect ほか）
-//   19224-19395   必殺技 / 即死技 の 全画面オーバーレイ
-//   19397-19527   画面: コンボ一覧 / 戦績
-//   19529-19738   キャラ別 ゲージの 描画（HUDの 下に 出る 細い バー）
-//   19740-19996   バトルの HUD
-//   19998-20930   オンライン対戦（PeerJS / ホストが 正）
-//   20932-21215   画面: VS イントロ
-//   21217-21252   画面の 切り替え（フェード）
-//   21254-21333   ポーズメニュー（バトル中に ESC）
-//   21335-21565   画面: キャラ詳細（Iキー）
-//   21567-21688   画面: 操作説明
-//   21690-21879   キー入力: キャラ選択画面
-//   21881-22097   キー入力: バトル中
-//   22099-22206   キー入力の 振り分け（画面ごと）
-//   22208-22413   メインループ（60FPS 固定タイムステップ）
+//   110-306       書き換わる 値（グローバル状態）
+//   308-535       CANVAS / 画面サイズ
+//   537-1092      キャラ別データ（31体ぶん）
+//   1094-1135     音の ロック解除（最初の 操作で 呼ぶ）
+//   1137-1314     キャラ画像（遅延読み込み）
+//   1316-1351     タイトル画面の 粒子
+//   1353-3027     絵: メニュー用の 31体テーブル（CHAR_BODY_ART）
+//   3029-3057     絵: メニュー用の 呼び出し口（drawCharacterBody）
+//   3059-4748     攻撃中の ポーズ（キャラ 0〜8）
+//   4750-5595     キャラの 絵 ②バトル用
+//   5597-5644     描画ユーティリティ
+//   5646-5768     画面: タイトル
+//   5770-6018     画面: キャラ選択
+//   6020-6118     画面: 難易度選択（CPU戦）
+//   6120-6349     画面: ステージ選択
+//   6351-6715     バトルの 定数 と 状態
+//   6717-6759     ゲージ演出の 小道具（ポップアップ / 変身中の 判定 / MAX の 光り）
+//   6761-6776     カメラ / 画面揺れ
+//   6778-7210     効果音（Web Audio で 合成）
+//   7212-7526     観客の 音
+//   7528-7550     ヒット表示 / コミック文字
+//   7552-7599     掴み・投げ の 定数と キャラ別テーブル
+//   7601-8091     コマンド技（→→↓↓+Z など）
+//   8093-8617     技データ
+//   8619-8851     読み込み時に attackDefs を 一括で 書き換える（この 順番で 走る・並べ替え 禁止）
+//   8853-9200     プレイヤー生成 / 試合の 初期化
+//   9202-9219     ヒット処理（ダメージ・ノックバック）
+//   9221-9649     ヒットした ときの 演出（applyHit の 後半・ゲームの 数値は 変えない）
+//   9651-10574    ヒット処理（ダメージと ノックバックを 決めて 相手に 入れる）
+//   10576-10605   当たり判定
+//   10607-10648   飛び道具
+//   10650-10908   技の 発動（通常技・復帰技・ジャブ）
+//   10910-11128   掴み・投げ の 実行
+//   11130-11473   CPU の 思考
+//   11475-11647   画面演出の 配列を 1フレーム 進める
+//   11649-11883   キャラ固有の ゲージ更新（毎フレーム・プレイヤー1人分）
+//   11885-12241   攻撃中の 1フレーム 更新（プレイヤー1人分）
+//   12243-12384   D キー長押しの 処理（プレイヤー1人分）
+//   12386-12501   受け身（テクニング）の 処理（プレイヤー1人分）
+//   12503-12670   のけぞり（ヒットスタン）の 処理（プレイヤー1人分）
+//   12672-12772   着地の 処理（プレイヤー1人分）
+//   12774-14088   バトルの 毎フレーム更新（中核）
+//   14090-14587   物理（移動・重力・着地・撃墜判定）
+//   14589-14657   攻撃ボタンの 処理（P1ローカル と オンラインのゲスト で 共通）
+//   14659-14778   スマッシュ攻撃（方向2回 + X）
+//   14780-14875   崖つかまり
+//   14877-15305   D技 と 必殺技 の データ
+//   15307-15725   D技: キャラ別の 中身（D_SKILL_IMPL）
+//   15727-15874   D技: 発動 と 毎フレーム更新（triggerDSkill / updateDSkill）
+//   15876-15936   空中回避
+//   15938-16034   バトル描画の 下準備（カメラ・影・2.5D）
+//   16036-16258   バトル画面の うえに 重ねる もの（ボスラッシュHUD / GAME SET 演出）
+//   16260-16556   ステージの 床を 描く（2.5D の 台形）
+//   16558-16963   プレイヤー2人を 描く（本体・影・名前・ゲージ・状態異常の 重ね表示）
+//   16965-18119   バトル画面の 描画
+//   18121-18817   描画: 技エフェクトの 表（ATTACK_EFFECTS: effect名 → 描き方）
+//   18819-19223   描画: 技エフェクトの 呼び出し口（drawAttackEffect ほか）
+//   19225-19396   必殺技 / 即死技 の 全画面オーバーレイ
+//   19398-19528   画面: コンボ一覧 / 戦績
+//   19530-19739   キャラ別 ゲージの 描画（HUDの 下に 出る 細い バー）
+//   19741-19997   バトルの HUD
+//   19999-21003   オンライン対戦（PeerJS / ホストが 正）
+//   21005-21288   画面: VS イントロ
+//   21290-21325   画面の 切り替え（フェード）
+//   21327-21406   ポーズメニュー（バトル中に ESC）
+//   21408-21638   画面: キャラ詳細（Iキー）
+//   21640-21761   画面: 操作説明
+//   21763-21952   キー入力: キャラ選択画面
+//   21954-22170   キー入力: バトル中
+//   22172-22279   キー入力の 振り分け（画面ごと）
+//   22281-22486   メインループ（60FPS 固定タイムステップ）
 //
 // ### 目次ここまで
 // ======================================================================
@@ -289,6 +289,7 @@ let ultimateSteppedThisFrame = false;
 let onlineTeardown = false;
 let onlinePingInterval = null;   // ロビー/キャラ選択中の 無通信で NAT に 接続を 殺されないための 生存確認
 let onlineJoinRetries = 0;       // 参加失敗（peer-unavailable）の 自動リトライ回数
+let onlinePeerRetries = 0;       // 仲介サーバーへの WebSocket 確立失敗の 自動リトライ回数
 let onlineConnectTimeout = null;
 let guestSendCounter = 0;
 let lastGuestKeys = null;
@@ -20218,14 +20219,40 @@ function startHosting() {
   teardownOnlineSession();   // 前のセッションを 必ず 捨ててから 始める
   if (!peerLibReady()) return;
   onlineRoomId = generateRoomId();
+  onlinePeerRetries = 0;
+  createHostPeer();
+}
+
+// 0.peerjs.com の WebSocket は 確立に 失敗する ことが 時々 ある（HTTP は 通るのに
+// wss だけ タイムアウトするのを 実測済み）。1回の 失敗で 諦めず、
+// peer を 作り直して 自動で 再挑戦する
+function createHostPeer() {
   onlineState = 'hosting';
-  onlineError = '';
+  onlineError = onlinePeerRetries > 0 ? ('Server busy, retrying... (' + onlinePeerRetries + '/3)') : '';
   isHost = true;
-  console.log('[ONLINE] Hosting room:', onlineRoomId);
+  console.log('[ONLINE] Hosting room:', onlineRoomId, onlinePeerRetries > 0 ? '(retry ' + onlinePeerRetries + ')' : '');
   peer = new Peer('smash-' + onlineRoomId, PEER_CONFIG);
+  // wss が エラーも 出さずに 無言で ハングする ことが ある（実測）。
+  // 6秒 たっても 開通しなければ 作り直す
+  const myPeer = peer;
+  const openWatchdog = setTimeout(() => {
+    if (peer !== myPeer || myPeer.open || onlineState !== 'hosting') return;
+    try { myPeer.destroy(); } catch (ex) {}
+    if (onlinePeerRetries < 3) {
+      onlinePeerRetries++;
+      peer = null;
+      createHostPeer();
+    } else {
+      peer = null;
+      onlineError = 'Could not reach the server. Try again shortly.';
+      onlineState = 'menu';
+    }
+  }, 6000);
   peer.on('open', (id) => {
+    clearTimeout(openWatchdog);
     console.log('[ONLINE] Peer opened with ID:', id);
     onlineState = 'hosting';
+    onlineError = '';
   });
   peer.on('connection', (conn) => {
     // すでに 対戦相手が いるのに 2人目が つないで きたら 断る。
@@ -20246,7 +20273,23 @@ function startHosting() {
     // ここで peer.destroy() すると 生きている 試合まで 道連れに なり、
     // 相手側に 偽の「The opponent disconnected」が 出ていた
     if (err.type === 'network' && peerConn && peerConn.open) return;
-    onlineError = 'Connection error: ' + (err.type === 'unavailable-id' ? 'That ID is already taken' : err.type === 'network' ? 'Network error' : err.type === 'server-error' ? 'Server error' : err.message || err.type);
+    // WebSocket が 確立前に 落ちた / 部屋の 登録に 失敗した → 作り直して 自動再挑戦
+    if (err.type === 'network' && onlineState === 'hosting' && onlinePeerRetries < 3) {
+      onlinePeerRetries++;
+      if (peer) { try { peer.destroy(); } catch (ex) {} peer = null; }
+      setTimeout(() => { if (onlineState === 'hosting') createHostPeer(); }, 1200);
+      return;
+    }
+    // 前回の セッションの 登録が サーバーに 幽霊として 残っていると ID が 使えない
+    // → 新しい 部屋番号を 発行して 作り直す（画面の 表示も 自動で 変わる）
+    if (err.type === 'unavailable-id' && onlineState === 'hosting' && onlinePeerRetries < 3) {
+      onlinePeerRetries++;
+      onlineRoomId = generateRoomId();
+      if (peer) { try { peer.destroy(); } catch (ex) {} peer = null; }
+      setTimeout(() => { if (onlineState === 'hosting') createHostPeer(); }, 300);
+      return;
+    }
+    onlineError = 'Connection error: ' + (err.type === 'unavailable-id' ? 'That ID is already taken' : err.type === 'network' ? 'Could not reach the server. Try again shortly.' : err.type === 'server-error' ? 'Server error' : err.message || err.type);
     onlineState = 'menu';
     if (peer) { try { peer.destroy(); } catch (ex) {} peer = null; }
   });
@@ -20262,12 +20305,34 @@ function joinRoom(roomId) {
   teardownOnlineSession();   // 前のセッションを 必ず 捨ててから 始める
   if (!peerLibReady()) return;
   onlineJoinRetries = 0;
+  onlinePeerRetries = 0;
+  createGuestPeer(roomId);
+}
+
+// ホスト側と 同じく、仲介サーバーへの WebSocket 失敗は 作り直して 自動再挑戦する
+function createGuestPeer(roomId) {
   onlineState = 'joining';
-  onlineError = '';
+  onlineError = onlinePeerRetries > 0 ? ('Server busy, retrying... (' + onlinePeerRetries + '/3)') : '';
   isHost = false;
-  console.log('[ONLINE] Joining room:', roomId);
+  console.log('[ONLINE] Joining room:', roomId, onlinePeerRetries > 0 ? '(retry ' + onlinePeerRetries + ')' : '');
   peer = new Peer(undefined, PEER_CONFIG);
+  // ホスト側と 同じ 無言ハング対策
+  const myPeer = peer;
+  const openWatchdog = setTimeout(() => {
+    if (peer !== myPeer || myPeer.open || onlineState !== 'joining') return;
+    try { myPeer.destroy(); } catch (ex) {}
+    if (onlinePeerRetries < 3) {
+      onlinePeerRetries++;
+      peer = null;
+      createGuestPeer(roomId);
+    } else {
+      peer = null;
+      onlineError = 'Could not reach the server. Try again shortly.';
+      onlineState = 'menu';
+    }
+  }, 6000);
   peer.on('open', (id) => {
+    clearTimeout(openWatchdog);
     console.log('[ONLINE] Guest peer opened:', id, '→ connecting to smash-' + roomId);
     const conn = peer.connect('smash-' + roomId, { reliable: true });
     setupPeerConnection(conn);
@@ -20284,6 +20349,14 @@ function joinRoom(roomId) {
     console.error('[ONLINE] Peer error:', err.type, err);
     // 仲介サーバーとの 切断は P2P が 生きていれば 無視（ホスト側と 同じ 理由）
     if (err.type === 'network' && peerConn && peerConn.open) return;
+    // WebSocket が 確立前に 落ちた → peer を 作り直して 自動再挑戦
+    if (err.type === 'network' && onlineState === 'joining' && onlinePeerRetries < 3) {
+      onlinePeerRetries++;
+      if (onlineConnectTimeout) { clearTimeout(onlineConnectTimeout); onlineConnectTimeout = null; }
+      if (peer) { try { peer.destroy(); } catch (ex) {} peer = null; }
+      setTimeout(() => { if (onlineState === 'joining') createGuestPeer(roomId); }, 1200);
+      return;
+    }
     // 部屋が 見つからない 場合、ホストが 仲介サーバーに 再登録中の ことが ある。
     // 1.5秒おきに 2回まで 自動で つなぎ直してから 諦める
     if (err.type === 'peer-unavailable' && onlineState === 'joining' && onlineJoinRetries < 2) {
@@ -20298,7 +20371,7 @@ function joinRoom(roomId) {
       return;
     }
     if (onlineConnectTimeout) { clearTimeout(onlineConnectTimeout); onlineConnectTimeout = null; }
-    onlineError = err.type === 'peer-unavailable' ? 'Opponent not found. Check the ID.' : err.type === 'network' ? 'Network error' : (err.message || err.type);
+    onlineError = err.type === 'peer-unavailable' ? 'Opponent not found. Check the ID.' : err.type === 'network' ? 'Could not reach the server. Try again shortly.' : (err.message || err.type);
     onlineState = 'menu';
     if (peer) { try { peer.destroy(); } catch (ex) {} peer = null; }
   });
