@@ -52,24 +52,24 @@
 //   13676 物理（移動・重力・着地・撃墜判定）
 //   14233 スマッシュ攻撃（方向2回 + X）
 //   14345 崖つかまり
-//   14439 D技 と 必殺技 の データ
-//   15252 D技の 中身（キャラ別）
-//   15401 空中回避
-//   15463 バトル描画の 下準備（カメラ・影・2.5D）
-//   15563 バトル画面の 描画
-//   17594 技の エフェクト描画
-//   18669 必殺技 / 即死技 の 全画面オーバーレイ
-//   18842 画面: コンボ一覧 / 戦績
-//   18974 キャラ別 ゲージの 描画（HUDの 下に 出る 細い バー）
-//   19185 バトルの HUD
-//   19456 オンライン対戦（PeerJS / ホストが 正）
-//   20388 画面: VS イントロ
-//   20673 画面の 切り替え（フェード）
-//   20708 ポーズメニュー（バトル中に ESC）
-//   20789 画面: キャラ詳細（Iキー）
-//   21020 画面: 操作説明
-//   21144 キー入力の 振り分け（画面ごと）
-//   21625 メインループ（60FPS 固定タイムステップ）
+//   14442 D技 と 必殺技 の データ
+//   15264 D技の 中身（キャラ別）
+//   15413 空中回避
+//   15475 バトル描画の 下準備（カメラ・影・2.5D）
+//   15575 バトル画面の 描画
+//   17606 技の エフェクト描画
+//   18681 必殺技 / 即死技 の 全画面オーバーレイ
+//   18854 画面: コンボ一覧 / 戦績
+//   18986 キャラ別 ゲージの 描画（HUDの 下に 出る 細い バー）
+//   19197 バトルの HUD
+//   19468 オンライン対戦（PeerJS / ホストが 正）
+//   20400 画面: VS イントロ
+//   20685 画面の 切り替え（フェード）
+//   20720 ポーズメニュー（バトル中に ESC）
+//   20801 画面: キャラ詳細（Iキー）
+//   21032 画面: 操作説明
+//   21156 キー入力の 振り分け（画面ごと）
+//   21637 メインループ（60FPS 固定タイムステップ）
 //
 // ### 目次ここまで
 // ======================================================================
@@ -14431,6 +14431,9 @@ function updateLedge(p) {
 }
 
 // --- D技（固有追加技）システム ---
+// 必殺技の 動画段階の 上限フレーム。いちばん長い 動画（約10秒）＋余裕。
+// 実時間タイマーが 効かない 状況でも ここで 必ず 次の 段階へ 進む
+const ULTIMATE_VIDEO_MAX_FRAMES = 60 * 14;
 const D_SKILL_HOLD_FRAMES = 30;   // 0.5秒長押し
 const D_SKILL_COOLDOWN = 600;     // 10秒クールダウン
 // 詳細画面に 出すための D技の 名前（triggerDSkill の 中身と そろえること）
@@ -14808,7 +14811,16 @@ function updateUltimate() {
     ultimateTimer = 0;
     startUltimateVideo();
   }
-  // Phase 4: Video (handled by video events → transitions to 'damage')
+  // Phase 4: Video
+  //   通常は 動画の ended / error / スキップキー で 'damage' へ 進む。
+  //   それらは すべて 実時間に 依存する ので、ここで フレーム数の 保険を かける。
+  //   これが 無いと 動画が 固まった とき 画面が 止まったままに なる
+  if (ultimatePhase === 'video' && ultimateTimer > ULTIMATE_VIDEO_MAX_FRAMES) {
+    console.warn('[ULT] 動画が 終わらないので 打ち切り（' + ultimateTimer + 'F）');
+    removeUltimateVideo();
+    ultimatePhase = 'damage';
+    ultimateTimer = 0;
+  }
   // Phase 5: Damage（ホスト側のみダメージ適用、ゲストはstate同期で反映）
   if (ultimatePhase === 'damage') {
     if (ultimateTimer === 1 && !(onlineMode && !isHost)) {
@@ -21774,6 +21786,11 @@ function gameLoopInner(timestamp) {
   } else if (scene === 'battle') {
     // 必殺技の 動画が 全画面に 出ている間は ゲームを 描かない。
     // 動画の デコードと ゲームの 描画が 同時に 走ると カクつくため
+    // ultimateVideoShowing が 取り残されると 画面が 真っ黒に なるので、
+    // 必殺技が 終わっているのに 立っていたら 畳む
+    if (ultimateVideoShowing && !ultimateActive) {
+      try { removeUltimateVideo(); } catch (e) { ultimateVideoShowing = false; }
+    }
     if (!ultimateVideoShowing) {
       drawBattle(FIXED_DT);
       drawUltimateOverlay();

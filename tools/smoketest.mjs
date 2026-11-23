@@ -644,6 +644,82 @@ try {
       } catch (e) { fadeBad.push('threw: ' + e.message); }
       check('BGM fade timer is cleared', fadeBad.length === 0, fadeBad.join(' | ') || 'stopBGM clears it');
 
+      // --- 必殺技が 必ず 終わるか（実時間タイマーが 効かない 最悪の 状況）---
+      //     タブが 裏に 回る / タイマーが 間引かれる / 動画が 固まる と、
+      //     'video' 段階から 抜けられず 画面が 止まったままに なっていた
+      var ultBad = [];
+      var realSetTimeout = window.setTimeout, realSetInterval = window.setInterval;
+      try {
+        window.setTimeout = function(){ return 0; };
+        window.setInterval = function(){ return 0; };
+        for (var uc = 0; uc < characters.length; uc += (QUICK_MODE ? 6 : 1)) {
+          gameMode='cpu'; cpuDifficulty=0; p1Select=uc; p2Select=(uc+3)%characters.length;
+          selectedStage=0; onlineMode=false; scene='battle'; transitioning=false;
+          initBattle(); run(250);
+          var up2 = players[0];
+          players[1].x = up2.x + 70; players[1].invincibleTimer = 0;
+          up2.ultimateGauge = 100;
+          if (!triggerUltimate(up2)) { ultBad.push(uc + ': did not fire'); continue; }
+          var uf = 0;
+          while (ultimateActive && uf < 1500) { T += STEP; gameLoop(T); uf++; }
+          if (ultimateActive) ultBad.push(uc + ': still running after 1500F (phase=' + ultimatePhase + ')');
+          if (ultimateVideoShowing) ultBad.push(uc + ': video flag left set (battle would never draw)');
+          if (document.querySelectorAll('video').length) ultBad.push(uc + ': <video> left in the DOM');
+        }
+      } catch (e) { ultBad.push('threw: ' + e.message); }
+      window.setTimeout = realSetTimeout; window.setInterval = realSetInterval;
+      try { removeUltimateVideo(); } catch (e) {}
+      check('ultimate always ends, even with timers dead', ultBad.length === 0,
+            ultBad.slice(0,3).join(' | ') || 'frame-based backstop works');
+
+      // --- どの 状態も 必ず 抜けられるか ---
+      //     「入れるのに 出られない 状態」が あると 画面が 止まる / 動けなく なる。
+      //     必殺技の video 段階が まさに それだった
+      var hangBad = [];
+      try {
+        function until(cond, max, label) {
+          var f = 0; while (cond() && f < max) { T += STEP; gameLoop(T); f++; }
+          if (cond()) hangBad.push(label + ': still set after ' + max + 'F');
+        }
+        var hr = battle(0, 0, 250), ha = hr[0], hb = hr[1];
+        hb.x = ha.x + 45; hb.invincibleTimer = 0; ha.hitTargets = [];
+        applyHit(ha, hb, 30, 8, 0.1, -30, 'strong');
+        until(function(){ return hitStopFrames > 0; }, 200, 'hitStopFrames');
+
+        hr = battle(0, 0, 250); hr[1].damage = 200; hr[1].x = BLAST_RIGHT + 50; blastCheck(hr[1]);
+        until(function(){ return koSlowMotion.active; }, 400, 'koSlowMotion');
+
+        hr = battle(0, 0, 250); comboDisplay[0] = { count: 20, timer: 120, maxTimer: 120 };
+        hr[1].x = hr[0].x + 50; hr[1].invincibleTimer = 0;
+        executeComboFinisher(hr[0]); comboDisplay[0] = null;
+        until(function(){ return comboFinisherSlowmo > 0; }, 300, 'comboFinisherSlowmo');
+
+        hr = battle(0, 0, 250); hr[1].x = hr[0].x + 35; hr[1].grounded = true;
+        hr[0].grounded = true; hr[0].throwCooldown = 0; tryGrab(hr[0]);
+        until(function(){ return hr[1].grabbed; }, 600, 'grabbed');
+
+        hr = battle(0, 0, 250); hr[0].x = STAGE_LEFT; hr[0].y += 10; hr[0].vy = 0;
+        hr[0].grounded = false; checkLedgeGrab(hr[0]);
+        until(function(){ return hr[0].ledgeGrab; }, 400, 'ledgeGrab');
+
+        hr = battle(0, 0, 250); hr[0].guardBreakStun = 120;
+        until(function(){ return hr[0].guardBreakStun > 0; }, 400, 'guardBreakStun');
+
+        hr = battle(0, 0, 250); hr[1].x = 3000; hr[1].alive = false;
+        hr[0].damage = 200; hr[0].x = BLAST_LEFT - 100; hr[0].invincibleTimer = 0; run(5);
+        until(function(){ return !hr[0].alive; }, 700, 'respawnTimer');
+
+        scene = 'select'; transitioning = false; selectTransition = 0; startTransition('title');
+        until(function(){ return transitioning; }, 200, 'transitioning');
+
+        hr = battle(0, 0, 250); hr[0].grounded = false; hr[0].y -= 200; triggerAirDodge(hr[0], {});
+        until(function(){ return hr[0].airDodging; }, 300, 'airDodging');
+
+        hr = battle(5, 0, 250); hr[0].dSkillCooldown = 0; hr[0].dSkillActive = false; triggerDSkill(hr[0]);
+        until(function(){ return hr[0].dSkillActive; }, 800, 'dSkillActive');
+      } catch (e) { hangBad.push('threw: ' + e.message); }
+      check('no state can get stuck', hangBad.length === 0, hangBad.slice(0,3).join(' | ') || '10 states all exit');
+
       // --- ポーズメニュー ---
       var pauseBad = [];
       try {
