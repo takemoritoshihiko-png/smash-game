@@ -21,59 +21,61 @@
 //   変更したら  node tools/smoketest.mjs  を 必ず 走らせること。
 //   目次が ずれたら  node tools/toc.mjs  で 作り直す。
 //
-//   274   CANVAS / 画面サイズ
-//   1057  音の ロック解除（最初の 操作で 呼ぶ）
-//   1092  キャラ画像（遅延読み込み）
-//   1272  タイトル画面の 粒子
-//   1309  キャラの 絵 ①メニュー用（選択画面・詳細画面・タイトル）
-//   2986  キャラの 絵 ①メニュー用（選択画面・詳細画面）
-//   4704  キャラの 絵 ②バトル用
-//   5550  描画ユーティリティ
-//   5599  画面: タイトル
-//   5723  画面: キャラ選択
-//   5973  画面: 難易度選択（CPU戦）
-//   6073  画面: ステージ選択
-//   6304  バトルの 定数 と 状態
-//   6673  復帰技 / パワーモードの 表示
-//   6715  カメラ / 画面揺れ
-//   6732  効果音（Web Audio で 合成）
-//   7143  観客の 音
-//   7459  ヒット表示 / コミック文字
-//   7483  掴み・投げ の 定数と キャラ別テーブル
-//   7532  コマンド技（→→↓↓+Z など）
-//   8023  技データ
-//   8788  プレイヤー生成 / 試合の 初期化
-//   9136  ヒット処理（ダメージ・ノックバック）
-//   10477 当たり判定
-//   10509 飛び道具
-//   10552 技の 発動（通常技・復帰技・ジャブ）
-//   10811 掴み・投げ の 実行
-//   11035 CPU の 思考
-//   11380 画面演出の 配列を 1フレーム 進める
-//   11543 バトルの 毎フレーム更新（中核）
-//   13847 物理（移動・重力・着地・撃墜判定）
-//   14414 スマッシュ攻撃（方向2回 + X）
-//   14530 崖つかまり
-//   14627 D技 と 必殺技 の データ
-//   15485 D技の 中身（キャラ別）
-//   15638 空中回避
-//   15700 バトル描画の 下準備（カメラ・影・2.5D）
-//   15798 バトル画面の うえに 重ねる もの（ボスラッシュHUD / GAME SET 演出）
-//   16026 バトル画面の 描画
-//   17851 技エフェクトの 描画（effect 名 → 描き方）
-//   18508 技の エフェクト描画
-//   18942 必殺技 / 即死技 の 全画面オーバーレイ
-//   19115 画面: コンボ一覧 / 戦績
-//   19247 キャラ別 ゲージの 描画（HUDの 下に 出る 細い バー）
-//   19458 バトルの HUD
-//   19727 オンライン対戦（PeerJS / ホストが 正）
-//   20590 画面: VS イントロ
-//   20875 画面の 切り替え（フェード）
-//   20910 ポーズメニュー（バトル中に ESC）
-//   20991 画面: キャラ詳細（Iキー）
-//   21222 画面: 操作説明
-//   21346 キー入力の 振り分け（画面ごと）
-//   21827 メインループ（60FPS 固定タイムステップ）
+//   276   CANVAS / 画面サイズ
+//   1059  音の ロック解除（最初の 操作で 呼ぶ）
+//   1094  キャラ画像（遅延読み込み）
+//   1274  タイトル画面の 粒子
+//   1311  キャラの 絵 ①メニュー用（選択画面・詳細画面・タイトル）
+//   2988  キャラの 絵 ①メニュー用（選択画面・詳細画面）
+//   4706  キャラの 絵 ②バトル用
+//   5552  描画ユーティリティ
+//   5601  画面: タイトル
+//   5725  画面: キャラ選択
+//   5975  画面: 難易度選択（CPU戦）
+//   6075  画面: ステージ選択
+//   6306  バトルの 定数 と 状態
+//   6675  復帰技 / パワーモードの 表示
+//   6717  カメラ / 画面揺れ
+//   6734  効果音（Web Audio で 合成）
+//   7145  観客の 音
+//   7461  ヒット表示 / コミック文字
+//   7485  掴み・投げ の 定数と キャラ別テーブル
+//   7534  コマンド技（→→↓↓+Z など）
+//   8025  技データ
+//   8790  プレイヤー生成 / 試合の 初期化
+//   9138  ヒット処理（ダメージ・ノックバック）
+//   10479 当たり判定
+//   10511 飛び道具
+//   10554 技の 発動（通常技・復帰技・ジャブ）
+//   10813 掴み・投げ の 実行
+//   11037 CPU の 思考
+//   11382 画面演出の 配列を 1フレーム 進める
+//   11543 キャラ固有の ゲージ更新（毎フレーム・プレイヤー1人分）
+//   11779 攻撃中の 1フレーム 更新（プレイヤー1人分）
+//   12128 バトルの 毎フレーム更新（中核）
+//   13869 物理（移動・重力・着地・撃墜判定）
+//   14436 スマッシュ攻撃（方向2回 + X）
+//   14552 崖つかまり
+//   14649 D技 と 必殺技 の データ
+//   15507 D技の 中身（キャラ別）
+//   15660 空中回避
+//   15722 バトル描画の 下準備（カメラ・影・2.5D）
+//   15820 バトル画面の うえに 重ねる もの（ボスラッシュHUD / GAME SET 演出）
+//   16048 バトル画面の 描画
+//   17873 技エフェクトの 描画（effect 名 → 描き方）
+//   18530 技の エフェクト描画
+//   18964 必殺技 / 即死技 の 全画面オーバーレイ
+//   19137 画面: コンボ一覧 / 戦績
+//   19269 キャラ別 ゲージの 描画（HUDの 下に 出る 細い バー）
+//   19480 バトルの HUD
+//   19749 オンライン対戦（PeerJS / ホストが 正）
+//   20612 画面: VS イントロ
+//   20897 画面の 切り替え（フェード）
+//   20932 ポーズメニュー（バトル中に ESC）
+//   21013 画面: キャラ詳細（Iキー）
+//   21244 画面: 操作説明
+//   21368 キー入力の 振り分け（画面ごと）
+//   21849 メインループ（60FPS 固定タイムステップ）
 //
 // ### 目次ここまで
 // ======================================================================
@@ -11537,6 +11539,589 @@ function updateEffectArrays(simulate) {
     if (stockLossAnim.life <= 0) stockLossAnim.active = false;
   }
 }
+// ======================================================================
+// キャラ固有の ゲージ更新（毎フレーム・プレイヤー1人分）
+//
+// updateBattle の プレイヤーループの 中に 直接 書かれていた もの。中身は そのまま。
+// ゲージの 自然増減・変身モードの 残り時間・発動時の 光りなど。
+// 「Nフレームに1回」の 判定は battleFrame を 使う こと（battleTime は ミリ秒）
+// ======================================================================
+function updateCharacterGauges(p) {
+    // ゼン(0): 氷ゲージ自然減少（毎秒-3 = 毎20Fに-1）
+    if (p.charIdx === 0 && battleFrame % 20 === 0 && p.zenIceGauge > 0) p.zenIceGauge = Math.max(0, p.zenIceGauge - 1);
+    // 波おじ(13): スタミナ回復（毎秒+5 = 毎12Fに+1）
+    if (p.charIdx === 13) {
+    if (p.namiojiExhausted > 0) { p.namiojiExhausted--; }
+    else if (battleFrame % 12 === 0 && p.namiojiStamina < 100) p.namiojiStamina = Math.min(100, p.namiojiStamina + 1);
+    if (p.namiojiFullPower > 0) p.namiojiFullPower--;
+    }
+    // キング(16): 時間停止タイマー・速度ボーナス
+    if (p.charIdx === 16) {
+    if (p.kingTimeStop > 0) {
+      p.kingTimeStop--;
+      // 時間停止中: 相手を完全停止
+      for (const t of players) {
+        if (t.id !== p.id && t.alive) { t.vx = 0; t.vy = 0; t.hitstun = Math.max(t.hitstun, 2); }
+      }
+    }
+    }
+    // ジャッジマン(9): 最終審判モードタイマー
+    if (p.charIdx === 9 && p.judgeFinalMode > 0) p.judgeFinalMode--;
+    // 天才(10): 龍気ゲージ消費（龍モード中毎秒-10 = 毎6Fに-1）
+    if (p.charIdx === 10 && p.dragonMode && battleFrame % 6 === 0) {
+    p.tensaiDragonGauge = Math.max(0, p.tensaiDragonGauge - 1);
+    if (p.tensaiDragonGauge <= 0) {
+      p.dragonMode = false; p.dragonCooldown = 600; p.weight = 0.8;
+      cmdNameDisplay.push({ text: 'HUMAN MODE', x: p.x, y: p.y - 120, life: 60, maxLife: 60, color: '#FF8833' });
+    }
+    }
+    // Catbus(11): テレポートリチャージ（8秒ごと = 480F）
+    if (p.charIdx === 11) {
+    if (p.catbusTeleCharges < 3) {
+      p.catbusTeleRecharge++;
+      if (p.catbusTeleRecharge >= 480) { p.catbusTeleCharges++; p.catbusTeleRecharge = 0; }
+    }
+    }
+
+    // 熊太郎(6): テンション自然減少・激怒モード
+    if (p.charIdx === 6) {
+    if (p.kumaFuryMode > 0) p.kumaFuryMode--;
+    if (p.kumaFuryCooldown > 0) p.kumaFuryCooldown--;
+    if (battleFrame % 12 === 0 && p.kumaFury > 0 && !p.kumaFuryMode) p.kumaFury = Math.max(0, p.kumaFury - 1);
+    if (p.kumaFury >= 100 && !p.kumaFuryMode && p.kumaFuryCooldown <= 0) {
+      p.kumaFuryMode = 480; p.kumaFury = 0;
+      cmdNameDisplay.push({ text: 'Fury Mode!', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#FF4444' });
+    }
+    }
+    // シャうでん(8): 電圧自然減少・過電圧モード
+    if (p.charIdx === 8) {
+    if (p.shawdenOvercharge > 0) p.shawdenOvercharge--;
+    if (battleFrame % 20 === 0 && p.shawdenVoltage > 0 && !p.shawdenOvercharge) p.shawdenVoltage = Math.max(0, p.shawdenVoltage - 1);
+    if (p.shawdenVoltage >= 100 && !p.shawdenOvercharge) {
+      p.shawdenOvercharge = 300; p.shawdenVoltage = 0;
+      cmdNameDisplay.push({ text: 'Overvolt!', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#FFFF44' });
+    }
+    }
+    // サム(15): 空中滞在タイマー
+    if (p.charIdx === 15) {
+    if (!p.grounded) { p.samAirTimer++; if (p.samAirTimer === 600) cmdNameDisplay.push({ text: 'AIR MASTER!!', x: p.x, y: p.y - 100, life: 90, maxLife: 90, color: '#FFD700' }); }
+    else p.samAirTimer = 0;
+    }
+    // セン(18): 出世は applyHit内で処理
+    // マイクロ(20): 離脱体復帰
+    if (p.charIdx === 20 && p.microBodies < 3) {
+    p.microRejoinTimer++;
+    if (p.microRejoinTimer >= 420) { p.microBodies = Math.min(3, p.microBodies + 1); p.microRejoinTimer = 0; } // 10秒→7秒
+    }
+    // ドスボス(19): 装甲回復・大破
+    if (p.charIdx === 19) {
+    if (p.dosbossBroken > 0) { p.dosbossBroken--; if (p.dosbossBroken <= 0) { p.dosbossArmor = 100; cmdNameDisplay.push({ text: 'Repaired', x: p.x, y: p.y - 100, life: 45, maxLife: 45, color: '#CC66FF' }); } }
+    else if (battleFrame % 20 === 0 && p.dosbossArmor < 100) p.dosbossArmor = Math.min(100, p.dosbossArmor + 1);
+    }
+
+    // メテオ(3): 燃焼ゲージ自然減少
+    if (p.charIdx === 3 && battleFrame % 15 === 0 && p.meteoBurnGauge > 0) p.meteoBurnGauge = Math.max(0, p.meteoBurnGauge - 1);
+    // ヤッホ(25): カオスイベント
+    if (p.charIdx === 25) {
+    if (p.yahoChaosEvent > 0) p.yahoChaosEvent--;
+    p.yahoChaosCooldown++;
+    if (p.yahoChaosCooldown >= 600 && p.yahoChaosEvent <= 0) { // 10秒ごと
+      p.yahoChaosCooldown = 0;
+      p.yahoChaosType = Math.floor(Math.random() * 6);
+      p.yahoChaosEvent = [300, 180, 120, 120, 60, 180][p.yahoChaosType];
+      cmdNameDisplay.push({ text: 'CHAOS!!', x: p.x, y: p.y - 100, life: 45, maxLife: 45, color: '#FF' + Math.floor(Math.random()*256).toString(16).padStart(2,'0') + Math.floor(Math.random()*256).toString(16).padStart(2,'0') });
+    }
+    }
+    // 怖(24): 恐怖ゲージ自然減少
+    if (p.charIdx === 24 && battleFrame % 20 === 0 && p.kowaiFearGauge2 > 0) p.kowaiFearGauge2 = Math.max(0, p.kowaiFearGauge2 - 1);
+    // サトル(23): 闘志自然減少・マスターモード
+    if (p.charIdx === 23) {
+    if (p.satoruMasterMode > 0) p.satoruMasterMode--;
+    if (battleFrame % 12 === 0 && p.satoruFightGauge > 0 && !p.satoruMasterMode) p.satoruFightGauge = Math.max(0, p.satoruFightGauge - 1);
+    if (p.satoruFightGauge >= 100 && !p.satoruMasterMode) {
+      p.satoruMasterMode = 480; p.satoruFightGauge = 0;
+      cmdNameDisplay.push({ text: 'TAEKWONDO MASTER!!', x: p.x, y: p.y - 100, life: 90, maxLife: 90, color: '#FF4444' });
+    }
+    }
+    // プル(27): 引力ゲージ自然減少・重力崩壊
+    if (p.charIdx === 27) {
+    if (p.pullCollapseMode > 0) p.pullCollapseMode--;
+    if (battleFrame % 20 === 0 && p.pullGravGauge > 0 && !p.pullCollapseMode) p.pullGravGauge = Math.max(0, p.pullGravGauge - 1);
+    if (p.pullGravGauge >= 100 && !p.pullCollapseMode) {
+      p.pullCollapseMode = 360; p.pullGravGauge = 0;
+      cmdNameDisplay.push({ text: 'GRAVITY COLLAPSE!!', x: p.x, y: p.y - 100, life: 90, maxLife: 90, color: '#AA66FF' });
+    }
+    }
+    // 金金(22): 資産自然減少・億万長者・コンボ黄金モード
+    if (p.charIdx === 22) {
+    if (p.kinkinComboGold > 0) p.kinkinComboGold--;
+    if (p.kinkinGoldMode > 0) p.kinkinGoldMode--;
+    if (p.kinkinAssetGauge >= 100 && !p.kinkinGoldMode) {
+      p.kinkinGoldMode = 480; p.kinkinAssetGauge = 0;
+      cmdNameDisplay.push({ text: 'GOLD RUSH!!', x: p.x, y: p.y - 100, life: 90, maxLife: 90, color: '#FFD700' });
+    }
+    }
+    // ロング(4): 穿孔ゲージ自然減少・龍槍モード
+    if (p.charIdx === 4) {
+    if (p.longDragonSpear > 0) p.longDragonSpear--;
+    if (battleFrame % 20 === 0 && p.longPierceGauge > 0 && !p.longDragonSpear) p.longPierceGauge = Math.max(0, p.longPierceGauge - 1);
+    if (p.longPierceGauge >= 100 && !p.longDragonSpear) {
+      p.longDragonSpear = 360; p.longPierceGauge = 0;
+      cmdNameDisplay.push({ text: 'DRAGON SPEAR!!', x: p.x, y: p.y - 100, life: 90, maxLife: 90, color: '#44FFCC' });
+    }
+    }
+
+    // ドン(1): 大地ゲージ自然減少
+    if (p.charIdx === 1 && battleFrame % 30 === 0 && p.donEarthGauge > 0) p.donEarthGauge = Math.max(0, p.donEarthGauge - 1);
+    // サイソク(2): 加速ゲージ（移動で蓄積、静止で急減）
+    if (p.charIdx === 2) {
+    if (p.saisokuLightSpeed > 0) p.saisokuLightSpeed--;
+    const spd = Math.abs(p.vx);
+    if (spd > 1) p.saisokuAccelGauge = Math.min(100, (p.saisokuAccelGauge||0) + spd * 0.05);
+    else if (battleFrame % 6 === 0) p.saisokuAccelGauge = Math.max(0, (p.saisokuAccelGauge||0) - 1);
+    if (p.saisokuAccelGauge >= 100 && !p.saisokuLightSpeed) {
+      p.saisokuLightSpeed = 300; p.saisokuAccelGauge = 0;
+      cmdNameDisplay.push({ text: 'LIGHT SPEED!!', x: p.x, y: p.y - 100, life: 90, maxLife: 90, color: '#FFFFFF' });
+    }
+    }
+    // うる男(5): 野性ゲージ自然減少
+    if (p.charIdx === 5) {
+    if (p.uruoWildRelease > 0) p.uruoWildRelease--;
+    if (battleFrame % 20 === 0 && p.uruoWildGauge > 0 && !p.uruoWildRelease) p.uruoWildGauge = Math.max(0, p.uruoWildGauge - 1);
+    if (p.uruoWildGauge >= 100 && !p.uruoWildRelease) {
+      p.uruoWildRelease = 420; p.uruoWildGauge = 0;
+      cmdNameDisplay.push({ text: 'WILD RELEASE!!', x: p.x, y: p.y - 100, life: 90, maxLife: 90, color: '#88CCFF' });
+    }
+    }
+    // バレット(7): 魔法ゲージ自然減少
+    if (p.charIdx === 7) {
+    if (p.bulletAwaken > 0) p.bulletAwaken--;
+    if (battleFrame % 20 === 0 && p.bulletMagicGauge > 0 && !p.bulletAwaken) p.bulletMagicGauge = Math.max(0, p.bulletMagicGauge - 1);
+    if (p.bulletMagicGauge >= 100 && !p.bulletAwaken) {
+      p.bulletAwaken = 480; p.bulletMagicGauge = 0;
+      cmdNameDisplay.push({ text: 'MAGICAL BURST!!', x: p.x, y: p.y - 100, life: 90, maxLife: 90, color: '#FF66AA' });
+    }
+    }
+    // タンク(12): 弾薬補充(20秒=1200F)
+    if (p.charIdx === 12 && p.tankAmmo < 5) {
+    p.tankReloadTimer++;
+    if (p.tankReloadTimer >= 720) { p.tankAmmo++; p.tankReloadTimer = 0; } // 20秒→12秒
+    }
+    // おんぱ(17): 周波数自然減少
+    if (p.charIdx === 17) {
+    if (p.onpaResonance > 0) p.onpaResonance--;
+    if (battleFrame % 15 === 0 && p.onpaFreqGauge > 0 && !p.onpaResonance) p.onpaFreqGauge = Math.max(0, p.onpaFreqGauge - 1);
+    if (p.onpaFreqGauge >= 100 && !p.onpaResonance) {
+      p.onpaResonance = 360; p.onpaFreqGauge = 0;
+      cmdNameDisplay.push({ text: 'RESONANCE!!', x: p.x, y: p.y - 100, life: 90, maxLife: 90, color: '#88FFFF' });
+    }
+    }
+    // ミスターツー(21): 爆炎融合
+    if (p.charIdx === 21) {
+    if (p.mrtwoDualBlast > 0) p.mrtwoDualBlast--;
+    if (p.mrtwoDualL >= 80 && p.mrtwoDualR >= 80 && !p.mrtwoDualBlast) {
+      p.mrtwoDualBlast = 360; p.mrtwoDualL = 0; p.mrtwoDualR = 0;
+      cmdNameDisplay.push({ text: 'DUAL BLAST!!', x: p.x, y: p.y - 100, life: 90, maxLife: 90, color: '#FF6688' });
+    }
+    }
+
+    // ぽよ(26): スライムゲージ自然減少・ダブルスライム
+    if (p.charIdx === 26) {
+    if (p.poyoDoubleSlime > 0) p.poyoDoubleSlime--;
+    if (battleFrame % 15 === 0 && p.poyoSlimeGauge > 0 && !p.poyoDoubleSlime) p.poyoSlimeGauge = Math.max(0, p.poyoSlimeGauge - 1);
+    if (p.poyoSlimeGauge >= 100 && !p.poyoDoubleSlime) {
+      p.poyoDoubleSlime = 480; p.poyoSlimeGauge = 0; // 8秒
+      cmdNameDisplay.push({ text: 'DOUBLE SLIME!!', x: p.x, y: p.y - 100, life: 90, maxLife: 90, color: '#FF88CC' });
+      hitEffects.push({ x: p.x, y: p.y - 35, life: 15, maxLife: 15, color: '#FF88CC', size: 50, type: 'ring' });
+      playHitSound('justGuard');
+    }
+    // ダブルスライム: 2回目攻撃の自動発動
+    if (p.poyoDoubleHitTimer > 0) {
+      p.poyoDoubleHitTimer--;
+      if (p.poyoDoubleHitTimer <= 0 && p.poyoDoubleHitData && p.poyoDoubleHitTarget !== null) {
+        const t2 = players.find(pp => pp.id === p.poyoDoubleHitTarget);
+        if (t2 && t2.alive && t2.invincibleTimer <= 0) {
+          const d2 = p.poyoDoubleHitData;
+          applyHit(p, t2, d2.damage * 0.6, d2.kbBase * 0.5, d2.kbScale * 0.5, d2.kbAngle, d2.hitType);
+          sparks.push({ x: t2.x, y: t2.y - 35, vx: (Math.random()-0.5)*3, vy: -1, life: 8, maxLife: 8, color: '#FF88CC', size: 3, gravity: 0.05, drag: 0.95 });
+        }
+        p.poyoDoubleHitData = null; p.poyoDoubleHitTarget = null;
+      }
+    }
+    }
+
+    // 強化モード発動チェック（発動1F目にエフェクト）
+    const ch6 = characters[p.charIdx];
+    const modeCheck = [
+    { t: p.kumaFuryMode, prev: '_prevKumaFury' },
+    { t: p.saisokuLightSpeed, prev: '_prevSaisokuLS' },
+    { t: p.uruoWildRelease, prev: '_prevUruoWR' },
+    { t: p.bulletAwaken, prev: '_prevBulletAw' },
+    { t: p.shawdenOvercharge, prev: '_prevShawdenOC' },
+    { t: p.onpaResonance, prev: '_prevOnpaRes' },
+    { t: p.kinkinComboGold, prev: '_prevKinkinCG' },
+    { t: p.kinkinGoldMode, prev: '_prevKinkinGM' },
+    { t: p.longDragonSpear, prev: '_prevLongDS' },
+    { t: p.pullCollapseMode, prev: '_prevPullCM' },
+    { t: p.satoruMasterMode, prev: '_prevSatoruMM' },
+    { t: p.poyoDoubleSlime, prev: '_prevPoyoDS' },
+    { t: p.botRobot, prev: '_prevBotRobot' },
+    { t: p.chattaFly, prev: '_prevChattaFly' },
+    ];
+    for (const mc of modeCheck) {
+    if (mc.t > 0 && !p[mc.prev]) {
+      triggerGaugeMaxEffect(p, '', ch6 ? ch6.accent : '#FFD700');
+    }
+    p[mc.prev] = mc.t > 0;
+    }
+}
+// ======================================================================
+// 攻撃中の 1フレーム 更新（プレイヤー1人分）
+//
+// updateBattle の プレイヤーループに 直接 書かれていた もの。中身は そのまま。
+// 技の 経過フレーム・特殊移動・判定の 発生・終了処理。
+// 元は 最後に continue で プレイヤーループを 抜けていたので、
+// 呼び出し側が 代わりに continue する。途中の continue は return に した
+// ======================================================================
+function updateAttackFrames(p) {
+  p.attackFrame++;
+  const atk = p.attackData;
+  const totalFrames = atk.startup + atk.active + atk.recovery;
+
+  // Special movement attacks
+  if (atk.specialType === 'jumpSlam') {
+    if (p.attackFrame === atk.startup) {
+      p.vy = atk.jumpPower;
+      p.specialState = 'jumping';
+      p.grounded = false;
+    }
+    if (p.specialState === 'jumping') {
+      p.vy += getGravity(p);
+      if (p.vy > 0) { p.specialState = 'slamming'; p.vy = 16; }
+    }
+    if (p.specialState === 'slamming') {
+      p.vy = 16;
+      // 降下中も攻撃判定を出す（足元hitbox）
+      const slamW = atk.slamHw || atk.hw || 60;
+      const slamH = atk.slamHh || atk.hh || 40;
+      const slamHb = { x: p.x - slamW / 2, y: p.y - 10, w: slamW, h: slamH };
+      checkHitboxAgainstPlayers(p, slamHb, atk.damage * 0.7, atk.kbBase, atk.kbScale, 80, 'strong');
+      // Check if we hit ground
+      if (p.grounded) {
+        // Slam hit!
+        p.specialState = 'slamHit';
+        p.attackFrame = atk.startup + 1; // start active frames
+        p.hitTargets = []; // 着地時にリセットして着地ヒットも判定
+      }
+    }
+    if (p.specialState === 'slamHit') {
+      const slamFrame = p.attackFrame - atk.startup;
+      if (slamFrame <= atk.slamActive) {
+        const hb = { x: p.x - atk.slamHw / 2, y: p.y + atk.slamHy, w: atk.slamHw, h: atk.slamHh };
+        checkHitboxAgainstPlayers(p, hb, atk.damage, atk.kbBase, atk.kbScale, atk.kbAngle, 'strong');
+      }
+      if (slamFrame > atk.slamActive + atk.recovery) {
+        if (p.hitTargets.length === 0) {
+          showHitDisplay(p.x, p.y, false);
+          playHitSound('miss');
+        }
+        p.attacking = false; p.specialState = null;
+      }
+    }
+    // Apply movement (limited horizontal control)
+    p.x += p.vx * 0.3;
+    p.y += p.vy;
+    landingCheck(p);
+    blastCheck(p);
+    if (p.specialState !== 'slamHit') return;
+    if (p.attacking) return;
+  }
+
+  if (atk.specialType === 'shadowDash' && p.attackFrame > atk.startup && p.attackFrame <= atk.startup + atk.active) {
+    const dir = p.facingLeft ? -1 : 1;
+    p.vx = atk.dashSpeed * dir;
+    p.specialState = 'dashing';
+  } else if (atk.specialType === 'shadowDash' && p.attackFrame > atk.startup + atk.active) {
+    p.specialState = null;
+    p.vx *= 0.3;
+  }
+
+  // Slide (sweep / sliding)
+  if (atk.specialType === 'slide' && p.attackFrame > atk.startup && p.attackFrame <= atk.startup + atk.active) {
+    const dir = p.facingLeft ? -1 : 1;
+    p.vx = atk.slideSpeed * dir;
+    p.specialState = 'sliding';
+  } else if (atk.specialType === 'slide' && p.attackFrame > atk.startup + atk.active) {
+    p.specialState = null;
+    p.vx *= 0.3;
+  }
+
+  if (atk.specialType === 'uppercut' && p.attackFrame === atk.startup + 1) {
+    p.vy = atk.launchVy;
+    p.grounded = false;
+    p.specialState = 'rising';
+  }
+  if (atk.specialType === 'uppercut' && p.attackFrame > atk.startup + atk.active) {
+    p.specialState = null;
+  }
+
+  // Divekick: 空中下攻撃で急降下
+  if (atk.specialType === 'divekick' && p.attackFrame > atk.startup && p.attackFrame <= atk.startup + atk.active) {
+    p.vy = atk.diveSpeed;
+    p.vx *= 0.3;
+    p.specialState = 'diving';
+  }
+  if (atk.specialType === 'divekick' && p.attackFrame > atk.startup + atk.active) {
+    p.specialState = null;
+  }
+
+  // Command: Teleport Slash (Zen cmd2)
+  if (atk.specialType === 'cmdTeleSlash' && p.attackFrame === atk.startup) {
+    const dir = p.facingLeft ? -1 : 1;
+    p.x += atk.teleportDist * dir;
+    p.specialState = 'teleSlashing';
+    // Clamp to stage
+    p.x = Math.max(BLAST_LEFT + 30, Math.min(BLAST_RIGHT - 30, p.x));
+  }
+  if (atk.specialType === 'cmdTeleSlash' && p.attackFrame > atk.startup + atk.active) {
+    p.specialState = null;
+  }
+
+  // Command: Charge (Don cmd2)
+  if (atk.specialType === 'cmdCharge' && p.attackFrame > atk.startup && p.attackFrame <= atk.startup + atk.active) {
+    const dir = p.facingLeft ? -1 : 1;
+    p.vx = atk.chargeSpeed * dir;
+    p.specialState = 'charging';
+  } else if (atk.specialType === 'cmdCharge' && p.attackFrame > atk.startup + atk.active) {
+    p.specialState = null;
+    p.vx *= 0.2;
+  }
+
+  // Command: Shuriken Storm (Saisoku cmd1)
+  if (atk.specialType === 'cmdShurikenStorm' && p.attackFrame > atk.startup && p.attackFrame <= atk.startup + atk.active) {
+    if ((p.attackFrame - atk.startup) % 3 === 1) {
+      const dir = p.facingLeft ? -1 : 1;
+      const spread = (Math.random() - 0.5) * 4;
+      projectiles.push({
+        x: p.x + 20 * dir, y: p.y - 40 + spread * 5,
+        vx: (10 + Math.random() * 3) * dir, vy: spread,
+        w: 14, h: 14,
+        damage: 4, kbBase: 1.5, kbScale: 0.03, kbAngle: -5,
+        life: 35, ownerId: p.id,
+        color: '#88FFCC', pcolor: '#AAFFDD',
+        shape: 'star', ownerCharIdx: p.charIdx, time: 0,
+      });
+    }
+  }
+
+  // Command: Clone Rush (Saisoku cmd2)
+  if (atk.specialType === 'cmdCloneRush' && p.attackFrame > atk.startup && p.attackFrame <= atk.startup + atk.active) {
+    p.specialState = 'cloneRush';
+  }
+  if (atk.specialType === 'cmdCloneRush' && p.attackFrame > atk.startup + atk.active) {
+    p.specialState = null;
+  }
+
+  // Active frames - check hitbox
+  if (p.attackFrame > atk.startup && p.attackFrame <= atk.startup + atk.active) {
+    // Spawn projectile on first active frame (or multi-shot)
+    if (atk.projectile) {
+      if (atk.multiShot && atk.shotInterval) {
+        const activeFrame = p.attackFrame - atk.startup;
+        if (activeFrame >= 1 && activeFrame <= atk.multiShot * atk.shotInterval && (activeFrame - 1) % atk.shotInterval === 0) {
+          spawnProjectile(p, atk.projectile);
+        }
+      } else if (p.attackFrame === atk.startup + 1) {
+        spawnProjectile(p, atk.projectile);
+      }
+    }
+    // BulletStorm: scatter random projectiles during active frames
+    if (atk.specialType === 'bulletStorm' && p.attackFrame % 2 === 0) {
+      const dir = p.facingLeft ? -1 : 1;
+      const angle = (Math.random() - 0.3) * Math.PI * 0.8;
+      projectiles.push({
+        x: p.x + 20 * dir, y: p.y - 40,
+        vx: Math.cos(angle) * 10 * dir, vy: Math.sin(angle) * 10,
+        w: 10, h: 8,
+        damage: 3, kbBase: 2, kbScale: 0.03, kbAngle: -15,
+        life: 40, ownerId: p.id,
+        color: '#FF66AA', pcolor: '#FFAACC',
+        shape: 'rect', ownerCharIdx: p.charIdx, time: 0,
+        homing: false, pierce: false,
+      });
+    }
+
+    // Determine hit type for effects
+    const ht = p.attackType === 'command' ? 'cmd' : p.attackType || 'normal';
+
+    // Melee hitbox
+    if (atk.hw > 0 && atk.hh > 0) {
+      let hitbox;
+      if (atk.centerHit) {
+        hitbox = { x: p.x - atk.hw / 2, y: p.y + atk.hy, w: atk.hw, h: atk.hh };
+      } else {
+        hitbox = getAttackHitbox(p, atk);
+      }
+
+      if (atk.multiHit) {
+        const sinceLastHit = p.attackFrame - p.lastHitFrame;
+        const isLast = p.attackFrame >= atk.startup + atk.active - 2;
+        if (sinceLastHit >= atk.hitInterval) {
+          const dmg = isLast ? atk.finalDamage : atk.damage;
+          const kb = isLast ? atk.finalKbBase : atk.kbBase;
+          const ks = isLast ? atk.finalKbScale : atk.kbScale;
+          const ka = isLast ? atk.finalKbAngle : atk.kbAngle;
+          // Clear targets for multi-hit
+          p.hitTargets = [];
+          if (checkHitboxAgainstPlayers(p, hitbox, dmg, kb, ks, ka, ht)) {
+            p.lastHitFrame = p.attackFrame;
+          }
+        }
+      } else {
+        checkHitboxAgainstPlayers(p, hitbox, atk.damage, atk.kbBase, atk.kbScale, atk.kbAngle, ht);
+      }
+    }
+  }
+
+  // ドスボス: ランダムキャノン - startup終了後の最初のactiveフレームで発動
+  if (atk.dosbossRandom && p.attackFrame === atk.startup + 1) {
+    const pattern = Math.floor(Math.random() * 3);
+    p.dosbossRandomPattern = pattern;
+    const dir = p.facingLeft ? -1 : 1;
+    if (pattern === 0) {
+      // パターンA: 通常砲撃 - 大きな砲弾
+      spawnProjectile(p, { speed:11, damage:11, kbBase:6, kbScale:0.10, kbAngle:-25, w:30, h:28, life:45, color:'#CC66FF', pcolor:'#9944CC' });
+      cmdNameDisplay.push({ text: 'Normal Shot!', x: p.x, y: p.y - 100, life: 45, maxLife: 45, color: '#CC66FF' });
+    } else if (pattern === 1) {
+      // パターンB: 木投げ - スタン付き飛び道具
+      const proj = { speed:9, damage:7, kbBase:3, kbScale:0.05, kbAngle:-15, w:20, h:28, life:40, color:'#44AA22', pcolor:'#33881A' };
+      const pr = {
+        x: p.x + 30 * dir, y: p.y - 40,
+        vx: proj.speed * dir, vy: -2,
+        w: proj.w, h: proj.h,
+        damage: proj.damage, kbBase: proj.kbBase, kbScale: proj.kbScale, kbAngle: proj.kbAngle,
+        life: proj.life, ownerId: p.id,
+        color: proj.color, pcolor: proj.pcolor,
+        shape: 'rect', ownerCharIdx: p.charIdx, time: 0,
+        stun: true, stunFrames: 30,
+        meshitero: false,
+      };
+      projectiles.push(pr);
+      cmdNameDisplay.push({ text: 'Log Throw!', x: p.x, y: p.y - 100, life: 45, maxLife: 45, color: '#44AA22' });
+    } else {
+      // パターンC: 自爆爆発 - 自分もダメージ、周囲に大ダメージ
+      // パッシブ: ドスボス(19) ランダム強化 パターンCダメージ+15%
+      cmdNameDisplay.push({ text: 'BOOM!', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#FF6600' });
+      p.damage = Math.min(999, p.damage + 6);
+      const boomHitbox = { x: p.x - 70, y: p.y - 70, w: 140, h: 100 };
+      const boomDmg = p.charIdx === 19 ? Math.floor(15 * 1.15) : 15;
+      checkHitboxAgainstPlayers(p, boomHitbox, boomDmg, 8, 0.14, -40, 'special');
+      triggerScreenShake(8, 15);
+      hitFlash.alpha = 0.3;
+      hitFlash.color = '#FF6600';
+      hitEffects.push({ x: p.x, y: p.y - 35, life: 20, maxLife: 20, color: '#FF6600', size: 80 });
+      hitEffects.push({ x: p.x, y: p.y - 35, life: 15, maxLife: 15, color: '#9944CC', size: 120, type: 'ring' });
+    }
+  }
+
+  // ドスボス: デコイ設置
+  if (atk.dosbossDecoy && p.attackFrame === atk.startup + 1) {
+    const dir = p.facingLeft ? -1 : 1;
+    const decoyX = p.x + 80 * dir;
+    sparks.push({
+      x: decoyX, y: p.y,
+      vx: 0, vy: 0,
+      life: 180, maxLife: 180,
+      color: '#CC66FF',
+      type: 'dosbossDecoy',
+      gravity: 0, drag: 1,
+      ownerId: p.id, ownerCharIdx: p.charIdx,
+      decoyX: decoyX, decoyY: p.y,
+    });
+    cmdNameDisplay.push({ text: 'Decoy!', x: decoyX, y: p.y - 80, life: 45, maxLife: 45, color: '#CC66FF' });
+  }
+
+  // End attack
+  if (p.attackFrame >= totalFrames) {
+    // Show MISS if melee attack hit nobody (skip projectile-only attacks)
+    if (p.hitTargets.length === 0 && atk.hw > 0) {
+      const dir = p.facingLeft ? -1 : 1;
+      showHitDisplay(p.x + 30 * dir, p.y, false);
+      playHitSound('miss');
+      // 空振り時の慣性ペナルティ: 攻撃方向に少し滑る + 硬直感
+      if (p.grounded) {
+        p.vx = dir * 1.5;
+        p.landLag = Math.max(p.landLag || 0, 4); // 空振り硬直4F
+      }
+    }
+    // セン: 満腹パワーバフ発動
+    if (atk.senBuff) {
+      // パッシブ: セン(18) バフ延長+15%
+      p.senBuffTimer = p.charIdx === 18 ? 690 : 600; // 11.5秒 or 10秒
+      cmdNameDisplay.push({ text: 'Full Belly Power!', x: p.x, y: p.y - 120, life: 90, maxLife: 90, color: '#FF8844' });
+    }
+    // 金金: お金の鎧発動
+    if (atk.kingkingArmor) {
+      p.kingkingArmorTimer = 600; // 10秒
+      cmdNameDisplay.push({ text: 'MONEY POWER!', x: p.x, y: p.y - 120, life: 90, maxLife: 90, color: '#FFD700' });
+      hitFlash.alpha = 0.25; hitFlash.color = '#FFD700';
+      triggerScreenShake(5, 10);
+      hitEffects.push({ x: p.x, y: p.y - 40, life: 25, maxLife: 25, color: '#FFD700', size: 60, type: 'ring' });
+      hitEffects.push({ x: p.x, y: p.y - 40, life: 20, maxLife: 20, color: '#DAA520', size: 40, type: 'charGlow' });
+      for (let i = 0; i < 12; i++) sparks.push({ x: p.x+(Math.random()-0.5)*40, y: p.y-40+(Math.random()-0.5)*40, vx:(Math.random()-0.5)*5, vy:-2-Math.random()*3, life:20, maxLife:20, color:i%2?'#FFD700':'#DAA520', size:3+Math.random()*2, gravity:0.1, drag:0.96 });
+    }
+    p.attacking = false;
+    p.specialState = null;
+  }
+
+  // During attack, limited movement
+  if (atk.specialType === 'shadowDash' || atk.specialType === 'slide' || atk.specialType === 'cmdCharge') {
+    p.vy += getGravity(p);
+    if (p.vy > MAX_FALL_SPEED) p.vy = MAX_FALL_SPEED;
+    p.x += p.vx;
+    p.y += p.vy;
+    // ステージ範囲内にクランプ（テレポート等の画面外防止）
+    if (p.x < BLAST_LEFT + 50) p.x = BLAST_LEFT + 50;
+    if (p.x > BLAST_RIGHT - 50) p.x = BLAST_RIGHT - 50;
+    if (p.y < BLAST_TOP + 50) p.y = BLAST_TOP + 50;
+    landingCheck(p);
+    blastCheck(p);
+  } else if (atk.specialType !== 'jumpSlam') {
+    p.vy += getGravity(p);
+    if (p.vy > MAX_FALL_SPEED) p.vy = MAX_FALL_SPEED;
+    if (p.grounded) {
+      // 地上攻撃: 横移動を大幅制限
+      p.x += p.vx * 0.3;
+      p.vx *= 0.85;
+    } else {
+      // 空中攻撃: 慣性を維持し、入力で微調整可能
+      p.x += p.vx;
+      p.vx *= 0.98; // 軽い空気抵抗のみ
+      // 空中攻撃中の横入力（moveXはcontinueでスキップされるのでここで取得）
+      let airMoveX = 0;
+      if (p.id === 0) {
+        if (onlineMode && !isHost) { if (remoteKeys.left) airMoveX = -1; if (remoteKeys.right) airMoveX = 1; }
+        else { if (keys['ArrowLeft']) airMoveX = -1; if (keys['ArrowRight']) airMoveX = 1; }
+      } else if (p.id === 1) {
+        if (onlineMode && isHost) { if (remoteKeys.left) airMoveX = -1; if (remoteKeys.right) airMoveX = 1; }
+        else if (!(gameMode === 'cpu' || bossRushMode)) {
+          if (onlineMode && !isHost) { if (keys['ArrowLeft']) airMoveX = -1; if (keys['ArrowRight']) airMoveX = 1; }
+          else { if (keys['a'] || keys['A']) airMoveX = -1; if (keys['d'] || keys['D']) airMoveX = 1; }
+        }
+      }
+      if (airMoveX !== 0) {
+        const ch2 = characters[p.charIdx];
+        const airDrift = ch2.moveSpeed * AIR_SPEED_MULT * 0.65;
+        p.vx += airMoveX * AIR_ACCEL * airDrift * 0.06; // 空中攻撃中の横入力を弱める
+      }
+    }
+    p.y += p.vy;
+    landingCheck(p);
+    blastCheck(p);
+  }
+}
+
+
 
 
 // ======================================================================
@@ -12228,234 +12813,8 @@ function updateBattle(dt) {
       continue; // 崖つかまり中は通常処理スキップ
     }
 
-    // === 固有個性システム更新 ===
-    // ゼン(0): 氷ゲージ自然減少（毎秒-3 = 毎20Fに-1）
-    if (p.charIdx === 0 && battleFrame % 20 === 0 && p.zenIceGauge > 0) p.zenIceGauge = Math.max(0, p.zenIceGauge - 1);
-    // 波おじ(13): スタミナ回復（毎秒+5 = 毎12Fに+1）
-    if (p.charIdx === 13) {
-      if (p.namiojiExhausted > 0) { p.namiojiExhausted--; }
-      else if (battleFrame % 12 === 0 && p.namiojiStamina < 100) p.namiojiStamina = Math.min(100, p.namiojiStamina + 1);
-      if (p.namiojiFullPower > 0) p.namiojiFullPower--;
-    }
-    // キング(16): 時間停止タイマー・速度ボーナス
-    if (p.charIdx === 16) {
-      if (p.kingTimeStop > 0) {
-        p.kingTimeStop--;
-        // 時間停止中: 相手を完全停止
-        for (const t of players) {
-          if (t.id !== p.id && t.alive) { t.vx = 0; t.vy = 0; t.hitstun = Math.max(t.hitstun, 2); }
-        }
-      }
-    }
-    // ジャッジマン(9): 最終審判モードタイマー
-    if (p.charIdx === 9 && p.judgeFinalMode > 0) p.judgeFinalMode--;
-    // 天才(10): 龍気ゲージ消費（龍モード中毎秒-10 = 毎6Fに-1）
-    if (p.charIdx === 10 && p.dragonMode && battleFrame % 6 === 0) {
-      p.tensaiDragonGauge = Math.max(0, p.tensaiDragonGauge - 1);
-      if (p.tensaiDragonGauge <= 0) {
-        p.dragonMode = false; p.dragonCooldown = 600; p.weight = 0.8;
-        cmdNameDisplay.push({ text: 'HUMAN MODE', x: p.x, y: p.y - 120, life: 60, maxLife: 60, color: '#FF8833' });
-      }
-    }
-    // Catbus(11): テレポートリチャージ（8秒ごと = 480F）
-    if (p.charIdx === 11) {
-      if (p.catbusTeleCharges < 3) {
-        p.catbusTeleRecharge++;
-        if (p.catbusTeleRecharge >= 480) { p.catbusTeleCharges++; p.catbusTeleRecharge = 0; }
-      }
-    }
-
-    // 熊太郎(6): テンション自然減少・激怒モード
-    if (p.charIdx === 6) {
-      if (p.kumaFuryMode > 0) p.kumaFuryMode--;
-      if (p.kumaFuryCooldown > 0) p.kumaFuryCooldown--;
-      if (battleFrame % 12 === 0 && p.kumaFury > 0 && !p.kumaFuryMode) p.kumaFury = Math.max(0, p.kumaFury - 1);
-      if (p.kumaFury >= 100 && !p.kumaFuryMode && p.kumaFuryCooldown <= 0) {
-        p.kumaFuryMode = 480; p.kumaFury = 0;
-        cmdNameDisplay.push({ text: 'Fury Mode!', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#FF4444' });
-      }
-    }
-    // シャうでん(8): 電圧自然減少・過電圧モード
-    if (p.charIdx === 8) {
-      if (p.shawdenOvercharge > 0) p.shawdenOvercharge--;
-      if (battleFrame % 20 === 0 && p.shawdenVoltage > 0 && !p.shawdenOvercharge) p.shawdenVoltage = Math.max(0, p.shawdenVoltage - 1);
-      if (p.shawdenVoltage >= 100 && !p.shawdenOvercharge) {
-        p.shawdenOvercharge = 300; p.shawdenVoltage = 0;
-        cmdNameDisplay.push({ text: 'Overvolt!', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#FFFF44' });
-      }
-    }
-    // サム(15): 空中滞在タイマー
-    if (p.charIdx === 15) {
-      if (!p.grounded) { p.samAirTimer++; if (p.samAirTimer === 600) cmdNameDisplay.push({ text: 'AIR MASTER!!', x: p.x, y: p.y - 100, life: 90, maxLife: 90, color: '#FFD700' }); }
-      else p.samAirTimer = 0;
-    }
-    // セン(18): 出世は applyHit内で処理
-    // マイクロ(20): 離脱体復帰
-    if (p.charIdx === 20 && p.microBodies < 3) {
-      p.microRejoinTimer++;
-      if (p.microRejoinTimer >= 420) { p.microBodies = Math.min(3, p.microBodies + 1); p.microRejoinTimer = 0; } // 10秒→7秒
-    }
-    // ドスボス(19): 装甲回復・大破
-    if (p.charIdx === 19) {
-      if (p.dosbossBroken > 0) { p.dosbossBroken--; if (p.dosbossBroken <= 0) { p.dosbossArmor = 100; cmdNameDisplay.push({ text: 'Repaired', x: p.x, y: p.y - 100, life: 45, maxLife: 45, color: '#CC66FF' }); } }
-      else if (battleFrame % 20 === 0 && p.dosbossArmor < 100) p.dosbossArmor = Math.min(100, p.dosbossArmor + 1);
-    }
-
-    // メテオ(3): 燃焼ゲージ自然減少
-    if (p.charIdx === 3 && battleFrame % 15 === 0 && p.meteoBurnGauge > 0) p.meteoBurnGauge = Math.max(0, p.meteoBurnGauge - 1);
-    // ヤッホ(25): カオスイベント
-    if (p.charIdx === 25) {
-      if (p.yahoChaosEvent > 0) p.yahoChaosEvent--;
-      p.yahoChaosCooldown++;
-      if (p.yahoChaosCooldown >= 600 && p.yahoChaosEvent <= 0) { // 10秒ごと
-        p.yahoChaosCooldown = 0;
-        p.yahoChaosType = Math.floor(Math.random() * 6);
-        p.yahoChaosEvent = [300, 180, 120, 120, 60, 180][p.yahoChaosType];
-        cmdNameDisplay.push({ text: 'CHAOS!!', x: p.x, y: p.y - 100, life: 45, maxLife: 45, color: '#FF' + Math.floor(Math.random()*256).toString(16).padStart(2,'0') + Math.floor(Math.random()*256).toString(16).padStart(2,'0') });
-      }
-    }
-    // 怖(24): 恐怖ゲージ自然減少
-    if (p.charIdx === 24 && battleFrame % 20 === 0 && p.kowaiFearGauge2 > 0) p.kowaiFearGauge2 = Math.max(0, p.kowaiFearGauge2 - 1);
-    // サトル(23): 闘志自然減少・マスターモード
-    if (p.charIdx === 23) {
-      if (p.satoruMasterMode > 0) p.satoruMasterMode--;
-      if (battleFrame % 12 === 0 && p.satoruFightGauge > 0 && !p.satoruMasterMode) p.satoruFightGauge = Math.max(0, p.satoruFightGauge - 1);
-      if (p.satoruFightGauge >= 100 && !p.satoruMasterMode) {
-        p.satoruMasterMode = 480; p.satoruFightGauge = 0;
-        cmdNameDisplay.push({ text: 'TAEKWONDO MASTER!!', x: p.x, y: p.y - 100, life: 90, maxLife: 90, color: '#FF4444' });
-      }
-    }
-    // プル(27): 引力ゲージ自然減少・重力崩壊
-    if (p.charIdx === 27) {
-      if (p.pullCollapseMode > 0) p.pullCollapseMode--;
-      if (battleFrame % 20 === 0 && p.pullGravGauge > 0 && !p.pullCollapseMode) p.pullGravGauge = Math.max(0, p.pullGravGauge - 1);
-      if (p.pullGravGauge >= 100 && !p.pullCollapseMode) {
-        p.pullCollapseMode = 360; p.pullGravGauge = 0;
-        cmdNameDisplay.push({ text: 'GRAVITY COLLAPSE!!', x: p.x, y: p.y - 100, life: 90, maxLife: 90, color: '#AA66FF' });
-      }
-    }
-    // 金金(22): 資産自然減少・億万長者・コンボ黄金モード
-    if (p.charIdx === 22) {
-      if (p.kinkinComboGold > 0) p.kinkinComboGold--;
-      if (p.kinkinGoldMode > 0) p.kinkinGoldMode--;
-      if (p.kinkinAssetGauge >= 100 && !p.kinkinGoldMode) {
-        p.kinkinGoldMode = 480; p.kinkinAssetGauge = 0;
-        cmdNameDisplay.push({ text: 'GOLD RUSH!!', x: p.x, y: p.y - 100, life: 90, maxLife: 90, color: '#FFD700' });
-      }
-    }
-    // ロング(4): 穿孔ゲージ自然減少・龍槍モード
-    if (p.charIdx === 4) {
-      if (p.longDragonSpear > 0) p.longDragonSpear--;
-      if (battleFrame % 20 === 0 && p.longPierceGauge > 0 && !p.longDragonSpear) p.longPierceGauge = Math.max(0, p.longPierceGauge - 1);
-      if (p.longPierceGauge >= 100 && !p.longDragonSpear) {
-        p.longDragonSpear = 360; p.longPierceGauge = 0;
-        cmdNameDisplay.push({ text: 'DRAGON SPEAR!!', x: p.x, y: p.y - 100, life: 90, maxLife: 90, color: '#44FFCC' });
-      }
-    }
-
-    // ドン(1): 大地ゲージ自然減少
-    if (p.charIdx === 1 && battleFrame % 30 === 0 && p.donEarthGauge > 0) p.donEarthGauge = Math.max(0, p.donEarthGauge - 1);
-    // サイソク(2): 加速ゲージ（移動で蓄積、静止で急減）
-    if (p.charIdx === 2) {
-      if (p.saisokuLightSpeed > 0) p.saisokuLightSpeed--;
-      const spd = Math.abs(p.vx);
-      if (spd > 1) p.saisokuAccelGauge = Math.min(100, (p.saisokuAccelGauge||0) + spd * 0.05);
-      else if (battleFrame % 6 === 0) p.saisokuAccelGauge = Math.max(0, (p.saisokuAccelGauge||0) - 1);
-      if (p.saisokuAccelGauge >= 100 && !p.saisokuLightSpeed) {
-        p.saisokuLightSpeed = 300; p.saisokuAccelGauge = 0;
-        cmdNameDisplay.push({ text: 'LIGHT SPEED!!', x: p.x, y: p.y - 100, life: 90, maxLife: 90, color: '#FFFFFF' });
-      }
-    }
-    // うる男(5): 野性ゲージ自然減少
-    if (p.charIdx === 5) {
-      if (p.uruoWildRelease > 0) p.uruoWildRelease--;
-      if (battleFrame % 20 === 0 && p.uruoWildGauge > 0 && !p.uruoWildRelease) p.uruoWildGauge = Math.max(0, p.uruoWildGauge - 1);
-      if (p.uruoWildGauge >= 100 && !p.uruoWildRelease) {
-        p.uruoWildRelease = 420; p.uruoWildGauge = 0;
-        cmdNameDisplay.push({ text: 'WILD RELEASE!!', x: p.x, y: p.y - 100, life: 90, maxLife: 90, color: '#88CCFF' });
-      }
-    }
-    // バレット(7): 魔法ゲージ自然減少
-    if (p.charIdx === 7) {
-      if (p.bulletAwaken > 0) p.bulletAwaken--;
-      if (battleFrame % 20 === 0 && p.bulletMagicGauge > 0 && !p.bulletAwaken) p.bulletMagicGauge = Math.max(0, p.bulletMagicGauge - 1);
-      if (p.bulletMagicGauge >= 100 && !p.bulletAwaken) {
-        p.bulletAwaken = 480; p.bulletMagicGauge = 0;
-        cmdNameDisplay.push({ text: 'MAGICAL BURST!!', x: p.x, y: p.y - 100, life: 90, maxLife: 90, color: '#FF66AA' });
-      }
-    }
-    // タンク(12): 弾薬補充(20秒=1200F)
-    if (p.charIdx === 12 && p.tankAmmo < 5) {
-      p.tankReloadTimer++;
-      if (p.tankReloadTimer >= 720) { p.tankAmmo++; p.tankReloadTimer = 0; } // 20秒→12秒
-    }
-    // おんぱ(17): 周波数自然減少
-    if (p.charIdx === 17) {
-      if (p.onpaResonance > 0) p.onpaResonance--;
-      if (battleFrame % 15 === 0 && p.onpaFreqGauge > 0 && !p.onpaResonance) p.onpaFreqGauge = Math.max(0, p.onpaFreqGauge - 1);
-      if (p.onpaFreqGauge >= 100 && !p.onpaResonance) {
-        p.onpaResonance = 360; p.onpaFreqGauge = 0;
-        cmdNameDisplay.push({ text: 'RESONANCE!!', x: p.x, y: p.y - 100, life: 90, maxLife: 90, color: '#88FFFF' });
-      }
-    }
-    // ミスターツー(21): 爆炎融合
-    if (p.charIdx === 21) {
-      if (p.mrtwoDualBlast > 0) p.mrtwoDualBlast--;
-      if (p.mrtwoDualL >= 80 && p.mrtwoDualR >= 80 && !p.mrtwoDualBlast) {
-        p.mrtwoDualBlast = 360; p.mrtwoDualL = 0; p.mrtwoDualR = 0;
-        cmdNameDisplay.push({ text: 'DUAL BLAST!!', x: p.x, y: p.y - 100, life: 90, maxLife: 90, color: '#FF6688' });
-      }
-    }
-
-    // ぽよ(26): スライムゲージ自然減少・ダブルスライム
-    if (p.charIdx === 26) {
-      if (p.poyoDoubleSlime > 0) p.poyoDoubleSlime--;
-      if (battleFrame % 15 === 0 && p.poyoSlimeGauge > 0 && !p.poyoDoubleSlime) p.poyoSlimeGauge = Math.max(0, p.poyoSlimeGauge - 1);
-      if (p.poyoSlimeGauge >= 100 && !p.poyoDoubleSlime) {
-        p.poyoDoubleSlime = 480; p.poyoSlimeGauge = 0; // 8秒
-        cmdNameDisplay.push({ text: 'DOUBLE SLIME!!', x: p.x, y: p.y - 100, life: 90, maxLife: 90, color: '#FF88CC' });
-        hitEffects.push({ x: p.x, y: p.y - 35, life: 15, maxLife: 15, color: '#FF88CC', size: 50, type: 'ring' });
-        playHitSound('justGuard');
-      }
-      // ダブルスライム: 2回目攻撃の自動発動
-      if (p.poyoDoubleHitTimer > 0) {
-        p.poyoDoubleHitTimer--;
-        if (p.poyoDoubleHitTimer <= 0 && p.poyoDoubleHitData && p.poyoDoubleHitTarget !== null) {
-          const t2 = players.find(pp => pp.id === p.poyoDoubleHitTarget);
-          if (t2 && t2.alive && t2.invincibleTimer <= 0) {
-            const d2 = p.poyoDoubleHitData;
-            applyHit(p, t2, d2.damage * 0.6, d2.kbBase * 0.5, d2.kbScale * 0.5, d2.kbAngle, d2.hitType);
-            sparks.push({ x: t2.x, y: t2.y - 35, vx: (Math.random()-0.5)*3, vy: -1, life: 8, maxLife: 8, color: '#FF88CC', size: 3, gravity: 0.05, drag: 0.95 });
-          }
-          p.poyoDoubleHitData = null; p.poyoDoubleHitTarget = null;
-        }
-      }
-    }
-
-    // 強化モード発動チェック（発動1F目にエフェクト）
-    const ch6 = characters[p.charIdx];
-    const modeCheck = [
-      { t: p.kumaFuryMode, prev: '_prevKumaFury' },
-      { t: p.saisokuLightSpeed, prev: '_prevSaisokuLS' },
-      { t: p.uruoWildRelease, prev: '_prevUruoWR' },
-      { t: p.bulletAwaken, prev: '_prevBulletAw' },
-      { t: p.shawdenOvercharge, prev: '_prevShawdenOC' },
-      { t: p.onpaResonance, prev: '_prevOnpaRes' },
-      { t: p.kinkinComboGold, prev: '_prevKinkinCG' },
-      { t: p.kinkinGoldMode, prev: '_prevKinkinGM' },
-      { t: p.longDragonSpear, prev: '_prevLongDS' },
-      { t: p.pullCollapseMode, prev: '_prevPullCM' },
-      { t: p.satoruMasterMode, prev: '_prevSatoruMM' },
-      { t: p.poyoDoubleSlime, prev: '_prevPoyoDS' },
-      { t: p.botRobot, prev: '_prevBotRobot' },
-      { t: p.chattaFly, prev: '_prevChattaFly' },
-    ];
-    for (const mc of modeCheck) {
-      if (mc.t > 0 && !p[mc.prev]) {
-        triggerGaugeMaxEffect(p, '', ch6 ? ch6.accent : '#FFD700');
-      }
-      p[mc.prev] = mc.t > 0;
-    }
+    // キャラ固有の ゲージ更新は updateCharacterGauges() に まとめてある
+    updateCharacterGauges(p);
 
     // === 固有パッシブシステム更新 ===
     const ci = p.charIdx;
@@ -12988,345 +13347,8 @@ function updateBattle(dt) {
       continue;
     }
 
-    // Attack update
-    if (p.attacking) {
-      p.attackFrame++;
-      const atk = p.attackData;
-      const totalFrames = atk.startup + atk.active + atk.recovery;
-
-      // Special movement attacks
-      if (atk.specialType === 'jumpSlam') {
-        if (p.attackFrame === atk.startup) {
-          p.vy = atk.jumpPower;
-          p.specialState = 'jumping';
-          p.grounded = false;
-        }
-        if (p.specialState === 'jumping') {
-          p.vy += getGravity(p);
-          if (p.vy > 0) { p.specialState = 'slamming'; p.vy = 16; }
-        }
-        if (p.specialState === 'slamming') {
-          p.vy = 16;
-          // 降下中も攻撃判定を出す（足元hitbox）
-          const slamW = atk.slamHw || atk.hw || 60;
-          const slamH = atk.slamHh || atk.hh || 40;
-          const slamHb = { x: p.x - slamW / 2, y: p.y - 10, w: slamW, h: slamH };
-          checkHitboxAgainstPlayers(p, slamHb, atk.damage * 0.7, atk.kbBase, atk.kbScale, 80, 'strong');
-          // Check if we hit ground
-          if (p.grounded) {
-            // Slam hit!
-            p.specialState = 'slamHit';
-            p.attackFrame = atk.startup + 1; // start active frames
-            p.hitTargets = []; // 着地時にリセットして着地ヒットも判定
-          }
-        }
-        if (p.specialState === 'slamHit') {
-          const slamFrame = p.attackFrame - atk.startup;
-          if (slamFrame <= atk.slamActive) {
-            const hb = { x: p.x - atk.slamHw / 2, y: p.y + atk.slamHy, w: atk.slamHw, h: atk.slamHh };
-            checkHitboxAgainstPlayers(p, hb, atk.damage, atk.kbBase, atk.kbScale, atk.kbAngle, 'strong');
-          }
-          if (slamFrame > atk.slamActive + atk.recovery) {
-            if (p.hitTargets.length === 0) {
-              showHitDisplay(p.x, p.y, false);
-              playHitSound('miss');
-            }
-            p.attacking = false; p.specialState = null;
-          }
-        }
-        // Apply movement (limited horizontal control)
-        p.x += p.vx * 0.3;
-        p.y += p.vy;
-        landingCheck(p);
-        blastCheck(p);
-        if (p.specialState !== 'slamHit') continue;
-        if (p.attacking) continue;
-      }
-
-      if (atk.specialType === 'shadowDash' && p.attackFrame > atk.startup && p.attackFrame <= atk.startup + atk.active) {
-        const dir = p.facingLeft ? -1 : 1;
-        p.vx = atk.dashSpeed * dir;
-        p.specialState = 'dashing';
-      } else if (atk.specialType === 'shadowDash' && p.attackFrame > atk.startup + atk.active) {
-        p.specialState = null;
-        p.vx *= 0.3;
-      }
-
-      // Slide (sweep / sliding)
-      if (atk.specialType === 'slide' && p.attackFrame > atk.startup && p.attackFrame <= atk.startup + atk.active) {
-        const dir = p.facingLeft ? -1 : 1;
-        p.vx = atk.slideSpeed * dir;
-        p.specialState = 'sliding';
-      } else if (atk.specialType === 'slide' && p.attackFrame > atk.startup + atk.active) {
-        p.specialState = null;
-        p.vx *= 0.3;
-      }
-
-      if (atk.specialType === 'uppercut' && p.attackFrame === atk.startup + 1) {
-        p.vy = atk.launchVy;
-        p.grounded = false;
-        p.specialState = 'rising';
-      }
-      if (atk.specialType === 'uppercut' && p.attackFrame > atk.startup + atk.active) {
-        p.specialState = null;
-      }
-
-      // Divekick: 空中下攻撃で急降下
-      if (atk.specialType === 'divekick' && p.attackFrame > atk.startup && p.attackFrame <= atk.startup + atk.active) {
-        p.vy = atk.diveSpeed;
-        p.vx *= 0.3;
-        p.specialState = 'diving';
-      }
-      if (atk.specialType === 'divekick' && p.attackFrame > atk.startup + atk.active) {
-        p.specialState = null;
-      }
-
-      // Command: Teleport Slash (Zen cmd2)
-      if (atk.specialType === 'cmdTeleSlash' && p.attackFrame === atk.startup) {
-        const dir = p.facingLeft ? -1 : 1;
-        p.x += atk.teleportDist * dir;
-        p.specialState = 'teleSlashing';
-        // Clamp to stage
-        p.x = Math.max(BLAST_LEFT + 30, Math.min(BLAST_RIGHT - 30, p.x));
-      }
-      if (atk.specialType === 'cmdTeleSlash' && p.attackFrame > atk.startup + atk.active) {
-        p.specialState = null;
-      }
-
-      // Command: Charge (Don cmd2)
-      if (atk.specialType === 'cmdCharge' && p.attackFrame > atk.startup && p.attackFrame <= atk.startup + atk.active) {
-        const dir = p.facingLeft ? -1 : 1;
-        p.vx = atk.chargeSpeed * dir;
-        p.specialState = 'charging';
-      } else if (atk.specialType === 'cmdCharge' && p.attackFrame > atk.startup + atk.active) {
-        p.specialState = null;
-        p.vx *= 0.2;
-      }
-
-      // Command: Shuriken Storm (Saisoku cmd1)
-      if (atk.specialType === 'cmdShurikenStorm' && p.attackFrame > atk.startup && p.attackFrame <= atk.startup + atk.active) {
-        if ((p.attackFrame - atk.startup) % 3 === 1) {
-          const dir = p.facingLeft ? -1 : 1;
-          const spread = (Math.random() - 0.5) * 4;
-          projectiles.push({
-            x: p.x + 20 * dir, y: p.y - 40 + spread * 5,
-            vx: (10 + Math.random() * 3) * dir, vy: spread,
-            w: 14, h: 14,
-            damage: 4, kbBase: 1.5, kbScale: 0.03, kbAngle: -5,
-            life: 35, ownerId: p.id,
-            color: '#88FFCC', pcolor: '#AAFFDD',
-            shape: 'star', ownerCharIdx: p.charIdx, time: 0,
-          });
-        }
-      }
-
-      // Command: Clone Rush (Saisoku cmd2)
-      if (atk.specialType === 'cmdCloneRush' && p.attackFrame > atk.startup && p.attackFrame <= atk.startup + atk.active) {
-        p.specialState = 'cloneRush';
-      }
-      if (atk.specialType === 'cmdCloneRush' && p.attackFrame > atk.startup + atk.active) {
-        p.specialState = null;
-      }
-
-      // Active frames - check hitbox
-      if (p.attackFrame > atk.startup && p.attackFrame <= atk.startup + atk.active) {
-        // Spawn projectile on first active frame (or multi-shot)
-        if (atk.projectile) {
-          if (atk.multiShot && atk.shotInterval) {
-            const activeFrame = p.attackFrame - atk.startup;
-            if (activeFrame >= 1 && activeFrame <= atk.multiShot * atk.shotInterval && (activeFrame - 1) % atk.shotInterval === 0) {
-              spawnProjectile(p, atk.projectile);
-            }
-          } else if (p.attackFrame === atk.startup + 1) {
-            spawnProjectile(p, atk.projectile);
-          }
-        }
-        // BulletStorm: scatter random projectiles during active frames
-        if (atk.specialType === 'bulletStorm' && p.attackFrame % 2 === 0) {
-          const dir = p.facingLeft ? -1 : 1;
-          const angle = (Math.random() - 0.3) * Math.PI * 0.8;
-          projectiles.push({
-            x: p.x + 20 * dir, y: p.y - 40,
-            vx: Math.cos(angle) * 10 * dir, vy: Math.sin(angle) * 10,
-            w: 10, h: 8,
-            damage: 3, kbBase: 2, kbScale: 0.03, kbAngle: -15,
-            life: 40, ownerId: p.id,
-            color: '#FF66AA', pcolor: '#FFAACC',
-            shape: 'rect', ownerCharIdx: p.charIdx, time: 0,
-            homing: false, pierce: false,
-          });
-        }
-
-        // Determine hit type for effects
-        const ht = p.attackType === 'command' ? 'cmd' : p.attackType || 'normal';
-
-        // Melee hitbox
-        if (atk.hw > 0 && atk.hh > 0) {
-          let hitbox;
-          if (atk.centerHit) {
-            hitbox = { x: p.x - atk.hw / 2, y: p.y + atk.hy, w: atk.hw, h: atk.hh };
-          } else {
-            hitbox = getAttackHitbox(p, atk);
-          }
-
-          if (atk.multiHit) {
-            const sinceLastHit = p.attackFrame - p.lastHitFrame;
-            const isLast = p.attackFrame >= atk.startup + atk.active - 2;
-            if (sinceLastHit >= atk.hitInterval) {
-              const dmg = isLast ? atk.finalDamage : atk.damage;
-              const kb = isLast ? atk.finalKbBase : atk.kbBase;
-              const ks = isLast ? atk.finalKbScale : atk.kbScale;
-              const ka = isLast ? atk.finalKbAngle : atk.kbAngle;
-              // Clear targets for multi-hit
-              p.hitTargets = [];
-              if (checkHitboxAgainstPlayers(p, hitbox, dmg, kb, ks, ka, ht)) {
-                p.lastHitFrame = p.attackFrame;
-              }
-            }
-          } else {
-            checkHitboxAgainstPlayers(p, hitbox, atk.damage, atk.kbBase, atk.kbScale, atk.kbAngle, ht);
-          }
-        }
-      }
-
-      // ドスボス: ランダムキャノン - startup終了後の最初のactiveフレームで発動
-      if (atk.dosbossRandom && p.attackFrame === atk.startup + 1) {
-        const pattern = Math.floor(Math.random() * 3);
-        p.dosbossRandomPattern = pattern;
-        const dir = p.facingLeft ? -1 : 1;
-        if (pattern === 0) {
-          // パターンA: 通常砲撃 - 大きな砲弾
-          spawnProjectile(p, { speed:11, damage:11, kbBase:6, kbScale:0.10, kbAngle:-25, w:30, h:28, life:45, color:'#CC66FF', pcolor:'#9944CC' });
-          cmdNameDisplay.push({ text: 'Normal Shot!', x: p.x, y: p.y - 100, life: 45, maxLife: 45, color: '#CC66FF' });
-        } else if (pattern === 1) {
-          // パターンB: 木投げ - スタン付き飛び道具
-          const proj = { speed:9, damage:7, kbBase:3, kbScale:0.05, kbAngle:-15, w:20, h:28, life:40, color:'#44AA22', pcolor:'#33881A' };
-          const pr = {
-            x: p.x + 30 * dir, y: p.y - 40,
-            vx: proj.speed * dir, vy: -2,
-            w: proj.w, h: proj.h,
-            damage: proj.damage, kbBase: proj.kbBase, kbScale: proj.kbScale, kbAngle: proj.kbAngle,
-            life: proj.life, ownerId: p.id,
-            color: proj.color, pcolor: proj.pcolor,
-            shape: 'rect', ownerCharIdx: p.charIdx, time: 0,
-            stun: true, stunFrames: 30,
-            meshitero: false,
-          };
-          projectiles.push(pr);
-          cmdNameDisplay.push({ text: 'Log Throw!', x: p.x, y: p.y - 100, life: 45, maxLife: 45, color: '#44AA22' });
-        } else {
-          // パターンC: 自爆爆発 - 自分もダメージ、周囲に大ダメージ
-          // パッシブ: ドスボス(19) ランダム強化 パターンCダメージ+15%
-          cmdNameDisplay.push({ text: 'BOOM!', x: p.x, y: p.y - 100, life: 60, maxLife: 60, color: '#FF6600' });
-          p.damage = Math.min(999, p.damage + 6);
-          const boomHitbox = { x: p.x - 70, y: p.y - 70, w: 140, h: 100 };
-          const boomDmg = p.charIdx === 19 ? Math.floor(15 * 1.15) : 15;
-          checkHitboxAgainstPlayers(p, boomHitbox, boomDmg, 8, 0.14, -40, 'special');
-          triggerScreenShake(8, 15);
-          hitFlash.alpha = 0.3;
-          hitFlash.color = '#FF6600';
-          hitEffects.push({ x: p.x, y: p.y - 35, life: 20, maxLife: 20, color: '#FF6600', size: 80 });
-          hitEffects.push({ x: p.x, y: p.y - 35, life: 15, maxLife: 15, color: '#9944CC', size: 120, type: 'ring' });
-        }
-      }
-
-      // ドスボス: デコイ設置
-      if (atk.dosbossDecoy && p.attackFrame === atk.startup + 1) {
-        const dir = p.facingLeft ? -1 : 1;
-        const decoyX = p.x + 80 * dir;
-        sparks.push({
-          x: decoyX, y: p.y,
-          vx: 0, vy: 0,
-          life: 180, maxLife: 180,
-          color: '#CC66FF',
-          type: 'dosbossDecoy',
-          gravity: 0, drag: 1,
-          ownerId: p.id, ownerCharIdx: p.charIdx,
-          decoyX: decoyX, decoyY: p.y,
-        });
-        cmdNameDisplay.push({ text: 'Decoy!', x: decoyX, y: p.y - 80, life: 45, maxLife: 45, color: '#CC66FF' });
-      }
-
-      // End attack
-      if (p.attackFrame >= totalFrames) {
-        // Show MISS if melee attack hit nobody (skip projectile-only attacks)
-        if (p.hitTargets.length === 0 && atk.hw > 0) {
-          const dir = p.facingLeft ? -1 : 1;
-          showHitDisplay(p.x + 30 * dir, p.y, false);
-          playHitSound('miss');
-          // 空振り時の慣性ペナルティ: 攻撃方向に少し滑る + 硬直感
-          if (p.grounded) {
-            p.vx = dir * 1.5;
-            p.landLag = Math.max(p.landLag || 0, 4); // 空振り硬直4F
-          }
-        }
-        // セン: 満腹パワーバフ発動
-        if (atk.senBuff) {
-          // パッシブ: セン(18) バフ延長+15%
-          p.senBuffTimer = p.charIdx === 18 ? 690 : 600; // 11.5秒 or 10秒
-          cmdNameDisplay.push({ text: 'Full Belly Power!', x: p.x, y: p.y - 120, life: 90, maxLife: 90, color: '#FF8844' });
-        }
-        // 金金: お金の鎧発動
-        if (atk.kingkingArmor) {
-          p.kingkingArmorTimer = 600; // 10秒
-          cmdNameDisplay.push({ text: 'MONEY POWER!', x: p.x, y: p.y - 120, life: 90, maxLife: 90, color: '#FFD700' });
-          hitFlash.alpha = 0.25; hitFlash.color = '#FFD700';
-          triggerScreenShake(5, 10);
-          hitEffects.push({ x: p.x, y: p.y - 40, life: 25, maxLife: 25, color: '#FFD700', size: 60, type: 'ring' });
-          hitEffects.push({ x: p.x, y: p.y - 40, life: 20, maxLife: 20, color: '#DAA520', size: 40, type: 'charGlow' });
-          for (let i = 0; i < 12; i++) sparks.push({ x: p.x+(Math.random()-0.5)*40, y: p.y-40+(Math.random()-0.5)*40, vx:(Math.random()-0.5)*5, vy:-2-Math.random()*3, life:20, maxLife:20, color:i%2?'#FFD700':'#DAA520', size:3+Math.random()*2, gravity:0.1, drag:0.96 });
-        }
-        p.attacking = false;
-        p.specialState = null;
-      }
-
-      // During attack, limited movement
-      if (atk.specialType === 'shadowDash' || atk.specialType === 'slide' || atk.specialType === 'cmdCharge') {
-        p.vy += getGravity(p);
-        if (p.vy > MAX_FALL_SPEED) p.vy = MAX_FALL_SPEED;
-        p.x += p.vx;
-        p.y += p.vy;
-        // ステージ範囲内にクランプ（テレポート等の画面外防止）
-        if (p.x < BLAST_LEFT + 50) p.x = BLAST_LEFT + 50;
-        if (p.x > BLAST_RIGHT - 50) p.x = BLAST_RIGHT - 50;
-        if (p.y < BLAST_TOP + 50) p.y = BLAST_TOP + 50;
-        landingCheck(p);
-        blastCheck(p);
-      } else if (atk.specialType !== 'jumpSlam') {
-        p.vy += getGravity(p);
-        if (p.vy > MAX_FALL_SPEED) p.vy = MAX_FALL_SPEED;
-        if (p.grounded) {
-          // 地上攻撃: 横移動を大幅制限
-          p.x += p.vx * 0.3;
-          p.vx *= 0.85;
-        } else {
-          // 空中攻撃: 慣性を維持し、入力で微調整可能
-          p.x += p.vx;
-          p.vx *= 0.98; // 軽い空気抵抗のみ
-          // 空中攻撃中の横入力（moveXはcontinueでスキップされるのでここで取得）
-          let airMoveX = 0;
-          if (p.id === 0) {
-            if (onlineMode && !isHost) { if (remoteKeys.left) airMoveX = -1; if (remoteKeys.right) airMoveX = 1; }
-            else { if (keys['ArrowLeft']) airMoveX = -1; if (keys['ArrowRight']) airMoveX = 1; }
-          } else if (p.id === 1) {
-            if (onlineMode && isHost) { if (remoteKeys.left) airMoveX = -1; if (remoteKeys.right) airMoveX = 1; }
-            else if (!(gameMode === 'cpu' || bossRushMode)) {
-              if (onlineMode && !isHost) { if (keys['ArrowLeft']) airMoveX = -1; if (keys['ArrowRight']) airMoveX = 1; }
-              else { if (keys['a'] || keys['A']) airMoveX = -1; if (keys['d'] || keys['D']) airMoveX = 1; }
-            }
-          }
-          if (airMoveX !== 0) {
-            const ch2 = characters[p.charIdx];
-            const airDrift = ch2.moveSpeed * AIR_SPEED_MULT * 0.65;
-            p.vx += airMoveX * AIR_ACCEL * airDrift * 0.06; // 空中攻撃中の横入力を弱める
-          }
-        }
-        p.y += p.vy;
-        landingCheck(p);
-        blastCheck(p);
-      }
-      continue;
-    }
+    // 攻撃中の 処理は updateAttackFrames() に まとめてある
+    if (p.attacking) { updateAttackFrames(p); continue; }
 
     // --- Guard handling ---
     let wantsGuard = false;
