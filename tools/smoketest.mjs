@@ -779,6 +779,70 @@ try {
       if (ERRORS.length > errBefore) netBad2.push((ERRORS.length - errBefore) + ' 件の 例外を 握りつぶした');
       check('online protocol survives junk', netBad2.length === 0, netBad2.slice(0,3).join(' | ') || '8 scenarios, no swallowed errors');
 
+      // --- オンラインの 時間切れ引き分けで ゲストが 固まらないか ---
+      //     ホストが isDraw を 送らず、winner も -1 なので ゲスト側の
+      //     GAME SET 演出が 始まらず、Enter も ESC も 一生 効かなかった
+      var drawBad2 = [];
+      try {
+        function fakeConn2() {
+          return { open:true, sent:[], h:{},
+                   on:function(e,f){ this.h[e]=f; }, send:function(m){ this.sent.push(m); }, close:function(){} };
+        }
+        isHost = false; scene = 'online'; transitioning = false;
+        var dc = fakeConn2(); setupPeerConnection(dc); dc.h.open();
+        p1Select = 0; p2Select = 1; selectedStage = 0;
+        scene = 'battle'; transitioning = false; initBattle(); run(300);
+        dc.h.data({ type:'state', _ts: 0,
+          p1: serializePlayer(players[0]), p2: serializePlayer(players[1]),
+          battleTimer: 0, battleStarted: true, battleCountdown: 0,
+          gameOver: true, winner: -1, isDraw: true,
+          hitStopFrames: 0, koSlowMotion: { active:false, frames:0, maxFrames:90 },
+          projectiles: [], combo0: null, combo1: null });
+        run(400);
+        if (!gameOver) drawBad2.push('guest did not see gameOver');
+        if (!isDraw) drawBad2.push('isDraw not synced');
+        if (gameSetPhase === 0) drawBad2.push('GAME SET never started');
+        if (!(gameSetTimer > 180)) drawBad2.push('gameSetTimer stuck at ' + gameSetTimer + ' - Enter/ESC would never work');
+      } catch (e) { drawBad2.push('threw: ' + e.message); }
+      onlineMode = false; isHost = false; remoteKeys = {}; prevRemoteKeys = {};
+      check('online draw does not soft-lock the guest', drawBad2.length === 0,
+            drawBad2.join(' | ') || 'GAME SET runs, input accepted');
+
+      // --- タブを 離れた とき キーが 残らないか ---
+      var blurBad = [];
+      try {
+        battle(0, 1, 100);
+        keys['ArrowRight'] = true; keys['Shift'] = true;
+        window.dispatchEvent(new Event('blur'));
+        var held = Object.keys(keys).filter(function (k) { return keys[k]; });
+        if (held.length) blurBad.push('blur left keys held: ' + held.join(','));
+      } catch (e) { blurBad.push('threw: ' + e.message); }
+      for (var bk in keys) delete keys[bk];
+      check('held keys clear when the tab loses focus', blurBad.length === 0,
+            blurBad.join(' | ') || 'blur + visibilitychange');
+
+      // --- 描画で 例外が 出ても 操作不能に ならないか ---
+      var resilBad = [];
+      try {
+        battle(0, 1, 100);
+        scene = 'select'; transitioning = false; selectTransition = 0;
+        startTransition('title');
+        var realDrawSelect = drawSelect;
+        // わざと 描画で 投げさせる
+        window.drawSelect = function(){ throw new Error('smoketest: forced draw failure'); };
+        var guard = 0;
+        while (transitioning && guard++ < 200) { T += STEP; gameLoop(T); }
+        window.drawSelect = realDrawSelect;
+        if (transitioning) resilBad.push('a draw failure stranded transitioning (all input dead)');
+        if (scene !== 'title') resilBad.push('transition did not complete, scene=' + scene);
+      } catch (e) { resilBad.push('threw: ' + e.message); }
+      // わざと 起こした 例外は 集計から 除く（本物の エラーは 残す）
+      for (var ei = ERRORS.length - 1; ei >= 0; ei--) {
+        if (ERRORS[ei].indexOf('smoketest: forced') >= 0) ERRORS.splice(ei, 1);
+      }
+      check('a draw failure cannot strand the UI', resilBad.length === 0,
+            resilBad.join(' | ') || 'transition still completes');
+
       // --- ポーズメニュー ---
       var pauseBad = [];
       try {

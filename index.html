@@ -22,54 +22,54 @@
 //   目次が ずれたら  node tools/toc.mjs  で 作り直す。
 //
 //   82    CANVAS / 画面サイズ
-//   920   音の ロック解除（最初の 操作で 呼ぶ）
-//   949   キャラ画像（遅延読み込み）
-//   1129  タイトル画面の 粒子
-//   1168  キャラの 絵 ①メニュー用（選択画面・詳細画面）
-//   2828  キャラの 絵 ②バトル用
-//   5344  描画ユーティリティ
-//   5393  画面: タイトル
-//   5517  画面: キャラ選択
-//   5767  画面: 難易度選択（CPU戦）
-//   5867  画面: ステージ選択
-//   6098  バトルの 定数 と 状態
-//   6500  復帰技 / パワーモードの 表示
-//   6548  カメラ / 画面揺れ
-//   6567  効果音（Web Audio で 合成）
-//   6988  観客の 音
-//   7331  ヒット表示 / コミック文字
-//   7359  掴み・投げ の 定数と キャラ別テーブル
-//   7410  コマンド技（→→↓↓+Z など）
-//   7901  技データ
-//   8666  プレイヤー生成 / 試合の 初期化
-//   9014  ヒット処理（ダメージ・ノックバック）
-//   10353 当たり判定
-//   10385 飛び道具
-//   10428 技の 発動（通常技・復帰技・ジャブ）
-//   10687 掴み・投げ の 実行
-//   10912 CPU の 思考
-//   11258 バトルの 毎フレーム更新（中核）
-//   13676 物理（移動・重力・着地・撃墜判定）
-//   14233 スマッシュ攻撃（方向2回 + X）
-//   14345 崖つかまり
-//   14442 D技 と 必殺技 の データ
-//   15264 D技の 中身（キャラ別）
-//   15413 空中回避
-//   15475 バトル描画の 下準備（カメラ・影・2.5D）
-//   15575 バトル画面の 描画
-//   17606 技の エフェクト描画
-//   18681 必殺技 / 即死技 の 全画面オーバーレイ
-//   18854 画面: コンボ一覧 / 戦績
-//   18986 キャラ別 ゲージの 描画（HUDの 下に 出る 細い バー）
-//   19197 バトルの HUD
-//   19468 オンライン対戦（PeerJS / ホストが 正）
-//   20412 画面: VS イントロ
-//   20697 画面の 切り替え（フェード）
-//   20732 ポーズメニュー（バトル中に ESC）
-//   20813 画面: キャラ詳細（Iキー）
-//   21044 画面: 操作説明
-//   21168 キー入力の 振り分け（画面ごと）
-//   21649 メインループ（60FPS 固定タイムステップ）
+//   922   音の ロック解除（最初の 操作で 呼ぶ）
+//   957   キャラ画像（遅延読み込み）
+//   1137  タイトル画面の 粒子
+//   1176  キャラの 絵 ①メニュー用（選択画面・詳細画面）
+//   2836  キャラの 絵 ②バトル用
+//   5357  描画ユーティリティ
+//   5406  画面: タイトル
+//   5530  画面: キャラ選択
+//   5780  画面: 難易度選択（CPU戦）
+//   5880  画面: ステージ選択
+//   6111  バトルの 定数 と 状態
+//   6513  復帰技 / パワーモードの 表示
+//   6561  カメラ / 画面揺れ
+//   6580  効果音（Web Audio で 合成）
+//   7001  観客の 音
+//   7344  ヒット表示 / コミック文字
+//   7372  掴み・投げ の 定数と キャラ別テーブル
+//   7423  コマンド技（→→↓↓+Z など）
+//   7914  技データ
+//   8679  プレイヤー生成 / 試合の 初期化
+//   9027  ヒット処理（ダメージ・ノックバック）
+//   10366 当たり判定
+//   10398 飛び道具
+//   10441 技の 発動（通常技・復帰技・ジャブ）
+//   10700 掴み・投げ の 実行
+//   10925 CPU の 思考
+//   11271 バトルの 毎フレーム更新（中核）
+//   13689 物理（移動・重力・着地・撃墜判定）
+//   14246 スマッシュ攻撃（方向2回 + X）
+//   14358 崖つかまり
+//   14455 D技 と 必殺技 の データ
+//   15318 D技の 中身（キャラ別）
+//   15467 空中回避
+//   15529 バトル描画の 下準備（カメラ・影・2.5D）
+//   15629 バトル画面の 描画
+//   17662 技の エフェクト描画
+//   18737 必殺技 / 即死技 の 全画面オーバーレイ
+//   18910 画面: コンボ一覧 / 戦績
+//   19042 キャラ別 ゲージの 描画（HUDの 下に 出る 細い バー）
+//   19253 バトルの HUD
+//   19524 オンライン対戦（PeerJS / ホストが 正）
+//   20478 画面: VS イントロ
+//   20763 画面の 切り替え（フェード）
+//   20798 ポーズメニュー（バトル中に ESC）
+//   20879 画面: キャラ詳細（Iキー）
+//   21110 画面: 操作説明
+//   21234 キー入力の 振り分け（画面ごと）
+//   21715 メインループ（60FPS 固定タイムステップ）
 //
 // ### 目次ここまで
 // ======================================================================
@@ -137,6 +137,8 @@ function runPauseItem(label) {
     closePause();
     stopBGM();
     bossRushMode = false;
+    ultimateActive = false; ultimatePhase = '';
+    try { removeUltimateVideo(); } catch (e) { ultimateVideoShowing = false; }
     if (onlineMode) { teardownOnlineSession(); onlineError = ''; }
     startTransition('title');
     return;
@@ -939,6 +941,12 @@ document.addEventListener('keydown', (e) => {
 });
 document.addEventListener('keyup', (e) => {
   keys[e.key] = false;
+});
+// 画面から 離れた ときに 押していた キーが そのまま 残ると、
+// 戻ってきた とき キャラが 勝手に 走り続ける（keyup が 来ないため）
+window.addEventListener('blur', () => { for (const k in keys) delete keys[k]; });
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) for (const k in keys) delete keys[k];
 });
 
 // --- Character images ---
@@ -3262,8 +3270,13 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
       spr = sprites[fallbacks[key]];
       if (spr && spr.complete && spr.naturalWidth > 0) return spr;
     }
-    spr = sprites['idle'];
-    if (spr && spr.complete && spr.naturalWidth > 0) return spr;
+    // 最後の 受け皿。idle が 無い キャラ（怖は idle.webp を 持っていない）だと
+    // ここで null を 返して しまい、止まった 瞬間だけ 手描きの 絵に 切り替わって
+    // 見た目が ちぐはぐに なる。立ち絵に 使えそうな ものを 順に 探す
+    for (const alt of ['idle', 'walk', 'jump', 'win', 'damage']) {
+      spr = sprites[alt];
+      if (spr && spr.complete && spr.naturalWidth > 0) return spr;
+    }
     return null;
   }
 
@@ -14490,6 +14503,13 @@ const ultimateData = [
 ];
 
 function removeUltimateVideo() {
+  // 見張り用の タイマーを 先に 止める。残すと 次の 必殺技の 動画を
+  // 古い 見張りが 打ち切って しまう
+  if (ultimateVideo) {
+    if (ultimateVideo.watch) { clearInterval(ultimateVideo.watch); ultimateVideo.watch = null; }
+    if (ultimateVideo.safety) { clearTimeout(ultimateVideo.safety); ultimateVideo.safety = null; }
+    if (ultimateVideo.done) ultimateVideo.done.finished = true;
+  }
   if (ultimateVideo && ultimateVideo.el) {
     const el = ultimateVideo.el;
     try { el.pause(); } catch (e) {}
@@ -14552,11 +14572,33 @@ function triggerUltimate(p) {
 // 真っ黒な 画面が 出て カクつくので、ゲージが 100% に なった時点で
 // 裏で 先に 読み込んでおく。
 const ultVideoCache = {};
+const ultVideoOrder = [];           // 使った 順（古いものが 先頭）
+const ULT_VIDEO_CACHE_MAX = 4;      // 1試合で 要るのは 2本。ボスラッシュを 考えて 4本
 let ultimateVideoShowing = false;   // 動画が 画面に 出ている間は ゲームを 描かない（カクつき防止）
+
+// 使っていない 動画を 捨てる。これが 無いと 遊び続けるほど
+// 読み込み済みの 動画（1本 5〜19MB）が たまり続けて 重くなる
+function trimUltVideoCache() {
+  while (ultVideoOrder.length > ULT_VIDEO_CACHE_MAX) {
+    const old = ultVideoOrder.shift();
+    const v = ultVideoCache[old];
+    // いま 画面に 出ている ものは 捨てない
+    if (!v || (ultimateVideo && ultimateVideo.el === v)) { if (v) ultVideoOrder.push(old); break; }
+    try { v.pause(); v.removeAttribute('src'); v.load(); } catch (e) {}
+    delete ultVideoCache[old];
+  }
+}
+
+function touchUltVideo(name) {
+  const i = ultVideoOrder.indexOf(name);
+  if (i >= 0) ultVideoOrder.splice(i, 1);
+  ultVideoOrder.push(name);
+}
 
 function prefetchUltimateVideo(charIdx) {
   const name = ultimateFileNames[charIdx];
-  if (!name || ultVideoCache[name]) return;
+  if (!name) return;
+  if (ultVideoCache[name]) { touchUltVideo(name); return; }
   const v = document.createElement('video');
   v.preload = 'auto';
   v.playsInline = true;
@@ -14564,6 +14606,8 @@ function prefetchUltimateVideo(charIdx) {
   v.src = 'images/ultimates/' + name + '_ultimate.mp4';
   try { v.load(); } catch (e) {}
   ultVideoCache[name] = v;
+  touchUltVideo(name);
+  trimUltVideoCache();
 }
 
 function startUltimateVideo() {
@@ -14571,6 +14615,7 @@ function startUltimateVideo() {
   if (!p) { ultimatePhase = 'damage'; ultimateTimer = 0; return; }
   const name = ultimateFileNames[p.charIdx] || 'zen';
   if (!ultVideoCache[name]) prefetchUltimateVideo(p.charIdx);
+  else touchUltVideo(name);
   const video = ultVideoCache[name];
   if (!video) { ultimatePhase = 'damage'; ultimateTimer = 0; return; }
 
@@ -14587,10 +14632,17 @@ function startUltimateVideo() {
   video.onended = onFinish;
   video.onerror = onFinish;
   // どれかの キーを 押したら 動画を 飛ばせる（毎回 最後まで 見なくていい）
-  function skipKey() { onFinish(); }
+  // 押しっぱなしの キーの リピートで すぐ 飛ばされないよう、
+  // いったん 離して から 押した ときだけ 飛ばす
+  let skipArmed = false;
+  function armSkip() { skipArmed = true; }
+  function skipKey(e) { if (!skipArmed && e && e.repeat) return; onFinish(); }
+  document.addEventListener('keyup', armSkip, { once: true });
+  setTimeout(armSkip, 400);
   video.onclick = skipKey;
   document.addEventListener('keydown', skipKey, { once: true });
-  ultimateVideo = { el: video, shown: false, skipKey: skipKey };
+  const doneFlag = { get finished() { return finished; }, set finished(v) { finished = v; } };
+  ultimateVideo = { el: video, shown: false, skipKey: skipKey, watch: null, safety: null, done: doneFlag };
 
   // 再生できる 状態に なってから 画面に 出す（読み込み中の 真っ黒を 見せない）
   function show() {
@@ -14622,7 +14674,7 @@ function startUltimateVideo() {
   // 見張り: 画面に 出したのに 再生が 進んでいない（固まっている）なら 打ち切る。
   // 読み込みが 遅い 回線で 止まったまま 待たされるのを 防ぐ
   let lastT = -1, stuck = 0;
-  const watch = setInterval(function () {
+  const watch = ultimateVideo.watch = setInterval(function () {
     if (finished) { clearInterval(watch); return; }
     if (!ultimateVideo) { clearInterval(watch); return; }   // 消えた後も 300msごとに 回り続けていた
     if (!ultimateVideo.shown) return;
@@ -14634,7 +14686,7 @@ function startUltimateVideo() {
   // 保険: ここまで 来たら 必ず 終わらせる。
   // いちばん 長い 動画（Bot の 10秒）＋余裕。再生が 止まった場合は
   // 上の 見張りが 1.5秒で 打ち切るので、ここは 長めで よい
-  setTimeout(onFinish, 12000);
+  ultimateVideo.safety = setTimeout(onFinish, 12000);
 }
 
 function applyUltimateDamage(attacker, target) {
@@ -14707,7 +14759,9 @@ function applyUltimateDamage(attacker, target) {
   cmdNameDisplay.push({ text: ud.name, x: 480, y: 200, life: 70, maxLife: 70, color: ud.color });
 }
 
+let ultimateSteppedThisFrame = false;
 function updateUltimate() {
+  ultimateSteppedThisFrame = true;
   if (!ultimateActive) return;
   ultimateTimer++;
 
@@ -17098,7 +17152,9 @@ function drawBattle(dt) {
   }
 
   // Game over - GAME SET演出
-  if (gameOver && (winner >= 0 || isDraw)) {
+  // 条件を 絞りすぎると 演出が 始まらず、Enter/ESC の 受付（gameSetTimer > 180）に
+  // 一生 届かなくなる。決着していれば 必ず 進める
+  if (gameOver) {
     gameSetTimer++;
     // 引き分けのときは 勝者が いない
     const wP = winner >= 0 ? players[winner] : null;
@@ -19484,6 +19540,9 @@ function teardownOnlineSession() {
   remoteKeys = {}; prevRemoteKeys = {};   // 残ると 相手が キーを 押しっぱなしに なる
   hostLastSentState = null; lastGuestKeys = null;
   gameMode = 'cpu';   // 'vs' のまま 残ると 到達しないはずの ローカル2人対戦に 入ってしまう
+  // 必殺技の 動画が 出たまま 抜けると、全画面の <video> が ロビーの 上に 残る
+  ultimateActive = false; ultimatePhase = ''; ultimateTimer = 0;
+  try { removeUltimateVideo(); } catch (e) { ultimateVideoShowing = false; }
   onlineTeardown = false;
 }
 
@@ -19557,6 +19616,10 @@ function setupPeerConnection(conn) {
         remoteKeys = data.keys;
       }
     } else if (data.type === 'ultimate') {
+      // すでに 必殺技中なら 無視する。ここで ultimateVideo を 捨てると
+      // 画面に 出ている <video> を 消す 手がかりが 失われ、二度と 消えなくなる
+      if (ultimateActive) return;
+      try { removeUltimateVideo(); } catch (e) {}
       // Guest: trigger ultimate visual + video
       ultimateActive = true;
       ultimatePlayerId = data.playerId;
@@ -19812,7 +19875,7 @@ function sendHostState() {
       _ts: Date.now(), // RTT計測用タイムスタンプ
       p1: serializePlayer(p1),
       p2: serializePlayer(p2),
-      battleTimer, battleStarted, battleCountdown, gameOver, winner,
+      battleTimer, battleStarted, battleCountdown, gameOver, winner, isDraw,
       ultActive: ultimateActive,
       hitStopFrames,
       koSlowMotion: { active: koSlowMotion.active, frames: koSlowMotion.frames, maxFrames: koSlowMotion.maxFrames },
@@ -19978,8 +20041,11 @@ function applyHostState(data) {
   battleTimer = takeNum(data.battleTimer, battleTimer);
   battleStarted = takeBool(data.battleStarted, battleStarted);
   battleCountdown = takeNum(data.battleCountdown, battleCountdown);
-  // ゲスト側: gameOverがfalse→trueに変わったらGAME SET演出を開始
-  if (data.gameOver && !gameOver && data.winner >= 0) {
+  // ゲスト側: gameOverがfalse→trueに変わったらGAME SET演出を開始。
+  // 引き分け（winner = -1）でも 必ず 始めること。
+  // 始まらないと gameSetTimer が 増えず、Enter も ESC も 効かなくなる
+  isDraw = takeBool(data.isDraw, isDraw);
+  if (data.gameOver && !gameOver) {
     gameSetTimer = 0;
     gameSetPhase = 1;
     stopBGM();
@@ -21680,7 +21746,9 @@ function gameLoopInner(timestamp) {
 
   // Fixed timestep updates for consistent physics
   let updated = false;
-  while (accumulator >= FIXED_DT) {
+  let guardIter = 0;   // 念のための 上限。これが 無いと 一度 遅れると 固まる
+  while (accumulator >= FIXED_DT && guardIter++ < 8) {
+    try {
     // 描画補間用: 前フレーム位置を保存
     if (scene === 'battle' && players && players.length >= 2) {
       for (const p of players) { if (p) { p.prevX = p.x; p.prevY = p.y; } }
@@ -21725,6 +21793,12 @@ function gameLoopInner(timestamp) {
         }
         updateUltimate();
       }
+      // 必殺技の 進行は どの 枝に 入っても 必ず 1回 進める。
+      // 上の if/else に 任せると 撃墜スローや ポーズで 止まり、
+      // フレーム数の 保険（ULTIMATE_VIDEO_MAX_FRAMES）が 効かなくなる
+      if (ultimateActive && !ultimateSteppedThisFrame) updateUltimate();
+      ultimateSteppedThisFrame = false;
+
       // Online host: process remote player's (P2) attack key presses (edge detection)
       if (onlineMode && isHost) {
         const rp = players[1];
@@ -21753,9 +21827,18 @@ function gameLoopInner(timestamp) {
         prevRemoteKeys = { ...remoteKeys };
       }
     }
-    accumulator -= FIXED_DT;
+    } catch (stepErr) {
+      // 1フレームの 失敗で ループ全体を 止めない
+      loopErrorCount++;
+      if (String(stepErr && stepErr.message) !== lastLoopError) {
+        lastLoopError = String(stepErr && stepErr.message);
+        console.error('[STEP] ' + lastLoopError, stepErr);
+      }
+    }
+    accumulator -= FIXED_DT;   // 失敗しても 必ず 減らす（減らさないと 永久ループ）
     updated = true;
   }
+  if (accumulator > FIXED_DT * 8) accumulator = FIXED_DT;   // 溜まりすぎた 分は 捨てる
 
   // Online: host sends state, guest sends input
   if (onlineMode && scene === 'battle') {
@@ -21779,6 +21862,7 @@ function gameLoopInner(timestamp) {
   // Render every frame for smooth visuals
   ctx.clearRect(0, 0, 960, 640);
 
+  try {
   if (scene === 'title') {
     drawTitle(FIXED_DT);
   } else if (scene === 'combolist') {
@@ -21814,9 +21898,23 @@ function gameLoopInner(timestamp) {
   } else if (scene === 'howtoplay') {
     drawHowToPlay();
   }
+  } catch (drawErr) {
+    // 1画面の 描画失敗で 遷移まで 巻き添えに しない
+    loopErrorCount++;
+    if (String(drawErr && drawErr.message) !== lastLoopError) {
+      lastLoopError = String(drawErr && drawErr.message);
+      console.error('[DRAW] ' + lastLoopError, drawErr);
+    }
+  }
 
-  drawTransition();
-  if (showHowToPlay) drawHowToPlayOverlay();
+  // 画面遷移は 描画で 例外が 出ても 必ず 進める。
+  // ここに 届かないと transitioning が 立ったままに なり、
+  // handleKeyDown が 先頭で return して 操作不能に なる
+  try { drawTransition(); } catch (e) {
+    transitioning = false; selectTransition = 0;
+    console.error('[DRAW] drawTransition: ' + (e && e.message), e);
+  }
+  if (showHowToPlay) { try { drawHowToPlayOverlay(); } catch (e) {} }
 }
 
 requestAnimationFrame(gameLoop);
