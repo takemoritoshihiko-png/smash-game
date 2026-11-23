@@ -28,77 +28,77 @@
 //     ・キャラを 足すなら「キャラ別データ（31体ぶん）」の チェックリスト
 //     ・落とし穴の 一覧は README の「よくある 落とし穴」
 //
-//   110-301       書き換わる 値（グローバル状態）
-//   303-532       CANVAS / 画面サイズ
+//   110-303       書き換わる 値（グローバル状態）
+//   305-532       CANVAS / 画面サイズ
 //   534-1089      キャラ別データ（31体ぶん）
-//   1091-1124     音の ロック解除（最初の 操作で 呼ぶ）
-//   1126-1303     キャラ画像（遅延読み込み）
-//   1305-1340     タイトル画面の 粒子
-//   1342-3016     絵: メニュー用の 31体テーブル（CHAR_BODY_ART）
-//   3018-3046     絵: メニュー用の 呼び出し口（drawCharacterBody）
-//   3048-4737     攻撃中の ポーズ（キャラ 0〜8）
-//   4739-5583     キャラの 絵 ②バトル用
-//   5585-5632     描画ユーティリティ
-//   5634-5756     画面: タイトル
-//   5758-6006     画面: キャラ選択
-//   6008-6106     画面: 難易度選択（CPU戦）
-//   6108-6337     画面: ステージ選択
-//   6339-6702     バトルの 定数 と 状態
-//   6704-6746     ゲージ演出の 小道具（ポップアップ / 変身中の 判定 / MAX の 光り）
-//   6748-6763     カメラ / 画面揺れ
-//   6765-7195     効果音（Web Audio で 合成）
-//   7197-7511     観客の 音
-//   7513-7535     ヒット表示 / コミック文字
-//   7537-7584     掴み・投げ の 定数と キャラ別テーブル
-//   7586-8074     コマンド技（→→↓↓+Z など）
-//   8076-8600     技データ
-//   8602-8834     読み込み時に attackDefs を 一括で 書き換える（この 順番で 走る・並べ替え 禁止）
-//   8836-9182     プレイヤー生成 / 試合の 初期化
-//   9184-9201     ヒット処理（ダメージ・ノックバック）
-//   9203-9631     ヒットした ときの 演出（applyHit の 後半・ゲームの 数値は 変えない）
-//   9633-10556    ヒット処理（ダメージと ノックバックを 決めて 相手に 入れる）
-//   10558-10587   当たり判定
-//   10589-10630   飛び道具
-//   10632-10890   技の 発動（通常技・復帰技・ジャブ）
-//   10892-11114   掴み・投げ の 実行
-//   11116-11459   CPU の 思考
-//   11461-11620   画面演出の 配列を 1フレーム 進める
-//   11622-11856   キャラ固有の ゲージ更新（毎フレーム・プレイヤー1人分）
-//   11858-12201   攻撃中の 1フレーム 更新（プレイヤー1人分）
-//   12203-12344   D キー長押しの 処理（プレイヤー1人分）
-//   12346-12458   受け身（テクニング）の 処理（プレイヤー1人分）
-//   12460-12627   のけぞり（ヒットスタン）の 処理（プレイヤー1人分）
-//   12629-12729   着地の 処理（プレイヤー1人分）
-//   12731-14013   バトルの 毎フレーム更新（中核）
-//   14015-14510   物理（移動・重力・着地・撃墜判定）
-//   14512-14580   攻撃ボタンの 処理（P1ローカル と オンラインのゲスト で 共通）
-//   14582-14701   スマッシュ攻撃（方向2回 + X）
-//   14703-14798   崖つかまり
-//   14800-15237   D技 と 必殺技 の データ
-//   15239-15656   D技: キャラ別の 中身（D_SKILL_IMPL）
-//   15658-15809   D技: 発動 と 毎フレーム更新（triggerDSkill / updateDSkill）
-//   15811-15871   空中回避
-//   15873-15969   バトル描画の 下準備（カメラ・影・2.5D）
-//   15971-16194   バトル画面の うえに 重ねる もの（ボスラッシュHUD / GAME SET 演出）
-//   16196-16492   ステージの 床を 描く（2.5D の 台形）
-//   16494-16899   プレイヤー2人を 描く（本体・影・名前・ゲージ・状態異常の 重ね表示）
-//   16901-18062   バトル画面の 描画
-//   18064-18719   描画: 技エフェクトの 表（ATTACK_EFFECTS: effect名 → 描き方）
-//   18721-19152   描画: 技エフェクトの 呼び出し口（drawAttackEffect ほか）
-//   19154-19325   必殺技 / 即死技 の 全画面オーバーレイ
-//   19327-19457   画面: コンボ一覧 / 戦績
-//   19459-19668   キャラ別 ゲージの 描画（HUDの 下に 出る 細い バー）
-//   19670-19937   バトルの HUD
-//   19939-20830   オンライン対戦（PeerJS / ホストが 正）
-//   20832-21115   画面: VS イントロ
-//   21117-21152   画面の 切り替え（フェード）
-//   21154-21233   ポーズメニュー（バトル中に ESC）
-//   21235-21465   画面: キャラ詳細（Iキー）
-//   21467-21588   画面: 操作説明
-//   21590-21766   キー入力: キャラ選択画面
-//   21768-21984   キー入力: バトル中
-//   21986-22091   キー入力の 振り分け（画面ごと）
-//   22093-22298   メインループ（60FPS 固定タイムステップ）
+//   1091-1132     音の ロック解除（最初の 操作で 呼ぶ）
+//   1134-1311     キャラ画像（遅延読み込み）
+//   1313-1348     タイトル画面の 粒子
+//   1350-3024     絵: メニュー用の 31体テーブル（CHAR_BODY_ART）
+//   3026-3054     絵: メニュー用の 呼び出し口（drawCharacterBody）
+//   3056-4745     攻撃中の ポーズ（キャラ 0〜8）
+//   4747-5592     キャラの 絵 ②バトル用
+//   5594-5641     描画ユーティリティ
+//   5643-5765     画面: タイトル
+//   5767-6015     画面: キャラ選択
+//   6017-6115     画面: 難易度選択（CPU戦）
+//   6117-6346     画面: ステージ選択
+//   6348-6712     バトルの 定数 と 状態
+//   6714-6756     ゲージ演出の 小道具（ポップアップ / 変身中の 判定 / MAX の 光り）
+//   6758-6773     カメラ / 画面揺れ
+//   6775-7207     効果音（Web Audio で 合成）
+//   7209-7523     観客の 音
+//   7525-7547     ヒット表示 / コミック文字
+//   7549-7596     掴み・投げ の 定数と キャラ別テーブル
+//   7598-8088     コマンド技（→→↓↓+Z など）
+//   8090-8614     技データ
+//   8616-8848     読み込み時に attackDefs を 一括で 書き換える（この 順番で 走る・並べ替え 禁止）
+//   8850-9197     プレイヤー生成 / 試合の 初期化
+//   9199-9216     ヒット処理（ダメージ・ノックバック）
+//   9218-9646     ヒットした ときの 演出（applyHit の 後半・ゲームの 数値は 変えない）
+//   9648-10571    ヒット処理（ダメージと ノックバックを 決めて 相手に 入れる）
+//   10573-10602   当たり判定
+//   10604-10645   飛び道具
+//   10647-10905   技の 発動（通常技・復帰技・ジャブ）
+//   10907-11125   掴み・投げ の 実行
+//   11127-11470   CPU の 思考
+//   11472-11644   画面演出の 配列を 1フレーム 進める
+//   11646-11880   キャラ固有の ゲージ更新（毎フレーム・プレイヤー1人分）
+//   11882-12233   攻撃中の 1フレーム 更新（プレイヤー1人分）
+//   12235-12376   D キー長押しの 処理（プレイヤー1人分）
+//   12378-12493   受け身（テクニング）の 処理（プレイヤー1人分）
+//   12495-12662   のけぞり（ヒットスタン）の 処理（プレイヤー1人分）
+//   12664-12764   着地の 処理（プレイヤー1人分）
+//   12766-14080   バトルの 毎フレーム更新（中核）
+//   14082-14579   物理（移動・重力・着地・撃墜判定）
+//   14581-14649   攻撃ボタンの 処理（P1ローカル と オンラインのゲスト で 共通）
+//   14651-14770   スマッシュ攻撃（方向2回 + X）
+//   14772-14867   崖つかまり
+//   14869-15297   D技 と 必殺技 の データ
+//   15299-15717   D技: キャラ別の 中身（D_SKILL_IMPL）
+//   15719-15866   D技: 発動 と 毎フレーム更新（triggerDSkill / updateDSkill）
+//   15868-15928   空中回避
+//   15930-16026   バトル描画の 下準備（カメラ・影・2.5D）
+//   16028-16250   バトル画面の うえに 重ねる もの（ボスラッシュHUD / GAME SET 演出）
+//   16252-16548   ステージの 床を 描く（2.5D の 台形）
+//   16550-16955   プレイヤー2人を 描く（本体・影・名前・ゲージ・状態異常の 重ね表示）
+//   16957-18111   バトル画面の 描画
+//   18113-18809   描画: 技エフェクトの 表（ATTACK_EFFECTS: effect名 → 描き方）
+//   18811-19215   描画: 技エフェクトの 呼び出し口（drawAttackEffect ほか）
+//   19217-19388   必殺技 / 即死技 の 全画面オーバーレイ
+//   19390-19520   画面: コンボ一覧 / 戦績
+//   19522-19731   キャラ別 ゲージの 描画（HUDの 下に 出る 細い バー）
+//   19733-19989   バトルの HUD
+//   19991-20873   オンライン対戦（PeerJS / ホストが 正）
+//   20875-21158   画面: VS イントロ
+//   21160-21195   画面の 切り替え（フェード）
+//   21197-21276   ポーズメニュー（バトル中に ESC）
+//   21278-21508   画面: キャラ詳細（Iキー）
+//   21510-21631   画面: 操作説明
+//   21633-21822   キー入力: キャラ選択画面
+//   21824-22040   キー入力: バトル中
+//   22042-22149   キー入力の 振り分け（画面ごと）
+//   22151-22356   メインループ（60FPS 固定タイムステップ）
 //
 // ### 目次ここまで
 // ======================================================================
@@ -190,6 +190,7 @@ let battleTime = 0;
 let players = [];
 let projectiles = [];
 let hitEffects = [];
+let finisherFxQueue = [];   // コンボフィニッシャーの 時間差ヒット演出（フレーム消化）
 let sparks = [];       // directional spark particles on hit
 let damageNumbers = []; // floating damage numbers
 let trails = [];       // knockback trails
@@ -216,6 +217,7 @@ let battleStats = { totalGames: 0, totalWins: 0, charWins: {}, charGames: {}, vs
 let unlockData = { stages: [], chars: [], titles: [] };
 let showFrameData = false;
 let trainingMode = false;
+let trainingPending = false;   // モード選択で TRAINING を 選んだ（gameMode は 'cpu' に 変換されるため 別持ち）
 let comboListCharIdx = 0;
 let instantKillDisplay = { active: false, timer: 0, maxTimer: 0 };
 // ゲージMAXエフェクト
@@ -399,10 +401,8 @@ const VS_INTRO_DURATION = 180; // 3 seconds at 60fps
 
 
 // --- Characters ---
-// === バランス調整済みパラメータ (v2.0) ===
-// 重量級(w≥1.0): spd 5.0-6.5, jump -11.0~-12.5
-// 中量級(w 0.8-0.99): spd 7.0-8.0, jump -13.0~-14.0
-// 軽量級(w<0.8): spd 8.5-9.5, jump -14.5~-16.0
+// 速度・ジャンプは キャラごとの 個別調整（下の 表が 正）。
+// 昔の「重量級/中量級/軽量級で 範囲を 揃える」方針の 数字は 実データと ずれたので 消した
 const characters = [
   { name: 'Zen', type: 'Balanced', color: '#4A90D9', accent: '#6BB5FF', dark: '#2A5A8A',
     stats: { power: 3, speed: 3, tech: 3, defense: 3 }, desc: 'An all-round fighter with balanced offense and defense',
@@ -1067,7 +1067,7 @@ const D_SKILL_NAMES = {
 
 // --- BALANCE_TWEAK : キャラ別の 強さ 微調整（dmg / kb / frames 倍率） ---
 // === キャラ別 バランス調整（2026-11）===
-// 30キャラの「平均ダメージ・技の効率(ダメージ÷全体フレーム)・リーチ・
+// 31キャラの「平均ダメージ・技の効率(ダメージ÷全体フレーム)・リーチ・
 // ノックバック・体重・移動速度」を 数値化して 比べ、中央値から
 // 離れすぎている キャラだけ 寄せる。
 //   dmg    ... ダメージの 倍率
@@ -1105,11 +1105,19 @@ const keys = {};
 document.addEventListener('keydown', (e) => {
   unlockAudio();
   keys[e.key] = true;
+  // 英字は 大小 両方を 立てる。Shift（ガード）を 押しながら Z を 押すと 'Z' で down、
+  // Shift を 先に 離すと 'z' で up が 来て、'Z' が 押しっぱなしに なるため
+  if (e.key.length === 1 && e.key.toLowerCase() !== e.key.toUpperCase()) {
+    keys[e.key.toLowerCase()] = true; keys[e.key.toUpperCase()] = true;
+  }
   if (e.key === 'F3' || ((e.key === 'h' || e.key === 'H') && scene === 'battle')) { debugHitboxes = !debugHitboxes; e.preventDefault(); }
   handleKeyDown(e);
 });
 document.addEventListener('keyup', (e) => {
   keys[e.key] = false;
+  if (e.key.length === 1 && e.key.toLowerCase() !== e.key.toUpperCase()) {
+    keys[e.key.toLowerCase()] = false; keys[e.key.toUpperCase()] = false;
+  }
 });
 // 画面から 離れた ときに 押していた キーが そのまま 残ると、
 // 戻ってきた とき キャラが 勝手に 走り続ける（keyup が 来ないため）
@@ -4889,10 +4897,6 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
       const walkSpeeds = [0.18, 0.12, 0.3, 0.15, 0.2];
       const ws = walkSpeeds[charIndex] || 0.18;
       const phase = (wc * ws) % (Math.PI * 2);
-      const walkPhase = Math.floor((phase / (Math.PI * 2)) * 4); // 0-3
-      // Smooth sub-phase for interpolation
-      const subPhase = ((phase / (Math.PI * 2)) * 4) % 1;
-      const easedSub = easeOutCubic(subPhase);
 
       if (charIndex === 0) {
         bobY = Math.abs(Math.sin(phase)) * 2.5;
@@ -5144,11 +5148,16 @@ function drawBattleCharacter(x, y, scale, charIndex, time, facingLeft, animData)
     if (ad.hitstun > 0) return 'damage';
     if (ad.attacking && ad.attackType) {
       const at = ad.attackType;
-      if (at === 'special' || at === 'cmdSpecial' || at === 'command') return 'special';
-      if (at === 'aerial' || at === 'downair') return 'attack_air';
-      if (at === 'upSmash') return 'attack_up';
-      if (at === 'sideSmash') return 'attack_side';
-      if (at === 'downSmash') return 'attack_down';
+      if (at === 'special' || at === 'command') return 'special';
+      // 空中技は 3方向とも 空中攻撃の 絵
+      if (at === 'aerial' || at === 'downair' || at === 'airup' || at === 'airfront' || at === 'airback') return 'attack_air';
+      // スマッシュは attackType が 'smash' 固定で、方向は attackData.smashType に 入っている
+      if (at === 'smash') {
+        const st = ad.attackData && ad.attackData.smashType;
+        if (st === 'upSmash') return 'attack_up';
+        if (st === 'downSmash') return 'attack_down';
+        return 'attack_side';
+      }
       if (at === 'strong') return 'attack_s';
       if (at === 'up') return 'attack_up';
       if (at === 'side' || at === 'dash') return 'attack_side';
@@ -5809,7 +5818,7 @@ function drawSelect(dt) {
     const rowCount = row < rows - 1 ? cols : lastRowCount;
     const rowW = rowCount * cardW + (rowCount - 1) * gapX;
     const rowX = (960 - rowW) / 2;
-    const cx = rowX + (row < rows - 1 ? col : col) * (cardW + gapX);
+    const cx = rowX + col * (cardW + gapX);
     const cy = gridStartY + row * (cardH + gapY);
     const isP1 = p1Select === i, isP2 = p2Select === i;
     const selected = isP1 || isP2;
@@ -6350,7 +6359,7 @@ const STAGE_GROUND_Y = 450;
 // ヒットストップの 長さの 倍率。1.0 = スマブラと 同じ。短くしたいなら 0.7 など
 const HITSTOP_SCALE = 1.0;
 // 小ジャンプの 上昇速度（大ジャンプに対する 割合）。高さは この2乗に なる
-// 0.74 → 高さ 約55%（スマブラの ショートホップと 同じくらい）
+// 0.81 → 高さ 約65%
 const SHORT_HOP_V = 0.81;
 // ラグ（Rage）: 何%から 効きはじめ / 何%で 最大 / 最大 何倍か
 const RAGE_START = 35, RAGE_MAX = 150, RAGE_MULT = 1.1;
@@ -6429,6 +6438,27 @@ function canComboFinisher(playerId) {
   return cd && cd.count >= 15 && !comboFinisherUsed[playerId];
 }
 
+// 状態異常を 1か所で 付与する（dur は フレーム数）。
+// opts.burnDmg / opts.poisonDmg で 1ティックあたりの ダメージを 指定（省略時 2 / 1）。
+// 同じ if連鎖が 6か所に コピーされていて、毒ダメージの 値が 場所ごとに ずれ始めていた
+function applyStatus(target, type, dur, opts) {
+  opts = opts || {};
+  switch (type) {
+    case 'frozen':    target.frozen = Math.max(target.frozen || 0, dur); break;
+    case 'burning':   target.burning = Math.max(target.burning || 0, dur); target.burnDmg = opts.burnDmg || 2; break;
+    case 'stunned':   target.stunned = Math.max(target.stunned || 0, dur); break;
+    case 'cursed':    target.cursed = Math.max(target.cursed || 0, dur); break;
+    case 'confused':  target.confused = Math.max(target.confused || 0, dur); break;
+    case 'poisoned':  target.poisoned = Math.max(target.poisoned || 0, dur);
+                      target.poisonDmg = Math.max(target.poisonDmg || 0, opts.poisonDmg || 1); break;
+    case 'paralyzed': target.paralyzed = Math.max(target.paralyzed || 0, dur); break;
+    case 'fear':      target.fearTimer = Math.max(target.fearTimer || 0, dur); break;
+    case 'feared2':   target.feared2 = Math.max(target.feared2 || 0, dur); break;
+    case 'sealMagic': target.sealMagic = Math.max(target.sealMagic || 0, dur); break;
+    // 'bounce' は 技ごとに 挙動が 違う（投げバウンド / 打ち上げ）ので 呼び出し側で 処理する
+  }
+}
+
 function executeComboFinisher(p) {
   if (!canComboFinisher(p.id)) return;
   // 先に 出せるか 確かめる。演出と 使用済みフラグを 立ててから 失敗すると
@@ -6465,7 +6495,7 @@ function executeComboFinisher(p) {
   // Chatta: ちっちゃい 自分の 分身を 出す。相手を 追いかけて、捕まえたら 8ダメージで 爆発。
   // 爆発するまで 次の 分身は 出せない
   if (p.charIdx === 30) {
-    if (chattaMinions.some(m => m.ownerId === p.id)) return;   // まだ 前のが 生きている
+    // 分身の 生存チェックは 関数冒頭（使用済みフラグを 立てる 前）で 済んでいる
     chattaMinions.push({ ownerId: p.id, x: p.x, y: STAGE_GROUND_Y, vx: 0,
       dmg: f.damage, kb: f.kb, angle: f.kbAngle, life: 900, t: 0 });
     playHitSound('jump');
@@ -6498,15 +6528,9 @@ function executeComboFinisher(p) {
     totalDmg += hitDmg;
     target.damage = Math.min(999, target.damage + hitDmg);
 
-    // マルチヒットエフェクト
+    // マルチヒットエフェクト（ゲームフレームの キューで 鳴らす。setTimeout 禁止）
     if (hitCount > 1) {
-      const delay = i * 2;
-      setTimeout(() => {
-        if (!target.alive) return;
-        hitEffects.push({ x: target.x + (Math.random()-0.5)*40, y: target.y - 30 + (Math.random()-0.5)*30,
-          life: 12, maxLife: 12, color: f.color, size: 25 + Math.random()*15 });
-        playHitSound('normal', 3);
-      }, delay * 16);
+      finisherFxQueue.push({ delay: i * 2 + 1, targetId: target.id, color: f.color });
     }
   }
 
@@ -6523,29 +6547,15 @@ function executeComboFinisher(p) {
 
   // 状態異常適用
   if (f.effect && f.effectDur > 0) {
-    if (f.effect === 'frozen') target.frozen = Math.max(target.frozen || 0, f.effectDur);
-    else if (f.effect === 'burning') { target.burning = Math.max(target.burning || 0, f.effectDur); target.burnDmg = 2; }
-    else if (f.effect === 'stunned') target.stunned = Math.max(target.stunned || 0, f.effectDur);
-    else if (f.effect === 'cursed') target.cursed = Math.max(target.cursed || 0, f.effectDur);
-    else if (f.effect === 'confused') target.confused = Math.max(target.confused || 0, f.effectDur);
-    else if (f.effect === 'poisoned') { target.poisoned = Math.max(target.poisoned || 0, f.effectDur); if (!target.poisonDmg || target.poisonDmg < 1) target.poisonDmg = 1; }
-    else if (f.effect === 'paralyzed') target.paralyzed = Math.max(target.paralyzed || 0, f.effectDur);
-    else if (f.effect === 'fear') target.fearTimer = Math.max(target.fearTimer || 0, f.effectDur);
-    else if (f.effect === 'bounce') { target.downThrowBounce = true; target.groundBounced = false; }
+    if (f.effect === 'bounce') { target.downThrowBounce = true; target.groundBounced = false; }
     else if (f.effect === 'random') {
       // ヤッホ: ランダム全状態異常
-      const effs = ['frozen','burning','stunned','cursed','confused','poisoned'];
-      for (const e of effs) {
-        if (Math.random() < 0.5) {
-          if (e === 'frozen') target.frozen = Math.max(target.frozen||0, 180);
-          else if (e === 'burning') { target.burning = Math.max(target.burning||0, 300); target.burnDmg = 2; }
-          else if (e === 'stunned') target.stunned = Math.max(target.stunned||0, 180);
-          else if (e === 'cursed') target.cursed = Math.max(target.cursed||0, 300);
-          else if (e === 'confused') target.confused = Math.max(target.confused||0, 300);
-          else if (e === 'poisoned') { target.poisoned = Math.max(target.poisoned||0, 600); target.poisonDmg = 3; }
-        }
+      const randDur = { frozen: 180, burning: 300, stunned: 180, cursed: 300, confused: 300, poisoned: 600 };
+      for (const e in randDur) {
+        if (Math.random() < 0.5) applyStatus(target, e, randDur[e], { poisonDmg: 3 });
       }
     }
+    else applyStatus(target, f.effect, f.effectDur);
   }
 
   // ゲージ吸収
@@ -7061,6 +7071,8 @@ currentBgmAudio = bgmAudio;
 const bgmMap = { 'sounds/bgm.mp3': bgmAudio, 'sounds/bgm2.mp3': bgm2Audio, 'sounds/bgm3.mp3': bgm3Audio, 'sounds/bgm4.mp3': bgm4Audio, 'sounds/bgm5.mp3': bgm5Audio };
 
 function startBGM() {
+  // 前の 試合の フェードアウトが まだ 走っていたら 止める（残すと 新しい 曲を 絞ってしまう）
+  if (bgmFadeInterval) { clearInterval(bgmFadeInterval); bgmFadeInterval = null; }
   if (bgmPlaying) return;
   const stage = stages[selectedStage];
   currentBgmAudio = bgmMap[stage.bgmSrc] || bgmAudio;
@@ -7990,6 +8002,9 @@ function checkCommandInput(player) {
 }
 
 function executeCommand(player, cmd) {
+  // 状態チェックは テレポートより 先。後に 置くと のけぞり中でも
+  // 瞬間移動だけ 成立して、しかも クールダウンが かからない
+  if (player.attacking || player.hitstun > 0 || !player.alive || player.grabbing || player.grabbed || player.guarding || player.guardBreakStun > 0) return false;
   // Chatta: テレポート（前に 一気に 跳ぶ）
   if (cmd.attack && cmd.attack.chattaBlink) {
     const dir = player.facingLeft ? -1 : 1;
@@ -8007,7 +8022,6 @@ function executeCommand(player, cmd) {
     }
     playHitSound('jump');
   }
-  if (player.attacking || player.hitstun > 0 || !player.alive || player.grabbing || player.grabbed || player.guarding || player.guardBreakStun > 0) return false;
 
   const atk = cmd.attack;
   player.attacking = true;
@@ -9062,7 +9076,7 @@ function initBattle() {
   pauseOpen = false; pauseAnim = 0; pauseSel = 0;
   // トレーニングは そこへ 入った ときだけ true。
   // 残ると 以後 戦績が 記録されなく なる
-  trainingMode = (gameMode === 'training');
+  trainingMode = (gameMode === 'training') || trainingPending;
   // 戦う 2人分の スプライトを 先に 用意しておく（描き始めで カクつかないように）
   preloadSprites(p1Select);
   preloadSprites(p2Select);
@@ -9112,6 +9126,7 @@ function initBattle() {
   battleFrame = 0;
   projectiles = [];
   hitEffects = [];
+  finisherFxQueue = [];
   sparks = [];
   damageNumbers = [];
   trails = [];
@@ -9952,6 +9967,9 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
 
   // === 固有個性ゲージ更新（ヒット時） ===
   const aci4 = attacker.charIdx;
+  // キャラ固有の ノックバック倍率は ここに 貯めて、weightedKb 計算後に 掛ける。
+  // （target.vx/vy に 直接 掛けても、後で weightedKb で 上書きされて 無効だった）
+  let charKbMult = 1;
   // ゼン: 氷ゲージ+8、被ダメ-5
   if (aci4 === 0) attacker.zenIceGauge = Math.min(100, (attacker.zenIceGauge || 0) + 8);
   if (target.charIdx === 0) target.zenIceGauge = Math.max(0, (target.zenIceGauge || 0) - 5);
@@ -10012,7 +10030,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   // メテオ(3): 燃焼ゲージ+8、燃焼付与で+20
   if (aci4 === 3) { attacker.meteoBurnGauge = Math.min(100, (attacker.meteoBurnGauge||0) + 8); if (target.burning > 0) attacker.meteoBurnGauge = Math.min(100, attacker.meteoBurnGauge + 12); }
   // メテオ業火: 燃焼中の相手60%以上でKB+30%
-  if (aci4 === 3 && target.burning > 0 && target.damage >= 60) { target.vx *= 1.3; target.vy *= 1.3; }
+  if (aci4 === 3 && target.burning > 0 && target.damage >= 60) charKbMult *= 1.3;
   // ヤッホ(25): カオスゲージ+ランダム
   if (aci4 === 25) attacker.yahoChaosGauge = Math.min(100, (attacker.yahoChaosGauge||0) + 5 + Math.floor(Math.random()*6)); // max+10に制限
   // ヤッホカオスイベント: ダメージ2倍(type0)
@@ -10064,14 +10082,14 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   if (aci4 === 1) attacker.donEarthGauge = Math.min(100, (attacker.donEarthGauge||0) + 10);
   if (target.charIdx === 1) target.donEarthGauge = Math.min(100, (target.donEarthGauge||0) + 8);
   // ドン地震モード: KB×1.4
-  if (aci4 === 1 && attacker.donEarthGauge >= 80) { target.vx *= 1.4; target.vy *= 1.4; }
+  if (aci4 === 1 && attacker.donEarthGauge >= 80) charKbMult *= 1.4;
   // サイソク(2): 加速+5
   if (aci4 === 2) attacker.saisokuAccelGauge = Math.min(100, (attacker.saisokuAccelGauge||0) + 5);
   // うる男(5): 野性+10(攻撃)、+12(被ダメ)
   if (aci4 === 5) attacker.uruoWildGauge = Math.min(100, (attacker.uruoWildGauge||0) + 10);
   if (target.charIdx === 5) target.uruoWildGauge = Math.min(100, (target.uruoWildGauge||0) + 12);
   // うる男野性解放: KB×2
-  if (aci4 === 5 && attacker.uruoWildRelease > 0) { target.vx *= 1.5; target.vy *= 1.5; } // 野性解放KB×1.5
+  if (aci4 === 5 && attacker.uruoWildRelease > 0) charKbMult *= 1.5; // 野性解放KB×1.5
   // バレット(7): 魔法+8、混乱付与で+20
   if (aci4 === 7) { attacker.bulletMagicGauge = Math.min(100, (attacker.bulletMagicGauge||0) + 5); if (target.confused > 0) attacker.bulletMagicGauge = Math.min(100, attacker.bulletMagicGauge + 6); }
   // おんぱ(17): 周波数+10、気絶で+25
@@ -10102,10 +10120,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   if (aci4 === 13 && attacker.namiojiFullPower > 0) target.damage = Math.min(999, target.damage + finalDamage * 0.5);
   // キング時間停止中: KB×3
   // キング: 時間停止中KB×2.0、通常時KB×0.8
-  if (aci4 === 16) {
-    if (attacker.kingTimeStop > 0) { target.vx *= 2.0; target.vy *= 2.0; }
-    else { target.vx *= 0.8; target.vy *= 0.8; }
-  }
+  if (aci4 === 16) charKbMult *= (attacker.kingTimeStop > 0) ? 2.0 : 0.8;
   // ジャッジマン最終審判: ダメージ×1.4
   if (aci4 === 9 && attacker.judgeFinalMode > 0) target.damage = Math.min(999, target.damage + finalDamage * 0.4);
 
@@ -10121,7 +10136,7 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   // weight 0.7→1.15倍, 1.0→1.0倍, 1.5→0.75倍（旧: 0.7→1.43倍で飛びすぎ）
   const targetWeight = characters[target.charIdx] ? characters[target.charIdx].weight : 1.0;
   const weightFactor = 1 / (0.5 + targetWeight * 0.5); // 緩やかなカーブ
-  let weightedKb = kb * weightFactor;
+  let weightedKb = kb * weightFactor * charKbMult;
   // パッシブ: ドン(1) 重量強化 吹っ飛び-10%
   if (target.charIdx === 1) weightedKb *= 0.9;
   // パッシブ: おんぱ(17)「最低ダメージ・最強ノックバック」
@@ -11098,14 +11113,10 @@ function executeThrow(grabber, dirX, dirY) {
   }
   // 特殊投げ: ヤッホ - ランダム効果
   if (grabber.charIdx === 25) {
-    const effects = ['frozen','burning','stunned','cursed','confused','poisoned'];
+    const throwDur = { frozen: 60, burning: 120, stunned: 60, cursed: 120, confused: 120, poisoned: 180 };
+    const effects = Object.keys(throwDur);
     const randEff = effects[Math.floor(Math.random() * effects.length)];
-    if (randEff === 'frozen') target.frozen = Math.max(target.frozen||0, 60);
-    else if (randEff === 'burning') { target.burning = Math.max(target.burning||0, 120); target.burnDmg = 2; }
-    else if (randEff === 'stunned') target.stunned = Math.max(target.stunned||0, 60);
-    else if (randEff === 'cursed') target.cursed = Math.max(target.cursed||0, 120);
-    else if (randEff === 'confused') target.confused = Math.max(target.confused||0, 120);
-    else if (randEff === 'poisoned') { target.poisoned = Math.max(target.poisoned||0, 180); target.poisonDmg = 2; }
+    applyStatus(target, randEff, throwDur[randEff], { poisonDmg: 2 });
   }
 
   releaseGrab(grabber);
@@ -11469,6 +11480,19 @@ function getCpuInput(cpu, target) {
 // オンラインの ゲストは 判定を しない（ホストが 正）ので false で 呼ぶ
 function updateEffectArrays(simulate) {
   if (simulate === undefined) simulate = true;
+  // コンボフィニッシャーの 連続ヒット演出（ゲームフレームで 消化。
+  // setTimeout だと ポーズ中にも 鳴り、リセット後の 次の 試合にまで 漏れていた）
+  for (let i = finisherFxQueue.length - 1; i >= 0; i--) {
+    const q = finisherFxQueue[i];
+    q.delay--;
+    if (q.delay > 0) continue;
+    finisherFxQueue.splice(i, 1);
+    const t = players[q.targetId];
+    if (!t || !t.alive) continue;
+    hitEffects.push({ x: t.x + (Math.random()-0.5)*40, y: t.y - 30 + (Math.random()-0.5)*30,
+      life: 12, maxLife: 12, color: q.color, size: 25 + Math.random()*15 });
+    playHitSound('normal', 3);
+  }
   // Update hit effects
   for (let i = hitEffects.length - 1; i >= 0; i--) {
     hitEffects[i].life--;
@@ -11650,7 +11674,7 @@ function updateCharacterGauges(p) {
     if (p.charIdx === 10 && p.dragonMode && battleFrame % 6 === 0) {
     p.tensaiDragonGauge = Math.max(0, p.tensaiDragonGauge - 1);
     if (p.tensaiDragonGauge <= 0) {
-      p.dragonMode = false; p.dragonCooldown = 600; p.weight = 0.8;
+      p.dragonMode = false; p.dragonCooldown = 600;
       cmdNameDisplay.push({ text: 'HUMAN MODE', x: p.x, y: p.y - 120, life: 60, maxLife: 60, color: '#FF8833' });
     }
     }
@@ -11895,11 +11919,17 @@ function updateAttackFrames(p) {
     }
     if (p.specialState === 'slamHit') {
       const slamFrame = p.attackFrame - atk.startup;
-      if (slamFrame <= atk.slamActive) {
-        const hb = { x: p.x - atk.slamHw / 2, y: p.y + atk.slamHy, w: atk.slamHw, h: atk.slamHh };
+      // slamActive / slamHw が 無い 技（Bot・Chatta の ↑X など）でも
+      // 技が 必ず 終わるように、active / 通常hitbox で 補う
+      const slamActive = (atk.slamActive !== undefined) ? atk.slamActive : atk.active;
+      const shW = atk.slamHw || atk.hw || 60;
+      const shH = atk.slamHh || atk.hh || 40;
+      const shY = (atk.slamHy !== undefined) ? atk.slamHy : (atk.hy || -20);
+      if (slamFrame <= slamActive) {
+        const hb = { x: p.x - shW / 2, y: p.y + shY, w: shW, h: shH };
         checkHitboxAgainstPlayers(p, hb, atk.damage, atk.kbBase, atk.kbScale, atk.kbAngle, 'strong');
       }
-      if (slamFrame > atk.slamActive + atk.recovery) {
+      if (slamFrame > slamActive + atk.recovery) {
         if (p.hitTargets.length === 0) {
           showHitDisplay(p.x, p.y, false);
           playHitSound('miss');
@@ -12046,10 +12076,12 @@ function updateAttackFrames(p) {
         const sinceLastHit = p.attackFrame - p.lastHitFrame;
         const isLast = p.attackFrame >= atk.startup + atk.active - 2;
         if (sinceLastHit >= atk.hitInterval) {
-          const dmg = isLast ? atk.finalDamage : atk.damage;
-          const kb = isLast ? atk.finalKbBase : atk.kbBase;
-          const ks = isLast ? atk.finalKbScale : atk.kbScale;
-          const ka = isLast ? atk.finalKbAngle : atk.kbAngle;
+          // final* が 無い 連打技（ジャブ連打など）は 通常値に 落とす。
+          // undefined のままだと NaNガードが 5ダメージを 代入して 連打が 強すぎた
+          const dmg = isLast ? (atk.finalDamage !== undefined ? atk.finalDamage : atk.damage) : atk.damage;
+          const kb = isLast ? (atk.finalKbBase !== undefined ? atk.finalKbBase : atk.kbBase) : atk.kbBase;
+          const ks = isLast ? (atk.finalKbScale !== undefined ? atk.finalKbScale : atk.kbScale) : atk.kbScale;
+          const ka = isLast ? (atk.finalKbAngle !== undefined ? atk.finalKbAngle : atk.kbAngle) : atk.kbAngle;
           // Clear targets for multi-hit
           p.hitTargets = [];
           if (checkHitboxAgainstPlayers(p, hitbox, dmg, kb, ks, ka, ht)) {
@@ -12431,6 +12463,9 @@ function updateTeching(p) {
       // ダウン攻撃: 発生10F目に周囲ヒットボックス
       p.vx *= 0.9;
       if (p.techTimer === 10) {
+        // 前の 技の attackData が 残っていると applyHit が stun や comboRole を
+        // 引き継いでしまうので、ダウン攻撃では 消してから 当てる
+        p.attackData = null;
         const daHitbox = { x: p.x - 40, y: p.y - 30, w: 80, h: 40 };
         for (const t of players) {
           // ここは「次の 相手を 見る」continue。return に すると
@@ -12951,10 +12986,8 @@ function updateBattle(dt) {
         applyHit(fakeAttacker, p, projDmg, pr.kbBase, pr.kbScale, pr.kbAngle, 'projectile');
         // 飛び道具の状態異常適用
         if (pr.statusChance && pr.statusType && Math.random() < pr.statusChance) {
-          if (pr.statusType === 'frozen') p.frozen = Math.max(p.frozen||0, 60);
-          else if (pr.statusType === 'burning') { p.burning = Math.max(p.burning||0, 120); p.burnDmg = 2; }
-          else if (pr.statusType === 'stunned') p.stunned = Math.max(p.stunned||0, 60);
-          else if (pr.statusType === 'confused') p.confused = Math.max(p.confused||0, 120);
+          const projDur = { frozen: 60, burning: 120, stunned: 60, confused: 120 }[pr.statusType] || 60;
+          applyStatus(p, pr.statusType, projDur);
         }
         // 引力弾: ヒットした相手を引き寄せ
         if (pr.pullEffect && owner) {
@@ -12999,6 +13032,7 @@ function updateBattle(dt) {
       if (p.id === 0) { hsGuard = (onlineMode && !isHost) ? !!remoteKeys.s : !!keys['Shift']; }
       else if (p.id === 1 && (gameMode === 'cpu' || bossRushMode)) { hsGuard = false; }
       else if (onlineMode && isHost) { hsGuard = !!remoteKeys.s; }
+      else if (onlineMode && !isHost) { hsGuard = !!keys['Shift']; }   // ゲスト機の P2 = 自分（Shiftでガード）
       else { hsGuard = !!(keys['p'] || keys['P']); }
       if (!hsGuard && p.guarding) { p.guarding = false; }
       continue;
@@ -13029,6 +13063,11 @@ function updateBattle(dt) {
         p.dSkillActive = false; p.dSkillTimer = 0; p.dSkillBuff = null;
         p.jabCount = 0; p.jabTimer = 0; p.repMove = null; p.repCount = 0;
         p.recoveryUsed = false; p.recoveryActive = 0; p.airDodgeUsed = false;
+        // 状態異常も 消す。撃墜中は タイマーが 止まる（ループ冒頭で continue）ため、
+        // 凍結の まま 倒されると 凍結の まま 復活していた
+        p.frozen = 0; p.burning = 0; p.burnDmg = 0; p.poisoned = 0; p.poisonTimer = 0; p.poisonDmg = 0;
+        p.stunned = 0; p.confused = 0; p.paralyzed = 0; p.cursed = 0; p.fearTimer = 0; p.feared2 = 0;
+        p.sealMagic = 0; p.inkBlindTimer = 0; p.bounceStun = 0;
       }
       continue;
     }
@@ -13046,7 +13085,14 @@ function updateBattle(dt) {
     if (p.inkBlindTimer > 0) p.inkBlindTimer--;
     if (p.kingComboTimer > 0) { p.kingComboTimer--; if (p.kingComboTimer <= 0) { p.kingComboHits = 0; } }
     if (p.senBuffTimer > 0) p.senBuffTimer--;
-    if (p.kingkingArmorTimer > 0) p.kingkingArmorTimer--;
+    if (p.kingkingArmorTimer > 0) {
+      p.kingkingArmorTimer--;
+      // 金金: 鎧中の 金色オーラ。updateDSkill 側に 置くと dSkillActive でない 金金では
+      // 一度も 描かれなかったので、タイマーを 減らす ここで 出す
+      if (p.kingkingArmorTimer % 8 === 0) {
+        sparks.push({ x: p.x+(Math.random()-0.5)*30, y: p.y-35+(Math.random()-0.5)*25, vx:(Math.random()-0.5)*1.5, vy:-0.8-Math.random()*0.5, life:12, maxLife:12, color:Math.random()>0.5?'#FFD700':'#DAA520', size:2+Math.random()*1.5, gravity:-0.02, drag:0.97 });
+      }
+    }
     if (p.fearTimer > 0) p.fearTimer--;
     if (p.poisonTimer > 0) { p.poisonTimer--; if (p.poisonTimer % 60 === 0) p.damage = Math.min(999, p.damage + 1); }
     if (p.fearGauge > 0 && p.fearTimer <= 0) p.fearGauge = Math.max(0, p.fearGauge - 0.1); // ゲージ自然減少
@@ -13058,7 +13104,10 @@ function updateBattle(dt) {
     // 掴まれている / 被弾中 / 倒れている ときは D技の 当たり判定を 止める。
     // 止めないと 掴まれた まま 相手を 殴り返して 掴みが 外れる
     if (!(p.grabbed || p.hitstun > 0 || !p.alive || p.guardBreakStun > 0)) updateDSkill(p);
-    else if (p.dSkillTimer > 0) p.dSkillTimer--;   // 時間だけは 進める
+    else {
+      if (p.dSkillTimer > 0) p.dSkillTimer--;      // 時間だけは 進める
+      if (p.dSkillCooldown > 0) p.dSkillCooldown--; // クールダウンも 止めない（コンボされると 延びてしまう）
+    }
     // ガード硬直カウントダウン
     if (p.guardPenalty > 0) { p.guardPenalty--; p.vx *= 0.9; }
     if (p.guardShrink > 0) p.guardShrink--;
@@ -13081,6 +13130,7 @@ function updateBattle(dt) {
       if (p.id === 0) { xHeld = (onlineMode && !isHost) ? !!remoteKeys.x : !!(keys['x'] || keys['X']); }
       else if (gameMode === 'cpu' || bossRushMode) { xHeld = false; } // CPU即発動
       else if (onlineMode && isHost) { xHeld = !!remoteKeys.x; }
+      else if (onlineMode && !isHost) { xHeld = !!(keys['x'] || keys['X']); } // ゲスト機の P2 = 自分
       else { xHeld = !!(keys['i'] || keys['I']); } // P2
       // 先に 中断の 判定を する。順番が 逆だと、掴まれた/殴られた あとに
       // 溜めスマッシュが 勝手に 出てしまう
@@ -13134,8 +13184,8 @@ function updateBattle(dt) {
               life: 25 + Math.floor(Math.random() * 20), maxLife: 45, color: ['#FF4400','#FF8833','#FFAA44','#FF2200'][i%4], size: 3 + Math.random() * 5, type: 'fireball', gravity: 0.08, drag: 0.97 });
           }
           cmdNameDisplay.push({ text: 'DRAGON MODE!', x: p.x, y: p.y - 120, life: 108, maxLife: 108, color: '#FF4400' });
-          // ドラゴンモードではステータス変更
-          p.weight = 1.5;
+          // 重さの 変化は applyHit の dragonMode 判定（KB 1/1.35）側で 効いている。
+          // p.weight への 代入は どこからも 読まれない 死に値だったので 削除した
         }
       } else {
         p.dragonTransformTimer = 0;
@@ -13147,7 +13197,6 @@ function updateBattle(dt) {
         if (p.dragonTimer <= 0) {
           p.dragonMode = false;
           p.dragonCooldown = 1200; // 20秒クールダウン
-          p.weight = 0.8; // 人型に戻す
           hitEffects.push({ x: p.x, y: p.y - 40, life: 15, maxLife: 15, color: '#FFFFFF', size: 40 });
           cmdNameDisplay.push({ text: 'HUMAN MODE', x: p.x, y: p.y - 120, life: 60, maxLife: 60, color: '#FF8833' });
         }
@@ -13329,8 +13378,12 @@ function updateBattle(dt) {
       sparks.push({ x: p.x + (Math.random()-0.5)*20, y: p.y - 20, vx: (Math.random()-0.5)*1.5, vy: -1-Math.random(), life: 10, maxLife: 10, color: Math.random()>0.5?'#FFD700':'#FF8833', size: 2+Math.random(), gravity: -0.03, drag: 0.96 });
     }
     // メテオ(3): 燃焼オーラ - 近接攻撃を受けた時、相手にも微小ダメージ
-    if (ci === 3 && p.alive && p.hitstun > 0 && p.damageTint === 12) {
-      // 被弾直後の1フレームだけ: 攻撃した相手に1ダメージ
+    // のけぞり中は damageTint が 12 の まま 減らないため、damageTint 判定だと
+    // 毎フレーム 1ダメージ 入り続けていた。1被弾 = 1回 の 一度きりフラグに する
+    if (ci === 3 && p.hitstun <= 0) p.meteoAuraCounted = false;
+    if (ci === 3 && p.alive && p.hitstun > 0 && !p.meteoAuraCounted) {
+      p.meteoAuraCounted = true;
+      // 被弾直後の1回だけ: 攻撃した相手に1ダメージ
       for (const t of players) {
         if (t.id !== p.id && t.alive && t.attacking && Math.hypot(t.x - p.x, t.y - p.y) < 80) {
           t.damage = Math.min(999, t.damage + 1);
@@ -13366,8 +13419,17 @@ function updateBattle(dt) {
         // ふわふわ 浮く: 重力を 打ち消して、上下キーで 動く
         p.grounded = false;
         p.vy *= 0.72;
-        const flyUp = (p.id === 0) ? (keys['ArrowUp'] || (onlineMode && !isHost && remoteKeys.up)) : false;
-        const flyDown = (p.id === 0) ? (keys['ArrowDown'] || (onlineMode && !isHost && remoteKeys.down)) : false;
+        // P2 の Chatta も 上下に 操縦できるように する（以前は P1 専用で、
+        // オンラインの P2 は 飛んでも 高さを 変えられなかった）
+        let flyUp = false, flyDown = false;
+        if (p.id === 0) {
+          flyUp = !!(keys['ArrowUp'] || (onlineMode && !isHost && remoteKeys.up));
+          flyDown = !!(keys['ArrowDown'] || (onlineMode && !isHost && remoteKeys.down));
+        } else if (onlineMode && isHost) {
+          flyUp = !!remoteKeys.up; flyDown = !!remoteKeys.down;
+        } else if (onlineMode && !isHost) {
+          flyUp = !!keys['ArrowUp']; flyDown = !!keys['ArrowDown'];
+        }
         if (flyUp) p.vy -= 1.1;
         else if (flyDown) p.vy += 1.1;
         else p.vy -= 0.12;
@@ -13447,11 +13509,8 @@ function updateBattle(dt) {
     }
     // サトル(23): カウンターボーナスタイマー
     if (ci === 23 && p.satoruCounterBonus > 0) p.satoruCounterBonus--;
-    // サトル(23): 空中回避成功時のカウンター検出
-    if (ci === 23 && p.airDodgeEndlag > 0 && p.airDodgeEndlag === AIR_DODGE_ENDLAG_FRAMES) {
-      // 空中回避が終了した瞬間 → カウンターボーナス付与
-      p.satoruCounterBonus = 30; // 0.5秒間+20%
-    }
+    // サトル(23)の カウンターボーナス付与は 空中回避の 終了処理側（airDodgeTimer の 減算）で 行う。
+    // ここで endlag === MAX を 見る 方式は、同フレーム内で すでに 1 減っていて 一度も 成立しなかった
     // 怖(24): 相手ゲージ蓄積5%低下（常時）
     if (ci === 24 && p.alive) {
       for (const t of players) {
@@ -13561,12 +13620,10 @@ function updateBattle(dt) {
             p.hitTargets.push(t.id);
             p.recoveryHitConfirmed = true;
             // 状態異常付与
-            if (rec2.status === 'frozen') t.frozen = Math.max(t.frozen, 60);
-            else if (rec2.status === 'burning') { t.burning = Math.max(t.burning, 120); t.burnDmg = 2; }
-            else if (rec2.status === 'poisoned') { t.poisoned = Math.max(t.poisoned, 120); if (!t.poisonDmg || t.poisonDmg < 1) t.poisonDmg = 1; }
-            else if (rec2.status === 'stunned') t.stunned = Math.max(t.stunned, 30);
-            else if (rec2.status === 'cursed') t.cursed = Math.max(t.cursed, 60);
-            else if (rec2.status === 'confused') t.confused = Math.max(t.confused, 60);
+            if (rec2.status) {
+              const recDur = { frozen: 60, burning: 120, poisoned: 120, stunned: 30, cursed: 60, confused: 60 }[rec2.status] || 60;
+              applyStatus(t, rec2.status, recDur);
+            }
           }
         }
       }
@@ -13589,7 +13646,9 @@ function updateBattle(dt) {
     } else if (onlineMode && isHost) {
       wantsGuard = !!remoteKeys.s;
     } else if (onlineMode && !isHost) {
-      wantsGuard = !!(keys['s'] || keys['S']);
+      // ゲスト機の P2 = 自分。ホストへは Shift を s として 送っている（sendGuestInput）ので、
+      // ローカルの 見た目も Shift で 合わせる（以前は 使っていない 'S' キーを 見ていた）
+      wantsGuard = !!keys['Shift'];
     } else {
       wantsGuard = !!(keys['p'] || keys['P']);
     }
@@ -13636,6 +13695,8 @@ function updateBattle(dt) {
         gcUp = false; gcJump = false;
       } else if (onlineMode && isHost) {
         gcUp = !!remoteKeys.up;
+      } else if (onlineMode && !isHost) {
+        gcUp = !!keys['ArrowUp'];   // ゲスト機の P2 = 自分（移動と 同じく 矢印キー）
       } else {
         gcUp = !!(keys['w'] || keys['W']);
       }
@@ -13667,6 +13728,8 @@ function updateBattle(dt) {
         p.airDodgeEndlag = AIR_DODGE_ENDLAG_FRAMES;
         p.vx *= 0.3;
         p.vy *= 0.3;
+        // サトル(23): 空中回避を 出し切った 瞬間に カウンターボーナス（0.5秒 +20%）
+        if (p.charIdx === 23) p.satoruCounterBonus = 30;
       }
     }
     if (p.airDodgeEndlag > 0) {
@@ -13776,6 +13839,8 @@ function updateBattle(dt) {
       let downKeyPress = false;
       if (p.id === 0) { downKeyPress = (onlineMode && !isHost) ? !!remoteKeys.down : !!keys['ArrowDown']; }
       else if (gameMode === 'cpu' || bossRushMode) { downKeyPress = false; }
+      else if (onlineMode && isHost) { downKeyPress = !!remoteKeys.down; }
+      else if (onlineMode && !isHost) { downKeyPress = !!keys['ArrowDown']; } // ゲスト機の P2 = 自分
       else { downKeyPress = !!(keys['s'] || keys['S']); }
       if (downKeyPress && !p._microDownPrev) {
         if (battleFrame - (p._microDownTime || 0) < 15) {
@@ -13967,10 +14032,12 @@ function updateBattle(dt) {
     p.x += p.vx;
     p.y += p.vy;
     // 空中攻撃状態を着地前に記録
-    if (!p.grounded && (p.attacking || p.attackFrame > 0)) {
+    // 注: attackFrame は 技が 終わっても 0 に 戻らないので、ここで 見ると
+    // 「とっくに 終わった 地上技」の 残り香で ただの ジャンプ着地にも 硬直が ついていた
+    if (!p.grounded && p.attacking) {
       const at = p.attackType;
       if (at === 'aerial' || at === 'downair' || at === 'up' || at === 'side' || at === 'normal') {
-        if (!p.grounded) p.wasAirAttacking = at;
+        p.wasAirAttacking = at;
       }
     }
     const wasGroundedBefore = p.grounded;
@@ -14293,6 +14360,74 @@ function landingCheck(p) {
   }
 }
 
+// KO共通演出（斬撃光・星・ストックロス・紙吹雪・フラッシュ・揺れ・音・KO!!表示）。
+// ホストの 物理KO（blastCheck）と ゲストの 状態反映（applyHostState）の 両方から 呼ぶ。
+// 以前は 2か所に ほぼ 同じ コピーが あり、ストックアイコンの 座標修正が 片方にしか
+// 当たっていなかった（＝この ファイルの「2コピー問題」そのもの）
+function spawnKOEffects(playerId, stockIdx, ex, ey) {
+  playHitSound('ko');
+  triggerScreenShake(10, 20);
+  // 白いフラッシュ（強め）
+  hitFlash.alpha = 0.55;
+  hitFlash.color = '#FFFFFF';
+  // 光の斬撃エフェクト（青白い光線が画面を斜めに走る）
+  for (let i = 0; i < 5; i++) {
+    const baseAngle = -0.6 + Math.random() * 1.2;
+    koSlashEffects.push({
+      x: ex, y: ey,
+      angle: baseAngle,
+      length: 400 + Math.random() * 500,
+      width: 2 + Math.random() * 4,
+      life: 90, maxLife: 90,
+      delay: i * 3,
+      color: i % 2 === 0 ? '#AADDFF' : '#FFFFFF',
+    });
+  }
+  // 黄色い星（大小様々、多めに飛び散る）
+  for (let i = 0; i < 16; i++) {
+    const angle = (i / 16) * Math.PI * 2 + Math.random() * 0.4;
+    const speed = 2 + Math.random() * 7;
+    sparks.push({
+      x: ex, y: ey,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - 2,
+      life: 70 + Math.floor(Math.random() * 20),
+      maxLife: 90,
+      color: i % 3 === 0 ? '#FFFFFF' : '#FFDD44',
+      size: 3 + Math.random() * 6,
+      type: 'star',
+      gravity: 0.04,
+      drag: 0.985,
+      spin: (Math.random() - 0.5) * 0.4,
+      angle: Math.random() * Math.PI * 2,
+    });
+  }
+  // ストックロスアニメーション（HUD は drawPlayerHUD(120, 530, ...) / (600, 530, ...)）
+  const hudX = playerId === 0 ? 120 : 600;
+  stockLossAnim = {
+    active: true, playerId: playerId, life: 30, maxLife: 30,
+    x: hudX + 10 + stockIdx * 22 + 7,
+    y: 530 + 90 - 18 + 5,
+  };
+  // KO!! テキスト表示
+  koDisplay = { active: true, life: 90, maxLife: 90, playerIdx: playerId };
+  // 紙吹雪
+  const killerIdx = playerId === 0 ? 1 : 0;
+  const killerColor = characters[players[killerIdx] ? players[killerIdx].charIdx : 0].accent;
+  for (let i = 0; i < 50; i++) {
+    confetti.push({
+      x: 100 + Math.random() * 760, y: -20 - Math.random() * 100,
+      vx: (Math.random() - 0.5) * 4, vy: 1 + Math.random() * 3,
+      life: 60 + Math.floor(Math.random() * 60), maxLife: 120,
+      color: ['#FF4444','#FFDD00','#44AAFF','#FF66AA','#44FF88','#FF8844','#AA44FF', killerColor][i % 8],
+      size: 3 + Math.random() * 5,
+      rotation: Math.random() * Math.PI * 2,
+      rotSpeed: (Math.random() - 0.5) * 0.2,
+      type: i % 3 === 0 ? 'rect' : i % 3 === 1 ? 'star' : 'circle',
+    });
+  }
+}
+
 function blastCheck(p) {
   if (p.x < BLAST_LEFT || p.x > BLAST_RIGHT || p.y < BLAST_TOP || p.y > BLAST_BOTTOM) {
     // === 飛んでいった 方向で 撃墜演出を 変える（スマブラと同じ）===
@@ -14394,77 +14529,11 @@ function blastCheck(p) {
     p.throwTechWindow = 0;
     if (p.grabbing) releaseGrab(p);
     if (p.grabbed) { p.grabbed = false; p.grabbedBy = null; }
-    playHitSound('ko');
-    triggerScreenShake(10, 20);
+    // KO共通演出（stocks は 減算済みなので そのまま 失った アイコンの 位置になる）
+    spawnKOEffects(p.id, p.stocks, ex, ey);
 
-    // ④ 白いフラッシュ（強め）
-    hitFlash.alpha = 0.55;
-    hitFlash.color = '#FFFFFF';
-
-    // ① 光の斬撃エフェクト（青白い光線が画面を斜めに走る）
-    for (let i = 0; i < 5; i++) {
-      const baseAngle = -0.6 + Math.random() * 1.2;
-      koSlashEffects.push({
-        x: ex, y: ey,
-        angle: baseAngle,
-        length: 400 + Math.random() * 500,
-        width: 2 + Math.random() * 4,
-        life: 90, maxLife: 90,
-        delay: i * 3,
-        color: i % 2 === 0 ? '#AADDFF' : '#FFFFFF',
-      });
-    }
-
-    // ② 黄色い星（大小様々、多めに飛び散る）
-    for (let i = 0; i < 16; i++) {
-      const angle = (i / 16) * Math.PI * 2 + Math.random() * 0.4;
-      const speed = 2 + Math.random() * 7;
-      sparks.push({
-        x: ex, y: ey,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed - 2,
-        life: 70 + Math.floor(Math.random() * 20),
-        maxLife: 90,
-        color: i % 3 === 0 ? '#FFFFFF' : '#FFDD44',
-        size: 3 + Math.random() * 6,
-        type: 'star',
-        gravity: 0.04,
-        drag: 0.985,
-        spin: (Math.random() - 0.5) * 0.4,
-        angle: Math.random() * Math.PI * 2,
-      });
-    }
-
-    // ③ スローモーション（1.5秒）
+    // スローモーション（1.5秒）
     koSlowMotion = { active: true, frames: 0, maxFrames: 90 };
-
-    // ⑤ ストックロスアニメーション
-    const stockIdx = p.stocks; // stocks already decremented, so this is the lost stock index
-    const hudX = p.id === 0 ? 20 : 710;
-    stockLossAnim = {
-      active: true, playerId: p.id, life: 30, maxLife: 30,
-      x: hudX + 10 + stockIdx * 22 + 7,
-      y: 640 - 100 + 80 - 18 + 5,
-    };
-
-    // KO!! テキスト表示
-    koDisplay = { active: true, life: 90, maxLife: 90, playerIdx: p.id };
-
-    // 紙吹雪
-    const killerIdx = p.id === 0 ? 1 : 0;
-    const killerColor = characters[players[killerIdx] ? players[killerIdx].charIdx : 0].accent;
-    for (let i = 0; i < 50; i++) {
-      confetti.push({
-        x: 100 + Math.random() * 760, y: -20 - Math.random() * 100,
-        vx: (Math.random() - 0.5) * 4, vy: 1 + Math.random() * 3,
-        life: 60 + Math.floor(Math.random() * 60), maxLife: 120,
-        color: ['#FF4444','#FFDD00','#44AAFF','#FF66AA','#44FF88','#FF8844','#AA44FF', killerColor][i % 8],
-        size: 3 + Math.random() * 5,
-        rotation: Math.random() * Math.PI * 2,
-        rotSpeed: (Math.random() - 0.5) * 0.2,
-        type: i % 3 === 0 ? 'rect' : i % 3 === 1 ? 'star' : 'circle',
-      });
-    }
     p.attacking = false;
     p.specialState = null;
     if (p.stocks <= 0) {
@@ -15062,17 +15131,8 @@ function applyUltimateDamage(attacker, target) {
     for (let h = 0; h < hitCount; h++) applyHit(attacker, target, dmg, kb, 0.2, angle, 'cmd');
     if (ud.status) {
       const dur = ud.dur || 60;
-      const st = ud.status;
-      if (st === 'frozen') target.frozen = Math.max(target.frozen, dur);
-      if (st === 'burning') { target.burning = Math.max(target.burning, dur); target.burnDmg = 3; }
-      if (st === 'poisoned') { target.poisoned = Math.max(target.poisoned, ud.dur); target.poisonDmg = ud.poisonDmg||8; }
-      if (st === 'stunned') target.stunned = Math.max(target.stunned, dur);
-      if (st === 'cursed') target.cursed = Math.max(target.cursed, dur);
-      if (st === 'confused') target.confused = Math.max(target.confused, dur);
-      if (st === 'paralyzed') target.paralyzed = Math.max(target.paralyzed, dur);
-      if (st === 'feared2') target.feared2 = Math.max(target.feared2, dur);
-      if (st === 'sealMagic') target.sealMagic = Math.max(target.sealMagic, dur);
-      if (st === 'bounce') { target.vy = 12; target.groundBounced = false; }
+      if (ud.status === 'bounce') { target.vy = 12; target.groundBounced = false; }
+      else applyStatus(target, ud.status, dur, { burnDmg: 3, poisonDmg: ud.poisonDmg || 8 });
     }
     if (ud.steal && target.ultimateGauge !== undefined) {
       const stolen = target.ultimateGauge * (ud.steal/100);
@@ -15472,7 +15532,8 @@ const D_SKILL_IMPL = {
     spawnProjectile(p, { speed:14, damage:11, kbBase:6, kbScale:0.10, kbAngle:-25, w:36, h:34, life:58, color:'#CC66FF', pcolor:'#9944CC' });
     projectiles.push({ x: p.x + 30*dir, y: p.y - 50, vx: 12*dir, vy: -2, w:26, h:34,
       damage:7, kbBase:3, kbScale:0.05, kbAngle:-15, life:52, ownerId: p.id,
-      color:'#44AA22', pcolor:'#33881A', shape:'rect', ownerCharIdx:ci, time:0, stun:true, stunFrames:30 });
+      // 飛び道具の 状態異常は statusChance/statusType で 渡す（stun:true は 飛び道具側では 読まれない）
+      color:'#44AA22', pcolor:'#33881A', shape:'rect', ownerCharIdx:ci, time:0, statusChance:1, statusType:'stunned' });
     const boomHitbox = { x: p.x - 98, y: p.y - 98, w: 196, h: 140 };
     checkHitboxAgainstPlayers(p, boomHitbox, 15, 8, 0.14, -40, 'special');
     p.damage = Math.min(999, p.damage + 6);
@@ -15748,10 +15809,6 @@ function updateDSkill(p) {
   if (p.dSkillBuff === 'satoruHaki' && p.dSkillTimer % 6 === 0) {
     // サトル: 青いオーラ
     sparks.push({ x: p.x+(Math.random()-0.5)*25, y: p.y-35+(Math.random()-0.5)*20, vx:(Math.random()-0.5)*1.5, vy:-1-Math.random()*0.5, life:12, maxLife:12, color:Math.random()>0.5?'#44AAFF':'#2266AA', size:2+Math.random()*1.5, gravity:-0.02, drag:0.97 });
-  }
-  // 金金: 鎧中の金色オーラ（updateDSkillとは別にメインループでも呼べるが、ここでまとめる）
-  if (p.charIdx === 22 && p.kingkingArmorTimer > 0 && p.dSkillTimer % 8 === 0) {
-    sparks.push({ x: p.x+(Math.random()-0.5)*30, y: p.y-35+(Math.random()-0.5)*25, vx:(Math.random()-0.5)*1.5, vy:-0.8-Math.random()*0.5, life:12, maxLife:12, color:Math.random()>0.5?'#FFD700':'#DAA520', size:2+Math.random()*1.5, gravity:-0.02, drag:0.97 });
   }
   // 分身（サイソク）: 毎フレーム分身が攻撃判定 + 残像エフェクト
   if (p.dSkillBuff === 'bunshin') {
@@ -16052,9 +16109,8 @@ function drawBossRushHUD() {
         ctx.fillText('ENTER : Back to title', 480, 480);
       }
       ctx.globalAlpha = 1;
-      // drawBattle の 先頭で save を 2回（画面揺れ＋カメラ）している。
-      // 1回しか 戻さないと 毎フレーム 1つずつ 積もり、変形が 壊れて 画面が 飛ぶ
-      ctx.restore();
+      // この関数は カメラ変形を 戻した 後に 呼ばれるので、残っている save は
+      // 画面揺れの 1回だけ。それを ここで 戻してから 抜ける
       ctx.restore();
       return true; // クリア画面を 出した。GAME SET 演出は 飛ばす
     }
@@ -17642,51 +17698,6 @@ function drawBattle(dt) {
     ctx.restore();
   }
 
-  // Countdown (screen space - after camera)
-  if (battleCountdown > 0) {
-    const sec = Math.ceil(battleCountdown / 60);
-    ctx.font = 'bold 80px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillStyle = '#FFF'; ctx.shadowColor = '#FFF'; ctx.shadowBlur = 20;
-    ctx.fillText(sec.toString(), 480, 300);
-    ctx.shadowBlur = 0;
-  } else if (battleTime < 2500) {
-    const goAlpha = Math.max(0, 1 - (battleTime - 3000) * 0.001);
-    if (goAlpha > 0) {
-      ctx.globalAlpha = Math.min(1, goAlpha);
-      ctx.font = 'bold 90px sans-serif'; ctx.textAlign = 'center';
-      ctx.fillStyle = '#FFDD44'; ctx.shadowColor = '#FFDD44'; ctx.shadowBlur = 20;
-      ctx.fillText('GO!', 480, 300);
-      ctx.shadowBlur = 0; ctx.globalAlpha = 1;
-    }
-  }
-
-  // 試合の 最初の 数秒だけ「ESCでメニュー」と 出す（見つけてもらうため）
-  if (battleStarted && !gameOver && !pauseOpen && battleTime > 1000 && battleTime < 7000) {
-    const hintA = battleTime < 6000 ? 1 : Math.max(0, 1 - (battleTime - 6000) / 1000);
-    ctx.globalAlpha = hintA * 0.75;
-    ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'right';
-    ctx.fillStyle = '#9ab';
-    ctx.fillText('ESC  MENU', 948, 22);
-    ctx.globalAlpha = 1;
-  }
-
-  // Boss Rush HUD
-  if (drawBossRushHUD()) return;   // クリア画面のときは ここで 終わり
-
-  // Boss Rush defeated overlay
-  if (bossRushMode && gameOver && winner === 0 && bossRushCurrent < 3 && bossRushPhase !== 'clear') {
-    // Override GAME SET text with boss defeated message
-    if (gameSetPhase >= 2) {
-      // Will be drawn on top of normal game set
-    }
-  }
-
-  // Game over - GAME SET演出
-  // 条件を 絞りすぎると 演出が 始まらず、Enter/ESC の 受付（gameSetTimer > 180）に
-  // 一生 届かなくなる。決着していれば 必ず 進める
-  drawGameSetOverlay();
-
   // デバッグ：当たり判定の可視化（F3で切り替え）
   if (debugHitboxes) {
     for (const p of players) {
@@ -17833,6 +17844,44 @@ function drawBattle(dt) {
 
   // === End dynamic camera (world-space effects above, screen-space below) ===
   ctx.restore();
+
+  // Countdown（スクリーン座標。カメラ変形の 中に 置くと ズーム時に 画面外へ 流れる）
+  if (battleCountdown > 0) {
+    const sec = Math.ceil(battleCountdown / 60);
+    ctx.font = 'bold 80px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#FFF'; ctx.shadowColor = '#FFF'; ctx.shadowBlur = 20;
+    ctx.fillText(sec.toString(), 480, 300);
+    ctx.shadowBlur = 0;
+  } else if (battleTime < 4000) {
+    // カウント終了時に battleTime は すでに 約3000ms なので、3000〜4000ms の 1秒間 フェード表示
+    const goAlpha = Math.max(0, 1 - (battleTime - 3000) * 0.001);
+    if (goAlpha > 0) {
+      ctx.globalAlpha = Math.min(1, goAlpha);
+      ctx.font = 'bold 90px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillStyle = '#FFDD44'; ctx.shadowColor = '#FFDD44'; ctx.shadowBlur = 20;
+      ctx.fillText('GO!', 480, 300);
+      ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+    }
+  }
+
+  // 試合の 最初の 数秒だけ「ESCでメニュー」と 出す（見つけてもらうため）
+  if (battleStarted && !gameOver && !pauseOpen && battleTime > 1000 && battleTime < 7000) {
+    const hintA = battleTime < 6000 ? 1 : Math.max(0, 1 - (battleTime - 6000) / 1000);
+    ctx.globalAlpha = hintA * 0.75;
+    ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'right';
+    ctx.fillStyle = '#9ab';
+    ctx.fillText('ESC  MENU', 948, 22);
+    ctx.globalAlpha = 1;
+  }
+
+  // Boss Rush HUD（カメラ変形の 外で 呼ぶこと。中だと ズーム時に 進捗バーが 画面外へ 出る）
+  if (drawBossRushHUD()) return;   // クリア画面のときは ここで 終わり
+
+  // Game over - GAME SET演出
+  // 条件を 絞りすぎると 演出が 始まらず、Enter/ESC の 受付（gameSetTimer > 180）に
+  // 一生 届かなくなる。決着していれば 必ず 進める
+  drawGameSetOverlay();
 
   // === コンボフィニッシャー画面縁グロー ===
   if (comboFinisherActive.active) {
@@ -18714,7 +18763,48 @@ const ATTACK_EFFECTS = {
       ctx.stroke();
     }
   },
+  // 強攻撃・スマッシュ用の 大きい パンチ衝撃（punch の 強化版）
+  'bigpunch': (p, atk, cx, cy, dir, frame) => {
+    const t = Math.min(1, (frame - atk.startup) / (atk.active || 1));
+    const px = cx + (26 + 30 * t) * dir;
+    const py = cy - 36;
+    // 衝撃の 本体
+    ctx.fillStyle = atk.color;
+    ctx.globalAlpha = 0.8 * (1 - t);
+    ctx.beginPath(); ctx.arc(px, py, 20 * (1 - t * 0.25), 0, Math.PI * 2); ctx.fill();
+    // 白い コア
+    ctx.fillStyle = '#FFF';
+    ctx.globalAlpha = 0.9 * (1 - t);
+    ctx.beginPath(); ctx.arc(px, py, 8 * (1 - t), 0, Math.PI * 2); ctx.fill();
+    // 広がる 衝撃リング
+    ctx.strokeStyle = atk.color;
+    ctx.lineWidth = 5;
+    ctx.globalAlpha = 0.6 * (1 - t);
+    ctx.beginPath(); ctx.arc(px, py, 14 + 32 * t, 0, Math.PI * 2); ctx.stroke();
+    // 放射の 線
+    ctx.strokeStyle = '#FFF';
+    ctx.lineWidth = 3;
+    ctx.globalAlpha = 0.8 * (1 - t);
+    for (let i = 0; i < 6; i++) {
+      const a = (Math.PI * 2 / 6) * i + 0.4;
+      const r1 = 16 + 22 * t, r2 = r1 + 14 * (1 - t);
+      ctx.beginPath();
+      ctx.moveTo(px + Math.cos(a) * r1, py + Math.sin(a) * r1);
+      ctx.lineTo(px + Math.cos(a) * r2, py + Math.sin(a) * r2);
+      ctx.stroke();
+    }
+  },
 };
+// コマンド技の うち 専用の 絵が 無い ものは、近い 見た目の 既存エフェクトを 使い回す。
+// （if連鎖 → 表 の 移行時に 落ちて、スマッシュと 4キャラの コマンド技が 無表示だった）
+ATTACK_EFFECTS.cmdUruo1   = ATTACK_EFFECTS.bigslash;   // Wolf Nail: 爪の 大振り
+ATTACK_EFFECTS.cmdUruo2   = ATTACK_EFFECTS.rapid;      // Wolf Giga Punch: 連打
+ATTACK_EFFECTS.cmdKuma1   = ATTACK_EFFECTS.punch;      // Honey Bomb: 投げる 瞬間（弾は projectile 側が 描く）
+ATTACK_EFFECTS.cmdKuma2   = ATTACK_EFFECTS.bigpunch;   // Super Bear Punch
+ATTACK_EFFECTS.cmdBullet1 = ATTACK_EFFECTS.punch;      // Missile: 発射の 瞬間
+ATTACK_EFFECTS.cmdBullet2 = ATTACK_EFFECTS.rapid;      // Bullet Storm
+ATTACK_EFFECTS.cmdShauden1 = ATTACK_EFFECTS.punch;     // Ink Bomb: 投げる 瞬間
+ATTACK_EFFECTS.cmdShauden2 = ATTACK_EFFECTS.rapid;     // Tentacle Dance: 連打
 
 
 // ======================================================================
@@ -18736,23 +18826,8 @@ function drawAttackEffect(p) {
   const cy = p.y;
 
   ctx.save();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  // エフェクトが 途中で 例外を 出しても arcラップと save が 残らないよう try/finally
+  try {
 
   // === キャラ固有攻撃エフェクト（upslash/sideslash/meteor用） ===
   // 未対応のeffect名はキャラ固有スタイルで描画
@@ -19048,22 +19123,10 @@ function drawAttackEffect(p) {
     }
   }
 
-  // === COMMAND ATTACK EFFECTS ===
-
-
-
-
-
-
-
-
-
-
-
-
-
-  ctx.restore();
-  ctx.arc = _origArc; // arcラップを解除
+  } finally {
+    ctx.restore();
+    ctx.arc = _origArc; // arcラップを解除
+  }
 }
 
 // --- Draw guard state ---
@@ -19724,17 +19787,6 @@ function drawBattleHUD() {
       ctx.beginPath(); ctx.moveTo(tx, gy); ctx.lineTo(tx, gy + gh); ctx.stroke();
     }
     // 攻撃強化: 削除済み
-    if (false) {
-      ctx.globalAlpha = 0.4 + Math.sin(battleTime * 0.12) * 0.2;
-      ctx.strokeStyle = '#FFD700'; ctx.lineWidth = 1.5;
-      ctx.beginPath(); ctx.arc(p.x, p.y - 35, 30, 0, Math.PI * 2); ctx.stroke();
-      ctx.globalAlpha = 1;
-      // 残り時間をゲージ上に表示
-      const puRatio = p.powerUpTimer / 300;
-      ctx.fillStyle = '#FFD700'; ctx.globalAlpha = 0.6;
-      ctx.fillRect(gx, gy - 3, gw * puRatio, 2);
-      ctx.globalAlpha = 1;
-    }
   }
 
   // === 固有個性ゲージ表示 ===
@@ -19963,6 +20015,9 @@ function teardownOnlineSession() {
 // これを やらないと バトルが そのまま ローカル対戦として 走り続ける
 function handleOnlineDisconnect(msg) {
   if (onlineTeardown) return;   // 自分で 閉じた ときの 二重呼び出し
+  // destroy() の 'close' は 非同期に 遅れて 来ることが ある。teardown 済み
+  //（peer なし・オンラインでない）なら、偽の「Disconnected」を 出さない
+  if (!onlineMode && !peer) return;
   const wasInGame = (scene === 'battle' || scene === 'vsintro' || scene === 'stageselect' ||
                      (scene === 'select' && onlineMode));
   teardownOnlineSession();
@@ -19972,6 +20027,9 @@ function handleOnlineDisconnect(msg) {
     stopBGM();
     bossRushMode = false;
     if (!transitioning) startTransition('online');
+    // フェード中に 切断されたら、進行中の 遷移先（vsintro/battle）を 乗り換える。
+    // 放って おくと CPU戦として そのまま 試合が 始まってしまう
+    else transitionTarget = 'online';
   }
 }
 
@@ -20007,13 +20065,27 @@ function setupPeerConnection(conn) {
     if (scene === 'online') startTransition('select');
   });
   conn.on('data', (data) => {
+    // 変な パケット（null や 文字列）で ハンドラごと 落ちないように 形だけ 先に 確認
+    if (!data || typeof data.type !== 'string') return;
     if (data.type === 'charSelect') {
       // Received remote player's character selection
       if (isHost) { p2Select = safeCharIdx(data.charIdx, p2Select); }
       else { p1Select = safeCharIdx(data.charIdx, p1Select); }
     } else if (data.type === 'charConfirm') {
-      if (isHost) { p2Select = safeCharIdx(data.charIdx, p2Select); p2Confirmed = true; }
-      else { p1Select = safeCharIdx(data.charIdx, p1Select); p1Confirmed = true; }
+      // 「ランダム」枠（characters.length）の まま 確定が 届いたら ここで 解決する。
+      // 残すと characters[p2Select] が undefined に なって VS画面が 落ちる
+      if (isHost) {
+        p2Select = safeCharIdx(data.charIdx, p2Select);
+        if (p2Select >= characters.length) p2Select = Math.floor(Math.random() * characters.length);
+        p2Confirmed = true;
+      } else {
+        p1Select = safeCharIdx(data.charIdx, p1Select);
+        if (p1Select >= characters.length) p1Select = Math.floor(Math.random() * characters.length);
+        p1Confirmed = true;
+      }
+    } else if (data.type === 'charUnconfirm') {
+      // 相手が ESC で 確定を 取り消した
+      if (isHost) p2Confirmed = false; else p1Confirmed = false;
     } else if (data.type === 'startBattle') {
       if (isHost) { p2Select = safeCharIdx(data.charIdx, p2Select); }
       else { p1Select = safeCharIdx(data.charIdx, p1Select); }
@@ -20029,6 +20101,8 @@ function setupPeerConnection(conn) {
         remoteKeys = data.keys;
       }
     } else if (data.type === 'ultimate') {
+      // 正規に 送るのは ホストだけ。ホスト側が 受けると 偽パケットで 演出を 強制される
+      if (isHost || scene !== 'battle') return;
       // すでに 必殺技中なら 無視する。ここで ultimateVideo を 捨てると
       // 画面に 出ている <video> を 消す 手がかりが 失われ、二度と 消えなくなる
       if (ultimateActive) return;
@@ -20137,6 +20211,13 @@ function startHosting() {
     onlineState = 'hosting';
   });
   peer.on('connection', (conn) => {
+    // すでに 対戦相手が いるのに 2人目が つないで きたら 断る。
+    // 受け入れると peerConn が すり替わって 進行中の 試合が 乗っ取られる
+    if (peerConn && onlineState === 'connected') {
+      console.log('[ONLINE] Rejected extra connection');
+      try { conn.close(); } catch (ex) {}
+      return;
+    }
     console.log('[ONLINE] Guest connected!');
     if (onlineConnectTimeout) { clearTimeout(onlineConnectTimeout); onlineConnectTimeout = null; }
     setupPeerConnection(conn);
@@ -20220,6 +20301,21 @@ function sendGuestInput() {
 //   片方だけだと「ホストでは 見えるのに ゲストでは 見えない」に なり、
 //   ホストで 試している 限り 絶対に 気づけない。
 //   x / y / vx / vy だけは applyFields が 補間して 入れるので 例外。
+//
+// 固有個性システムの ゲージ/モード類は この表で 送受信 両方を 回す。
+// ゲストの HUD（CHAR_GAUGE_DRAW）が 毎フレーム 読むのに 同期されておらず、
+// ゲスト側では ゲージが ずっと 0 の ままだった
+const CHAR_SYNC_FIELDS = [
+  'zenIceGauge','donEarthGauge','saisokuAccelGauge','saisokuLightSpeed','meteoBurnGauge',
+  'longPierceGauge','longDragonSpear','uruoWildGauge','uruoWildRelease','kumaFury','kumaFuryMode',
+  'bulletMagicGauge','bulletAwaken','shawdenVoltage','shawdenOvercharge','judgeMarks','judgeFinalMode',
+  'tensaiDragonGauge','catbusTeleCharges','tankAmmo','namiojiStamina','namiojiFullPower',
+  'tokkoPoisonGauge','samFlightCharges','kingClockGauge','kingTimeStop','onpaFreqGauge','onpaResonance',
+  'senRank','dosbossArmor','dosbossBroken','microBodies','kinkinAssetGauge','kinkinGoldMode','kinkinComboGold',
+  'satoruFightGauge','satoruMasterMode','kowaiFearGauge2','yahoChaosGauge','yahoChaosEvent','yahoChaosType',
+  'poyoSlimeGauge','poyoDoubleSlime','pullGravGauge','pullCollapseMode','mussySwarmCount',
+  'yahoPassive','yahoPassiveDisplay',
+];
 function serializePlayer(p) {
   // ゲストは 判定を しない（ホストが 正）ので、
   // 内部計算にしか 使わない 値は 送らない。送っても applyFields が 捨てるだけで、
@@ -20227,7 +20323,7 @@ function serializePlayer(p) {
   // 送るのを やめた もの: airDodgeUsed / autoBuff / autoBuffType / consecutiveHits /
   //   diFrame / dosbossComboCount / fearGauge / fearTimer / kingkingArmorTimer /
   //   poisonTimer / throwImmuneTimer / throwPhaseTimer
-  return {
+  const out = {
     x: p.x, y: p.y, vx: p.vx, vy: p.vy,
     damage: p.damage, stocks: p.stocks, alive: p.alive,
     attacking: p.attacking, attackType: p.attackType, attackFrame: p.attackFrame,
@@ -20267,6 +20363,12 @@ function serializePlayer(p) {
     chattaWarpLeft: p.chattaWarpLeft, botRobot: p.botRobot || 0,
     chattaFly: p.chattaFly || 0, chattaFlyCd: p.chattaFlyCd || 0,
   };
+  for (const f of CHAR_SYNC_FIELDS) out[f] = p[f] || 0;
+  // 金金(22)の コインは 見た目に 出るので 位置だけ 送る
+  if (p.charIdx === 22 && p.coins && p.coins.length > 0) {
+    out.coins = p.coins.map(c => ({ x: Math.round(c.x), y: Math.round(c.y), life: c.life }));
+  }
+  return out;
 }
 
 
@@ -20454,6 +20556,9 @@ function applyHostState(data) {
     target.paralyzed = src.paralyzed || 0;
     target.feared2 = src.feared2 || 0;
     target.sealMagic = src.sealMagic || 0;
+    // 固有個性ゲージ/モード同期（送信側と 同じ 表を 使う）
+    for (const f of CHAR_SYNC_FIELDS) target[f] = src[f] || 0;
+    if (src.coins) target.coins = src.coins.map(c => ({ x: c.x, y: c.y, vx: 0, vy: 0, life: c.life }));
     // Restore attackData from attackType
     if (src.attacking && src.attackType) {
       const defs = (target.charIdx === 10 && target.dragonMode) ? dragonAttackDefs : attackDefs[target.charIdx];
@@ -20597,24 +20702,11 @@ function applyHostState(data) {
       const ex = Math.max(BLAST_LEFT + 20, Math.min(BLAST_RIGHT - 20, p.x));
       const ey = Math.max(BLAST_TOP + 20, Math.min(BLAST_BOTTOM - 20, p.y));
 
-      // KO display
-      koDisplay = { active: true, life: 90, maxLife: 90, playerIdx: i };
+      // KO共通演出（ホスト側 blastCheck と 同じ 関数を 使う）
+      spawnKOEffects(i, newStocks, ex, ey);
 
-      // Blast explosion with colors
+      // ゲスト専用の 追加演出: 撃墜爆発 と 大きめの 火花バースト
       blastExplosions.push({ x: ex, y: ey, life: 40, maxLife: 40, color: accent, charColor: mainCol });
-
-      // KO slash effects
-      for (let j = 0; j < 5; j++) {
-        const baseAngle = -0.6 + Math.random() * 1.2;
-        koSlashEffects.push({
-          x: ex, y: ey, angle: baseAngle,
-          length: 400 + Math.random() * 500, width: 2 + Math.random() * 4,
-          life: 90, maxLife: 90, delay: j * 3,
-          color: j % 2 === 0 ? '#AADDFF' : '#FFFFFF',
-        });
-      }
-
-      // Large spark burst (40 particles)
       for (let j = 0; j < 40; j++) {
         const angle = Math.random() * Math.PI * 2;
         const speed = 2 + Math.random() * 8;
@@ -20626,50 +20718,6 @@ function applyHostState(data) {
           size: 1.5 + Math.random() * 3.5, gravity: 0.05 + Math.random()*0.1, drag: 0.98,
         });
       }
-
-      // Star particles
-      for (let j = 0; j < 16; j++) {
-        const angle = (j/16) * Math.PI * 2 + Math.random() * 0.4;
-        const speed = 2 + Math.random() * 7;
-        sparks.push({
-          x: ex, y: ey, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 2,
-          life: 70 + Math.floor(Math.random()*20), maxLife: 90,
-          color: j%3===0 ? '#FFFFFF' : '#FFDD44', size: 3 + Math.random()*6,
-          type: 'star', gravity: 0.04, drag: 0.985,
-          spin: (Math.random()-0.5)*0.4, angle: Math.random()*Math.PI*2,
-        });
-      }
-
-      // Stock loss animation
-      const stockIdx = newStocks;
-      const hudX = i === 0 ? 120 : 600;
-      stockLossAnim = {
-        active: true, playerId: i, life: 30, maxLife: 30,
-        x: hudX + 10 + stockIdx * 22 + 7, y: 530 + 90 - 18 + 5,
-      };
-
-      // Confetti
-      const killerIdx = i === 0 ? 1 : 0;
-      const killerColor = characters[players[killerIdx] ? players[killerIdx].charIdx : 0].accent;
-      for (let j = 0; j < 50; j++) {
-        confetti.push({
-          x: 100 + Math.random() * 760, y: -20 - Math.random() * 100,
-          vx: (Math.random()-0.5)*4, vy: 1 + Math.random()*3,
-          life: 60 + Math.floor(Math.random()*60), maxLife: 120,
-          color: ['#FF4444','#FFDD00','#44AAFF','#FF66AA','#44FF88','#FF8844','#AA44FF', killerColor][j % 8],
-          size: 3 + Math.random()*5,
-          rotation: Math.random()*Math.PI*2, rotSpeed: (Math.random()-0.5)*0.2,
-          type: j%3===0 ? 'rect' : j%3===1 ? 'star' : 'circle',
-        });
-      }
-
-      // Hit flash
-      hitFlash.alpha = 0.55;
-      hitFlash.color = '#FFFFFF';
-
-      // Screen shake + sound
-      triggerScreenShake(10, 20);
-      try { playHitSound('ko'); } catch(e) {}
     }
   }
 }
@@ -20759,12 +20807,7 @@ function drawOnlineLobby(dt) {
     ctx.fillStyle = '#888';
     ctx.fillText('ESC to go back', 480, 500);
 
-    // エラーメッセージ表示
-    if (onlineError) {
-      ctx.font = 'bold 14px sans-serif';
-      ctx.fillStyle = '#FF4444';
-      ctx.fillText(onlineError, 480, 530);
-    }
+    // エラーメッセージは 関数末尾の 共通表示（y=560）に 任せる（二重に 出ていた）
 
   } else if (onlineState === 'hosting') {
     ctx.font = '20px sans-serif';
@@ -21613,6 +21656,10 @@ function handleSelectKey(e) {
     if (e.key === 'Enter') {
       if (gameMode === 'training') {
         // Training mode: CPU doesn't move
+        // gameMode は 'cpu' に 変換するので、initBattle には trainingPending で 伝える。
+        // 変換後の gameMode だけ 見ていた 頃は initBattle が 毎回 false に 戻してしまい、
+        // トレーニング機能（Fキーの フレーム表示 / 戦績の 記録除外）が 一度も 効かなかった
+        trainingPending = true;
         trainingMode = true;
         gameMode = 'cpu';
         cpuDifficulty = 0; // CPUが動かない
@@ -21620,6 +21667,7 @@ function handleSelectKey(e) {
         p1Confirmed = false; p2Confirmed = false;
         return;
       }
+      trainingPending = false;
       if (gameMode === 'bossrush') {
         // Boss Rush: proceed to character select (P1 only)
         bossRushMode = true;
@@ -21700,8 +21748,8 @@ function handleSelectKey(e) {
           if (p1Select >= characters.length) p1Select = Math.floor(Math.random() * characters.length);
           p1Confirmed = true; if (peerConn) peerConn.send({ type: 'charConfirm', charIdx: p1Select });
         }
-      }
-      if (p1Confirmed && p2Confirmed && e.key === 'Enter') {
+      } else if (p2Confirmed && e.key === 'Enter') {
+        // else if に しないと、確定の Enter 1回で ステージ選択まで 進んでしまう
         startTransition('stageselect'); return;
       }
     } else {
@@ -21759,8 +21807,16 @@ function handleSelectKey(e) {
   }
 
   if (e.key === 'Escape') {
-    if (p1Confirmed || p2Confirmed) { p1Confirmed = false; p2Confirmed = false; }
-    else if (!onlineMode) { modeSelected = false; bossRushMode = false; }
+    if (onlineMode) {
+      // オンラインでは 自分の 確定だけ 取り消して 相手に 知らせる。
+      // 相手の 確定も ローカルで 消すと、相手側は 確定済みの つもりで 再送できず 固まる
+      const mineConfirmed = isHost ? p1Confirmed : p2Confirmed;
+      if (mineConfirmed) {
+        if (isHost) p1Confirmed = false; else p2Confirmed = false;
+        if (peerConn) peerConn.send({ type: 'charUnconfirm' });
+      }
+    } else if (p1Confirmed || p2Confirmed) { p1Confirmed = false; p2Confirmed = false; }
+    else { modeSelected = false; bossRushMode = false; }
   }
 }
 
@@ -21992,8 +22048,10 @@ function handleKeyDown(e) {
   if (!audioCtx) { try { getAudioCtx(); } catch(ex) {} }
   if (transitioning) return;
 
-  // H key: toggle HOW TO PLAY overlay (any scene except howtoplay/chardetail/online)
-  if ((e.key === 'h' || e.key === 'H') && scene !== 'howtoplay' && scene !== 'chardetail' && scene !== 'online') {
+  // H key: toggle HOW TO PLAY overlay (any scene except howtoplay/chardetail/online/battle)
+  // バトル中の H は ヒットボックス表示（keydownリスナー側）に 割り当て済み。
+  // ここでも 反応させると 1回の H で 両方 切り替わってしまう
+  if ((e.key === 'h' || e.key === 'H') && scene !== 'howtoplay' && scene !== 'chardetail' && scene !== 'online' && scene !== 'battle') {
     if (scene === 'title') { startTransition('howtoplay'); return; }
     showHowToPlay = !showHowToPlay; return;
   }
@@ -22119,7 +22177,6 @@ function gameLoopInner(timestamp) {
   accumulator += elapsed;
 
   // Fixed timestep updates for consistent physics
-  let updated = false;
   let guardIter = 0;   // 念のための 上限。これが 無いと 一度 遅れると 固まる
   while (accumulator >= FIXED_DT && guardIter++ < 8) {
     try {
@@ -22210,7 +22267,6 @@ function gameLoopInner(timestamp) {
       }
     }
     accumulator -= FIXED_DT;   // 失敗しても 必ず 減らす（減らさないと 永久ループ）
-    updated = true;
   }
   if (accumulator > FIXED_DT * 8) accumulator = FIXED_DT;   // 溜まりすぎた 分は 捨てる
 
@@ -22221,7 +22277,9 @@ function gameLoopInner(timestamp) {
   }
 
   // 描画補間: 物理更新と描画のフレーム間を補間
-  const renderAlpha = accumulator / FIXED_DT;
+  // 更新が 上限（8回/フレーム）で 打ち切られると accumulator が 1フレーム分を 超えて 残り、
+  // そのまま 使うと 補間でなく 外挿に なって 位置が 飛ぶ → 1 で 止める
+  const renderAlpha = Math.min(1, accumulator / FIXED_DT);
   if (scene === 'battle' && players && players.length >= 2) {
     for (const p of players) {
       if (p && p.prevX !== undefined) {
