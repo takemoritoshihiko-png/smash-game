@@ -15,7 +15,7 @@ jobs:
           lfs: false
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
       - uses: browser-actions/setup-chrome@v1
       - name: 目次が 本文と そろっているか
         run: node tools/toc.mjs --check

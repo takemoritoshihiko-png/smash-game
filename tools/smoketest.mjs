@@ -55,12 +55,13 @@ try {
   console.log(`ok  構文チェック   (<script> ${scriptBodies.length}個)`);
 
   // ---------- 目次が 本文と ずれていないか ----------
+  const earlyFailures = [];
   try {
     execFileSync(process.execPath, [join(ROOT, 'tools', 'toc.mjs'), '--check'], { stdio: 'pipe' });
     console.log('ok  目次');
   } catch (e) {
     console.error('FAIL 目次が ずれています → node tools/toc.mjs');
-    process.exitCode = 1;
+    earlyFailures.push('目次が ずれています → node tools/toc.mjs');
   }
 
   // ---------- 2. ブラウザで 実際に 動かす ----------
@@ -691,12 +692,19 @@ try {
     .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').replace(/&quot;/g, '"');
   console.log(report);
 
-  const failed = report.split('\n').filter(l => l.startsWith('FAIL') || l.startsWith('FATAL'));
+  const failed = [
+    ...earlyFailures,
+    ...report.split('\n').filter(l => l.startsWith('FAIL') || l.startsWith('FATAL')),
+  ];
   if (failed.length) {
-    console.error(`\n${failed.length} 件 失敗`);
+    // 末尾に まとめて 出す。tail だけ 見ても 見落とさない ように
+    console.error('\n' + '='.repeat(60));
+    console.error(`失敗 ${failed.length} 件`);
+    for (const f of failed) console.error('  - ' + f.replace(/^FAIL\s*/, ''));
+    console.error('='.repeat(60));
     process.exit(1);
   }
-  console.log('\n全部 通過');
+  console.log('\n全部 通過（' + report.split('\n').filter(l => l.startsWith('ok')).length + '項目）');
 } finally {
   rmSync(work, { recursive: true, force: true });
 }
