@@ -17,6 +17,8 @@ jobs:
         with:
           node-version: '24'
       - uses: browser-actions/setup-chrome@v1
+      - name: 画像ファイルの 食い違い
+        run: node tools/assetcheck.mjs
       - name: 目次が 本文と そろっているか
         run: node tools/toc.mjs --check
       - name: ゲームが 壊れていないか（全31キャラ）

@@ -54,8 +54,19 @@ try {
   }
   console.log(`ok  構文チェック   (<script> ${scriptBodies.length}個)`);
 
-  // ---------- 目次が 本文と ずれていないか ----------
   const earlyFailures = [];
+
+  // ---------- 画像/動画の 食い違い（参照はあるのに 無い / 置いてあるのに 使っていない）----------
+  try {
+    execFileSync(process.execPath, [join(ROOT, 'tools', 'assetcheck.mjs')], { stdio: 'pipe' });
+    console.log('ok  画像ファイル');
+  } catch (e) {
+    const msg = (e.stdout || '') + (e.stderr || '');
+    console.error('FAIL 画像ファイルの 食い違い → node tools/assetcheck.mjs');
+    earlyFailures.push('画像ファイルの 食い違い → node tools/assetcheck.mjs');
+  }
+
+  // ---------- 目次が 本文と ずれていないか ----------
   try {
     execFileSync(process.execPath, [join(ROOT, 'tools', 'toc.mjs'), '--check'], { stdio: 'pipe' });
     console.log('ok  目次');

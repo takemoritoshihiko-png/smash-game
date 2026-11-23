@@ -228,7 +228,22 @@ node tools/toc.mjs --check        # 目次が ずれていないか 見るだけ
 
 node tools/visualdiff.mjs --save base    # いまの 見た目を 記録（改修の 前に）
 node tools/visualdiff.mjs --check base   # 記録と 比べる（改修の 後に）
+
+node tools/behaviordiff.mjs --save base  # いまの 動きを 記録（改修の 前に）
+node tools/behaviordiff.mjs --check base # 記録と 比べる（改修の 後に）
+
+node tools/assetcheck.mjs                # 画像の 参照漏れ / 置き忘れ
 ```
+
+**見た目を 変えない はずの 改修**（関数の 切り出し・テーブル化）では
+`visualdiff` と `behaviordiff` の 両方を 使う。
+絵が 同じでも 中身が 変わっている ことが ある（処理順・`continue` の 位置）。
+実際 この 2つで 2回 退行を 捕まえている:
+
+- 切り出した 関数に 外側の ローカル変数を 渡し忘れ → 着地判定が 働かなくなった
+- 内側ループの `continue` を `return` に 変えた → ダウン攻撃が 当たらなくなった
+
+どちらも 例外は 出ず、見た目も ほぼ 同じ。`behaviordiff` だけが 気づいた。
 
 **見た目を 変えない はずの 改修（関数の 切り出し・テーブル化）を する ときは、
 必ず 先に `--save` してから 作業し、終わったら `--check` すること。**
