@@ -63,13 +63,13 @@
 //   18986 キャラ別 ゲージの 描画（HUDの 下に 出る 細い バー）
 //   19197 バトルの HUD
 //   19468 オンライン対戦（PeerJS / ホストが 正）
-//   20400 画面: VS イントロ
-//   20685 画面の 切り替え（フェード）
-//   20720 ポーズメニュー（バトル中に ESC）
-//   20801 画面: キャラ詳細（Iキー）
-//   21032 画面: 操作説明
-//   21156 キー入力の 振り分け（画面ごと）
-//   21637 メインループ（60FPS 固定タイムステップ）
+//   20412 画面: VS イントロ
+//   20697 画面の 切り替え（フェード）
+//   20732 ポーズメニュー（バトル中に ESC）
+//   20813 画面: キャラ詳細（Iキー）
+//   21044 画面: 操作説明
+//   21168 キー入力の 振り分け（画面ごと）
+//   21649 メインループ（60FPS 固定タイムステップ）
 //
 // ### 目次ここまで
 // ======================================================================
@@ -19968,36 +19968,48 @@ function applyHostState(data) {
   applyFields(players[1], data.p2);
 
   // Global state
-  battleTimer = data.battleTimer;
-  battleStarted = data.battleStarted;
-  battleCountdown = data.battleCountdown;
+  // 相手の 版ちがいや 途中で 切れた パケットで 項目が 欠ける ことが ある。
+  // そのまま 代入すると undefined が 入って 以後 ずっと おかしく なるし、
+  // 欠けた 入れ子（koSlowMotion など）を 読むと 例外で この関数 全体が 中断し、
+  // ゲストの 同期が 止まる。「来ていれば 使う」形に そろえる
+  const takeNum = (v, cur) => (Number.isFinite(v) ? v : cur);
+  const takeBool = (v, cur) => (typeof v === 'boolean' ? v : cur);
+
+  battleTimer = takeNum(data.battleTimer, battleTimer);
+  battleStarted = takeBool(data.battleStarted, battleStarted);
+  battleCountdown = takeNum(data.battleCountdown, battleCountdown);
   // ゲスト側: gameOverがfalse→trueに変わったらGAME SET演出を開始
   if (data.gameOver && !gameOver && data.winner >= 0) {
     gameSetTimer = 0;
     gameSetPhase = 1;
     stopBGM();
   }
-  gameOver = data.gameOver;
-  winner = data.winner;
+  gameOver = takeBool(data.gameOver, gameOver);
+  winner = takeNum(data.winner, winner);
   // ゲスト側: 受信値が現在値より大きい時だけ上書き（二重カウントダウン防止）
   if (data.hitStopFrames > hitStopFrames) hitStopFrames = data.hitStopFrames;
-  koSlowMotion.active = data.koSlowMotion.active;
-  koSlowMotion.frames = data.koSlowMotion.frames;
-  koSlowMotion.maxFrames = data.koSlowMotion.maxFrames;
+  if (data.koSlowMotion) {
+    koSlowMotion.active = takeBool(data.koSlowMotion.active, koSlowMotion.active);
+    koSlowMotion.frames = takeNum(data.koSlowMotion.frames, koSlowMotion.frames);
+    koSlowMotion.maxFrames = takeNum(data.koSlowMotion.maxFrames, koSlowMotion.maxFrames);
+  }
   // hitFlash and screenShake are generated locally from state changes
   // Don't overwrite them from host to avoid cancelling guest-local effects
 
   // Projectiles
   projectiles.length = 0;
-  if (data.projectiles) {
+  if (Array.isArray(data.projectiles)) {
     for (const pr of data.projectiles) {
-      projectiles.push(pr);
+      // 座標が 数字でない ものは 捨てる（描画で createRadialGradient が 例外を 投げる）
+      if (pr && Number.isFinite(pr.x) && Number.isFinite(pr.y)) projectiles.push(pr);
     }
   }
 
   // コンボカウンター同期
-  comboDisplay[0] = data.combo0 ? { count: data.combo0.count, timer: data.combo0.timer, maxTimer: data.combo0.maxTimer } : null;
-  comboDisplay[1] = data.combo1 ? { count: data.combo1.count, timer: data.combo1.timer, maxTimer: data.combo1.maxTimer } : null;
+  const takeCombo = (c) => (c && Number.isFinite(c.count) && Number.isFinite(c.timer))
+    ? { count: c.count, timer: c.timer, maxTimer: Number.isFinite(c.maxTimer) ? c.maxTimer : 90 } : null;
+  comboDisplay[0] = takeCombo(data.combo0);
+  comboDisplay[1] = takeCombo(data.combo1);
 
   // Generate local effects on damage/stock changes
   for (let i = 0; i < 2; i++) {

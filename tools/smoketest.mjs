@@ -720,6 +720,65 @@ try {
       } catch (e) { hangBad.push('threw: ' + e.message); }
       check('no state can get stuck', hangBad.length === 0, hangBad.slice(0,3).join(' | ') || '10 states all exit');
 
+      // --- オンラインの やりとり（偽の 接続で 通信手順を 一通り）---
+      //     壊れた パケットで 例外が 出ると applyHostState 全体が 中断し、
+      //     ゲストの 同期が 黙って 止まる
+      var netBad2 = [];
+      var errBefore = ERRORS.length;
+      try {
+        function fakeConn() {
+          return { open:true, sent:[], h:{},
+                   on:function(e,f){ this.h[e]=f; }, send:function(m){ this.sent.push(m); }, close:function(){} };
+        }
+        isHost = true; scene = 'online'; transitioning = false;
+        var fc = fakeConn(); setupPeerConnection(fc); fc.h.open();
+        if (!onlineMode) netBad2.push('open did not set onlineMode');
+        if (gameMode !== 'vs') netBad2.push('open did not set gameMode=vs');
+        if (!(fc.sent[0] && fc.sent[0].type === 'charSelect')) netBad2.push('no charSelect sent');
+
+        [999, -5, null, undefined, 'abc', NaN, 1.7, characters.length + 10].forEach(function (v) {
+          fc.h.data({ type:'charSelect', charIdx: v });
+          if (!(Number.isInteger(p2Select) && p2Select >= 0 && p2Select <= characters.length))
+            netBad2.push('charIdx ' + v + ' -> p2Select=' + p2Select);
+        });
+        fc.h.data({ type:'startBattle', charIdx: characters.length, stageIdx: 999 });
+        if (!(selectedStage >= 0 && selectedStage < stages.length)) netBad2.push('stageIdx 999 accepted');
+        if (p1Select >= characters.length || p2Select >= characters.length) netBad2.push('RANDOM slot leaked into battle');
+
+        run(60); scene = 'battle'; transitioning = false; initBattle(); run(250);
+        [null, undefined, 'x', 123, {}].forEach(function (v) { fc.h.data({ type:'input', keys: v }); run(2); });
+        if (typeof remoteKeys !== 'object' || remoteKeys === null) netBad2.push('remoteKeys corrupted');
+
+        isHost = false; onlineMode = true;
+        [{p1:{},p2:{}}, {p1:null,p2:null}, {p1:{x:NaN,y:0,vx:0,vy:0},p2:{}},
+         {p1:{x:'a',y:'b',vx:0,vy:0},p2:{}}].forEach(function (pk) {
+          fc.h.data(Object.assign({ type:'state' }, pk)); run(2);
+        });
+        [{}, {p1x:NaN,p1y:0,p1vx:0,p1vy:0,p2x:0,p2y:0,p2vx:0,p2vy:0}].forEach(function (pk) {
+          fc.h.data(Object.assign({ type:'frame' }, pk)); run(2);
+        });
+        if (!Number.isFinite(players[0].x) || !Number.isFinite(players[1].x)) netBad2.push('position went NaN');
+        if (!Number.isFinite(battleTimer)) netBad2.push('battleTimer went NaN');
+
+        isHost = true; gameOver = true; gameSetTimer = 200;
+        fc.sent.length = 0; fc.h.data({ type:'rematchReq' });
+        if (!fc.sent.some(function (m) { return m.type === 'rematch'; })) netBad2.push('rematchReq ignored');
+
+        scene = 'battle'; transitioning = false; onlineMode = true; remoteKeys = { right: 1 };
+        fc.h.close();
+        if (onlineMode) netBad2.push('close left onlineMode true');
+        if (Object.keys(remoteKeys).length) netBad2.push('close left remoteKeys');
+        if (gameMode !== 'cpu') netBad2.push('close left gameMode=' + gameMode);
+        // 切断後に 遅れて 届いた パケットで 落ちない こと
+        fc.h.data({ type:'state', p1:{x:1,y:1,vx:0,vy:0}, p2:{x:2,y:2,vx:0,vy:0} });
+        fc.h.data({ type:'input', keys:{ z:1 } });
+        fc.h.close();
+      } catch (e) { netBad2.push('threw: ' + e.message); }
+      onlineMode = false; isHost = false; remoteKeys = {}; prevRemoteKeys = {};
+      // 握りつぶされた 例外も 失敗に する（applyHostState は try/catch の 中に ある）
+      if (ERRORS.length > errBefore) netBad2.push((ERRORS.length - errBefore) + ' 件の 例外を 握りつぶした');
+      check('online protocol survives junk', netBad2.length === 0, netBad2.slice(0,3).join(' | ') || '8 scenarios, no swallowed errors');
+
       // --- ポーズメニュー ---
       var pauseBad = [];
       try {
