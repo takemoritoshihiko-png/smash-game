@@ -151,6 +151,33 @@ const PROBE = String.raw`
         }
       }
 
+      // ---- ②b 攻撃ポーズ（キャラ 0〜8 は 手描き）----
+      var ATKS = ['normal','strong','side','up','down','aerial','downair','dash','special'];
+      for (var pc = 0; pc <= 8 && pc < characters.length; pc++) {
+        for (var ai = 0; ai < ATKS.length; ai++) {
+          var adef = (attackDefs[pc] || {})[ATKS[ai]];
+          if (!adef) continue;
+          var frames = [1, (adef.startup || 2) + 1, (adef.startup || 2) + (adef.active || 4) + 1];
+          for (var fi = 0; fi < frames.length; fi++) {
+            freeze(100);
+            var pd = { alive: true, animState: 'idle', attacking: true, attackType: ATKS[ai],
+                       attackFrame: frames[fi], attackData: adef, hitstun: 0, guarding: false,
+                       walkCycle: 0, spinAngle: 0, damageTint: 0, invincibleTimer: 0,
+                       grounded: ATKS[ai].indexOf('air') !== 0, vx: 0, vy: 0, animTimer: 50,
+                       charging: false, chargeTime: 0, chargeMaxTime: 120, specialState: null,
+                       dragonMode: false, botRobot: 0, chattaFly: 0, microSplit: false,
+                       dSkillActive: false, dSkillTimer: 0, dSkillBuff: null,
+                       landSquash: 0, jumpSquash: 0, damage: 40, stocks: 3, id: 0, charIdx: pc };
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.clearRect(0, 0, 960, 640);
+            ctx.globalAlpha = 1; ctx.textAlign = 'left';
+            try { drawBattleCharacter(480, 420, 1.0, pc, 1600, false, pd); }
+            catch (e) { OUT.push('pose/' + pc + '/' + ATKS[ai] + '/' + fi + ' ERR ' + e.message); continue; }
+            OUT.push('pose/' + pc + '/' + ATKS[ai] + '/' + fi + ' ' + hashRegion(300, 200, 360, 360));
+          }
+        }
+      }
+
       // ---- ③ 技エフェクト ----
       var EFFECTS = Object.keys(typeof ATTACK_EFFECTS !== 'undefined' ? ATTACK_EFFECTS : {});
       if (!EFFECTS.length) EFFECTS = ['slash','punch','kick','shockwave','slam'];
