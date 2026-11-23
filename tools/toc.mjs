@@ -42,12 +42,23 @@ for (let i = 0; i < lines.length; i++) {
   if (i > 1 && lines[i - 1].startsWith('//') && isBar(lines[i - 2])) continue;
   const t = lines[i + 1];
   if (!t || !t.startsWith('// ') || isBar(t)) continue;
+  // 見出しの 補足は 何行 書いても よい。8行で 打ち切っていた せいで、
+  // いちばん 丁寧に 説明を 書いた 区画ほど 目次から 落ちていた
   let closed = false;
-  for (let j = i + 2; j < Math.min(i + 8, lines.length); j++) if (isBar(lines[j])) { closed = true; break; }
+  for (let j = i + 2; j < Math.min(i + 40, lines.length); j++) if (isBar(lines[j])) { closed = true; break; }
   if (!closed) continue;
   const name = t.slice(3).trim();
   if (!name || name.startsWith('###')) continue;
   toc.push({ at: i, name });
+}
+
+// 同じ 見出し名が 2つ あると 目次で 見分けが つかない
+const seenTitle = new Map();
+for (const { at, name } of toc) {
+  if (seenTitle.has(name)) {
+    console.error('WARN 同じ 見出し名が 2か所: 「' + name + '」 L' + (seenTitle.get(name) + 2) + ' と L' + (at + 2));
+  }
+  seenTitle.set(name, at);
 }
 
 const insertAt = lines.findIndex((l) => l.trim() === '<script>') + 1;
@@ -60,8 +71,19 @@ const build = (offset) => {
     '//   変更したら  node tools/smoketest.mjs  を 必ず 走らせること。',
     '//   目次が ずれたら  node tools/toc.mjs  で 作り直す。',
     '//',
+    '//   はじめての 人へ:',
+    '//     ・毎フレームの 入口は いちばん下の gameLoopInner()',
+    '//     ・画面は scene で 切り替わる。scene を 書き換えているのは drawTransition() の 中 1か所だけ',
+    '//     ・試合の 中身は updateBattle()、描くのは drawBattle()',
+    '//     ・キャラを 足すなら「キャラ別データ（31体ぶん）」の チェックリスト',
+    '//     ・落とし穴の 一覧は README の「よくある 落とし穴」',
+    '//',
   ];
-  for (const { at, name } of toc) b.push('//   ' + String(at + 2 + offset).padEnd(6) + name);
+  for (let k = 0; k < toc.length; k++) {
+    const from = toc[k].at + 2 + offset;
+    const to = (k + 1 < toc.length ? toc[k + 1].at + offset : lines.length + offset);
+    b.push('//   ' + (from + '-' + to).padEnd(14) + toc[k].name);
+  }
   b.push('//', '// ### 目次ここまで', BAR, '');
   return b;
 };

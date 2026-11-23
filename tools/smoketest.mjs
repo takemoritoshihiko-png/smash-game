@@ -1015,6 +1015,44 @@ try {
       check('vector fallback art draws for every character', fbBad.length === 0,
             fbBad.slice(0,4).join(' | ') || '31 chars, sprites forced missing');
 
+      // --- 送る 項目と 受ける 項目が そろっているか ---
+      //     片方だけ 足すと「ホストでは 見えるのに ゲストでは 見えない」に なり、
+      //     ホストで 試している 限り 気づけない
+      var syncBad = [];
+      try {
+        battle(0, 1, 120);
+        var pkt = serializePlayer(players[0]);
+        var ghost = {};
+        // 送られてくる 項目を 全部 別の 値に して、applyHostState が 入れ直すか 見る
+        isHost = false; onlineMode = true;
+        var before = {};
+        Object.keys(pkt).forEach(function (k) { before[k] = players[1][k]; });
+        var mutated = {};
+        Object.keys(pkt).forEach(function (k) {
+          var v = pkt[k];
+          if (typeof v === 'number') mutated[k] = v + 7;
+          else if (typeof v === 'boolean') mutated[k] = !v;
+          else mutated[k] = v;
+        });
+        mutated.x = players[1].x; mutated.y = players[1].y;
+        mutated.vx = 0; mutated.vy = 0;
+        mutated.alive = players[1].alive; mutated.respawnTimer = players[1].respawnTimer;
+        applyHostState({ type:'state', p1: serializePlayer(players[0]), p2: mutated,
+          battleTimer: battleTimer, battleStarted: battleStarted, battleCountdown: battleCountdown,
+          gameOver: false, winner: -1, isDraw: false, hitStopFrames: 0,
+          koSlowMotion: { active:false, frames:0, maxFrames:90 }, projectiles: [],
+          combo0: null, combo1: null });
+        var notApplied = [];
+        Object.keys(mutated).forEach(function (k) {
+          if (k === 'x' || k === 'y' || k === 'vx' || k === 'vy') return;
+          if (players[1][k] !== mutated[k]) notApplied.push(k);
+        });
+        if (notApplied.length) syncBad.push('送っているのに 反映されない: ' + notApplied.join(','));
+      } catch (e) { syncBad.push('threw: ' + e.message); }
+      onlineMode = false; isHost = false;
+      check('every synced field is applied on the guest', syncBad.length === 0,
+            syncBad.join(' | ').slice(0, 160) || 'serializePlayer and applyFields agree');
+
       // --- ポーズメニュー ---
       var pauseBad = [];
       try {

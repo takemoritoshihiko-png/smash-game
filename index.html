@@ -21,65 +21,77 @@
 //   変更したら  node tools/smoketest.mjs  を 必ず 走らせること。
 //   目次が ずれたら  node tools/toc.mjs  で 作り直す。
 //
-//   280   CANVAS / 画面サイズ
-//   1063  音の ロック解除（最初の 操作で 呼ぶ）
-//   1098  キャラ画像（遅延読み込み）
-//   1278  タイトル画面の 粒子
-//   1315  キャラの 絵 ①メニュー用（選択画面・詳細画面・タイトル）
-//   2992  キャラの 絵 ①メニュー用（選択画面・詳細画面）
-//   4710  キャラの 絵 ②バトル用
-//   5556  描画ユーティリティ
-//   5605  画面: タイトル
-//   5729  画面: キャラ選択
-//   5979  画面: 難易度選択（CPU戦）
-//   6079  画面: ステージ選択
-//   6310  バトルの 定数 と 状態
-//   6679  復帰技 / パワーモードの 表示
-//   6721  カメラ / 画面揺れ
-//   6738  効果音（Web Audio で 合成）
-//   7149  観客の 音
-//   7465  ヒット表示 / コミック文字
-//   7489  掴み・投げ の 定数と キャラ別テーブル
-//   7538  コマンド技（→→↓↓+Z など）
-//   8029  技データ
-//   8794  プレイヤー生成 / 試合の 初期化
-//   9142  ヒット処理（ダメージ・ノックバック）
-//   10483 当たり判定
-//   10515 飛び道具
-//   10558 技の 発動（通常技・復帰技・ジャブ）
-//   10817 掴み・投げ の 実行
-//   11041 CPU の 思考
-//   11386 画面演出の 配列を 1フレーム 進める
-//   11547 キャラ固有の ゲージ更新（毎フレーム・プレイヤー1人分）
-//   11783 攻撃中の 1フレーム 更新（プレイヤー1人分）
-//   12128 D キー長押しの 処理（プレイヤー1人分）
-//   12271 受け身（テクニング）の 処理（プレイヤー1人分）
-//   12383 のけぞり（ヒットスタン）の 処理（プレイヤー1人分）
-//   12552 着地の 処理（プレイヤー1人分）
-//   12654 バトルの 毎フレーム更新（中核）
-//   13922 物理（移動・重力・着地・撃墜判定）
-//   14489 スマッシュ攻撃（方向2回 + X）
-//   14605 崖つかまり
-//   14702 D技 と 必殺技 の データ
-//   15560 D技の 中身（キャラ別）
-//   15713 空中回避
-//   15775 バトル描画の 下準備（カメラ・影・2.5D）
-//   15873 バトル画面の うえに 重ねる もの（ボスラッシュHUD / GAME SET 演出）
-//   16101 バトル画面の 描画
-//   17926 技エフェクトの 描画（effect 名 → 描き方）
-//   18583 技の エフェクト描画
-//   19017 必殺技 / 即死技 の 全画面オーバーレイ
-//   19190 画面: コンボ一覧 / 戦績
-//   19322 キャラ別 ゲージの 描画（HUDの 下に 出る 細い バー）
-//   19533 バトルの HUD
-//   19802 オンライン対戦（PeerJS / ホストが 正）
-//   20665 画面: VS イントロ
-//   20950 画面の 切り替え（フェード）
-//   20985 ポーズメニュー（バトル中に ESC）
-//   21066 画面: キャラ詳細（Iキー）
-//   21297 画面: 操作説明
-//   21421 キー入力の 振り分け（画面ごと）
-//   21902 メインループ（60FPS 固定タイムステップ）
+//   はじめての 人へ:
+//     ・毎フレームの 入口は いちばん下の gameLoopInner()
+//     ・画面は scene で 切り替わる。scene を 書き換えているのは drawTransition() の 中 1か所だけ
+//     ・試合の 中身は updateBattle()、描くのは drawBattle()
+//     ・キャラを 足すなら「キャラ別データ（31体ぶん）」の チェックリスト
+//     ・落とし穴の 一覧は README の「よくある 落とし穴」
+//
+//   103-290       書き換わる 値（グローバル状態）
+//   292-521       CANVAS / 画面サイズ
+//   523-1076      キャラ別データ（31体ぶん）
+//   1078-1111     音の ロック解除（最初の 操作で 呼ぶ）
+//   1113-1291     キャラ画像（遅延読み込み）
+//   1293-1328     タイトル画面の 粒子
+//   1330-3005     絵: メニュー用の 31体テーブル（CHAR_BODY_ART）
+//   3007-3035     絵: メニュー用の 呼び出し口（drawCharacterBody）
+//   3037-4726     攻撃中の ポーズ（キャラ 0〜8）
+//   4728-5572     キャラの 絵 ②バトル用
+//   5574-5621     描画ユーティリティ
+//   5623-5745     画面: タイトル
+//   5747-5995     画面: キャラ選択
+//   5997-6095     画面: 難易度選択（CPU戦）
+//   6097-6326     画面: ステージ選択
+//   6328-6695     バトルの 定数 と 状態
+//   6697-6741     ゲージ演出の 小道具（ポップアップ / 変身中の 判定 / MAX の 光り）
+//   6743-6758     カメラ / 画面揺れ
+//   6760-7169     効果音（Web Audio で 合成）
+//   7171-7485     観客の 音
+//   7487-7509     ヒット表示 / コミック文字
+//   7511-7558     掴み・投げ の 定数と キャラ別テーブル
+//   7560-8049     コマンド技（→→↓↓+Z など）
+//   8051-8814     技データ
+//   8816-9162     プレイヤー生成 / 試合の 初期化
+//   9164-10503    ヒット処理（ダメージ・ノックバック）
+//   10505-10535   当たり判定
+//   10537-10578   飛び道具
+//   10580-10837   技の 発動（通常技・復帰技・ジャブ）
+//   10839-11061   掴み・投げ の 実行
+//   11063-11406   CPU の 思考
+//   11408-11567   画面演出の 配列を 1フレーム 進める
+//   11569-11803   キャラ固有の ゲージ更新（毎フレーム・プレイヤー1人分）
+//   11805-12148   攻撃中の 1フレーム 更新（プレイヤー1人分）
+//   12150-12291   D キー長押しの 処理（プレイヤー1人分）
+//   12293-12403   受け身（テクニング）の 処理（プレイヤー1人分）
+//   12405-12572   のけぞり（ヒットスタン）の 処理（プレイヤー1人分）
+//   12574-12674   着地の 処理（プレイヤー1人分）
+//   12676-13942   バトルの 毎フレーム更新（中核）
+//   13944-14439   物理（移動・重力・着地・撃墜判定）
+//   14441-14509   攻撃ボタンの 処理（P1ローカル と オンラインのゲスト で 共通）
+//   14511-14625   スマッシュ攻撃（方向2回 + X）
+//   14627-14722   崖つかまり
+//   14724-15161   D技 と 必殺技 の データ
+//   15163-15580   D技: キャラ別の 中身（D_SKILL_IMPL）
+//   15582-15733   D技: 発動 と 毎フレーム更新（triggerDSkill / updateDSkill）
+//   15735-15795   空中回避
+//   15797-15893   バトル描画の 下準備（カメラ・影・2.5D）
+//   15895-16121   バトル画面の うえに 重ねる もの（ボスラッシュHUD / GAME SET 演出）
+//   16123-17946   バトル画面の 描画
+//   17948-18603   描画: 技エフェクトの 表（ATTACK_EFFECTS: effect名 → 描き方）
+//   18605-19037   描画: 技エフェクトの 呼び出し口（drawAttackEffect ほか）
+//   19039-19210   必殺技 / 即死技 の 全画面オーバーレイ
+//   19212-19342   画面: コンボ一覧 / 戦績
+//   19344-19553   キャラ別 ゲージの 描画（HUDの 下に 出る 細い バー）
+//   19555-19822   バトルの HUD
+//   19824-20715   オンライン対戦（PeerJS / ホストが 正）
+//   20717-21000   画面: VS イントロ
+//   21002-21035   画面の 切り替え（フェード）
+//   21037-21116   ポーズメニュー（バトル中に ESC）
+//   21118-21347   画面: キャラ詳細（Iキー）
+//   21349-21471   画面: 操作説明
+//   21473-21952   キー入力の 振り分け（画面ごと）
+//   21954-22159   メインループ（60FPS 固定タイムステップ）
 //
 // ### 目次ここまで
 // ======================================================================
@@ -617,6 +629,7 @@ const CHAR_THROW_STATUS = {
 };
 
 // --- CHAR_BODY : やられ判定の 大きさ [横倍率, 縦倍率] ---
+// ※ CHAR_BODY_ART（メニュー用の 絵の 表）とは 別物。名前が 似ているので 注意
 // キャラ別体格 [width倍率, height倍率] (基準: 36w × 70h)
 const CHAR_BODY = [
   [1.0, 1.0],   // 0 zen 標準
@@ -952,6 +965,8 @@ const COMBO_ROUTES = {
 };
 
 // --- RECOVERY_MOVES : 復帰技（空中で ↑+X） ---
+// キャラを 足したら ここにも 必ず 足す。抜けると ↑+X が 無反応に なる
+// （smoketest の 'table RECOVERY_MOVES' が 穴を 見つける）
 const RECOVERY_MOVES = {
   // ダメ×0.4、高さ×0.65(超重量級除く)、角度を-80〜-90に統一
   0:  { name:'Icicle Rise',     height:182, angle:-85, frames:20, dmg:1, color:'#88DDFF', status:'frozen' },
@@ -1312,7 +1327,7 @@ function drawParticles() {
   ctx.globalAlpha = 1;
 }
 // ======================================================================
-// キャラの 絵 ①メニュー用（選択画面・詳細画面・タイトル）
+// 絵: メニュー用の 31体テーブル（CHAR_BODY_ART）
 //
 // 31体ぶんの if (charIndex === N) を 表に した もの。中身は そのまま。
 // 呼ばれる 時点で ctx は すでに 中心へ 移動・左右反転 済み。
@@ -2989,8 +3004,11 @@ const CHAR_BODY_ART = {
 
 // --- Draw character body ---
 // ======================================================================
-// キャラの 絵 ①メニュー用（選択画面・詳細画面）
-// 31キャラ分の if (charIndex === N) が 並ぶ。バトル用は 次の区画
+// 絵: メニュー用の 呼び出し口（drawCharacterBody）
+//
+// 表（CHAR_BODY_ART）を 引くだけ。絵そのものは 触らない。
+// ctx の 移動・左右反転は ここで 済ませてから 表に 渡す。
+// バトル中の 絵は 次の 区画（drawBattleCharacter）
 // ======================================================================
 function drawCharacterBody(x, y, scale, charIndex, time, facingLeft) {
   const ch = characters[charIndex];
@@ -6676,8 +6694,12 @@ loadUnlocks();
 // === 復帰技データ（全28キャラ） ===
 // height: 上昇px, angle: 角度(度,-90=真上), frames: 持続F, dmg: ダメージ, color: エフェクト色, status: 状態異常
 // ======================================================================
-// 復帰技 / パワーモードの 表示
-// キャラを 足したら ここにも 必ず 足す。抜けると ↑+X が 無反応に なる
+// ゲージ演出の 小道具（ポップアップ / 変身中の 判定 / MAX の 光り）
+//
+// 復帰技の データ（RECOVERY_MOVES）は ここでは なく
+// 「キャラ別データ（31体ぶん）」の 区画に ある。
+// getActivePowerMode() の 表は 変身を 持つ キャラを 手で 並べた もの。
+// 新しい 変身を 足したら ここにも 1行 足す（抜けると HUD が 光らない）
 // ======================================================================
 function addGaugePopup(x, y, amount, color) {
   gaugePopups.push({ x: x, y: y - 60, text: (amount > 0 ? '+' : '') + amount, life: 30, maxLife: 30, color: color || '#FFD700' });
@@ -15138,7 +15160,7 @@ function updateUltimate() {
   }
 }
 // ======================================================================
-// D技の 中身（キャラ別）
+// D技: キャラ別の 中身（D_SKILL_IMPL）
 //
 // D_SKILL_NAMES と 必ず 1対1 に すること。
 // ここに 無い キャラは triggerDSkill の 入口で はじかれる（クールダウンも 減らない）。
@@ -15557,7 +15579,7 @@ const D_SKILL_IMPL = {
 
 
 // ======================================================================
-// D技の 中身（キャラ別）
+// D技: 発動 と 毎フレーム更新（triggerDSkill / updateDSkill）
 // ======================================================================
 function triggerDSkill(p) {
   if (p.dSkillCooldown > 0 || p.dSkillActive || !p.alive || p.hitstun > 0 || p.grabbed) return;
@@ -17923,7 +17945,7 @@ function drawBattle(dt) {
   }
 }
 // ======================================================================
-// 技エフェクトの 描画（effect 名 → 描き方）
+// 描画: 技エフェクトの 表（ATTACK_EFFECTS: effect名 → 描き方）
 //
 // 以前は if (atk.effect === ...) が 29個 並んでいて、1回の 描画で
 // すべて 評価されていた。中身は そのまま 移しただけ。
@@ -18580,7 +18602,7 @@ const ATTACK_EFFECTS = {
 
 
 // ======================================================================
-// 技の エフェクト描画
+// 描画: 技エフェクトの 呼び出し口（drawAttackEffect ほか）
 // ======================================================================
 function drawAttackEffect(p) {
   const atk = p.attackData;
@@ -20077,7 +20099,19 @@ function sendGuestInput() {
   peerConn.send({ type: 'input', keys: myKeys });
 }
 
+// ホスト → ゲストへ 送る プレイヤーの 状態。
+//
+// ★ ここに 足したら applyHostState() の applyFields にも 必ず 足すこと。
+//   片方だけだと「ホストでは 見えるのに ゲストでは 見えない」に なり、
+//   ホストで 試している 限り 絶対に 気づけない。
+//   x / y / vx / vy だけは applyFields が 補間して 入れるので 例外。
 function serializePlayer(p) {
+  // ゲストは 判定を しない（ホストが 正）ので、
+  // 内部計算にしか 使わない 値は 送らない。送っても applyFields が 捨てるだけで、
+  // 毎フレーム 2人分の 無駄に なる。
+  // 送るのを やめた もの: airDodgeUsed / autoBuff / autoBuffType / consecutiveHits /
+  //   diFrame / dosbossComboCount / fearGauge / fearTimer / kingkingArmorTimer /
+  //   poisonTimer / throwImmuneTimer / throwPhaseTimer
   return {
     x: p.x, y: p.y, vx: p.vx, vy: p.vy,
     damage: p.damage, stocks: p.stocks, alive: p.alive,
@@ -20096,22 +20130,21 @@ function serializePlayer(p) {
     justGuardTimer: p.justGuardTimer, strongLocked: p.strongLocked,
     dragonCooldown: p.dragonCooldown, dragonTransforming: p.dragonTransforming,
     dragonTransformTimer: p.dragonTransformTimer,
-    throwCooldown: p.throwCooldown, throwImmuneTimer: p.throwImmuneTimer,
-    throwPhase: p.throwPhase, throwPhaseTimer: p.throwPhaseTimer,
+    throwCooldown: p.throwCooldown,
+    throwPhase: p.throwPhase,
     throwTechWindow: p.throwTechWindow,
     inkBlindTimer: p.inkBlindTimer,
     animTimer: p.animTimer, charIdx: p.charIdx,
     kingComboHits: p.kingComboHits, kingComboTimer: p.kingComboTimer,
-    senBuffTimer: p.senBuffTimer, kingkingArmorTimer: p.kingkingArmorTimer, fearGauge: p.fearGauge, fearTimer: p.fearTimer, poisonTimer: p.poisonTimer,
+    senBuffTimer: p.senBuffTimer,
     dosbossRandomPattern: p.dosbossRandomPattern, gravityDebuffTimer: p.gravityDebuffTimer,
     cancelWindow: p.cancelWindow, comboWindow: p.comboWindow, airComboTimer: p.airComboTimer,
-    airDodging: p.airDodging, airDodgeTimer: p.airDodgeTimer, airDodgeUsed: p.airDodgeUsed, airDodgeEndlag: p.airDodgeEndlag, diFrame: p.diFrame,
+    airDodging: p.airDodging, airDodgeTimer: p.airDodgeTimer, airDodgeEndlag: p.airDodgeEndlag,
     dashing: p.dashing, fastFalling: p.fastFalling, landLag: p.landLag, guardPenalty: p.guardPenalty,
     smashCharging: p.smashCharging, smashChargeTime: p.smashChargeTime, smashType: p.smashType,
     dSkillCooldown: p.dSkillCooldown, dSkillActive: p.dSkillActive, dSkillTimer: p.dSkillTimer, dSkillBuff: p.dSkillBuff, ultimateGauge: p.ultimateGauge,
     frozen: p.frozen, burning: p.burning, poisoned: p.poisoned, stunned: p.stunned, cursed: p.cursed, confused: p.confused, paralyzed: p.paralyzed, feared2: p.feared2, sealMagic: p.sealMagic,
     ledgeGrab: p.ledgeGrab, ledgeSide: p.ledgeSide, ledgeTimer: p.ledgeTimer,
-    autoBuff: p.autoBuff, autoBuffType: p.autoBuffType, consecutiveHits: p.consecutiveHits, dosbossComboCount: p.dosbossComboCount,
     catbusVanishTimer: p.catbusVanishTimer || 0, microSplit: p.microSplit || false, mrtwoPersonality: p.mrtwoPersonality || 0,
     rageActive: p.rageActive || false, rageGauge: p.rageGauge || 0, powerUpTimer: p.powerUpTimer || 0,
     techState: p.techState || '', techTimer: p.techTimer || 0,
@@ -20207,6 +20240,7 @@ function applyHostState(data) {
   // Apply player states (LERP + 予測 + レイテンシ補正)
   const LERP_POS = 0.25;
   const LERP_VEL = 0.4;
+  // ★ serializePlayer() と 1対1。足し忘れは 無音で 壊れる
   const applyFields = (target, src) => {
     // 壊れた / 欠けた パケットで 座標が NaN に なると 二度と 戻らないので、
     // 数字で ない ものは 位置と 速度に 入れない
@@ -20267,6 +20301,24 @@ function applyHostState(data) {
     target.techTimer = src.techTimer || 0;
     target.guardShrink = src.guardShrink || 0;
     target.bounceStun = src.bounceStun || 0;
+    // 以下は 送っていたのに 受けていなかった もの。
+    // 見た目（姿勢・溜め・崖つかまり・硬直）に 直結するので ゲストにも 反映する
+    target.smashCharging = !!src.smashCharging;
+    target.smashChargeTime = src.smashChargeTime || 0;
+    target.smashType = src.smashType || null;
+    target.ledgeGrab = !!src.ledgeGrab;
+    target.ledgeSide = src.ledgeSide || 0;
+    target.ledgeTimer = src.ledgeTimer || 0;
+    target.airDodging = !!src.airDodging;
+    target.airDodgeTimer = src.airDodgeTimer || 0;
+    target.airDodgeEndlag = src.airDodgeEndlag || 0;
+    target.dashing = !!src.dashing;
+    target.fastFalling = !!src.fastFalling;
+    target.landLag = src.landLag || 0;
+    target.guardPenalty = src.guardPenalty || 0;
+    target.throwPhase = src.throwPhase || 0;
+    target.throwTechWindow = src.throwTechWindow || 0;
+    target.dSkillTimer = src.dSkillTimer || 0;
     target.chattaWarpLeft = src.chattaWarpLeft != null ? src.chattaWarpLeft : CHATTA_WARP_USES;
     target.botRobot = src.botRobot || 0;
     target.chattaFly = src.chattaFly || 0;
