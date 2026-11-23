@@ -21,58 +21,59 @@
 //   変更したら  node tools/smoketest.mjs  を 必ず 走らせること。
 //   目次が ずれたら  node tools/toc.mjs  で 作り直す。
 //
-//   273   CANVAS / 画面サイズ
-//   1056  音の ロック解除（最初の 操作で 呼ぶ）
-//   1091  キャラ画像（遅延読み込み）
-//   1271  タイトル画面の 粒子
-//   1308  キャラの 絵 ①メニュー用（選択画面・詳細画面・タイトル）
-//   2985  キャラの 絵 ①メニュー用（選択画面・詳細画面）
-//   4703  キャラの 絵 ②バトル用
-//   5549  描画ユーティリティ
-//   5598  画面: タイトル
-//   5722  画面: キャラ選択
-//   5972  画面: 難易度選択（CPU戦）
-//   6072  画面: ステージ選択
-//   6303  バトルの 定数 と 状態
-//   6672  復帰技 / パワーモードの 表示
-//   6714  カメラ / 画面揺れ
-//   6731  効果音（Web Audio で 合成）
-//   7142  観客の 音
-//   7458  ヒット表示 / コミック文字
-//   7482  掴み・投げ の 定数と キャラ別テーブル
-//   7531  コマンド技（→→↓↓+Z など）
-//   8022  技データ
-//   8787  プレイヤー生成 / 試合の 初期化
-//   9135  ヒット処理（ダメージ・ノックバック）
-//   10476 当たり判定
-//   10508 飛び道具
-//   10551 技の 発動（通常技・復帰技・ジャブ）
-//   10810 掴み・投げ の 実行
-//   11034 CPU の 思考
-//   11380 バトルの 毎フレーム更新（中核）
-//   13830 物理（移動・重力・着地・撃墜判定）
-//   14397 スマッシュ攻撃（方向2回 + X）
-//   14513 崖つかまり
-//   14610 D技 と 必殺技 の データ
-//   15468 D技の 中身（キャラ別）
-//   15621 空中回避
-//   15683 バトル描画の 下準備（カメラ・影・2.5D）
-//   15781 バトル画面の うえに 重ねる もの（ボスラッシュHUD / GAME SET 演出）
-//   16009 バトル画面の 描画
-//   17834 技エフェクトの 描画（effect 名 → 描き方）
-//   18491 技の エフェクト描画
-//   18925 必殺技 / 即死技 の 全画面オーバーレイ
-//   19098 画面: コンボ一覧 / 戦績
-//   19230 キャラ別 ゲージの 描画（HUDの 下に 出る 細い バー）
-//   19441 バトルの HUD
-//   19710 オンライン対戦（PeerJS / ホストが 正）
-//   20654 画面: VS イントロ
-//   20939 画面の 切り替え（フェード）
-//   20974 ポーズメニュー（バトル中に ESC）
-//   21055 画面: キャラ詳細（Iキー）
-//   21286 画面: 操作説明
-//   21410 キー入力の 振り分け（画面ごと）
-//   21891 メインループ（60FPS 固定タイムステップ）
+//   274   CANVAS / 画面サイズ
+//   1057  音の ロック解除（最初の 操作で 呼ぶ）
+//   1092  キャラ画像（遅延読み込み）
+//   1272  タイトル画面の 粒子
+//   1309  キャラの 絵 ①メニュー用（選択画面・詳細画面・タイトル）
+//   2986  キャラの 絵 ①メニュー用（選択画面・詳細画面）
+//   4704  キャラの 絵 ②バトル用
+//   5550  描画ユーティリティ
+//   5599  画面: タイトル
+//   5723  画面: キャラ選択
+//   5973  画面: 難易度選択（CPU戦）
+//   6073  画面: ステージ選択
+//   6304  バトルの 定数 と 状態
+//   6673  復帰技 / パワーモードの 表示
+//   6715  カメラ / 画面揺れ
+//   6732  効果音（Web Audio で 合成）
+//   7143  観客の 音
+//   7459  ヒット表示 / コミック文字
+//   7483  掴み・投げ の 定数と キャラ別テーブル
+//   7532  コマンド技（→→↓↓+Z など）
+//   8023  技データ
+//   8788  プレイヤー生成 / 試合の 初期化
+//   9136  ヒット処理（ダメージ・ノックバック）
+//   10477 当たり判定
+//   10509 飛び道具
+//   10552 技の 発動（通常技・復帰技・ジャブ）
+//   10811 掴み・投げ の 実行
+//   11035 CPU の 思考
+//   11380 画面演出の 配列を 1フレーム 進める
+//   11543 バトルの 毎フレーム更新（中核）
+//   13847 物理（移動・重力・着地・撃墜判定）
+//   14414 スマッシュ攻撃（方向2回 + X）
+//   14530 崖つかまり
+//   14627 D技 と 必殺技 の データ
+//   15485 D技の 中身（キャラ別）
+//   15638 空中回避
+//   15700 バトル描画の 下準備（カメラ・影・2.5D）
+//   15798 バトル画面の うえに 重ねる もの（ボスラッシュHUD / GAME SET 演出）
+//   16026 バトル画面の 描画
+//   17851 技エフェクトの 描画（effect 名 → 描き方）
+//   18508 技の エフェクト描画
+//   18942 必殺技 / 即死技 の 全画面オーバーレイ
+//   19115 画面: コンボ一覧 / 戦績
+//   19247 キャラ別 ゲージの 描画（HUDの 下に 出る 細い バー）
+//   19458 バトルの HUD
+//   19727 オンライン対戦（PeerJS / ホストが 正）
+//   20590 画面: VS イントロ
+//   20875 画面の 切り替え（フェード）
+//   20910 ポーズメニュー（バトル中に ESC）
+//   20991 画面: キャラ詳細（Iキー）
+//   21222 画面: 操作説明
+//   21346 キー入力の 振り分け（画面ごと）
+//   21827 メインループ（60FPS 固定タイムステップ）
 //
 // ### 目次ここまで
 // ======================================================================
@@ -11375,79 +11376,18 @@ function getCpuInput(cpu, target) {
 
   return result;
 }
-
 // ======================================================================
-// バトルの 毎フレーム更新（中核）
-// 「Nフレームに1回」の 判定は battleFrame を 使うこと。battleTime は ミリ秒
+// 画面演出の 配列を 1フレーム 進める
+//
+// updateBattle の 中に 直接 書かれていた もの。中身は そのまま。
+// プレイヤーの 状態は 書き換えない（読むだけ）ので ここに 置ける。
+// ゲスト側（updateGuestEffects）にも ほぼ 同じ 処理が あるので、
+// 片方だけ 直すと ホストと ゲストで 演出が ずれる
 // ======================================================================
-function updateBattle(dt) {
-  battleTime += dt;
-  battleFrame++;
-
-  // コンボの 残り時間。以前は 描画の 中で 減らしていたため、
-  // ポーズ中に 勝手に 消えたり、必殺技の 動画中（描画を 飛ばす）に 止まったり、
-  // 1ヒットだけの コンボが 永久に 残ったり していた
-  for (let ci = 0; ci < 2; ci++) {
-    const cd = comboDisplay[ci];
-    if (!cd) continue;
-    cd.timer--;
-    if (cd.timer <= 0) resetCombo(ci);
-  }
-  cmdFrameCounter++; // コマンド入力用フレームカウンタ
-
-  // ヒットストップ処理
-  if (hitStopFrames > 0) hitStopFrames--;
-  const inHitStop = hitStopFrames > 0;
-
-  if (battleCountdown > 0) { battleCountdown--; return; }
-  battleStarted = true;
-
-  battleFrameAcc++;
-  if (battleFrameAcc >= 60) { battleFrameAcc = 0; if (battleTimer > 0) battleTimer--; }
-
-  // 残り10秒で観客カウントダウン手拍子
-  if (battleTimer === 10 && battleFrameAcc === 0 && !audienceCountdownStarted) {
-    audienceCountdownStarted = true;
-    playAudienceCountdown();
-  }
-
-  if (battleTimer <= 0 && !gameOver) {
-    // 時間切れは 引き分け（勝者を 決めない）
-    gameOver = true;
-    isDraw = true;
-    winner = -1;
-    gameSetTimer = 0; gameSetPhase = 1;   // GAME SET の 演出を 始める
-    stopBGM();
-  }
-  if (gameOver) return;
-
-  // 必殺技ゲージが たまった人の 動画を 先に 読み込んでおく（発動時の 真っ黒を 防ぐ）
-  for (const pp of players) {
-    if (pp && pp.alive && (pp.ultimateGauge || 0) >= 100) prefetchUltimateVideo(pp.charIdx);
-  }
-  // コンボフィニッシャーReady判定
-  updateComboFinisherReady();
-
-  // === 動く足場の更新 ===
-  for (const plat of platforms) {
-    if (!plat.moving) continue;
-    const t = battleTime * 0.02 * plat.moveSpeed;
-    const prevX = plat.x, prevY = plat.y;
-    if (plat.moveType === 'horizontal') {
-      plat.x = plat.baseX + Math.sin(t) * plat.moveRange / 2;
-    } else if (plat.moveType === 'vertical') {
-      plat.y = plat.baseY + Math.sin(t) * plat.moveRange / 2;
-    }
-    // 乗っているプレイヤーを一緒に移動
-    const dx = plat.x - prevX, dy = plat.y - prevY;
-    for (const p of players) {
-      if (!p.alive || !p.grounded) continue;
-      if (p.x >= plat.x && p.x <= plat.x + plat.w && Math.abs(p.y - plat.y) < 5) {
-        p.x += dx; p.y += dy;
-      }
-    }
-  }
-
+// simulate = false の ときは ダメージを 与える 処理を 飛ばす。
+// オンラインの ゲストは 判定を しない（ホストが 正）ので false で 呼ぶ
+function updateEffectArrays(simulate) {
+  if (simulate === undefined) simulate = true;
   // Update hit effects
   for (let i = hitEffects.length - 1; i >= 0; i--) {
     hitEffects[i].life--;
@@ -11465,7 +11405,7 @@ function updateBattle(dt) {
     // ドスボス デコイ爆発
     if (s.type === 'dosbossDecoy' && s.life === 1) {
       const boomHitbox = { x: s.decoyX - 50, y: s.decoyY - 50, w: 100, h: 80 };
-      const decoyOwner = players.find(pp => pp.id === s.ownerId);
+      const decoyOwner = simulate ? players.find(pp => pp.id === s.ownerId) : null;
       if (decoyOwner) {
         const savedTargets = decoyOwner.hitTargets;
         decoyOwner.hitTargets = [];
@@ -11596,6 +11536,83 @@ function updateBattle(dt) {
     stockLossAnim.life--;
     if (stockLossAnim.life <= 0) stockLossAnim.active = false;
   }
+}
+
+
+// ======================================================================
+// バトルの 毎フレーム更新（中核）
+// 「Nフレームに1回」の 判定は battleFrame を 使うこと。battleTime は ミリ秒
+// ======================================================================
+function updateBattle(dt) {
+  battleTime += dt;
+  battleFrame++;
+
+  // コンボの 残り時間。以前は 描画の 中で 減らしていたため、
+  // ポーズ中に 勝手に 消えたり、必殺技の 動画中（描画を 飛ばす）に 止まったり、
+  // 1ヒットだけの コンボが 永久に 残ったり していた
+  for (let ci = 0; ci < 2; ci++) {
+    const cd = comboDisplay[ci];
+    if (!cd) continue;
+    cd.timer--;
+    if (cd.timer <= 0) resetCombo(ci);
+  }
+  cmdFrameCounter++; // コマンド入力用フレームカウンタ
+
+  // ヒットストップ処理
+  if (hitStopFrames > 0) hitStopFrames--;
+  const inHitStop = hitStopFrames > 0;
+
+  if (battleCountdown > 0) { battleCountdown--; return; }
+  battleStarted = true;
+
+  battleFrameAcc++;
+  if (battleFrameAcc >= 60) { battleFrameAcc = 0; if (battleTimer > 0) battleTimer--; }
+
+  // 残り10秒で観客カウントダウン手拍子
+  if (battleTimer === 10 && battleFrameAcc === 0 && !audienceCountdownStarted) {
+    audienceCountdownStarted = true;
+    playAudienceCountdown();
+  }
+
+  if (battleTimer <= 0 && !gameOver) {
+    // 時間切れは 引き分け（勝者を 決めない）
+    gameOver = true;
+    isDraw = true;
+    winner = -1;
+    gameSetTimer = 0; gameSetPhase = 1;   // GAME SET の 演出を 始める
+    stopBGM();
+  }
+  if (gameOver) return;
+
+  // 必殺技ゲージが たまった人の 動画を 先に 読み込んでおく（発動時の 真っ黒を 防ぐ）
+  for (const pp of players) {
+    if (pp && pp.alive && (pp.ultimateGauge || 0) >= 100) prefetchUltimateVideo(pp.charIdx);
+  }
+  // コンボフィニッシャーReady判定
+  updateComboFinisherReady();
+
+  // === 動く足場の更新 ===
+  for (const plat of platforms) {
+    if (!plat.moving) continue;
+    const t = battleTime * 0.02 * plat.moveSpeed;
+    const prevX = plat.x, prevY = plat.y;
+    if (plat.moveType === 'horizontal') {
+      plat.x = plat.baseX + Math.sin(t) * plat.moveRange / 2;
+    } else if (plat.moveType === 'vertical') {
+      plat.y = plat.baseY + Math.sin(t) * plat.moveRange / 2;
+    }
+    // 乗っているプレイヤーを一緒に移動
+    const dx = plat.x - prevX, dy = plat.y - prevY;
+    for (const p of players) {
+      if (!p.alive || !p.grounded) continue;
+      if (p.x >= plat.x && p.x <= plat.x + plat.w && Math.abs(p.y - plat.y) < 5) {
+        p.x += dx; p.y += dy;
+      }
+    }
+  }
+
+  // 画面演出の 更新は updateEffectArrays() に まとめてある
+  updateEffectArrays();
 
   // Chatta: ちっちゃい分身が 地面を 走って 相手を 追う。触れたら 爆発
   for (let mi = chattaMinions.length - 1; mi >= 0; mi--) {
@@ -20442,90 +20459,9 @@ function updateGuestEffects(dt) {
     p.renderY += (p.y - p.renderY) * 0.35;
   }
 
-  // Only update visual effects, no game logic
-  for (let i = hitEffects.length - 1; i >= 0; i--) {
-    hitEffects[i].life--;
-    if (hitEffects[i].life <= 0) hitEffects.splice(i, 1);
-  }
-  for (let i = sparks.length - 1; i >= 0; i--) {
-    const s = sparks[i];
-    s.x += s.vx; s.y += s.vy;
-    s.vy += (s.gravity || 0.15);
-    s.vx *= (s.drag || 0.97);
-    if (s.spin) s.angle = (s.angle || 0) + s.spin;
-    s.life--;
-    if (s.life <= 0) sparks.splice(i, 1);
-  }
-  for (let i = damageNumbers.length - 1; i >= 0; i--) {
-    const d = damageNumbers[i];
-    d.y += d.vy; d.vy *= 0.96; d.life--;
-    if (d.life <= 0) damageNumbers.splice(i, 1);
-  }
-  for (let i = trails.length - 1; i >= 0; i--) {
-    const tr = trails[i];
-    tr.life--;
-    if (tr.life <= 0) { trails.splice(i, 1); continue; }
-    const target = players.find(pp => pp.id === tr.targetId);
-    if (target && target.alive && target.hitstun > 0) {
-      if (!tr.points) tr.points = [];
-      tr.points.push({ x: target.x, y: target.y - 35 });
-      const maxPts = tr.maxPoints || 20;
-      if (tr.points.length > maxPts) tr.points.shift();
-    }
-  }
-  for (let i = blastExplosions.length - 1; i >= 0; i--) {
-    blastExplosions[i].life--;
-    if (blastExplosions[i].life <= 0) blastExplosions.splice(i, 1);
-  }
-  for (let i = cmdNameDisplay.length - 1; i >= 0; i--) {
-    cmdNameDisplay[i].life--; cmdNameDisplay[i].y -= 0.5;
-    if (cmdNameDisplay[i].life <= 0) cmdNameDisplay.splice(i, 1);
-  }
-  for (let i = hitMissDisplays.length - 1; i >= 0; i--) {
-    hitMissDisplays[i].life--; hitMissDisplays[i].y -= 0.8;
-    if (hitMissDisplays[i].life <= 0) hitMissDisplays.splice(i, 1);
-  }
-  for (let i = comicTexts.length - 1; i >= 0; i--) {
-    comicTexts[i].life--; comicTexts[i].y -= 0.6;
-    if (comicTexts[i].life <= 0) comicTexts.splice(i, 1);
-  }
-  if (koDisplay.active) {
-    koDisplay.life--;
-    if (koDisplay.life <= 0) koDisplay.active = false;
-  }
-  for (let i = confetti.length - 1; i >= 0; i--) {
-    const c = confetti[i];
-    c.x += c.vx; c.y += c.vy; c.vy += 0.03; c.vx *= 0.99;
-    c.rotation += c.rotSpeed; c.life--;
-    if (c.life <= 0) confetti.splice(i, 1);
-  }
-  for (let i = speedLines.length - 1; i >= 0; i--) {
-    speedLines[i].life--;
-    if (speedLines[i].life <= 0) speedLines.splice(i, 1);
-  }
-  for (let i = fireTrails.length - 1; i >= 0; i--) {
-    const f = fireTrails[i];
-    f.x += f.vx; f.y += f.vy; f.vy -= 0.05; f.size *= 0.97; f.life--;
-    if (f.life <= 0) fireTrails.splice(i, 1);
-  }
-  for (let i = specialAura.length - 1; i >= 0; i--) {
-    specialAura[i].life--;
-    if (specialAura[i].life <= 0) specialAura.splice(i, 1);
-  }
-  if (cmdFlash.alpha > 0) {
-    cmdFlash.alpha *= 0.88;
-    if (cmdFlash.alpha < 0.01) cmdFlash.alpha = 0;
-  }
-  if (cmdScaleEffect.life > 0) cmdScaleEffect.life--;
-  for (let i = koSlashEffects.length - 1; i >= 0; i--) {
-    if (koSlashEffects[i].delay > 0) { koSlashEffects[i].delay--; }
-    else { koSlashEffects[i].life--; if (koSlashEffects[i].life <= 0) koSlashEffects.splice(i, 1); }
-  }
-  if (stockLossAnim.active) {
-    stockLossAnim.life--;
-    if (stockLossAnim.life <= 0) stockLossAnim.active = false;
-  }
-  // screenShake and hitFlash are decayed in drawBattle (updateScreenShake / hitFlash render)
+  // 演出の 更新は ホストと 共通（updateEffectArrays）。
+  // false = 判定を しない。ゲストは ダメージを 与えない（ホストが 正）
+  updateEffectArrays(false);
 }
 
 function drawOnlineLobby(dt) {
