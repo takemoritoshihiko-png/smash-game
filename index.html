@@ -1650,7 +1650,7 @@ const CHAR_BODY_ART = {
       ctx.strokeStyle = '#C04080';
       ctx.lineWidth = 4 * s;
       ctx.lineCap = 'round';
-      const tentT = Math.sin(time * 0.04 + charIndex) * 0.3;
+      const tentT = Math.sin(time * 0.04 + ci) * 0.3;   // ci = キャラ番号（表に 移した とき charIndex から 改名）
       // 左触手2本
       ctx.beginPath(); ctx.moveTo(-8 * s, 18 * s); ctx.quadraticCurveTo(-18 * s, 30 * s + tentT * 10, -14 * s, 45 * s); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(-4 * s, 20 * s); ctx.quadraticCurveTo(-12 * s, 35 * s - tentT * 8, -16 * s, 48 * s); ctx.stroke();

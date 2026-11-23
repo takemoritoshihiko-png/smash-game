@@ -954,6 +954,67 @@ try {
       check('boss rush clear keeps the canvas balanced', bossBad.length === 0,
             bossBad.join(' | ') || 'save/restore balanced');
 
+      // --- 画像が 読めない ときの 手描き描画（全31キャラ）---
+      //     画像が 読めている 間は この 枝に 入らないので、
+      //     ここに 書き間違いが あっても 普通の テストでは 見つからない。
+      //     実際 CHAR_BODY_ART[8] が 存在しない 変数を 参照していた
+      var fbBad = [];
+      try {
+        // 画像を 「未読み込み」に 見せかける
+        var patched = [];
+        function fakeBroken(img) {
+          if (!img || patched.indexOf(img) >= 0) return;
+          try {
+            Object.defineProperty(img, 'complete', { get: function(){ return false; }, configurable: true });
+            Object.defineProperty(img, 'naturalWidth', { get: function(){ return 0; }, configurable: true });
+            patched.push(img);
+          } catch (e) {}
+        }
+        var SPRITE_KEYS = ['idle','walk','jump','fall','attack_n','attack_s','attack_side','attack_up',
+                           'attack_down','attack_air','special','damage','down','win','guard','rage'];
+        for (var fi = 0; fi < characters.length; fi++) {
+          var set = SPRITE_SETS[fi];
+          if (set) for (var ki = 0; ki < SPRITE_KEYS.length; ki++) fakeBroken(set[SPRITE_KEYS[ki]]);
+        }
+        // 1枚絵の キャラ画像も 潰す
+        ['zenImg','donImg','saisokuImg','meteoImg','longImg','uruoImg','kumatarouImg','bulletImg',
+         'shaudenImg','judgemanImg','tensaiImg','tensaiDragonImg','catbusImg','tankImg','namiojiImg',
+         'tokkoImg','samImg','kingImg','onpaImg','senImg','dosbossImg','microImg','mrtwoImg',
+         'kinkinImg','satoruImg','kowaiImg','yahoImg','poyoImg','pullImg','mussyImg','botImg',
+         'botRobotImg','chattaImg'].forEach(function (nm) {
+          try { fakeBroken(eval(nm)); } catch (e) {}
+        });
+
+        for (var fc = 0; fc < characters.length; fc++) {
+          ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,960,640);
+          try { drawCharacterBody(480, 420, 2.0, fc, 1600, false); }
+          catch (e) { fbBad.push('body/' + fc + ': ' + e.message); }
+          var fad = { alive:true, animState:'idle', attacking:false, attackType:null, attackFrame:0,
+                      hitstun:0, guarding:false, walkCycle:0.3, spinAngle:0, damageTint:0,
+                      invincibleTimer:0, grounded:true, vx:0, vy:0, animTimer:50,
+                      charging:false, chargeTime:0, chargeMaxTime:120, specialState:null,
+                      dragonMode:false, botRobot:0, chattaFly:0, microSplit:false,
+                      dSkillActive:false, dSkillTimer:0, dSkillBuff:null,
+                      landSquash:0, jumpSquash:0, damage:40, stocks:3, id:0, charIdx:fc };
+          ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,960,640);
+          try { drawBattleCharacter(480, 420, 1.0, fc, 1600, false, fad); }
+          catch (e) { fbBad.push('battle/' + fc + ': ' + e.message); }
+          // 攻撃ポーズ（手描きは 0〜8）
+          if (fc <= 8) {
+            ['normal','side','up','down','aerial'].forEach(function (mv) {
+              var adf = (attackDefs[fc] || {})[mv];
+              if (!adf) return;
+              var fad2 = Object.assign({}, fad, { attacking:true, attackType:mv, attackFrame:(adf.startup||2)+1, attackData:adf });
+              ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,960,640);
+              try { drawBattleCharacter(480, 420, 1.0, fc, 1600, false, fad2); }
+              catch (e) { fbBad.push('pose/' + fc + '/' + mv + ': ' + e.message); }
+            });
+          }
+        }
+      } catch (e) { fbBad.push('threw: ' + e.message); }
+      check('vector fallback art draws for every character', fbBad.length === 0,
+            fbBad.slice(0,4).join(' | ') || '31 chars, sprites forced missing');
+
       // --- ポーズメニュー ---
       var pauseBad = [];
       try {
