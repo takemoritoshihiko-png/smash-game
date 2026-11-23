@@ -21,63 +21,251 @@
 //   変更したら  node tools/smoketest.mjs  を 必ず 走らせること。
 //   目次が ずれたら  node tools/toc.mjs  で 作り直す。
 //
-//   84    CANVAS / 画面サイズ
-//   924   音の ロック解除（最初の 操作で 呼ぶ）
-//   959   キャラ画像（遅延読み込み）
-//   1139  タイトル画面の 粒子
-//   1178  キャラの 絵 ①メニュー用（選択画面・詳細画面）
-//   2838  キャラの 絵 ②バトル用
-//   5359  描画ユーティリティ
-//   5408  画面: タイトル
-//   5532  画面: キャラ選択
-//   5782  画面: 難易度選択（CPU戦）
-//   5882  画面: ステージ選択
-//   6113  バトルの 定数 と 状態
-//   6520  復帰技 / パワーモードの 表示
-//   6568  カメラ / 画面揺れ
-//   6587  効果音（Web Audio で 合成）
-//   7008  観客の 音
-//   7351  ヒット表示 / コミック文字
-//   7379  掴み・投げ の 定数と キャラ別テーブル
-//   7430  コマンド技（→→↓↓+Z など）
-//   7921  技データ
-//   8686  プレイヤー生成 / 試合の 初期化
-//   9034  ヒット処理（ダメージ・ノックバック）
-//   10375 当たり判定
-//   10407 飛び道具
-//   10450 技の 発動（通常技・復帰技・ジャブ）
-//   10709 掴み・投げ の 実行
-//   10936 CPU の 思考
-//   11282 バトルの 毎フレーム更新（中核）
-//   13732 物理（移動・重力・着地・撃墜判定）
-//   14299 スマッシュ攻撃（方向2回 + X）
-//   14415 崖つかまり
-//   14512 D技 と 必殺技 の データ
-//   15379 D技の 中身（キャラ別）
-//   15532 空中回避
-//   15594 バトル描画の 下準備（カメラ・影・2.5D）
-//   15692 バトル画面の うえに 重ねる もの（ボスラッシュHUD / GAME SET 演出）
-//   15920 バトル画面の 描画
-//   17745 技エフェクトの 描画（effect 名 → 描き方）
-//   18402 技の エフェクト描画
-//   18836 必殺技 / 即死技 の 全画面オーバーレイ
-//   19009 画面: コンボ一覧 / 戦績
-//   19141 キャラ別 ゲージの 描画（HUDの 下に 出る 細い バー）
-//   19352 バトルの HUD
-//   19621 オンライン対戦（PeerJS / ホストが 正）
-//   20575 画面: VS イントロ
-//   20860 画面の 切り替え（フェード）
-//   20895 ポーズメニュー（バトル中に ESC）
-//   20976 画面: キャラ詳細（Iキー）
-//   21207 画面: 操作説明
-//   21331 キー入力の 振り分け（画面ごと）
-//   21812 メインループ（60FPS 固定タイムステップ）
+//   272   CANVAS / 画面サイズ
+//   1055  音の ロック解除（最初の 操作で 呼ぶ）
+//   1090  キャラ画像（遅延読み込み）
+//   1270  タイトル画面の 粒子
+//   1309  キャラの 絵 ①メニュー用（選択画面・詳細画面）
+//   2969  キャラの 絵 ②バトル用
+//   5490  描画ユーティリティ
+//   5539  画面: タイトル
+//   5663  画面: キャラ選択
+//   5913  画面: 難易度選択（CPU戦）
+//   6013  画面: ステージ選択
+//   6244  バトルの 定数 と 状態
+//   6613  復帰技 / パワーモードの 表示
+//   6655  カメラ / 画面揺れ
+//   6672  効果音（Web Audio で 合成）
+//   7083  観客の 音
+//   7399  ヒット表示 / コミック文字
+//   7423  掴み・投げ の 定数と キャラ別テーブル
+//   7472  コマンド技（→→↓↓+Z など）
+//   7963  技データ
+//   8728  プレイヤー生成 / 試合の 初期化
+//   9076  ヒット処理（ダメージ・ノックバック）
+//   10417 当たり判定
+//   10449 飛び道具
+//   10492 技の 発動（通常技・復帰技・ジャブ）
+//   10751 掴み・投げ の 実行
+//   10975 CPU の 思考
+//   11321 バトルの 毎フレーム更新（中核）
+//   13771 物理（移動・重力・着地・撃墜判定）
+//   14338 スマッシュ攻撃（方向2回 + X）
+//   14454 崖つかまり
+//   14551 D技 と 必殺技 の データ
+//   15409 D技の 中身（キャラ別）
+//   15562 空中回避
+//   15624 バトル描画の 下準備（カメラ・影・2.5D）
+//   15722 バトル画面の うえに 重ねる もの（ボスラッシュHUD / GAME SET 演出）
+//   15950 バトル画面の 描画
+//   17775 技エフェクトの 描画（effect 名 → 描き方）
+//   18432 技の エフェクト描画
+//   18866 必殺技 / 即死技 の 全画面オーバーレイ
+//   19039 画面: コンボ一覧 / 戦績
+//   19171 キャラ別 ゲージの 描画（HUDの 下に 出る 細い バー）
+//   19382 バトルの HUD
+//   19651 オンライン対戦（PeerJS / ホストが 正）
+//   20595 画面: VS イントロ
+//   20880 画面の 切り替え（フェード）
+//   20915 ポーズメニュー（バトル中に ESC）
+//   20996 画面: キャラ詳細（Iキー）
+//   21227 画面: 操作説明
+//   21351 キー入力の 振り分け（画面ごと）
+//   21832 メインループ（60FPS 固定タイムステップ）
 //
 // ### 目次ここまで
 // ======================================================================
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
+
+// ======================================================================
+// 書き換わる 値（グローバル状態）
+//
+// 以前は 33か所に 散らばっていて、どこで 何が 変わるか 追えなかった。
+// すべての let を ここに 集約。読むだけの 定数（const）は 各区画の まま。
+//
+//  ・画面を 切り替えても 残る ものが あるので、増やす ときは
+//    initBattle() / teardownOnlineSession() の 初期化にも 足すか 考えること
+//  ・ここに 無い let を 増やさない。増やすと また 散らばる
+//  ・初期値に 他の 変数を 使う ものだけは ここで null を 入れ、
+//    実際の 代入は 元の 場所に 残してある（currentBgmAudio / battleTimer）
+// ======================================================================
+// --- State ---
+let scene = 'title'; // 'title' | 'select' | 'difficulty' | 'stageselect' | 'vsintro' | 'battle' | 'online'
+let titleAlpha = 0;
+let titleFadeIn = true;
+let pressAlpha = 0;
+let pressDir = 1;
+let titleParticles = [];
+let selectTransition = 0;
+let transitioning = false;
+let transitionTarget = '';
+let titleTime = 0;
+let selectTime = 0;
+let charDetailIdx = 0;
+let charDetailTab = 0; // 0=MOVES 1=COMMANDS 2=COMBOS
+// --- ポーズメニュー（バトル中に ESC）---
+let pauseOpen = false;   // メニューが 出ているか
+let pauseSel = 0;        // 選んでいる 項目
+let pauseAnim = 0;       // 出てくる アニメ 0->1
+let showHowToPlay = false;
+// Select screen
+let p1Select = 0;
+let p2Select = 1;
+let p1Confirmed = false;
+let p2Confirmed = false;
+// Game mode
+let gameMode = 'cpu'; // 'vs' | 'cpu' | 'bossrush'
+let modeSelected = false; // whether mode has been chosen on select screen
+let cpuDifficulty = 1; // 0=easy, 1=normal, 2=hard, 3=extreme
+let difficultyTime = 0;
+let difficultySelected = 0; // cursor on difficulty screen
+// Boss Rush mode
+let bossRushMode = false;
+let bossRushBosses = [];    // array of 3 boss charIdx
+let bossRushCurrent = 0;    // 0,1,2 = which boss
+let bossRushPlayerChar = 0; // player's random char
+let bossRushPhase = '';     // 'intro' | 'battle' | 'defeated' | 'clear'
+let bossRushTimer = 0;
+let bossRushTitle = '';     // earned title
+let selectedStage = 0;
+let stageSelectTime = 0;
+// Online multiplayer
+let onlineMode = false;
+let isHost = false;
+let peer = null;
+let peerConn = null;
+let onlineState = 'menu'; // 'menu' | 'hosting' | 'joining' | 'connected'
+let onlineRoomId = '';
+let onlineInputId = '';
+let onlineError = '';
+let remoteKeys = {};      // keys state received from remote player
+let prevRemoteKeys = {};  // previous frame remote keys for edge detection
+let onlineInputFocused = false;
+// VS Intro screen
+let vsIntroTime = 0;
+let vsIntroFanfareNodes = null;
+// --- Audio unlock on first interaction ---
+let audioUnlocked = false;
+// 台形の手前幅に合わせて拡張（2.5D対応）
+// 元: 90〜870 (幅780)、台形near×1.2 → 幅936、中心480
+let STAGE_LEFT = 480 - (870 - 90) * 1.2 / 2;  // = 12
+let STAGE_RIGHT = 480 + (870 - 90) * 1.2 / 2;  // = 948
+let BLAST_LEFT = -800;     // -600→-800（左に200px拡大）
+let BLAST_RIGHT = 1760;    // 1560→1760（右に200px拡大）
+let battleTime = 0;
+let players = [];
+let projectiles = [];
+let hitEffects = [];
+let sparks = [];       // directional spark particles on hit
+let damageNumbers = []; // floating damage numbers
+let trails = [];       // knockback trails
+let blastExplosions = []; // stock loss explosions
+let starKOs = [];      // 上に 飛んだ 撃墜（星に なって 消える）
+let chattaMinions = [];  // Chatta の ちっちゃい分身（相手を 追って 爆発する）
+let screenKOs = [];    // 下に 落ちた 撃墜
+let battleCountdown = 0;
+let battleStarted = false;
+let gameOver = false;
+let winner = -1;
+let isDraw = false;        // 時間切れの 引き分け
+let gameSetTimer = 0;     // GAME SET演出タイマー
+let gameSetPhase = 0;     // 0=inactive, 1=slowmo+flash, 2=GAME SET text, 3=GAME SET fadeout, 4=winner display
+// デバッグモード（F3キーで切り替え）
+let debugHitboxes = false;
+let comboDisplay = [null, null]; // [P1, P2] { count, timer, maxTimer }
+let comboFinisherUsed = [false, false]; // 1コンボ中1回
+let comboFinisherReady = [false, false];
+let comboFinisherReadyDisplay = { active: false, timer: 0, playerId: -1 };
+let comboFinisherActive = { active: false, timer: 0, maxTimer: 0, playerId: -1, charIdx: -1 };
+let comboFinisherSlowmo = 0; // スローモーション残りフレーム
+let battleStats = { totalGames: 0, totalWins: 0, charWins: {}, charGames: {}, vsRecord: {}, maxCombo: 0 };
+let unlockData = { stages: [], chars: [], titles: [] };
+let showFrameData = false;
+let trainingMode = false;
+let comboListCharIdx = 0;
+let instantKillDisplay = { active: false, timer: 0, maxTimer: 0 };
+// ゲージMAXエフェクト
+let gaugeMaxEffect = { active: false, timer: 0, playerId: -1, color: '#FFD700', text: '' };
+// ゲージ増減ポップアップ
+let gaugePopups = []; // {x, y, text, life, color}
+// Screen shake system
+let screenShake = { x: 0, y: 0, intensity: 0, duration: 0 };
+// === Web Audio API Sound Effects ===
+let audioCtx = null;
+// 軽い歪み（サチュレーション）のカーブ。
+// サイン波だけだと「ピコッ」と 軽くなる。少し歪ませると 一気に 打撃らしく なる。
+let _satCurve = null;
+let bgmPlaying = false;
+let currentBgmAudio = null;
+let bgmFadeInterval = null;
+let audienceBaseSource = null;
+let audienceBaseGain = null;
+let audienceBaseFilter = null;
+let audienceActive = false;
+let audienceCountdownStarted = false;
+// Hit flash overlay (white flash on strong hits)
+let hitFlash = { alpha: 0, color: '#FFFFFF' };
+// Hitstop system
+let hitStopFrames = 0;
+// Comic text effects ("POW!", "BAM!", etc.)
+let comicTexts = [];
+// KO display
+let koDisplay = { active: false, life: 0, maxLife: 90, playerIdx: -1 };
+// Confetti / paper particles for KO
+let confetti = [];
+// Speed lines for knockback
+let speedLines = [];
+// Fire trail for high damage knockback
+let fireTrails = [];
+// Rainbow aura for special attacks
+let specialAura = [];
+// Command technique background flash
+let cmdFlash = { alpha: 0, color: '#FFFFFF' };
+let cmdScaleEffect = { playerId: -1, life: 0 };
+// ① KO slash effects (光の斬撃)
+let koSlashEffects = [];
+// ③ KO slow motion
+let koSlowMotion = { active: false, frames: 0, maxFrames: 90 }; // 1.5sec = 90 frames
+// ⑤ Stock loss animation
+let stockLossAnim = { active: false, playerId: -1, life: 0, maxLife: 30, x: 0, y: 0 };
+// HIT/MISS display system
+let hitMissDisplays = [];
+let battleTimer = 0;
+let battleFrameAcc = 0;
+// 試合開始からの 経過フレーム数（整数）。
+// battleTime は ミリ秒なので 「N フレームに 1回」の 判定には 必ず こちらを 使う
+let battleFrame = 0;
+let cmdFrameCounter = 0; // グローバルフレームカウンタ
+let cmdNameDisplay = []; // {text, x, y, life, maxLife, color}
+// --- CPU AI ---
+let cpuActionTimer = 0;
+let cpuAttackCooldown = 0;
+// 必殺技（アルティメット）システム
+let ultimateActive = false;
+let ultimateTimer = 0;
+let ultimatePhase = ''; // 'darken' | 'text' | 'video' | 'damage' | 'brighten'
+let ultimatePlayerId = -1;
+let ultimateVideo = null;
+let ultimateHitTarget = -1;
+let ultimateVideoShowing = false;   // 動画が 画面に 出ている間は ゲームを 描かない（カクつき防止）
+let ultimateSteppedThisFrame = false;
+// オンラインの 後始末。自分で やめる ときは これだけ 呼ぶ（画面は 呼び出し側が 決める）
+let onlineTeardown = false;
+let onlineConnectTimeout = null;
+let guestSendCounter = 0;
+let lastGuestKeys = null;
+let hostSendCounter = 0;
+let hostLastSentState = null; // 前回送信状態（デルタ検出用）
+// オンラインRTT計測
+let onlineRTT = 0; // ミリ秒
+let onlineLagFrames = 0;
+let lastTime = performance.now();
+let accumulator = 0;
+let loopErrorCount = 0;
+let lastLoopError = '';
+
 
 // --- Canvas sizing ---
 // ======================================================================
@@ -93,25 +281,7 @@ function resize() {
 resize();
 window.addEventListener('resize', resize);
 
-// --- State ---
-let scene = 'title'; // 'title' | 'select' | 'difficulty' | 'stageselect' | 'vsintro' | 'battle' | 'online'
-let titleAlpha = 0;
-let titleFadeIn = true;
-let pressAlpha = 0;
-let pressDir = 1;
-let titleParticles = [];
-let selectTransition = 0;
-let transitioning = false;
-let transitionTarget = '';
-let titleTime = 0;
-let selectTime = 0;
-let charDetailIdx = 0;
-let charDetailTab = 0; // 0=MOVES 1=COMMANDS 2=COMBOS
 
-// --- ポーズメニュー（バトル中に ESC）---
-let pauseOpen = false;   // メニューが 出ているか
-let pauseSel = 0;        // 選んでいる 項目
-let pauseAnim = 0;       // 出てくる アニメ 0->1
 // オンラインでは 相手を 止められないので 時間は 止めない（メニューだけ 出す）
 function pauseFreezesGame() { return !onlineMode; }
 function pauseMenuItems() {
@@ -146,29 +316,9 @@ function runPauseItem(label) {
     return;
   }
 }
-let showHowToPlay = false;
 
-// Select screen
-let p1Select = 0;
-let p2Select = 1;
-let p1Confirmed = false;
-let p2Confirmed = false;
 
-// Game mode
-let gameMode = 'cpu'; // 'vs' | 'cpu' | 'bossrush'
-let modeSelected = false; // whether mode has been chosen on select screen
-let cpuDifficulty = 1; // 0=easy, 1=normal, 2=hard, 3=extreme
-let difficultyTime = 0;
-let difficultySelected = 0; // cursor on difficulty screen
 
-// Boss Rush mode
-let bossRushMode = false;
-let bossRushBosses = [];    // array of 3 boss charIdx
-let bossRushCurrent = 0;    // 0,1,2 = which boss
-let bossRushPlayerChar = 0; // player's random char
-let bossRushPhase = '';     // 'intro' | 'battle' | 'defeated' | 'clear'
-let bossRushTimer = 0;
-let bossRushTitle = '';     // earned title
 
 // Stage select
 const stages = [
@@ -212,26 +362,9 @@ const stages = [
     blastExtra: 300,    // ブラストゾーン左右+300px
   },
 ];
-let selectedStage = 0;
-let stageSelectTime = 0;
 
-// Online multiplayer
-let onlineMode = false;
-let isHost = false;
-let peer = null;
-let peerConn = null;
-let onlineState = 'menu'; // 'menu' | 'hosting' | 'joining' | 'connected'
-let onlineRoomId = '';
-let onlineInputId = '';
-let onlineError = '';
-let remoteKeys = {};      // keys state received from remote player
-let prevRemoteKeys = {};  // previous frame remote keys for edge detection
-let onlineInputFocused = false;
 
-// VS Intro screen
-let vsIntroTime = 0;
 const VS_INTRO_DURATION = 180; // 3 seconds at 60fps
-let vsIntroFanfareNodes = null;
 
 
 // --- Characters ---
@@ -918,8 +1051,6 @@ const BALANCE_TWEAK = {
   2:  { kb: 1.10, dmg: 1.05 },      // Saisoku: 吹っ飛ばしが 弱すぎて 相手を 倒しきれない
 };
 
-// --- Audio unlock on first interaction ---
-let audioUnlocked = false;
 // ======================================================================
 // 音の ロック解除（最初の 操作で 呼ぶ）
 // ======================================================================
@@ -6120,10 +6251,6 @@ const GRAVITY_APEX = 0.291;       // 頂点付近の重力（旧×1.3×0.7=滞�
 const APEX_THRESHOLD = 1.8;       // 頂点判定の速度閾値（3.2→1.8: 範囲を縮小）
 const MAX_FALL_SPEED = 18.5;      // 落下上限（旧16.8→速め）
 const FAST_FALL_MULT = 1.8;       // 急降下倍率
-// 台形の手前幅に合わせて拡張（2.5D対応）
-// 元: 90〜870 (幅780)、台形near×1.2 → 幅936、中心480
-let STAGE_LEFT = 480 - (870 - 90) * 1.2 / 2;  // = 12
-let STAGE_RIGHT = 480 + (870 - 90) * 1.2 / 2;  // = 948
 const STAGE_GROUND_Y = 450;
 // ヒットストップの 長さの 倍率。1.0 = スマブラと 同じ。短くしたいなら 0.7 など
 const HITSTOP_SCALE = 1.0;
@@ -6147,8 +6274,6 @@ const CHATTA_SHOT_INTERVAL = 26;   // 指カッターの 間隔（遅め）
 const CHATTA_WARP_USES = 3;        // ワープメテオは 1ストック(1機)につき 3回。3ストックなので 1試合 9回
 const BLAST_TOP = -450;
 const BLAST_BOTTOM = 1400;   // 1000→1400（+400px下に拡大）
-let BLAST_LEFT = -800;     // -600→-800（左に200px拡大）
-let BLAST_RIGHT = 1760;    // 1560→1760（右に200px拡大）
 
 // 慣性・摩擦パラメータ（旧値: GROUND_ACCEL=0.22, AIR_ACCEL=0.14, AIR_SPEED_MULT=0.85, DASH=1.4）
 const GROUND_ACCEL = 0.30;       // 地上加速度（0.35→0.30: 少し滑らかな加速）
@@ -6179,30 +6304,9 @@ const RESPAWN_TIME = 90;
 
 const platforms = [];
 
-let battleTime = 0;
-let players = [];
-let projectiles = [];
-let hitEffects = [];
-let sparks = [];       // directional spark particles on hit
-let damageNumbers = []; // floating damage numbers
-let trails = [];       // knockback trails
-let blastExplosions = []; // stock loss explosions
-let starKOs = [];      // 上に 飛んだ 撃墜（星に なって 消える）
-let chattaMinions = [];  // Chatta の ちっちゃい分身（相手を 追って 爆発する）
-let screenKOs = [];    // 下に 落ちた 撃墜
-let battleCountdown = 0;
-let battleStarted = false;
-let gameOver = false;
-let winner = -1;
-let isDraw = false;        // 時間切れの 引き分け
-let gameSetTimer = 0;     // GAME SET演出タイマー
-let gameSetPhase = 0;     // 0=inactive, 1=slowmo+flash, 2=GAME SET text, 3=GAME SET fadeout, 4=winner display
 
-// デバッグモード（F3キーで切り替え）
-let debugHitboxes = false;
 
 // ========== コンボカウンター ==========
-let comboDisplay = [null, null]; // [P1, P2] { count, timer, maxTimer }
 function addComboHit(attackerId) {
   if (!comboDisplay[attackerId]) comboDisplay[attackerId] = { count: 0, timer: 0, maxTimer: 0 };
   comboDisplay[attackerId].count++;
@@ -6223,11 +6327,6 @@ function resetCombo(attackerId) {
 }
 
 // ========== コンボフィニッシャーシステム ==========
-let comboFinisherUsed = [false, false]; // 1コンボ中1回
-let comboFinisherReady = [false, false];
-let comboFinisherReadyDisplay = { active: false, timer: 0, playerId: -1 };
-let comboFinisherActive = { active: false, timer: 0, maxTimer: 0, playerId: -1, charIdx: -1 };
-let comboFinisherSlowmo = 0; // スローモーション残りフレーム
 
 
 function canComboFinisher(playerId) {
@@ -6437,7 +6536,6 @@ function updateComboFinisherReady() {
 }
 
 // ========== 戦績システム ==========
-let battleStats = { totalGames: 0, totalWins: 0, charWins: {}, charGames: {}, vsRecord: {}, maxCombo: 0 };
 function loadBattleStats() {
   try {
     const s = localStorage.getItem('smash_battle_stats');
@@ -6469,7 +6567,6 @@ function recordBattleResult(myCharIdx, opCharIdx, won) {
 loadBattleStats();
 
 // ========== アンロックシステム ==========
-let unlockData = { stages: [], chars: [], titles: [] };
 function loadUnlocks() {
   try {
     const s = localStorage.getItem('smash_unlocks');
@@ -6509,10 +6606,6 @@ function checkBossRushUnlocks(bossesCleared, title) {
 loadUnlocks();
 
 // ========== フレームデータ表示 ==========
-let showFrameData = false;
-let trainingMode = false;
-let comboListCharIdx = 0;
-let instantKillDisplay = { active: false, timer: 0, maxTimer: 0 };
 
 // === 復帰技データ（全28キャラ） ===
 // height: 上昇px, angle: 角度(度,-90=真上), frames: 持続F, dmg: ダメージ, color: エフェクト色, status: 状態異常
@@ -6520,10 +6613,6 @@ let instantKillDisplay = { active: false, timer: 0, maxTimer: 0 };
 // 復帰技 / パワーモードの 表示
 // キャラを 足したら ここにも 必ず 足す。抜けると ↑+X が 無反応に なる
 // ======================================================================
-// ゲージMAXエフェクト
-let gaugeMaxEffect = { active: false, timer: 0, playerId: -1, color: '#FFD700', text: '' };
-// ゲージ増減ポップアップ
-let gaugePopups = []; // {x, y, text, life, color}
 function addGaugePopup(x, y, amount, color) {
   gaugePopups.push({ x: x, y: y - 60, text: (amount > 0 ? '+' : '') + amount, life: 30, maxLife: 30, color: color || '#FFD700' });
 }
@@ -6562,8 +6651,6 @@ const cam = {
   padY: 100,
 };
 
-// Screen shake system
-let screenShake = { x: 0, y: 0, intensity: 0, duration: 0 };
 // ======================================================================
 // カメラ / 画面揺れ
 // ======================================================================
@@ -6581,8 +6668,6 @@ function updateScreenShake() {
   }
 }
 
-// === Web Audio API Sound Effects ===
-let audioCtx = null;
 // ======================================================================
 // 効果音（Web Audio で 合成）
 // 打撃音を 変えたいときは HIT_VOICES の 数字だけ いじれば よい
@@ -6641,9 +6726,6 @@ const HIT_VOICES = {
   cmd:        {v:1.35, a:[1000,0.050,0.90], b:['sawtooth',280, 52,0.200,0.60], s:[ 95,22,0.50,1.00], air:[500,0.26,0.55], met:[2000,760,0.14,0.32]},
 };
 
-// 軽い歪み（サチュレーション）のカーブ。
-// サイン波だけだと「ピコッ」と 軽くなる。少し歪ませると 一気に 打撃らしく なる。
-let _satCurve = null;
 function satCurve() {
   if (_satCurve) return _satCurve;
   const n = 1024, c = new Float32Array(n), k = 2.8;
@@ -6882,8 +6964,7 @@ const bgm5Audio = new Audio('sounds/bgm5.mp3');
 bgm5Audio.loop = true;
 bgm5Audio.volume = 0.4;
 bgm5Audio.preload = 'none';   // 再生するまで 読み込まない
-let bgmPlaying = false;
-let currentBgmAudio = bgmAudio;
+currentBgmAudio = bgmAudio;
 const bgmMap = { 'sounds/bgm.mp3': bgmAudio, 'sounds/bgm2.mp3': bgm2Audio, 'sounds/bgm3.mp3': bgm3Audio, 'sounds/bgm4.mp3': bgm4Audio, 'sounds/bgm5.mp3': bgm5Audio };
 
 function startBGM() {
@@ -6907,7 +6988,6 @@ function stopBGM() {
   stopAudienceBase();
 }
 
-let bgmFadeInterval = null;
 const BGM_VOLUME = 0.4;
 function fadeOutBGM(duration, callback) {
   if (bgmFadeInterval) clearInterval(bgmFadeInterval);
@@ -6998,11 +7078,6 @@ function playKOSE() {
 }
 
 // ============ 観客音響システム ============
-let audienceBaseSource = null;
-let audienceBaseGain = null;
-let audienceBaseFilter = null;
-let audienceActive = false;
-let audienceCountdownStarted = false;
 
 // ======================================================================
 // 観客の 音
@@ -7305,48 +7380,21 @@ function playAudienceCountdown() {
   } catch(e) {}
 }
 
-// Hit flash overlay (white flash on strong hits)
-let hitFlash = { alpha: 0, color: '#FFFFFF' };
 
 // ============ All-Star Brawl 2 style effects ============
-// Hitstop system
-let hitStopFrames = 0;
 
-// Comic text effects ("POW!", "BAM!", etc.)
-let comicTexts = [];
 const COMIC_WORDS = ['POW!','BAM!','WHAM!','CRACK!','SMASH!','BOOM!','ZAP!','THWACK!'];
 const COMIC_COLORS = ['#FF4444','#FFDD00','#44AAFF','#FF66AA','#44FF88','#FF8844','#AA44FF','#00FFCC'];
 
-// KO display
-let koDisplay = { active: false, life: 0, maxLife: 90, playerIdx: -1 };
 
-// Confetti / paper particles for KO
-let confetti = [];
 
-// Speed lines for knockback
-let speedLines = [];
 
-// Fire trail for high damage knockback
-let fireTrails = [];
 
-// Rainbow aura for special attacks
-let specialAura = [];
 
-// Command technique background flash
-let cmdFlash = { alpha: 0, color: '#FFFFFF' };
-let cmdScaleEffect = { playerId: -1, life: 0 };
 
-// ① KO slash effects (光の斬撃)
-let koSlashEffects = [];
 
-// ③ KO slow motion
-let koSlowMotion = { active: false, frames: 0, maxFrames: 90 }; // 1.5sec = 90 frames
 
-// ⑤ Stock loss animation
-let stockLossAnim = { active: false, playerId: -1, life: 0, maxLife: 30, x: 0, y: 0 };
 
-// HIT/MISS display system
-let hitMissDisplays = [];
 // ======================================================================
 // ヒット表示 / コミック文字
 // ======================================================================
@@ -7361,11 +7409,7 @@ function showHitDisplay(x, y, isHit) {
 }
 
 const BATTLE_TIME_LIMIT = 180;
-let battleTimer = BATTLE_TIME_LIMIT;
-let battleFrameAcc = 0;
-// 試合開始からの 経過フレーム数（整数）。
-// battleTime は ミリ秒なので 「N フレームに 1回」の 判定には 必ず こちらを 使う
-let battleFrame = 0;
+battleTimer = BATTLE_TIME_LIMIT;
 
 // --- 掴み・投げの 定数と キャラ別テーブル（attackDefs は もっと下）---
 // Each attack: { startup, active, recovery, damage, kbBase, kbScale, hx, hy, hw, hh, type, ... }
@@ -7421,8 +7465,6 @@ const CMD_INPUT_WINDOW = 120; // コマンド入力猶予フレーム数（120F 
 const CMD_COOLDOWN = 300; // 5sec at 60fps
 const cmdInputBuffers = [[], []]; // direction input history for P1/P2
 const cmdInputFrames = [[], []]; // フレームカウント（時間ベースではなくフレームベース）
-let cmdFrameCounter = 0; // グローバルフレームカウンタ
-let cmdNameDisplay = []; // {text, x, y, life, maxLife, color}
 
 // Command definitions per character
 // dir: 'D'=down, 'U'=up, 'L'=left, 'R'=right (relative to facing)
@@ -10928,9 +10970,6 @@ function executeThrow(grabber, dirX, dirY) {
   releaseGrab(grabber);
 }
 
-// --- CPU AI ---
-let cpuActionTimer = 0;
-let cpuAttackCooldown = 0;
 
 // ======================================================================
 // CPU の 思考
@@ -14514,13 +14553,6 @@ const D_SKILL_COOLDOWN = 600;     // 10秒クールダウン
 // triggerDSkill の 分岐と 必ず 対応させること
 // ======================================================================
 
-// 必殺技（アルティメット）システム
-let ultimateActive = false;
-let ultimateTimer = 0;
-let ultimatePhase = ''; // 'darken' | 'text' | 'video' | 'damage' | 'brighten'
-let ultimatePlayerId = -1;
-let ultimateVideo = null;
-let ultimateHitTarget = -1;
 
 const ultimateFileNames = ['zen','don','saisoku','meteo','long','uruo','kumataro','bullet','shauden','judgeman','tensai','catbus','tank','namioji','tokko','sam','king','onpa','sen','dosboss','micro','mrtwo','kingking','satoru','kowai','yaho','poyo','pull','mussy','bot','chatta'];
 const ultimateData = [
@@ -14635,7 +14667,6 @@ function triggerUltimate(p) {
 const ultVideoCache = {};
 const ultVideoOrder = [];           // 使った 順（古いものが 先頭）
 const ULT_VIDEO_CACHE_MAX = 4;      // 1試合で 要るのは 2本。ボスラッシュを 考えて 4本
-let ultimateVideoShowing = false;   // 動画が 画面に 出ている間は ゲームを 描かない（カクつき防止）
 
 // 使っていない 動画を 捨てる。これが 無いと 遊び続けるほど
 // 読み込み済みの 動画（1本 5〜19MB）が たまり続けて 重くなる
@@ -14820,7 +14851,6 @@ function applyUltimateDamage(attacker, target) {
   cmdNameDisplay.push({ text: ud.name, x: 480, y: 200, life: 70, maxLife: 70, color: ud.color });
 }
 
-let ultimateSteppedThisFrame = false;
 function updateUltimate() {
   ultimateSteppedThisFrame = true;
   if (!ultimateActive) return;
@@ -19624,8 +19654,6 @@ function generateRoomId() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-// オンラインの 後始末。自分で やめる ときは これだけ 呼ぶ（画面は 呼び出し側が 決める）
-let onlineTeardown = false;
 function teardownOnlineSession() {
   onlineTeardown = true;   // peer.destroy() が 呼ぶ 'close' を 無視させる
   if (onlineConnectTimeout) { clearTimeout(onlineConnectTimeout); onlineConnectTimeout = null; }
@@ -19796,7 +19824,6 @@ const PEER_CONFIG = {
   },
   debug: 2
 };
-let onlineConnectTimeout = null;
 
 // PeerJS は CDN 読み込み。落ちていると new Peer で ReferenceError に なるので 先に 見る
 function peerLibReady() {
@@ -19874,8 +19901,6 @@ function joinRoom(roomId) {
   });
 }
 
-let guestSendCounter = 0;
-let lastGuestKeys = null;
 function sendGuestInput() {
   if (!peerConn || !peerConn.open) return;
   guestSendCounter++;
@@ -19945,8 +19970,6 @@ function serializePlayer(p) {
   };
 }
 
-let hostSendCounter = 0;
-let hostLastSentState = null; // 前回送信状態（デルタ検出用）
 
 function sendHostState() {
   if (!peerConn || !peerConn.open) return;
@@ -20007,9 +20030,6 @@ function sendHostState() {
   }
 }
 
-// オンラインRTT計測
-let onlineRTT = 0; // ミリ秒
-let onlineLagFrames = 0;
 
 function applyHostState(data) {
   if (!players[0] || !players[1]) return;
@@ -21811,12 +21831,8 @@ canvas.addEventListener('click', (e) => {
 // ============================================================
 // メインループ（60FPS 固定タイムステップ）
 // ============================================================
-let lastTime = performance.now();
 const FIXED_DT = 1000 / 60; // 16.667ms per frame
-let accumulator = 0;
 
-let loopErrorCount = 0;
-let lastLoopError = '';
 function gameLoop(timestamp) {
   // 例外が 出ても 次のフレームを 必ず 予約する。
   // これが 無いと 1回の 例外で ゲームが 永久に 固まる
