@@ -151,12 +151,56 @@ PeerJS（P2P）を使っています。**サーバーを立てる必要はあり
 
 ```
 index.html            ゲーム本体（これ1つで動く）
+tools/smoketest.mjs   動きの 検査（43項目）
+tools/visualdiff.mjs  見た目の 比較（649項目・ピクセル単位）
+tools/behaviordiff.mjs 動きの 比較（217地点・全状態の 突き合わせ）
+tools/toc.mjs         index.html 先頭の 目次を 作り直す
 images/               キャラ・背景（WebP）
 images/<キャラ名>/     バトル中のスプライト
 images/ultimates/     必殺技の動画（mp4）
 sounds/               BGM
-.github/workflows/    main に push すると GitHub Pages へ自動デプロイ
+.github/workflows/    push すると テスト（test.yml）と Pages デプロイ（deploy.yml）
 ```
+
+## index.html の 歩き方
+
+1枚で 2万行 あるので、**先頭の 目次**（`// ### 目次`）から 探す。
+行番号は ずれる ので、**見出しの 文字で 検索**するのが 確実。
+区画の 見出しは `// ======` 2本に 挟まれている。
+
+おおまかな 並び:
+
+```
+目次 → 書き換わる 値（グローバル状態・全部 ここ）
+     → キャラ別データ（31体ぶんの 表・全部 ここ）
+     → 画像の 読み込み
+     → キャラの 絵（メニュー用 / バトル用 / 攻撃ポーズ）
+     → 画面（タイトル・選択・ステージ…）
+     → バトルの 定数
+     → 音
+     → 掴み / コマンド技 / 技データ
+     → 試合の 初期化
+     → ヒット処理・当たり判定・技の発動・投げ・CPU
+     → updateBattle（毎フレーム）と その 部品
+     → 物理 → スマッシュ・崖・D技・必殺技・空中回避
+     → バトルの 描画 → 技エフェクト → HUD
+     → オンライン対戦
+     → ポーズ・詳細画面・操作説明
+     → キー入力の 振り分け → メインループ
+```
+
+**よく いじる ところ**
+
+| やりたいこと | 見る 場所 |
+|---|---|
+| キャラを 足す | `// キャラ別データ（31体ぶん）` の チェックリスト |
+| 技の 数値を 変える | `attackDefs`（`// 技データ`） |
+| 強さを 微調整する | `BALANCE_TWEAK` |
+| キャラの 絵を 直す | `CHAR_BODY_ART`（メニュー）/ `ATTACK_POSES`（攻撃中） |
+| 技の エフェクト | `ATTACK_EFFECTS` |
+| D技の 中身 | `D_SKILL_IMPL`（`D_SKILL_NAMES` と 対で） |
+| HUDの ゲージ | `CHAR_GAUGE_DRAW` |
+| 操作を 増やす | `handleKeyDown` **と** `pressZ/pressX/pressA/pressC`（ゲストも 通る） |
 
 ## よくある 落とし穴（直した 跡）
 
@@ -167,6 +211,12 @@ sounds/               BGM
   `requestAnimationFrame` が 二度と 呼ばれず ゲームが 固まる
 - **通信で 来た番号は そのまま 使わない**。`safeCharIdx()` / `safeStageIdx()` を 通す
 - **キャラ別テーブルに 穴が 空いていないか** は `node tools/smoketest.mjs` が 見てくれる
+- **表（`CHAR_BODY_ART` など）の 中身を 動かす ときは 引数名に 注意**。
+  昔 `charIndex` だった ものが 今は `ci`。外から 持ってきた 変数を そのまま 使うと
+  **画像が 読めない ときだけ** 落ちる（普通の テストでは 見つからない）
+- **関数を 切り出す ときは、外側の ローカル変数を 引数に 渡し忘れない**。
+  `continue` を `return` に 変える ときは、それが 内側ループの ものでない か 確かめる。
+  どちらも 一度 やらかして `node tools/behaviordiff.mjs` に 見つけてもらった
 
 ## 自動チェック
 
