@@ -843,6 +843,117 @@ try {
       check('a draw failure cannot strand the UI', resilBad.length === 0,
             resilBad.join(' | ') || 'transition still completes');
 
+      // --- 実戦で 起きる 組み合わせの 不具合（サブエージェント調査で 発覚）---
+      var combo2Bad = [];
+      try {
+        // 掴むと 掴んだ側が ずれ続ける（崖際だと 2人とも 落ちる）
+        var cr = battle(0, 0, 250), cA = cr[0], cB = cr[1];
+        cA.x = 400; cB.x = 435; cA.grounded = true; cB.grounded = true;
+        cA.throwCooldown = 0; cB.invincibleTimer = 0;
+        tryGrab(cA); run(2);
+        var gx0 = cA.x; run(24);
+        if (Math.abs(cA.x - gx0) > 3) combo2Bad.push('grab slides the grabber ' + Math.round(cA.x - gx0) + 'px');
+
+        // 飛び道具で 必殺ゲージが 増えない
+        cr = battle(4, 0, 250); cA = cr[0]; cB = cr[1];
+        cA.ultimateGauge = 0; cB.invincibleTimer = 0; cB.x = cA.x + 120; cB.y = cA.y;
+        projectiles.push({ x: cB.x, y: cB.y - 30, vx: 0, vy: 0, w: 40, h: 40, life: 60,
+          ownerId: cA.id, ownerCharIdx: cA.charIdx, damage: 10, kbBase: 5, kbScale: 0.08, kbAngle: -20, color: '#fff' });
+        run(4);
+        if (!(cA.ultimateGauge > 0)) combo2Bad.push('projectile hit gave no ultimate gauge');
+
+        // 溜めスマッシュが 掴まれても 被弾しても 生き残り 勝手に 出る
+        cr = battle(0, 0, 250); cA = cr[0]; cB = cr[1];
+        cB.x = cA.x + 35; cA.grounded = true; cB.grounded = true; cB.throwCooldown = 0; cA.invincibleTimer = 0;
+        cA.smashCharging = true; cA.smashChargeTime = 120; cA.smashType = 'sideSmash';
+        tryGrab(cB); run(3);
+        if (cA.attacking || cA.smashCharging) combo2Bad.push('charged smash survived being grabbed');
+        cr = battle(0, 0, 250); cA = cr[0]; cB = cr[1];
+        cA.smashCharging = true; cA.smashChargeTime = 120; cA.smashType = 'sideSmash';
+        cA.invincibleTimer = 0; cB.x = cA.x + 40; cB.hitTargets = [];
+        applyHit(cB, cA, 20, 8, 0.1, -30, 'strong'); run(3);
+        if (cA.attacking || cA.smashCharging) combo2Bad.push('charged smash survived a hit');
+
+        // 同時撃墜が 引き分けに ならない
+        cr = battle(0, 0, 250); cA = cr[0]; cB = cr[1];
+        cA.stocks = 1; cB.stocks = 1; cA.damage = 150; cB.damage = 150;
+        cA.invincibleTimer = 0; cB.invincibleTimer = 0;
+        cA.x = BLAST_LEFT - 200; cB.x = BLAST_RIGHT + 200; run(3);
+        if (!(isDraw && winner === -1)) combo2Bad.push('double KO gave winner=' + winner + ' isDraw=' + isDraw);
+
+        // ポーズで コンボが 消える / 1ヒットの コンボが 永久に 残る
+        cr = battle(0, 0, 250);
+        comboDisplay[0] = { count: 15, timer: 90, maxTimer: 90 }; comboFinisherUsed[0] = false;
+        handleKeyDown({ key: 'Escape', preventDefault: function(){} }); run(95);
+        if (!canComboFinisher(0)) combo2Bad.push('pausing dropped a ready finisher');
+        closePause();
+        cr = battle(0, 0, 250); comboDisplay[0] = { count: 1, timer: 90, maxTimer: 90 }; run(200);
+        if (comboDisplay[0]) combo2Bad.push('a 1-hit combo never expires');
+
+        // 無敵/不在の 相手に 必殺技を 撃って ゲージだけ 失う
+        cr = battle(0, 0, 250); cA = cr[0]; cB = cr[1];
+        cB.invincibleTimer = 600; cA.ultimateGauge = 100;
+        if (triggerUltimate(cA) !== false || cA.ultimateGauge !== 100) combo2Bad.push('ultimate wasted on an invincible target');
+        cr = battle(0, 0, 250); cA = cr[0]; cB = cr[1];
+        cB.alive = false; cB.respawnTimer = 90; cA.ultimateGauge = 100;
+        if (triggerUltimate(cA) !== false || cA.ultimateGauge !== 100) combo2Bad.push('ultimate wasted while the opponent respawns');
+
+        // 何も 起きない D技で 10秒の クールダウンを 取られる
+        cr = battle(1, 0, 250); cA = cr[0];
+        cA.grounded = false; cA.dSkillCooldown = 0; cA.dSkillActive = false; triggerDSkill(cA);
+        if (cA.dSkillCooldown !== 0) combo2Bad.push('airborne Don burned the D-skill cooldown');
+        cr = battle(0, 0, 250); cA = cr[0]; cB = cr[1];
+        cB.alive = false; cB.respawnTimer = 90; cA.dSkillCooldown = 0; triggerDSkill(cA);
+        if (cA.dSkillCooldown !== 0) combo2Bad.push('targetless D-skill burned the cooldown');
+
+        // 掴んでいる 相手の D技に 殴られて 掴みが 外れる
+        cr = battle(0, 13, 250); cA = cr[0]; cB = cr[1];
+        cB.dSkillCooldown = 0; cB.dSkillActive = false; triggerDSkill(cB);
+        cB.x = cA.x + 35; cA.grounded = true; cB.grounded = true;
+        cA.throwCooldown = 0; cB.invincibleTimer = 0; cA.damage = 0;
+        tryGrab(cA); run(10);
+        if (!cA.grabbing || cA.damage > 0) combo2Bad.push('a grabbed opponent D-skill hit the grabber');
+
+        // 相手が 居ないのに フィニッシャーを 使い切る
+        cr = battle(0, 0, 250); cA = cr[0]; cB = cr[1];
+        cB.alive = false; cB.respawnTimer = 90;
+        comboDisplay[0] = { count: 20, timer: 90, maxTimer: 90 };
+        comboFinisherUsed[0] = false; comboFinisherSlowmo = 0;
+        executeComboFinisher(cA);
+        if (comboFinisherUsed[0] || comboFinisherSlowmo) combo2Bad.push('finisher consumed with no target');
+        comboDisplay[0] = null;
+
+        // 復活しても 変身が 解けない（0% で 竜のまま 戻ってくる）
+        cr = battle(10, 0, 250); cA = cr[0]; cB = cr[1];
+        cB.x = 3000; cB.alive = false;
+        cA.dragonMode = true; cA.dragonTimer = 900; cA.damage = 200;
+        cA.x = BLAST_LEFT - 200; cA.invincibleTimer = 0; run(5);
+        var rf = 0; while (!cA.alive && rf < 700) { T += STEP; gameLoop(T); rf++; }
+        if (cA.dragonMode) combo2Bad.push('dragon mode survived the respawn');
+      } catch (e) { combo2Bad.push('threw: ' + e.message); }
+      check('system interactions stay consistent', combo2Bad.length === 0,
+            combo2Bad.slice(0,3).join(' | ') || '11 interaction bugs stay fixed');
+
+      // --- ボスラッシュの クリア画面で キャンバス状態が 漏れないか ---
+      var bossBad = [];
+      try {
+        var sDepth = 0;
+        var cs = CanvasRenderingContext2D.prototype.save, crst = CanvasRenderingContext2D.prototype.restore;
+        CanvasRenderingContext2D.prototype.save = function(){ sDepth++; return cs.apply(this, arguments); };
+        CanvasRenderingContext2D.prototype.restore = function(){ sDepth--; return crst.apply(this, arguments); };
+        gameMode='bossrush'; bossRushMode=true; p1Select=0; p2Select=1; selectedStage=0;
+        onlineMode=false; scene='battle'; transitioning=false; initBattle(); run(250);
+        bossRushPhase='clear'; bossRushTimer=200; gameOver=false;
+        screenShake.x=40; screenShake.duration=9999;
+        sDepth = 0; drawBattle(STEP);
+        if (sDepth !== 0) bossBad.push('clear screen leaks ' + sDepth + ' canvas state(s) per frame');
+        while (sDepth > 0) { ctx.restore(); sDepth--; }
+        CanvasRenderingContext2D.prototype.save = cs; CanvasRenderingContext2D.prototype.restore = crst;
+        bossRushMode = false; bossRushPhase = ''; screenShake.duration = 0;
+      } catch (e) { bossBad.push('threw: ' + e.message); }
+      check('boss rush clear keeps the canvas balanced', bossBad.length === 0,
+            bossBad.join(' | ') || 'save/restore balanced');
+
       // --- ポーズメニュー ---
       var pauseBad = [];
       try {

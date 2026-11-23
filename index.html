@@ -33,43 +33,43 @@
 //   5780  画面: 難易度選択（CPU戦）
 //   5880  画面: ステージ選択
 //   6111  バトルの 定数 と 状態
-//   6513  復帰技 / パワーモードの 表示
-//   6561  カメラ / 画面揺れ
-//   6580  効果音（Web Audio で 合成）
-//   7001  観客の 音
-//   7344  ヒット表示 / コミック文字
-//   7372  掴み・投げ の 定数と キャラ別テーブル
-//   7423  コマンド技（→→↓↓+Z など）
-//   7914  技データ
-//   8679  プレイヤー生成 / 試合の 初期化
-//   9027  ヒット処理（ダメージ・ノックバック）
-//   10366 当たり判定
-//   10398 飛び道具
-//   10441 技の 発動（通常技・復帰技・ジャブ）
-//   10700 掴み・投げ の 実行
-//   10925 CPU の 思考
-//   11271 バトルの 毎フレーム更新（中核）
-//   13689 物理（移動・重力・着地・撃墜判定）
-//   14246 スマッシュ攻撃（方向2回 + X）
-//   14358 崖つかまり
-//   14455 D技 と 必殺技 の データ
-//   15318 D技の 中身（キャラ別）
-//   15467 空中回避
-//   15529 バトル描画の 下準備（カメラ・影・2.5D）
-//   15629 バトル画面の 描画
-//   17662 技の エフェクト描画
-//   18737 必殺技 / 即死技 の 全画面オーバーレイ
-//   18910 画面: コンボ一覧 / 戦績
-//   19042 キャラ別 ゲージの 描画（HUDの 下に 出る 細い バー）
-//   19253 バトルの HUD
-//   19524 オンライン対戦（PeerJS / ホストが 正）
-//   20478 画面: VS イントロ
-//   20763 画面の 切り替え（フェード）
-//   20798 ポーズメニュー（バトル中に ESC）
-//   20879 画面: キャラ詳細（Iキー）
-//   21110 画面: 操作説明
-//   21234 キー入力の 振り分け（画面ごと）
-//   21715 メインループ（60FPS 固定タイムステップ）
+//   6518  復帰技 / パワーモードの 表示
+//   6566  カメラ / 画面揺れ
+//   6585  効果音（Web Audio で 合成）
+//   7006  観客の 音
+//   7349  ヒット表示 / コミック文字
+//   7377  掴み・投げ の 定数と キャラ別テーブル
+//   7428  コマンド技（→→↓↓+Z など）
+//   7919  技データ
+//   8684  プレイヤー生成 / 試合の 初期化
+//   9032  ヒット処理（ダメージ・ノックバック）
+//   10373 当たり判定
+//   10405 飛び道具
+//   10448 技の 発動（通常技・復帰技・ジャブ）
+//   10707 掴み・投げ の 実行
+//   10934 CPU の 思考
+//   11280 バトルの 毎フレーム更新（中核）
+//   13730 物理（移動・重力・着地・撃墜判定）
+//   14297 スマッシュ攻撃（方向2回 + X）
+//   14413 崖つかまり
+//   14510 D技 と 必殺技 の データ
+//   15377 D技の 中身（キャラ別）
+//   15530 空中回避
+//   15592 バトル描画の 下準備（カメラ・影・2.5D）
+//   15692 バトル画面の 描画
+//   17727 技の エフェクト描画
+//   18802 必殺技 / 即死技 の 全画面オーバーレイ
+//   18975 画面: コンボ一覧 / 戦績
+//   19107 キャラ別 ゲージの 描画（HUDの 下に 出る 細い バー）
+//   19318 バトルの HUD
+//   19587 オンライン対戦（PeerJS / ホストが 正）
+//   20541 画面: VS イントロ
+//   20826 画面の 切り替え（フェード）
+//   20861 ポーズメニュー（バトル中に ESC）
+//   20942 画面: キャラ詳細（Iキー）
+//   21173 画面: 操作説明
+//   21297 キー入力の 振り分け（画面ごと）
+//   21778 メインループ（60FPS 固定タイムステップ）
 //
 // ### 目次ここまで
 // ======================================================================
@@ -6235,6 +6235,11 @@ function canComboFinisher(playerId) {
 
 function executeComboFinisher(p) {
   if (!canComboFinisher(p.id)) return;
+  // 先に 出せるか 確かめる。演出と 使用済みフラグを 立ててから 失敗すると
+  // 「派手な 演出だけ 鳴って 何も 起きない」に なる
+  const finTarget = players.find(pp => pp.id !== p.id && pp.alive);
+  if (!finTarget || finTarget.respawnTimer > 0) return;
+  if (p.charIdx === 30 && chattaMinions.some(m => m.ownerId === p.id)) return;   // 分身が まだ 生きている
   comboFinisherUsed[p.id] = true;
   comboFinisherReady[p.id] = false;
 
@@ -9931,6 +9936,8 @@ function applyHit(attacker, target, damage, kbBase, kbScale, kbAngle, hitType) {
   target.attacking = false;
   target.specialState = null;
   target.attackFrame = 0;
+  // 溜め中の スマッシュも 被弾で 中断する
+  target.smashCharging = false; target.smashType = null; target.smashChargeTime = 0;
   // 被弾時にガードブレイクスタンを解除（ヒットスタンに移行）
   target.guardBreakStun = 0;
   // Break grab
@@ -10734,6 +10741,8 @@ function tryGrab(p) {
       p.throwPhaseTimer = getGrabFrames(p.charIdx) + getGrabDurationBonus(target.damage);
       target.grabbed = true;
       target.grabbedBy = p.id;
+      // 溜め中の スマッシュも 掴みで 中断する（残すと 投げた あとに 勝手に 出る）
+      target.smashCharging = false; target.smashType = null; target.smashChargeTime = 0;
       target.hitstun = 0;
       target.attacking = false;
       target.specialState = null;
@@ -11274,6 +11283,16 @@ function getCpuInput(cpu, target) {
 function updateBattle(dt) {
   battleTime += dt;
   battleFrame++;
+
+  // コンボの 残り時間。以前は 描画の 中で 減らしていたため、
+  // ポーズ中に 勝手に 消えたり、必殺技の 動画中（描画を 飛ばす）に 止まったり、
+  // 1ヒットだけの コンボが 永久に 残ったり していた
+  for (let ci = 0; ci < 2; ci++) {
+    const cd = comboDisplay[ci];
+    if (!cd) continue;
+    cd.timer--;
+    if (cd.timer <= 0) resetCombo(ci);
+  }
   cmdFrameCounter++; // コマンド入力用フレームカウンタ
 
   // ヒットストップ処理
@@ -11592,7 +11611,10 @@ function updateBattle(dt) {
       const ph = getPlayerHitbox(p);
       if (hitboxCollides(pr.x - pr.w/2, pr.y - pr.h/2, pr.w, pr.h, ph.x, ph.y, ph.w, ph.h)) {
         const owner = players.find(pl => pl.id === pr.ownerId);
-        const fakeAttacker = { id: pr.ownerId, x: pr.x - pr.vx * 5, charIdx: pr.ownerCharIdx, senBuffTimer: owner ? owner.senBuffTimer : 0,
+        // 本人が 居るなら 本人を 攻撃者に する。
+        // 身代わりを 渡すと、必殺ゲージも キャラ別ゲージも そこに 書かれて 捨てられ、
+        // 飛び道具が 主体の キャラは 自分の 攻撃では 一生 ゲージが 溜まらない
+        const fakeAttacker = owner ? owner : { id: pr.ownerId, x: pr.x - pr.vx * 5, charIdx: pr.ownerCharIdx, senBuffTimer: owner ? owner.senBuffTimer : 0,
           damage: owner ? owner.damage : 0, stocks: owner ? owner.stocks : 3, dashing: false, autoBuff: owner ? owner.autoBuff : 0,
           autoBuffType: owner ? owner.autoBuffType : null, comboWindow: owner ? owner.comboWindow : 0, consecutiveHits: owner ? owner.consecutiveHits : 0,
           dSkillBuff: owner ? owner.dSkillBuff : null, dSkillCooldown: owner ? owner.dSkillCooldown : 0,
@@ -11675,6 +11697,17 @@ function updateBattle(dt) {
         p.gravityDebuffTimer = 0;
         p.chattaWarpLeft = CHATTA_WARP_USES;   // Chatta: ワープメテオは 1機につき 3回
         p.chattaWarpCd = 0;
+        // 変身を 解く。残すと 天才は 0% で 竜のまま 復活する（本来 80% 必要）
+        p.dragonMode = false; p.dragonTimer = 0; p.dragonTransforming = false; p.dragonTransformTimer = 0;
+        p.botRobot = 0;                                   // Bot: ロボット変身
+        p.chattaFly = 0; p.chattaFlyCd = 0;               // Chatta: 飛行
+        p.microSplit = false;                             // マイクロ: 分裂
+        // 溜め・D技・コンボ系の 残りも 消す
+        p.smashCharging = false; p.smashType = null; p.smashChargeTime = 0;
+        p.charging = false; p.chargeCmd = null; p.chargeTime = 0;
+        p.dSkillActive = false; p.dSkillTimer = 0; p.dSkillBuff = null;
+        p.jabCount = 0; p.jabTimer = 0; p.repMove = null; p.repCount = 0;
+        p.recoveryUsed = false; p.recoveryActive = 0; p.airDodgeUsed = false;
       }
       continue;
     }
@@ -11701,7 +11734,10 @@ function updateBattle(dt) {
     if (p.comboWindow > 0) p.comboWindow--;
     if (p.airComboTimer > 0) p.airComboTimer--;
     if (p.dragonCooldown > 0) p.dragonCooldown--;
-    updateDSkill(p);
+    // 掴まれている / 被弾中 / 倒れている ときは D技の 当たり判定を 止める。
+    // 止めないと 掴まれた まま 相手を 殴り返して 掴みが 外れる
+    if (!(p.grabbed || p.hitstun > 0 || !p.alive || p.guardBreakStun > 0)) updateDSkill(p);
+    else if (p.dSkillTimer > 0) p.dSkillTimer--;   // 時間だけは 進める
     // ガード硬直カウントダウン
     if (p.guardPenalty > 0) { p.guardPenalty--; p.vx *= 0.9; }
     if (p.guardShrink > 0) p.guardShrink--;
@@ -11725,8 +11761,13 @@ function updateBattle(dt) {
       else if (gameMode === 'cpu' || bossRushMode) { xHeld = false; } // CPU即発動
       else if (onlineMode && isHost) { xHeld = !!remoteKeys.x; }
       else { xHeld = !!(keys['i'] || keys['I']); } // P2
-      if (!xHeld || p.smashChargeTime >= SMASH_CHARGE_MAX) executeSmash(p);
-      if (p.hitstun > 0) { p.smashCharging = false; p.smashType = null; } // 被弾キャンセル
+      // 先に 中断の 判定を する。順番が 逆だと、掴まれた/殴られた あとに
+      // 溜めスマッシュが 勝手に 出てしまう
+      if (p.hitstun > 0 || p.grabbed || p.grabbing || !p.alive || p.guardBreakStun > 0) {
+        p.smashCharging = false; p.smashType = null; p.smashChargeTime = 0;
+      } else if (!xHeld || p.smashChargeTime >= SMASH_CHARGE_MAX) {
+        executeSmash(p);
+      }
     }
     // 自己バフタイマー
     if (p.autoBuff > 0) p.autoBuff--;
@@ -13693,6 +13734,10 @@ function resolvePlayerCollisions() {
   const a = players[0];
   const b = players[1];
   if (!a.alive || !b.alive) return;
+  // 掴んでいる 間は 相手を わざと 30px の 位置に 固定している。
+  // ここで 押し戻すと 掴んだ側だけが 毎フレーム 5px ずれていき、
+  // 崖際で 掴むと そのまま 2人とも 場外に 落ちる
+  if (a.grabbing || b.grabbing || a.grabbed || b.grabbed) return;
   // X方向チェック
   if (Math.abs(a.x - b.x) >= 36) return;
   // Y方向チェック：足のY座標の差が70以上なら衝突しない（上を飛び越えられる）
@@ -14138,9 +14183,15 @@ function blastCheck(p) {
     p.attacking = false;
     p.specialState = null;
     if (p.stocks <= 0) {
+      // 同じフレームに 両者が 落ちた ときは 引き分け。
+      // 先に gameOver が 立っていたら 勝者を 上書きしない
+      const other = players.find(pp => pp.id !== p.id);
+      const bothOut = other && other.stocks <= 0;
+      if (gameOver && bothOut) { winner = -1; isDraw = true; }
       gameOver = true;
       stopBGM();
-      winner = p.id === 0 ? 1 : 0;
+      if (!isDraw) winner = bothOut ? -1 : (p.id === 0 ? 1 : 0);
+      if (bothOut) isDraw = true;
       gameSetTimer = 0; gameSetPhase = 1;
       koSlowMotion.active = true; koSlowMotion.frames = 30; koSlowMotion.maxFrames = 30;
       // 即死コンボ判定: コンボ3HIT以上で撃墜
@@ -14278,6 +14329,10 @@ function startSmashAttack(p, smashType) {
 
 function executeSmash(p) {
   if (!p.smashCharging) return;
+  // 掴まれている / 被弾中 / 倒れている ときは 出さない
+  if (p.grabbed || p.grabbing || p.hitstun > 0 || !p.alive || p.guardBreakStun > 0) {
+    p.smashCharging = false; p.smashType = null; p.smashChargeTime = 0; return;
+  }
   const chargeRatio = Math.min(p.smashChargeTime / SMASH_CHARGE_MAX, 1);
   const chargeMult = 1 + chargeRatio * SMASH_CHARGE_BONUS;
   const defs = (p.charIdx === 10 && p.dragonMode) ? dragonAttackDefs : attackDefs[p.charIdx];
@@ -14558,6 +14613,10 @@ function checkUltimateHit(attacker, target) {
 }
 
 function triggerUltimate(p) {
+  // 相手が 居ない / 復活待ち / 無敵 のときは 出させない。
+  // 出すと ゲージ100%を 使い切って 何も 起きない
+  const ut = players.find(pp => pp.id !== p.id);
+  if (!ut || !ut.alive || ut.respawnTimer > 0 || ut.invincibleTimer > 0 || ut.airDodgeTimer > 0) return false;
   if (p.ultimateGauge < 100 || ultimateActive) return false;
   // Phase 1: startup attack motion (hit check happens after)
   ultimateActive = true;
@@ -15322,10 +15381,14 @@ function triggerDSkill(p) {
   // D技を 持たないキャラ（Chatta は D＝ワープメテオ）で クールダウンだけ 取られないように、
   // 分岐が ある ことを 先に 確かめる
   if (!D_SKILL_NAMES[p.charIdx]) return;
-  p.dSkillCooldown = D_SKILL_COOLDOWN;
   const target = players.find(pp => pp.id !== p.id && pp.alive);
   const dir = p.facingLeft ? -1 : 1;
   const ci = p.charIdx;
+  // 条件を 満たさない 場合は クールダウンを 取らない。
+  // 取ってしまうと「何も 起きないのに 10秒 使えない」に なる
+  if (ci === 1 && !p.grounded) return;                       // ドン: 地上でしか 出ない
+  if ((ci === 0 || ci === 8 || ci === 9 || ci === 16) && !target) return;   // 相手が 要る D技
+  p.dSkillCooldown = D_SKILL_COOLDOWN;
 
   const impl = D_SKILL_IMPL[ci];
   if (impl) impl(p, target, dir, ci);
@@ -17137,7 +17200,9 @@ function drawBattle(dt) {
         ctx.fillText('ENTER : Back to title', 480, 480);
       }
       ctx.globalAlpha = 1;
-      // Restore canvas state before returning (match ctx.save at drawBattle start)
+      // drawBattle の 先頭で save を 2回（画面揺れ＋カメラ）している。
+      // 1回しか 戻さないと 毎フレーム 1つずつ 積もり、変形が 壊れて 画面が 飛ぶ
+      ctx.restore();
       ctx.restore();
       return; // skip normal game set rendering
     }
@@ -19411,8 +19476,9 @@ function drawBattleHUD() {
   // === コンボカウンター表示 ===
   for (let ci4 = 0; ci4 < 2; ci4++) {
     const cd = comboDisplay[ci4];
-    if (cd && cd.count >= 2 && cd.timer > 0) {
-      cd.timer--;
+    if (cd && cd.count >= 1 && cd.timer > 0) {
+      // 減算は updateBattle に 移した。ここでは 描くだけ
+
       const cx4 = ci4 === 0 ? 60 : 900;
       const alpha4 = Math.min(1, cd.timer / 20);
       const scale4 = 1 + (cd.count >= 5 ? 0.3 : 0) + (cd.timer > 80 ? (90 - cd.timer) * 0.05 : 0);
@@ -19428,9 +19494,6 @@ function drawBattleHUD() {
       ctx.fillStyle = '#FFAA44';
       ctx.fillText('COMBO', cx4, 98);
       ctx.restore();
-      if (cd.timer <= 0) resetCombo(ci4);
-    } else if (cd && cd.timer <= 0) {
-      resetCombo(ci4);
     }
   }
 
